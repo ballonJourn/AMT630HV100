@@ -1,0 +1,1 @@
+CreateBootanimationImg bootlogo.jpg 300 1024 600 25 300
