@@ -371,7 +371,7 @@
 #define SPI_NOR_FLASH				0
 #define SPI_NAND_FLASH				1
 #define EMMC_FLASH					2
-#define DEVICE_TYPE_SELECT			SPI_NAND_FLASH
+#define DEVICE_TYPE_SELECT			SPI_NOR_FLASH
 /*******************************************/
 
 /********** update address configuration **********/
