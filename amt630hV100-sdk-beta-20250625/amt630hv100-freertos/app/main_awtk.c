@@ -811,7 +811,7 @@ void awtk_thread(void *data)
 
 	/* initialize carback */
 #ifdef CARBACK_DETECT
-	//carback_init();
+	carback_init();
 #endif
 
 	/* play animation */

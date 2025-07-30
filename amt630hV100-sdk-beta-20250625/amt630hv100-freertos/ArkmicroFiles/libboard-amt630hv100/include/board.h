@@ -167,7 +167,7 @@
 #define VIN_CVBS_NTSC		1
 #define VIN_AHD_720P_25		2
 #define VIN_AHD_720P_30    	3
-#define VIDEO_IN_FORMAT		VIN_CVBS_NTSC
+#define VIDEO_IN_FORMAT		VIN_AHD_720P_25
 #if VIDEO_IN_FORMAT == VIN_CVBS_PAL
 #define VIN_WIDTH		720
 #define VIN_HEIGHT		288
@@ -184,7 +184,7 @@
 /*******************************************/
 
 /************ carback configuration ********/
-//#define CARBACK_DETECT
+#define CARBACK_DETECT
 /*******************************************/
 
 /********* touchscreen configuration *******/
@@ -294,7 +294,7 @@
 
 /************ i2c configuration ************/
 #define HW_I2C0_SUPPORT			//Hardware i2c0 support
-//#define HW_I2C1_SUPPORT			//Hardware i2c1 support
+#define HW_I2C1_SUPPORT			//Hardware i2c1 support
 //#define ANALOG_I2C_SUPPORT		//Analog i2c support
 
 #ifdef ANALOG_I2C_SUPPORT

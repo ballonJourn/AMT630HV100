@@ -82,9 +82,9 @@ static void carback_thread(void *param)
 static void carback_test_thread(void *param)
 {
 	for (;;) {
-		vTaskDelay(pdMS_TO_TICKS(30000));
-		notify_enter_carback();
 		vTaskDelay(pdMS_TO_TICKS(10000));
+		notify_enter_carback();
+		vTaskDelay(pdMS_TO_TICKS(30000));
 		notify_exit_carback();
 	}
 }
