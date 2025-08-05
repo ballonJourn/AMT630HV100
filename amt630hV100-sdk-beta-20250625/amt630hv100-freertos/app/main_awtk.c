@@ -811,7 +811,7 @@ void awtk_thread(void *data)
 
 	/* initialize carback */
 #ifdef CARBACK_DETECT
-	carback_init();
+	// carback_init();
 #endif
 
 	/* play animation */
@@ -899,6 +899,8 @@ void awtk_thread(void *data)
 	extern int gui_app_start(int lcd_w, int lcd_h);
 	gui_app_start (OSD_WIDTH, OSD_HEIGHT);
 #endif
+
+// ark_lcd_osd_enable(LCD_UI_LAYER,0);
 
 
     while(1) {

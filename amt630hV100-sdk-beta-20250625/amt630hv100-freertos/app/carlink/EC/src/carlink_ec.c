@@ -193,7 +193,7 @@ void onRequestBuildNetCancel()
 }
 
 
-void onPhoneBuildNetFinish()
+void onPhoneBuildNetFinish(const char* ip)
 {
 
 }
@@ -491,7 +491,6 @@ void* initECTiny(void* param)
 	sprintf(uuid, "CARBIT%s", bt_mac);
 	printf("carbit  uuid :%s\r\n", uuid);
 	EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
-
     printf("\r\n2.register ECTiny callback functions\r\n");
     mECTinyCallback = registerECCallback();
 
@@ -542,6 +541,8 @@ void* initECTiny(void* param)
     
 
     printf("------ initECTiny end ------\n");
+    printf("carbit  uuid :%s\r\n", uuid);
+    printf("carbit  uuid :%s\r\n", uuid);
 	const char *UrlData = EC_generateQRCodeUrl(&qr_info);
 	printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
 

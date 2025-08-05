@@ -195,6 +195,18 @@ enum ECProjectFlavor
 typedef enum ECProjectFlavor ECProjectFlavor;
 
 /**
+ * @enum ECAuthCheckMode
+ *
+ */
+enum ECAuthCheckMode {
+    EC_AUTH_CHECK_DEFAULT = 0,                              ///< default check auth on phone
+    EC_AUTH_CHECK_ON_CAR_NETWORK = 1,                       ///< check auth on car network
+    EC_AUTH_CHECK_SCAN_CODE_TO_ACTIVATE_FOR_SUDING = 2,     ///< scan the code to activate the certificate for suding
+    EC_AUTH_CHECK_SCAN_CODE_TO_ACTIVATE = 4,                ///< scan the code to activate the certificate
+};
+typedef enum ECAuthCheckMode ECAuthCheckMode;
+
+/**
 * @struct ECAuthentication
 *
 * @brief car authorization info
@@ -205,7 +217,7 @@ struct ECAuthentication
     char         pwd[1024];                      ///< the specific password for authentication powered by Carbit.
     char         versionName[1024];              ///< the version name of EasyConn.
     uint32_t     versionCode;                    ///< the version code of EasyConn.
-	uint32_t         autoAuthViaCar;                 ///< specify whether make automatic authentication via car's network.
+	uint32_t         authCheckMode;              ///< the value of auth check model refer to ECAuthCheckMode.
     ECProjectFlavor     flavor;                  ///< specify the HU Project market for sale,SDK will carry a flavor by default.see enum ECProjectFlavor in ECTypes.h
     char         reserve[256];                   ///< reserve
 };
@@ -241,7 +253,8 @@ enum ECSupportFunction
     EC_SUPPORT_FUNCTION_PHONE_CONTROL_CAR = 0x400,
     EC_SUPPORT_FUNCTION_MEDIA_TRANSPORT_VIA_EC = 0x800,
     EC_SUPPORT_FUNCTION_ANDROID_PARALLEL_WORLD = 0x1000,
-    EC_SUPPORT_FUNCTION_BLE_CONNECT = 0x2000
+    EC_SUPPORT_FUNCTION_BLE_CONNECT = 0x2000,
+    EC_SUPPORT_FUNCTION_WEB_CAR_DVR = 0x40000
 };
 typedef enum ECSupportFunction ECSupportFunction;
 
@@ -329,7 +342,8 @@ enum ECLogModule
     EC_LOG_MODULE_ADB = 0x02,                       ///< output adb module log
     EC_LOG_MODULE_MUX = 0x04,                       ///< output mux module log
     EC_LOG_MODULE_USB = 0x08,                       ///< output usb module log
-    EC_LOG_MODULE_APP = 0x10                        ///< output ec app module log
+    EC_LOG_MODULE_APP = 0x10,                       ///< output ec app module log
+    EC_LOG_MODULE_WEB = 0x20                        ///< output web module log
 };
 typedef enum ECLogModule ECLogModule;
 
@@ -373,10 +387,21 @@ struct ECOptions
 	ECMirrorMode mirrorMode;                     ///< tell the app of connected phone which mirror mode would be used.
     uint32_t     bluetoothPolicy;                ///< the policy of A2DP message phone sent to the car.
     uint32_t     disableShowCallInfo;            ///< true:Don't show call info
+    uint32_t     disablePageInRVMap;             ///< Block display of some page
     uint32_t     socketTimeoutPeriod;            ///< socket timeout period in seconds
 	char         reserve[256];                   ///< reserve
 };
 typedef struct ECOptions ECOptions;
+
+/**
+ * @enum ECDisablePageInRVMap
+ *
+ */
+enum ECDisablePageInRVMap {
+    EC_DISABLE_PAGEINRVMAP_CALLPHONE = 0x0001,       ///< Block call display
+    EC_DISABLE_PAGEINRVMAP_MUSIC     = 0x0002,       ///< Block music display
+    EC_DISABLE_PAGEINRVMAP_MESSAGE   = 0x0004,       ///< Block message display
+};
 
 /**
 * @enum ECTransportType
@@ -594,6 +619,22 @@ enum  ECBtnCode
     EC_BTN_ENFORCE_LANDSCAPE = 0x10A0,              ///< make the android phone enforce landscape.
 	EC_BTN_CANCEL_LANDSCAPE = 0x10A1,               ///< make the android phone cancel landscape.
 	EC_BTN_ENFORCE_OR_CANCEL_LANDSCAPE = 0x10A2,    ///< make the android phone enforce or cancel landscape.
+
+    EC_BTN_FOCUS_BACKWARD = 0x1101,                      ///< 按键焦点向后
+    EC_BTN_FOCUS_FORWARD = 0x1102,                      ///< 按键焦点后前
+    EC_BTN_FOCUS_LEFT = 0x1103,                          ///< 按键焦点向左
+    EC_BTN_FOCUS_RIGHT = 0x1104,                          ///< 按键焦点向右
+    EC_BTN_FOCUS_UP = 0x1105,                              ///< 按键焦点向上
+    EC_BTN_FOCUS_DOWN = 0x1106,                          ///< 按键焦点上下
+    EC_BTN_FOCUS_ENTER = 0x1107,                          ///< 按键焦点确认
+
+    EC_BTN_KEY_PARALLEL_WORLD_MENU = 0x1200,             ///< 平行世界MENU按键
+    EC_BTN_KEY_PARALLEL_WORLD_HOME = 0x1201,             ///< 平行世界HOME按键
+    EC_BTN_KEY_PARALLEL_WORLD_BACK = 0x1202,             ///< 平行世界BACK按键
+
+    EC_BTN_KEY_TELEPHONY_ANSWER = 0x1300,                ///< 电话按键，接听
+    EC_BTN_KEY_TELEPHONY_HANGUP = 0x1301,                ///< 电话按键，挂断
+    EC_BTN_KEY_TELEPHONY_MUTE = 0x1302,                  ///< 电话按键，静音
 
     EC_BTN_SYSTEM_HOME = 0x2010,                         ///< The Android phone's HOME key
 	EC_BTN_SYSTEM_BACK = 0x2012,                             ///< The Android phone's BACK key
@@ -856,6 +897,78 @@ enum ECNaviIcon
     EC_NAVI_ICON_ROTARY_SHARP_RIGHT            = 78,              ///< 环岛后右转，右侧通行地区的逆时针环岛
     EC_NAVI_ICON_ROTARY_SLIGHT_LEFT            = 79,              ///< 环岛左前转，右侧通行地区的逆时针环岛
     EC_NAVI_ICON_ROTARY_SLIGHT_RIGHT           = 80,              ///< 环岛右前转，右侧通行地区的逆时针环岛
+    EC_NAVI_ICON_TURN_BRANCH_LEFT              = 81,              ///< 左前方转弯
+    EC_NAVI_ICON_TURN_LEFT_3BRANCH_LEFT        = 82,              ///< 普通三分歧/JCT/SAPA 靠最左
+    EC_NAVI_ICON_TURN_LF_3BRANCH_LEFT          = 83,              ///< 左转，驶入最左侧道路
+    EC_NAVI_ICON_TURN_RIGHT_3BRANCH_LEFT       = 84,              ///< 向左前方行驶，进入最左侧道路
+    EC_NAVI_ICON_TURN_RF_3BRANCH_LEFT          = 85,              ///< 向右前方行驶，进入最左侧道路
+    EC_NAVI_ICON_TURN_LEFT_2BRANCH_RIGHT       = 86,              ///< 左转，驶入右侧道路
+    EC_NAVI_ICON_TURN_LEFT_3BRANCH_RIGHT       = 87,              ///< 左转，驶入最右侧道路
+    EC_NAVI_ICON_TURN_BRANCH_RIGHT             = 88,              ///< 普通三分歧/JCT/SAPA 靠最右
+    EC_NAVI_ICON_TURN_RIGHT_3BRANCH_RIGHT      = 89,              ///< 右转，驶入最右侧道路
+    EC_NAVI_ICON_TURN_LF_3BRANCH_RIGHT         = 90,              ///< 左前方复杂八方向三分歧 右侧道路
+    EC_NAVI_ICON_TURN_RF_3BRANCH_RIGHT         = 91,              ///< 向右前方行驶，进入最右侧道路
+    EC_NAVI_ICON_TURN_LB_2BRANCH_LEFT          = 92,              ///< 左后方复杂八方向二分歧 左侧
+    EC_NAVI_ICON_TURN_LB_2BRANCH_RIGHT         = 93,              ///< 左后方复杂八方向二分歧 右侧
+    EC_NAVI_ICON_TURN_LB_3BRANCH_LEFT          = 94,              ///< 左后方复杂八方向三分歧 左侧
+    EC_NAVI_ICON_TURN_LB_3BRANCH_RIGHT         = 95,              ///< 左后方复杂八方向三分歧 右侧
+    EC_NAVI_ICON_TURN_LB_3BRANCH_MIDDLE        = 96,              ///< 左后方复杂八方向三分歧 中间
+    EC_NAVI_ICON_TURN_LB_NOT_BACK              = 97,              ///< 向左后方行驶，注意不是掉头
+    EC_NAVI_ICON_TURN_RB_2BRANCH_LEFT          = 98,              ///< 向右后方行驶，进入左侧道路
+    EC_NAVI_ICON_TURN_RB_2BRANCH_RIGHT         = 99,              ///< 向右后方行驶，进入右侧道路
+    EC_NAVI_ICON_TURN_RB_3BRANCH_LEFT          = 100,             ///< 向右后方行驶，进入最左侧道路
+    EC_NAVI_ICON_TURN_RB_3BRANCH_RIGHT         = 101,             ///< 向右后方行驶，进入最右侧道路
+    EC_NAVI_ICON_TURN_RB_3BRANCH_MIDDLE        = 102,             ///< 向右后方行驶，进入中间道路
+    EC_NAVI_ICON_TURN_RB_NOT_BACK              = 103,             ///< 向右后方行驶，进入左侧道路
+    EC_NAVI_ICON_TURN_BACK_2BRANCH_LEFT        = 104,             ///< 八方向掉头+随后靠左
+    EC_NAVI_ICON_TURN_BACK_3BRANCH_LEFT        = 105,             ///< 八方向掉头+随后靠最左
+    EC_NAVI_ICON_TURN_BACK_3BRANCH_RIGHT       = 106,             ///< 八方向掉头+随后靠最右
+    EC_NAVI_ICON_TURN_BACK_3BRANCH_MIDDLE      = 107,             ///< 八方向掉头+随后沿中间
+    EC_NAVI_ICON_TURN_BACK_2BRANCH_RIGHT       = 108,             ///< 八方向掉头+随后靠右
+    EC_NAVI_ICON_TURN_LEFT_SIDE_MAIN           = 109,             ///< 左侧走本线
+    EC_NAVI_ICON_TURN_BRANCH_LEFT_STRAIGHT     = 110,             ///< 靠最左走本线
+    EC_NAVI_ICON_TURN_RIGHT_SIDE_MAIN          = 111,             ///< 右侧走本线
+    EC_NAVI_ICON_TURN_BRANCH_RIGHT_STRAIGHT    = 112,             ///< 靠最右走本线
+    EC_NAVI_ICON_TURN_BRANCH_CENTER            = 113,             ///< 中间走本线
+    EC_NAVI_ICON_TURN_LEFT_SIDE_IC             = 114,             ///< IC二分歧左侧走IC
+    EC_NAVI_ICON_TURN_LF_2BRANCH_LEFT          = 115,             ///< 八方向左前方靠左侧
+    EC_NAVI_ICON_TURN_LEFT_2BRANCH_LEFT        = 116,             ///< 左转，驶入左侧道路
+    EC_NAVI_ICON_TURN_RIGHT_2BRANCH_LEFT       = 117,             ///< 右转，驶入左侧道路
+    EC_NAVI_ICON_TURN_RF_2BRANCH_LEFT          = 118,             ///< 八方向右前方靠左侧
+    EC_NAVI_ICON_TURN_RF_NOT_RIGHT             = 119,             ///< 向右前方行驶，注意不是右转
+    EC_NAVI_ICON_TURN_RIGHT_SIDE_IC            = 120,             ///< IC二分歧右侧走IC
+    EC_NAVI_ICON_TURN_LF_2BRANCH_RIGHT         = 121,             ///< 八方向左前方靠右侧
+    EC_NAVI_ICON_TURN_LF_NOT_LEFT              = 122,             ///< 左前，注意不是左转
+    EC_NAVI_ICON_TURN_RIGHT_2BRANCH_RIGHT      = 123,             ///< 右转，驶入右侧道路
+    EC_NAVI_ICON_TURN_RF_2BRANCH_RIGHT         = 124,             ///< 八方向右前方靠右侧
+    EC_NAVI_ICON_TURN_NEAR_RIGHT_FRONT         = 125,             ///< 近距离第二路口 右转
+    EC_NAVI_ICON_TURN_LEFT_3BRANCH_MIDDLE      = 126,             ///< 左转，驶入中间道路
+    EC_NAVI_ICON_TURN_RIGHT_3BRANCH_MIDDLE     = 127,             ///< 右转，驶入中间道路
+    EC_NAVI_ICON_TURN_RF_3BRANCH_MIDDLE        = 128,             ///< 向右前方行驶，进入中间道路
+    EC_NAVI_ICON_TURN_LF_3BRANCH_MIDDLE        = 129,             ///< 向左前方行驶，进入中间道路
+    EC_NAVI_ICON_LEFT_PASSROAD_FRONT           = 130,             ///< 向左到路⼝斜对⾯，继续向前
+    EC_NAVI_ICON_RIGHT_PASSROAD_FRONT          = 131,             ///< 向右到路⼝斜对⾯，继续向前
+    EC_NAVI_ICON_LEFT_PASSROAD_UTURN           = 132,             ///< 左转穿过⻢路(步⾏设施名称)往回⾛
+    EC_NAVI_ICON_RIGHT_PASSROAD_UTURN          = 133,             ///< 右转穿过⻢路(步⾏设施名称)往回⾛
+    EC_NAVI_ICON_LEFTDIAGONAL_PASSROAD_RIGHT   = 134,             ///< 向左到路⼝斜对⾯，向右转弯
+    EC_NAVI_ICON_LEFTDIAGONAL_PASSROAD_RIGHT_FRONT = 135,         ///< 向右到路⼝斜对⾯，向右前⽅转弯
+    EC_NAVI_ICON_RIGHTDIAGONAL_PASSROAD_LEFT_FRONT = 136,         ///< 向右到路⼝斜对⾯，向左前⽅转弯
+    EC_NAVI_ICON_LEFTDIAGONAL_PASSROAD_LEFT    = 137,             ///< 向左到路⼝斜对⾯，向左转弯
+    EC_NAVI_ICON_LEFTDIAGONAL_PASSROAD_LEFT_BACK   = 138,         ///< 向左到路⼝斜对⾯，向左后⽅转弯
+    EC_NAVI_ICON_RIGHTDIAGONAL_PASSROAD_LEFT   = 139,             ///< 向右到路⼝斜对⾯，向左转弯
+    EC_NAVI_ICON_RIGHTDIAGONAL_PASSROAD_RIGHT  = 140,             ///< 向右到路⼝斜对⾯，向右转弯
+    EC_NAVI_ICON_RIGHTDIAGONAL_PASSROAD_RIGHT_BACK = 141,         ///< 向右到路⼝斜对⾯，向右后⽅转弯
+    EC_NAVI_ICON_PASSROAD_LEFT                 = 142,             ///< 过⻢路左转
+    EC_NAVI_ICON_PASSROAD_RIGHT                = 143,             ///< 过⻢路右转
+    EC_NAVI_ICON_GOTO_LEFT_ROAD                = 144,             ///< 进⼊左侧道路继续向前
+    EC_NAVI_ICON_GOTO_RIGHT_ROAD               = 145,             ///< 进⼊右侧道路继续向前
+    EC_NAVI_ICON_GOTO_LEFT_ROAD_UTURN          = 146,             ///< 进⼊左侧道路往回⾛
+    EC_NAVI_ICON_GOTO_RIGHT_ROAD_UTURN         = 147,             ///< 进⼊右侧道路往回⾛
+    EC_NAVI_ICON_FARAWAY_ROUTE                 = 148,             ///< 偏离路线
+    EC_NAVI_ICON_GPS_WEAK                      = 149,             ///< 卫星信号
+    EC_NAVI_ICON_REROUTE                       = 150,             ///< 刷新路线
+    EC_NAVI_ICON_TURN_LEFT_DIAGONAL_PASSROAD_FRONT  = 151,        ///< 向左到路口斜对面继续向前
+    EC_NAVI_ICON_TURN_RIGHT_DIAGONAL_PASSROAD_FRONT = 152,        ///< 向右到路口斜对面继续向前
     EC_NAVI_ICON_MAX
 };
 typedef enum ECNaviIcon ECNaviIcon;
@@ -983,7 +1096,14 @@ enum ECAppPage
     EC_APP_PAGE_WECHAT = 15,                      ///< wechat
     EC_APP_PAGE_PERSONAL_CENTER = 16,             ///< personal center
     EC_APP_PAGE_APP_MANAGER = 17,                 ///< the manager of the thirdparty app
-    EC_APP_PAGE_ADD_OTA = 18                      ///< the OTA download
+    EC_APP_PAGE_ADD_OTA = 18,                     ///< the OTA download
+    EC_APP_PAGE_WECHAT_MSG = 19,                  ///< wechat meassge
+    EC_APP_PAGE_PHONE = 20,                       ///< phone page
+    EC_APP_PAGE_MIRROR_FLOATING = 21,             ///< car suspension mirror
+    EC_APP_PAGE_DRIVING_RECORDER = 22,            ///< Driving recorder page
+    EC_APP_PAGE_ANDROID_PARALLEL_WORLD = 100,     ///< Android Parallel World
+    EC_APP_PAGE_PHONE_SCREEN = 101,               ///< mobile phone screen
+    EC_APP_PAGE_ANDROID_PARALLEL_APP_MANAGER = 102   ///< Parallel world application management
 };
 typedef enum ECAppPage ECAppPage;
 
@@ -1518,6 +1638,66 @@ typedef struct ECPhoneNotification ECPhoneNotification;
 */
 typedef ECHudRoadJunctionPictureInfo ECHudLaneGuidancePictureInfo;
 
+typedef enum {
+    HTTP_REPLY_CONTENT_TYPE_JSON = 0,
+    HTTP_REPLY_CONTENT_TYPE_FILE_PATH,
+}HttpReplyContentType;
+
+typedef enum {
+    HTTP_REPLY_STATUS_OK = 0,
+    HTTP_REPLY_STATUS_FILE_NOT_EXIST,
+}HttpReplyStatus;
+
+enum ECAppPageStatus {
+    EC_APP_PAGE_STATUS_UNKONOW                     = 0x0,                    ///< 未知状态
+    EC_APP_PAGE_STATUS_OPEN                        = 0x01,                   ///< page打开
+    EC_APP_PAGE_STATUS_CLOSE                       = 0x02,                   ///< page关闭
+    EC_APP_PAGE_STATUS_FLOAT_WINDOW_AUTH_PENDING   = 0x04,                   ///< 悬浮窗等待授权
+    EC_APP_PAGE_STATUS_APP_INACTIVE                = 0x08,                   ///< app在后台
+    EC_APP_PAGE_STATUS_MIRROR_AUTH_PENDING         = 0x10,                   ///< 投屏等待授权
+    EC_APP_PAGE_STATUS_PHONE_SPACE_NOT_ENOUGHT     = 0x20,                   ///< 手机空间不足   --- 已废弃，使用 ECP_P2C_NOTIFY_PARALLEL_WORLD_CACHE 消息实现
+    EC_APP_PAGE_STATUS_PHONE_SPACE_EARLY_WARNING   = 0x40,                   ///< 手机空间预警   --- 已废弃，使用 ECP_P2C_NOTIFY_PARALLEL_WORLD_CACHE 消息实现
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_LOCATION = 0x80,                  ///< app申请定位权限
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_RECODING = 0x100,                  ///< app申请录音权限
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_STORAGE  = 0x200,                  ///< app申请存储权限
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_CAMERA   = 0x400,                  ///< app申请相机权限
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_POWER_SAVING   = 0x800,             ///< app申请省电权限
+    EC_APP_PAGE_STATUS_REQUEST_PERMISSION_MEDIA_APPLE_MUSIC  = 0x1000,       ///< app申请 媒体与Apple Music权限
+    EC_APP_PAGE_STATUS_FLOAT_WINDOW_AUTH_FAIL                = 0x2000,       ///< 悬浮窗授权失败
+    EC_APP_PAGE_STATUS_MIRROR_AUTH_FAIL                      = 0x4000       ///< 投屏授权失败
+};
+
+typedef enum ECAppPageStatus ECAppPageStatus;
+
+enum ECAppPageType
+{
+    EC_PAGE_TYPE_DEFAULT                        = 0x00000000,                        ///< 应用类型，未知
+    EC_PAGE_TYPE_MUSIC                          = 0x00000001,                       ///< 应用类型，音乐
+    EC_PAGE_TYPE_VIDEO                          = 0x00000002,                        ///< 应用类型，视频
+    EC_PAGE_TYPE_TOOL                           = 0x00000004,                        ///< 应用类型，工具
+    EC_PAGE_TYPE_NAVI                           = 0x00000008,                        ///< 应用类型，导航
+    EC_PAGE_TYPE_NEWS                           = 0x00000010,                        ///< 应用类型，新闻
+    EC_PAGE_TYPE_GAME                           = 0x00000020,                        ///< 应用类型，游戏
+    EC_PAGE_TYPE_ONLINE                         = 0x00000040,                        ///< 应用类型，在线
+    EC_PAGE_TYPE_LOCAL                          = 0x00000080,                        ///< 应用类型，本地
+    EC_PAGE_TYPE_ROM                            = 0x00000100,                        ///< 应用类型，ROM
+    EC_PAGE_TYPE_NATIVE_APP                     = 0x00000200,                        ///< 应用类型，原生应用
+    EC_PAGE_TYPE_PARALLEL_WORLD_APP             = 0x00000400,                        ///< 应用类型，平行世界应用
+    EC_PAGE_TYPE_MIRROR_THIRD_APP               = 0x00000800,                        ///< 应用类型，镜像三方应用
+    EC_PAGE_TYPE_PRE_INSTALL                    = 0x00001000,                        ///< 应用类型，预装
+    EC_PAGE_TYPE_360_DOWNLOAD                   = 0x00002000,                        ///< 360下载
+    EC_PAGE_TYPE_LOCAL_DOWNLOAD                 = 0x00004000                        ///< 本地下载
+};
+
+typedef enum ECAppPageType ECAppPageType;
+struct ECAppPageStutus
+{
+    int32_t page;                              ///< ECAppPage
+    int32_t status;                            ///<ECAPPPageStatus
+    int32_t type;                              ///<ECAPPPageType
+};
+
+typedef struct ECAppPageStutus ECAppPageStutus;
 #ifdef  __cplusplus
 };
 #endif
