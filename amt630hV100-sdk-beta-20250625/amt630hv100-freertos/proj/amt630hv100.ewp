@@ -2654,6 +2654,10 @@
                     <state>$PROJ_DIR$\..\lib\lwip\src\include\arch\</state>
                     <state>$PROJ_DIR$\..\lib\lwip\src\include\compat\</state>
                     <state>$PROJ_DIR$\..\lib\lwip\src\include\netif\</state>
+                    <state>$PROJ_DIR$\..\app\hcn</state>
+                    <state>$PROJ_DIR$\..\app\hcn\hal</state>
+                    <state>$PROJ_DIR$\..\app\hcn\mw</state>
+                    <state>$PROJ_DIR$\..\app\hcn\ui</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -4358,6 +4362,18 @@
             <file>
                 <name>$PROJ_DIR$\..\app\haoke\haoke_demo.c</name>
             </file>
+        </group>
+        <group>
+            <name>hcn</name>
+            <group>
+                <name>hal</name>
+            </group>
+            <group>
+                <name>mw</name>
+            </group>
+            <group>
+                <name>ui</name>
+            </group>
         </group>
         <group>
             <name>pointer_halo</name>
