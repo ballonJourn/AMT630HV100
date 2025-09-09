@@ -188,7 +188,57 @@ void cmd_wifi_p2p_start_ex(char dev_addr[6])
 	wifi_p2p_init((u8 *)mac, go_intent, listen_ch, op_ch);
 }
 
+#ifdef wifi_RS440
+void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
+{
+	u8 *passphrase = "12345678";
+#if CONFIG_CUSTOMER_REQUEST_ITE //for 5G channel
+	u8 channel = 40;	// 36, 40, 44, 48
+#else
+	u8 channel = 1;	// 1, 6, 11
+#endif
+	const char *ssid_in = "DIRECT-34-Ameba";
+	const char *dev_name = "ap630hv100_p2p";	// max strlen 32
+	const char *manufacturer = "by customer";	// max strlen 64
+	const char *model_name = "customer";	// max strlen 32
+	const char *model_number = "v2.0";	// max strlen 32
+	const char *serial_number = "9";	// max strlen 32
+#if CONFIG_WFD
+	const u8 pri_dev_type[8] = {0x00,0x07,0x00,0x50,0xF2,0x04,0x00,0x01};	// category ID:0x00,0x07; sub category ID:0x00,0x01
+#else
+	const u8 pri_dev_type[8] = {0x00,0x0A,0x00,0x50,0xF2,0x04,0x00,0x01};	// category ID:0x00,0x0A; sub category ID:0x00,0x01
+#endif
+	u8 res[P2P_GO_NEGO_RESULT_SIZE];
+#if CONFIG_WFD
+	u16 config_methods = WPS_CONFIG_DISPLAY | WPS_CONFIG_PUSHBUTTON;
+#else
+	u16 config_methods = WPS_CONFIG_DISPLAY | WPS_CONFIG_KEYPAD | WPS_CONFIG_PUSHBUTTON;
+#endif
+	if(!is_wifi_p2p_initialized()){
+		printf("\r\n%s(): p2p inital fail\n", __func__);
+		return;	
+	}
+	if (argv[0] && strlen(argv[0]) > 0)
+		dev_name = argv[0];
+	if (argv[1] && strlen(argv[1]) > 0)
+		ssid_in = argv[1];
+	if (argv[2] && strlen(argv[2]) > 0)
+		passphrase = (u8*)(argv[2]);
+	wifi_p2p_set_dev_name(dev_name);
+	wifi_p2p_set_manufacturer(manufacturer);
+	wifi_p2p_set_model_name(model_name);
+	wifi_p2p_set_model_number(model_number);
+	wifi_p2p_set_serial_number(serial_number);
+	wifi_p2p_set_pri_dev_type(pri_dev_type);
+	wifi_p2p_set_ssid(ssid_in);
+	wifi_p2p_set_config_methods(config_methods);
+	//channel = p2p_channel;
+	wifi_p2p_init_auto_go_params(res, passphrase, channel);
+	wifi_p2p_start_auto_go(res);
+	//return;
+}
 
+#else
 void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 {
 	u8 *passphrase = "12345678";
@@ -237,6 +287,7 @@ void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 	wifi_p2p_start_auto_go(res);
 	//return;
 }
+#endif
 void cmd_wifi_p2p_stop(int argc, char **argv)
 {
 	wifi_p2p_deinit();

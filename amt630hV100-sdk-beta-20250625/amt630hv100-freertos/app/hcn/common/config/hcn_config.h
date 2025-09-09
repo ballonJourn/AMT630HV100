@@ -97,6 +97,10 @@ extern "C" {
 ///< CAN功能
 #define CAN_MODULE_ENABLE
 
+///< BT_WIFI模块类型
+#define FSC_BW121       (1)
+#define GK_GOCRS440     (2)
+#define BT_WIFI_MODULE_TYPE  FSC_BW121
 
 #ifdef __cplusplus
 }

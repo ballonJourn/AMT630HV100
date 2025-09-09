@@ -176,6 +176,11 @@
 #define ADC_KEY
 /*******************************************/
 
+/*******************************************/
+#if BT_WIFI_MODULE_TYPE == GK_GOCRS440
+#define wifi_RS440
+#endif
+
 /******* video in configuration *******/
 #define VIDEO_DECODER_RN6752
 //#define VIDEO_DECODER_ARK7116

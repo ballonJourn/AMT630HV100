@@ -814,6 +814,7 @@ out:
     return 0;
 }
 
+int32_t sdio_enable_func(struct sdio_function *func);
 static int32_t sdio_init_card(struct mmcsd_host *host, uint32_t ocr)
 {
     int32_t err = 0;
@@ -912,6 +913,9 @@ static int32_t sdio_init_card(struct mmcsd_host *host, uint32_t ocr)
 
     /* register sdio card */
     err = sdio_register_card(card);printf("%s wifi_sdio_func:%08x\r\n", __func__, (int)wifi_sdio_func);
+#ifdef wifi_RS440
+	sdio_enable_func(wifi_sdio_func);//add rs440
+#endif
     if (err)
     {
         goto err3;
