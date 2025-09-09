@@ -13,6 +13,8 @@ typedef enum {
 	GPIOIRQ_TYPE_LEVEL_LOW,	
 } eGpioIrqType;
 
+typedef void (*ISRFunction_t)( void *param );
+
 void gpio_request(unsigned gpio);
 
 void gpio_direction_output(unsigned gpio, int value);
