@@ -46,6 +46,9 @@ extern int ulog_console_backend_init(void);
 #include "ota_update.h"
 #endif
 
+#include "config/hcn_config.h"
+#include "mw_init/hcn_mw_init.h"
+
 #define WIFI_TEST			0
 #define BT_TEST				0
 #define SDMMC_TEST			0
@@ -94,7 +97,11 @@ extern int delta_update(int filetype, size_t patchFileSize);
  **********************/
 #ifdef VG_DRIVER
 #pragma data_alignment=1024
+#ifdef __HCN_CONFIG_H__
+#define VG_HEAP_SIZE  HCN_VG_HEAP_SIZE
+#else
 #define VG_HEAP_SIZE	0xc00000
+#endif
 __no_init static uint8_t vgHeap[VG_HEAP_SIZE];
 #endif
 
@@ -901,7 +908,7 @@ void awtk_thread(void *data)
 #endif
 
 // ark_lcd_osd_enable(LCD_UI_LAYER,0);
-
+	//hcn_mw_init();
 
     while(1) {
 #ifdef TASK_STATUS_MONITOR

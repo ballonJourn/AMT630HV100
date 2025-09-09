@@ -1,6 +1,7 @@
 #ifndef _BOARD_H
 #define _BOARD_H
 
+#include "config/hcn_config.h"
 
 /********** display configuration **********/
 #define LCD_INTERFACE_TTL		0
@@ -64,10 +65,10 @@
 #define LCD_INTERFACE_TYPE		LCD_INTERFACE_TTL
 #endif
 #elif defined(AWTK)
-#define LCD_WIDTH	1024
-#define LCD_HEIGHT	600
-#define LCD_BPP		16
-#define LCD_INTERFACE_TYPE		LCD_INTERFACE_TTL
+#define LCD_WIDTH	HCN_LCD_WIDTH 
+#define LCD_HEIGHT	HCN_LCD_HEIGHT 
+#define LCD_BPP		HCN_LCD_BPP 
+#define LCD_INTERFACE_TYPE	HCN_LCD_INTERFACE_TYPE
 #else
 #define LCD_WIDTH	1024
 #define LCD_HEIGHT	600
@@ -85,7 +86,7 @@
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
 #define LCD_WIRING_MODE			LCD_WIRING_MODE_BGR
 #define LCD_WIRING_BIT_ORDER	LCD_WIRING_BIT_ORDER_MSB
-#define LVDS_SCREEN_RST_GPIO	74
+#define LVDS_SCREEN_RST_GPIO	HCN_LVDS_SCREEN_RST_GPIO
 #define LVDS_PANEL_FORMAT		LVDS_PANEL_FORMAT_TI
 #define LVDS_PANEL_DATA			LVDS_PANEL_DATA_8BIT
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_CPU
@@ -101,6 +102,7 @@
 #define VIDEO_DISPLAY_HEIGHT		((LCD_HEIGHT + 0xF) & (~0xF))
 #define VIDEO_DISPLAY_BUF_NUM		2
 
+#ifndef HCN_SCREEN_ENABLE
 
 #if (LCD_WIDTH == 1024 && LCD_HEIGHT == 600)
 #define LCD_TIMING_VBP		1
@@ -152,6 +154,20 @@
 #define LCD_CLK_FREQ		33330000
 #else
 #error "no lcd timing configuraion."
+#endif
+#else
+
+#if defined (HCN_LCD_TIMING_VBP) && defined(HCN_LCD_TIMING_VFP) && defined(HCN_LCD_TIMING_VSW) && defined(HCN_LCD_TIMING_HBP) && defined(HCN_LCD_TIMING_HFP) && defined(HCN_LCD_TIMING_HSW) && defined(HCN_LCD_CLK_FREQ)
+#define LCD_TIMING_VBP		HCN_LCD_TIMING_VBP 
+#define LCD_TIMING_VFP		HCN_LCD_TIMING_VFP 
+#define LCD_TIMING_VSW	    HCN_LCD_TIMING_VSW 
+#define LCD_TIMING_HBP		HCN_LCD_TIMING_HBP 
+#define LCD_TIMING_HFP		HCN_LCD_TIMING_HFP 
+#define LCD_TIMING_HSW	    HCN_LCD_TIMING_HSW 
+#define LCD_CLK_FREQ		HCN_LCD_CLK_FREQ
+#else
+#error "no lcd timing configuraion."
+#endif
 #endif
 /*******************************************/
 
@@ -206,6 +222,11 @@
 #endif
 /*******************************************/
 
+/*********** carlink enable ***********/
+#ifdef HCN_CARLINK_ENABLE
+#define CARLINK_ENABLE
+#endif
+
 /*********** sdmmc configuration ***********/
 #define SDMMC_SUPPORT
 /*******************************************/
@@ -257,18 +278,32 @@
 /*******************************************/
 
 /************ carlink configuration ************/
-#ifdef CARLINK_ENABLE	/* define in iar options */
+#ifdef HCN_WIFI_SUPPORT	/* define in iar options */
 #define WIFI_SUPPORT
 #endif
 
 #ifdef WIFI_SUPPORT
+#ifdef CARLINK_ENABLE
 #define CARLINK_EY			0
 //如果要将亿联,carplay和android auto都使能，有可能苹果手机和支持android auto的安卓手机都安装了亿联的应用,
 //v100端应用程序必须加上设置界面来配置优先选择连亿联还是手机自带的互联(android auto/carplay)
 #define CARLINK_EC			1
-#define CARLINK_CP          1
-#define CARLINK_AA          1
+#define CARLINK_CP          0
+#define CARLINK_AA          0
+#endif
+
 #define WIFI_RESET_IO		95
+#define WIFI_BT_PWR_GPIO   46
+
+///<--bengin 用于解决蓝牙wifi 初始化不成功时 复位 
+#define WIFI_BT_SDO_CMD_GPIO   20
+#define WIFI_BT_SDO_CLK_GPIO   22
+#define WIFI_BT_SDO_D3_GPIO   19
+#define WIFI_BT_SDO_D2_GPIO   18
+#define WIFI_BT_SDO_D1_GPIO   17
+#define WIFI_BT_SDO_D0_GPIO   16
+#define WIFI_BT_UART_TX_GPIO   41
+#define WIFI_BT_UART_RX_GPIO   40
 #else
 #define CARLINK_EY			0
 #define CARLINK_EC			0
@@ -395,15 +430,17 @@
 #define STEPLDR_MAX_SIZE			0x14000
 #define SYSINFOA_MEDIA_OFFSET		0x3c000
 #define SYSINFOB_MEDIA_OFFSET		0x3e000
+
 #define UPDATEFILE_MEDIA_OFFSET		0x40000
-#define UPDATEFILE_MEDIA_B_OFFSET	0xc00000
-#define UPDATEFILE_MAX_SIZE			0xb00000
+#define UPDATEFILE_MEDIA_B_OFFSET	0x1000000   //0xc00000
+#define UPDATEFILE_MAX_SIZE			0xf00000   //0xb00000 15M
+
 #if !(1 == CARLINK_CP)
-#define OTA_MEDIA_OFFSET			0x1600000
-#define OTA_MEDIA_SIZE				0xa00000
+#define OTA_MEDIA_OFFSET			0x1f00000 //0x1600000
+#define OTA_MEDIA_SIZE				0x100000 //0xa00000
 #else
-#define OTA_MEDIA_OFFSET			0xa00000
-#define OTA_MEDIA_SIZE				0x500000
+#define OTA_MEDIA_OFFSET			0xa00000 //0xa00000
+#define OTA_MEDIA_SIZE				0x500000 //0x500000
 #endif
 #define SPI0_QSPI_MODE
 #elif DEVICE_TYPE_SELECT == EMMC_FLASH
@@ -468,7 +505,9 @@
 /*********************************************/
 
 /********** update address configuration **********/
-//#define OTA_UPDATE_SUPPORT
+#ifdef HCN_OTA_UPDATE_ENABLE
+#define OTA_UPDATE_SUPPORT
+#endif
 
 #ifdef OTA_UPDATE_SUPPORT
 //#define DELTA_UPDATE_SUPPORT

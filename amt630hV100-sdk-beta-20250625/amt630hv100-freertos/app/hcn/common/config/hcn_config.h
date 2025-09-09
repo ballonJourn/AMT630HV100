@@ -1,0 +1,105 @@
+/**
+*
+* @file hcn_config.h
+*
+* @brief This message displayed in Doxygen Files index
+*
+* @ingroup PackageName
+* (note: this needs exactly one @defgroup somewhere)
+*
+* @date	2025/08/27 14:57
+* @author och
+*
+*/
+#ifndef __HCN_CONFIG_H__
+#define __HCN_CONFIG_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define HCN_SCREEN_ENABLE
+
+/**
+ * @brief 屏幕参数配置
+ */
+
+ ///< 屏幕类型
+#define HCN_LCD_INTERFACE_TTL		(0)
+#define HCN_LCD_INTERFACE_LVDS		(1)
+#define HCN_LCD_INTERFACE_CPU		(2)
+#define HCN_LCD_INTERFACE_MIPI		(3)
+
+///< 屏幕分辨率
+#define HCN_LCD_WIDTH	            1024
+#define HCN_LCD_HEIGHT	            600
+#define HCN_LCD_EC_WIDTH            1024
+#define HCN_LCD_EC_HEIGHT           600
+
+///< 屏幕色深
+#define HCN_LCD_BPP		            32
+#define HCN_LCD_INTERFACE_TYPE		HCN_LCD_INTERFACE_TTL
+
+///< 屏幕参数配置
+#define HCN_LCD_TIMING_VBP          1//16
+#define HCN_LCD_TIMING_VFP		    1//16
+#define HCN_LCD_TIMING_VSW	        30//4
+#define HCN_LCD_TIMING_HBP		    100//8
+#define HCN_LCD_TIMING_HFP		    100//8
+#define HCN_LCD_TIMING_HSW		    370//4
+#define HCN_LCD_CLK_FREQ            50000000//25000000
+
+///< 屏幕GPIO配置
+#define HCN_LVDS_SCREEN_RST_GPIO    74
+#define HCN_LCD_BL_EN_GPIO          6
+#define HCN_LCD_PWM_CH              2
+
+///< OSD显示设置, UI显示大小
+#define OSD_WIDTH      HCN_LCD_WIDTH 
+#define OSD_HEIGHT     HCN_LCD_HEIGHT             
+
+/**
+ * @brief memory config 以FreeRTos + AWTK为例
+ * ROM[5M] + RAM  的配置:amt630hv100-freertos\proj\amt630hv100_awtk.icf
+ * Memory Regions-
+ * define symbol __ICFEDIT_region_ROM_start__ = 0x20000080;
+ * define symbol __ICFEDIT_region_ROM_end__   = 0x2063ffff;
+ * define symbol __ICFEDIT_region_RAM_start__ = 0x20640000;
+ * define symbol __ICFEDIT_region_RAM_end__   = 0x23ffffff;
+ */
+#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (25.5) * 1024 * 1024) ) )
+#define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024) 
+#define HCN_AWTK_HEAP_SIZE ((17) * 1024 * 1024)
+
+///< 定义MCU串口使能
+#define HCN_MCU_UART_ENABLE
+
+///< 定义32MB spi nor flash使能
+//#define HCN_SPI_NOR_FLASH_32MB_ENABLE
+
+///< 胎压相关信息
+#define HCN_TPMS_NONE        (0)
+#define HCN_F433_TPMS_ENABLE (1)
+#define HCN_BLE_TPMS_ENABLE  (2)
+#define HCN_TPMS_TYPE        HCN_TPMS_NONE
+
+///< wifi相关信息
+#define HCN_WIFI_SUPPORT
+
+///< 手机互联使能
+#define HCN_CARLINK_ENABLE
+
+///< OTA功能
+#ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
+#define HCN_OTA_UPDATE_ENABLE
+#endif
+
+///< CAN功能
+#define CAN_MODULE_ENABLE
+
+
+#ifdef __cplusplus
+}
+#endif //__cplusplus
+
+#endif // __HCN_CONFIG_H__

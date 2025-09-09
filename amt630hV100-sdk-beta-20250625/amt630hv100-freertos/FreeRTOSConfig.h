@@ -28,6 +28,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+#include "app/hcn/common/config/hcn_config.h"
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -67,7 +68,11 @@
 //
 //#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (18.8+32) * 1024 * 1024) )  // google拼音出现异常
 //#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (8.5+32) * 1024 * 1024) )  // google拼音正常工作
+#ifdef __HCN_CONFIG_H__
+#define configTOTAL_HEAP_SIZE					HCN_configTOTAL_HEAP_SIZE  // google拼音正常工作
+#else
 #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (3.5+32) * 1024 * 1024) )  // google拼音正常工作
+#endif
 
 #elif defined(REVERSE_TRACK)
 #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (22+32) * 1024 * 1024) )

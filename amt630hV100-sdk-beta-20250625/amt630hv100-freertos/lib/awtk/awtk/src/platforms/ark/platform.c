@@ -32,6 +32,7 @@
 #include <rtos.h>
 #include <xm_base.h>
 
+#include "config/hcn_config.h"
 
 
 static ret_t date_time_get_now_impl(date_time_t* dt) {
@@ -99,7 +100,12 @@ int random(void)
 
 #ifndef HAS_STD_MALLOC
 #ifndef AWTK_HEAP_SIZE
-#define AWTK_HEAP_SIZE  (6 * 1024 * 1024)
+
+#ifdef __HCN_CONFIG_H__
+#define AWTK_HEAP_SIZE  HCN_AWTK_HEAP_SIZE // (10 * 1024 * 1024)
+#else
+#define AWTK_HEAP_SIZE   (6 * 1024 * 1024)
+#endif
 #endif
 static uint32_t s_heap_mem[AWTK_HEAP_SIZE/4];
 #endif /*HAS_STD_MALLOC*/
