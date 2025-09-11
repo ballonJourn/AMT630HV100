@@ -38,6 +38,9 @@ void LowLevelInit( void )
 
 void Abort_C_Handler( void)
 {
+    uint32_t lr = 0;
+    asm("mov   %0, r14" : : "r"(lr)); 
+    
     uint32_t v1,v2, dfsr;
     v1= 0;
     v2= 0;
@@ -54,12 +57,17 @@ void Abort_C_Handler( void)
 
     printf("-[Info]-Data fault status register value = 0x%x\n\r",(unsigned int)v1);
 
+    printf("\r\nLR register = 0x%08x\n\n\r", lr);
+
     while(1);
 
 }
 
 void Prefetch_C_Handler( void)
 {
+	uint32_t lr = 0;
+    asm("mov   %0, r14" : : "r"(lr));
+
     uint32_t v1,v2, ifsr;
     v1= 0;
     v2= 0;
@@ -74,14 +82,21 @@ void Prefetch_C_Handler( void)
 
     printf("-[INFO]- Prefetch Fault status register value by = 0x%x\n\r",(unsigned int)v1);
 
-    while(1);
+    printf("\r\nLR register = 0x%08x\n\n\r", lr);
 
+    while(1);
 }
 
 void Undefined_C_Handler( void)
 {
-  printf("Undefined abort \n\r");
-  while(1);
+	uint32_t lr = 0;
+    asm("mov   %0, r14" : : "r"(lr)); 
+
+	printf("Undefined abort \n\r");
+
+    printf("\r\nLR register = 0x%08x\n\n\r", lr);
+
+    while(1);
 }
 
 typedef enum {
