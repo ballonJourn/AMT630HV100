@@ -1,0 +1,99 @@
+<?xml ruler_x="400" ruler_y="240"?>
+<window name="home_page" style:normal:bg_image="wallpaper" move_focus_up_key="UP" move_focus_down_key="DOWN">
+  <view name="speed_view" x="237" y="77" w="326" h="326">
+    <image name="bg_cricle" x="0" y="0" w="326" h="326" draw_type="default" image="bg_cricle"/>
+    <image name="bg_halo" x="35" y="35" w="256" h="256" draw_type="default" image="bg_halo_bule"/>
+    <image name="bg_center" x="57" y="57" w="212" h="212" draw_type="default" image="bg_center"/>
+    <image_value name="speed_value" x="56" y="57" w="212" h="212" image="speed_" format="%d" value="0" min="0" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=180)" max="200"/>
+    <progress_circle max="360" name="progress_circle" x="0" y="0" w="326" h="326" visible="true" style:normal:fg_color="#FFFFFF" style:normal:fg_image="dashboard_progress_e" line_width="60" show_text="false" line_cap="butt" style:normal:icon="" start_angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=270)" value="0"/>
+    <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_green" anchor_y="1" angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=-135,to=135)"/>
+    <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="default" image="unit_km_h"/>
+    <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="N"/>
+    <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
+      <image name="gear_D" draw_type="center" image="gear_d_n"/>
+      <image name="gear_N" draw_type="center" image="gear_n_p"/>
+      <image name="gear_R" draw_type="center" image="gear_r_n"/>
+    </slide_menu>
+  </view>
+  <view name="time_view" x="1" y="5" w="77" h="40">
+    <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="55"/>
+    <label name="colon" x="26" y="-6" w="32" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="40" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)" style:normal:text_align_v="top" text=":"/>
+    <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="15"/>
+  </view>
+  <view name="dock_view" x="10" y="123" w="38" h="235" children_layout="default(r=0,c=1,ym=10,s=3)">
+    <image name="icon_info" draw_type="default" image="dock_instrument_p" h="40"/>
+    <image name="icon_navi" draw_type="default" image="dock_navi_n" h="40"/>
+    <image name="icon_music" draw_type="default" image="dock_music_n" h="40"/>
+    <image name="icon_phone" draw_type="default" image="dock_bluetooth_n" h="40"/>
+    <image name="icon_setting" draw_type="default" image="dock_settings_n" h="40"/>
+  </view>
+  <view name="power_view" x="524" y="123" w="276" h="235" style:normal:bg_image="power_bg">
+    <image name="power_bg" x="29" y="196" w="200" h="26" draw_type="default" image="power_progress"/>
+    <image_value name="power_value" x="64" y="72" w="141" h="78" image="power_" format="%d" value="123" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=100)"/>
+    <slider min="0" name="power_progress" x="40" y="200" w="181" h="21" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="2" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=100)" style="default"/>
+  </view>
+  <view name="dock_selec_view" x="0" y="95" w="276" h="290">
+    <slide_view name="slider_view" x="0" y="0" w="100%" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center" vertical="true" animating_time="500" auto_play="0">
+      <view name="info_page" x="0" y="0" w="100%" h="100%" style:normal:bg_image="">
+        <image name="image" x="107" y="48" w="40" h="40" draw_type="default" image="icon_riding_time"/>
+        <image name="image1" x="107" y="141" w="40" h="40" draw_type="default" image="icon_riding_distance"/>
+        <label name="riding_time" x="69" y="98" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="1H 48min"/>
+        <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="100km"/>
+      </view>
+      <view name="navi_page" x="0" y="0" w="100%" h="100%">
+        <qr name="qr" x="81" y="63" w="104" h="104" value="https://github.com/zlgopen/awtk" style:activated:bg_image=""/>
+        <label name="label2" x="53" y="193" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="扫码连接"/>
+      </view>
+      <view name="music_page" x="0" y="0" w="100%" h="100%">
+        <image name="image2" x="100" y="66" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
+        <label name="music_title" x="50" y="161" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="Title"/>
+        <label name="musiclyric" x="50" y="199" w="160" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
+      </view>
+      <view name="phone_page" x="0" y="0" w="100%" h="100%">
+        <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
+          <image name="icon_state" x="36" y="57" w="100" h="100" draw_type="default" image="icon_incoming_call"/>
+          <label name="phone_tips" x="6" y="0" w="160" h="57" style:normal:text_color="#FFFFFF" word_wrap="false" line_wrap="true" style:normal:font_size="24" text="短按确认键接听\n长按挂断"/>
+          <label name="phone_num" x="0" y="175" w="179" h="39" style:normal:font_size="28" style:normal:text_color="#FFFFFF" text="137 9611 2548"/>
+        </view>
+        <view name="bt__no_connected" x="53" y="38" w="201" h="214" visible="true">
+          <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
+        </view>
+      </view>
+      <view name="setting_page" x="0" y="0" w="100%" h="100%">
+        <image name="image4" x="92" y="97" w="83" h="97" draw_type="scale_auto" image="dock_settings_p"/>
+      </view>
+    </slide_view>
+  </view>
+  <view name="signal_view" x="78" y="0" w="722" h="50">
+    <image name="icon_GMS" x="0" y="0" w="40" h="40" draw_type="default" image="top_signal_3_n"/>
+    <image name="icon_gps" x="37" y="0" w="40" h="40" draw_type="default" image="top_gps_n"/>
+    <image name="icon_bt" x="77" y="0" w="40" h="40" draw_type="default" image="top_bluetooth_n"/>
+    <image name="icon_high_beam" x="127" y="0" w="40" h="40" draw_type="default" image="top_high_beam_n"/>
+    <image name="icon_left_bg" x="222" y="0" w="40" h="40" draw_type="default" image="top_left"/>
+    <image name="icon_left" x="222" y="0" w="40" h="40" draw_type="default" image="top_left_n" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)"/>
+    <image name="icon_ready_bg" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready"/>
+    <image name="icon_ready" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready_n"/>
+    <image name="icon_right_bg" x="382" y="0" w="40" h="40" draw_type="default" image="top_right"/>
+    <image name="icon_tight" x="382" y="0" w="40" h="40" draw_type="default" image="top_right_n" animation="visible(duration=4000,repeat_times=0,easing=elastic_out,from=0,to=1)"/>
+    <image name="icon_near_beam" x="437" y="0" w="40" h="40" draw_type="default" image="top_auto_high_beams_n"/>
+    <image name="icon_abs" x="522" y="0" w="40" h="40" draw_type="default" image="top_abs_n"/>
+    <image name="icon_ecu" x="568" y="0" w="40" h="40" draw_type="default" image="top_ecu_n"/>
+    <image name="icon_tcs" x="617" y="0" w="40" h="40" draw_type="default" image="top_tcs_n"/>
+    <image name="icon_engine" x="672" y="0" w="40" h="40" draw_type="default" image="top_brake_failure_n"/>
+  </view>
+  <view name="mileage_view" x="1" y="441" w="799" h="42">
+    <label name="label" x="0" y="4" w="43" h="28" style:normal:text_color="#64B2C5" style:normal:font_name="default" style:normal:font_size="21" style:normal:text_align_v="bottom" text="TRIP"/>
+    <label name="trip_label" x="43" y="7" w="55" h="28" style:normal:text_color="#FFFFFF" style:normal:font_name="default" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999.9"/>
+    <label name="trip_unit" x="102" y="7" w="38" h="28" style:normal:text_color="#FFFFFF" style:normal:font_name="default" style:normal:text_align_h="left" style:normal:font_size="28" style:normal:text_align_v="bottom" text="km"/>
+    <label name="label" x="753" y="5" w="43" h="28" style:normal:text_color="#64B2C5" style:normal:font_name="default" style:normal:font_size="21" style:normal:text_align_v="bottom" text="ODO"/>
+    <label name="odo_label" x="632" y="7" w="80" h="28" style:normal:text_color="#FFFFFF" style:normal:font_name="default" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999999"/>
+    <label name="odo_unit" x="716" y="7" w="34" h="28" style:normal:text_color="#FFFFFF" style:normal:font_name="default" style:normal:text_align_h="left" style:normal:font_size="28" style:normal:text_align_v="bottom" text="km"/>
+  </view>
+  <view name="electrical_view" x="178" y="440" w="444" h="40" style:normal:bg_image="power_level_bg">
+    <progress_bar name="electrical_bar" x="150" y="17" w="145" h="10" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00000000" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" style:normal:fg_image="power_level_p" style:normal:fg_image_draw_type="repeat9" style:normal:icon="" style:normal:icon_at="right" animation="value(duration=2000,yoyo_times=0,easing=linear,from=0,to=100)" value="50"/>
+    <label name="electrical_percentage" x="74" y="8" w="30" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="99"/>
+    <label name="label1" x="103" y="8" w="24" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_v="bottom" text="%"/>
+    <label name="electrical_value" x="296" y="8" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999"/>
+    <label name="electrical_unit" x="348" y="8" w="41" h="28" style:normal:text_color="#327889" style:normal:font_size="28" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
+  </view>
+</window>
