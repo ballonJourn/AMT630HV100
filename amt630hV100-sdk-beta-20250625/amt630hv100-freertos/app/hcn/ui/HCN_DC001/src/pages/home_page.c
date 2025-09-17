@@ -35,7 +35,6 @@ ret_t refesh_ui(const timer_info_t* timer){
 }
 
 static ret_t visit_init_child(void* ctx, const void* iter) {
-  widget_t* win = WIDGET(ctx);
   widget_t* widget = WIDGET(iter);
   const char* name = widget->name;
 

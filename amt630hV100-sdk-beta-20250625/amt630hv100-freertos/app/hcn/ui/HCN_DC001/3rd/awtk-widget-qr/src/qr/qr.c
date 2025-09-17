@@ -199,20 +199,18 @@ static ret_t qr_on_paint_self(widget_t* widget, canvas_t* c) {
     }
     widget_resize(widget, widget_w, widget_w);
     if (qr_ensure_qrcode(widget) == RET_OK) {
-      rect_t r = { 0, 0, widget->w, widget->h };
+      //rect_t r = { 0, 0, (int)widget->w, (int)widget->h };
       uint32_t w = tk_min(widget->w, widget->h);
       uint32_t h = tk_min(widget->w, widget->h);
-      uint32_t i = 0;
-      uint32_t j = 0;
 
       uint8_t* p = qr->qrcode->data;
       uint32_t size = qr->qrcode->width;
       uint32_t pix_size = (tk_min(widget->w, widget->h) - 2 * margin) / size;
       uint32_t x = 0;
       uint32_t y = 0;
-      rect_t r_clip = rect_init(widget->x + ((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->w,
-                                widget->y + ((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->h,
-                                IMAGE_QR_MAX_RATIO * widget->w, IMAGE_QR_MAX_RATIO * widget->h);
+      rect_t r_clip = rect_init(widget->x + (int)(((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->w),
+                                widget->y + (int)(((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->h),
+                                (int)(IMAGE_QR_MAX_RATIO * widget->w), (int)(IMAGE_QR_MAX_RATIO * widget->h));
       return_value_if_fail(pix_size > 1, RET_BAD_PARAMS); 
 
       bitmap_t* qr_bitmap =
