@@ -2,6 +2,7 @@ res/*
 !res/rommaker.bat
 !res/rommaker.exe
 **/*.bin
-!res/rom.bin
 src/*.obj
-src/main.c
+src/*/*.obj
+src/SConscript
+SConstruct

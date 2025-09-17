@@ -2,13 +2,13 @@
 <window name="home_page" style:normal:bg_image="wallpaper" move_focus_up_key="UP" move_focus_down_key="DOWN">
   <view name="speed_view" x="237" y="77" w="326" h="326">
     <image name="bg_cricle" x="0" y="0" w="326" h="326" draw_type="default" image="bg_cricle"/>
-    <image name="bg_halo" x="35" y="35" w="256" h="256" draw_type="default" image="bg_halo_bule"/>
+    <image name="bg_halo" x="35" y="35" w="256" h="256" draw_type="default" image="bg_halo_0"/>
     <image name="bg_center" x="57" y="57" w="212" h="212" draw_type="default" image="bg_center"/>
-    <image_value name="speed_value" x="56" y="57" w="212" h="212" image="speed_" format="%d" value="0" min="0" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=180)" max="200"/>
-    <progress_circle max="360" name="progress_circle" x="0" y="0" w="326" h="326" visible="true" style:normal:fg_color="#FFFFFF" style:normal:fg_image="dashboard_progress_e" line_width="60" show_text="false" line_cap="butt" style:normal:icon="" start_angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=270)" value="0"/>
-    <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_green" anchor_y="1" angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=-135,to=135)"/>
+    <image_value name="speed_value" x="56" y="57" w="212" h="212" image="speed_" format="%d" value="0" min="0" animation="value(duration=5000,yoyo_times=0,easing=linear,auto_start=false,from=0,to=180)" max="200"/>
+    <progress_circle max="360" name="progress_circle" x="0" y="0" w="326" h="326" visible="true" style:normal:fg_color="#FFFFFF" style:normal:fg_image="dashboard_progress_0" line_width="60" show_text="false" line_cap="butt" style:normal:icon="" start_angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=270)" value="0"/>
+    <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_0" anchor_y="1" angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=-135,to=135)"/>
     <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="default" image="unit_km_h"/>
-    <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="N"/>
+    <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="drv_mode_0"/>
     <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
       <image name="gear_D" draw_type="center" image="gear_d_n"/>
       <image name="gear_N" draw_type="center" image="gear_n_p"/>
@@ -29,7 +29,7 @@
   </view>
   <view name="power_view" x="524" y="123" w="276" h="235" style:normal:bg_image="power_bg">
     <image name="power_bg" x="29" y="196" w="200" h="26" draw_type="default" image="power_progress"/>
-    <image_value name="power_value" x="64" y="72" w="141" h="78" image="power_" format="%d" value="123" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=100)"/>
+    <image_value name="power_value" x="64" y="72" w="141" h="78" image="power_" format="%d" value="100" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=100)"/>
     <slider min="0" name="power_progress" x="40" y="200" w="181" h="21" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="2" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=100)" style="default"/>
   </view>
   <view name="dock_selec_view" x="0" y="95" w="276" h="290">
