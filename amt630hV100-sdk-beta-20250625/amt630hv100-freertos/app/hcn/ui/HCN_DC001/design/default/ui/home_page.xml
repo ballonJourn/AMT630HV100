@@ -10,9 +10,9 @@
     <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="default" image="unit_km_h"/>
     <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="drv_mode_0"/>
     <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
-      <image name="gear_D" draw_type="center" image="gear_d_n"/>
-      <image name="gear_N" draw_type="center" image="gear_n_p"/>
-      <image name="gear_R" draw_type="center" image="gear_r_n"/>
+      <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>
+      <image name="gear_N" draw_type="center" style:normal:icon="gear_n_n" style:selected:icon="gear_n_p"/>
+      <image name="gear_R" draw_type="center" style:normal:icon="gear_r_n" style:selected:icon="gear_r_p"/>
     </slide_menu>
   </view>
   <view name="time_view" x="1" y="5" w="77" h="40">
@@ -21,11 +21,11 @@
     <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="15"/>
   </view>
   <view name="dock_view" x="10" y="123" w="38" h="235" children_layout="default(r=0,c=1,ym=10,s=3)">
-    <image name="icon_info" draw_type="default" image="dock_instrument_p" h="40"/>
-    <image name="icon_navi" draw_type="default" image="dock_navi_n" h="40"/>
-    <image name="icon_music" draw_type="default" image="dock_music_n" h="40"/>
-    <image name="icon_phone" draw_type="default" image="dock_bluetooth_n" h="40"/>
-    <image name="icon_setting" draw_type="default" image="dock_settings_n" h="40"/>
+    <image name="icon_info" draw_type="default" h="40" style:normal:icon="dock_instrument_n" style:normal:bg_image="" style:selected:icon="dock_instrument_p"/>
+    <image name="icon_navi" draw_type="default" h="40" style:normal:icon="dock_navi_n" style:selected:icon="dock_navi_p"/>
+    <image name="icon_music" draw_type="default" h="40" style:normal:icon="dock_music_n" style:selected:icon="dock_music_p"/>
+    <image name="icon_phone" draw_type="default" h="40" style:normal:icon="dock_bluetooth_n" style:selected:icon="dock_bluetooth_p"/>
+    <image name="icon_setting" draw_type="default" h="40" style:normal:icon="dock_settings_n" style:selected:icon="dock_settings_p"/>
   </view>
   <view name="power_view" x="524" y="123" w="276" h="235" style:normal:bg_image="power_bg">
     <image name="power_bg" x="29" y="196" w="200" h="26" draw_type="default" image="power_progress"/>
@@ -74,7 +74,7 @@
     <image name="icon_ready_bg" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready"/>
     <image name="icon_ready" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready_n"/>
     <image name="icon_right_bg" x="382" y="0" w="40" h="40" draw_type="default" image="top_right"/>
-    <image name="icon_tight" x="382" y="0" w="40" h="40" draw_type="default" image="top_right_n" animation="visible(duration=4000,repeat_times=0,easing=elastic_out,from=0,to=1)"/>
+    <image name="icon_right" x="382" y="0" w="40" h="40" draw_type="default" image="top_right_n" animation="visible(duration=4000,repeat_times=0,easing=elastic_out,from=0,to=1)"/>
     <image name="icon_near_beam" x="437" y="0" w="40" h="40" draw_type="default" image="top_auto_high_beams_n"/>
     <image name="icon_abs" x="522" y="0" w="40" h="40" draw_type="default" image="top_abs_n"/>
     <image name="icon_ecu" x="568" y="0" w="40" h="40" draw_type="default" image="top_ecu_n"/>
