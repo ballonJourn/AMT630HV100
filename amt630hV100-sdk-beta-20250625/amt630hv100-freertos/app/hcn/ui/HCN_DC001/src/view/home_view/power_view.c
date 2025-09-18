@@ -26,5 +26,6 @@ ret_t home_refresh_power(int power)
     if(home_power_widget[POWER_BAR]){
         slider_set_value(home_power_widget[POWER_BAR] , power) ;
     }
-
+    
+    return RET_OK ;
 }

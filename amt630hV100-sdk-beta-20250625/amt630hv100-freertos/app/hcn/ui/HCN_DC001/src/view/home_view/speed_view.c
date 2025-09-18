@@ -114,4 +114,6 @@ ret_t home_refresh_gear(gear_e gear)
    
    slide_menu_set_value(gearWid, gear);
    // slide_menu_scroll_to_next(gearWid);
+   
+   return RET_OK ;
 }

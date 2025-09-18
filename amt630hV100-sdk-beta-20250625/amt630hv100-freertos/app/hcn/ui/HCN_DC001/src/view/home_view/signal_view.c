@@ -24,6 +24,8 @@ ret_t home_refresh_signal(signal_e icon , bool_t visible)
     {
         widget_set_visible(home_signal_widget[icon] , visible ? TRUE : FALSE) ;
     }
+    
+    return RET_OK ;
 }
 
 
@@ -36,6 +38,8 @@ ret_t home_refresh_GMS_level(gms_level_e level )
     {
         image_set_image(home_signal_widget[ICON_GMS] , format) ;
     }
+    
+    return RET_OK ;
 }
 
 

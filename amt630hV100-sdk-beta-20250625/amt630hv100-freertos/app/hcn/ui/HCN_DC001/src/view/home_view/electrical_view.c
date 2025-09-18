@@ -13,6 +13,8 @@ ret_t home_elec_view_init(widget_t* parent)
     for (size_t i = 0; i < ELECT_NUM_MAX; i++){
         home_elec_widget[i] = widget_lookup(parent, home_elec_widget_name[i], TRUE);
     }
+    
+    return RET_OK ;
 }
 
 ret_t home_refresh_electrical(uint32_t mileage) 
@@ -34,6 +36,8 @@ ret_t home_refresh_electrical(uint32_t mileage)
     if (home_elec_widget[ELECT_VALUE]){
         widget_set_text_utf8(home_elec_widget[ELECT_VALUE] , format);
     }
+    
+    return RET_OK ;
 }
 
 ret_t home_refresh_electrical_unit(unit_e unit) 
@@ -41,4 +45,6 @@ ret_t home_refresh_electrical_unit(unit_e unit)
     if (home_elec_widget[ELECT_UNIT]){
         widget_set_text_utf8(home_elec_widget[ELECT_UNIT] , (unit == KM_H) ? "km" : "mile" );
     }
+    
+    return RET_OK ;
 }

@@ -5,6 +5,7 @@
  * 初始化窗口的子控件
  */
 static ret_t visit_init_child(void* ctx, const void* iter) {
+  (void)ctx;
   widget_t* widget = WIDGET(iter);
   const char* name = widget->name;
 

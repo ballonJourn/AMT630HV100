@@ -2,7 +2,7 @@
 #define HOME_MILEAGE_VIEW_H
 #include "./common.h"
 
-typedef enum home_mileage_com{
+enum home_mileage_com{
     TRIP_LABEL      ,
     TRIP_UNIT       ,
          

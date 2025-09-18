@@ -37,5 +37,7 @@ ret_t home_refresh_dock_item(int index)
         else
             widget_set_state(home_dock_widget[i] , normal) ;
     }
+    
+    return RET_OK ;
 }
 

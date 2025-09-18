@@ -3,6 +3,10 @@
 #include "../view/home_view/speed_view.h"
 #include "../view/home_view/dock_view.h"
 #include "../view/home_view/mileage_view.h"
+#include "../view/home_view/power_view.h"
+#include "../view/home_view/signal_view.h"
+#include "../view/home_view/electrical_view.h"
+
 /**
  * 初始化窗口的子控件
  */
@@ -36,6 +40,7 @@ ret_t refesh_ui(const timer_info_t* timer){
 
 static ret_t visit_init_child(void* ctx, const void* iter) {
   widget_t* widget = WIDGET(iter);
+  (void)ctx;
   const char* name = widget->name;
 
 
