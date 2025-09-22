@@ -908,7 +908,7 @@ void awtk_thread(void *data)
 #endif
 
 // ark_lcd_osd_enable(LCD_UI_LAYER,0);
-	//hcn_mw_init();
+	hcn_mw_init();
 
     while(1) {
 #ifdef TASK_STATUS_MONITOR
