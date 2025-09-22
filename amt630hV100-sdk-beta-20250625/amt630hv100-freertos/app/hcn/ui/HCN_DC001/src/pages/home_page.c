@@ -6,7 +6,8 @@
 #include "../view/home_view/power_view.h"
 #include "../view/home_view/signal_view.h"
 #include "../view/home_view/electrical_view.h"
-
+#include "../view/view_manager.h"
+#include "../view/home_view/animation_ctrl.h"
 /**
  * 初始化窗口的子控件
  */
@@ -31,10 +32,18 @@ ret_t refesh_ui(const timer_info_t* timer){
   home_refresh_odo(1888.6) ;
   home_refresh_mileage_unit(MPH) ;
 
+  
+  // deal_key_down_short_press() ;
 
-  home_refresh_electrical(90);
+  if (count % 2 == 0)
+  {
+    animation_play_out() ;
+  }else
+  {
+    animation_play_in() ;
+  }
+  
 
-  home_refresh_electrical_unit(MPH);
   return RET_REPEAT;
 }
 
@@ -67,6 +76,8 @@ ret_t home_page_init(widget_t* win, void* ctx) {
   home_signal_view_init(win);
   home_mileage_view_init(win) ;
   home_elec_view_init(win) ;
+  view_manager_init(win) ;
+  home_animation_init(win) ;
 
   timer_add(refesh_ui,NULL , 2000);
 

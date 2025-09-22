@@ -11,7 +11,8 @@
 #define ANGLE_MAX (270)        //最大角度
 #define ELECTRI_MAX (188)      //最大续航里程 km
 
-
+#define STATE_NORMAL "normal"
+#define STATE_SELECTE "selected"
 typedef enum {
     KM_H,
     MPH ,

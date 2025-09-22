@@ -2,7 +2,8 @@ res/*
 !res/rommaker.bat
 !res/rommaker.exe
 **/*.bin
+!res/rom.bin
 src/*.obj
-src/*/*.obj
+src/**/*.obj
 src/SConscript
 SConstruct

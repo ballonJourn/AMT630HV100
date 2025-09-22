@@ -107,7 +107,7 @@
     <normal/>
     <disable bg_color="#F7F7F766" border_color="#C2C2C266" text_color="#44444466"/>
     <empty text_color="#959494"/>
-    <empty_focus text_color="#959494" border_color="#338FFF"/>
+    <empty_focus border_color="#338FFF" text_color="#959494"/>
     <empty_over text_color="#959494"/>
     <error border_color="#FF0000"/>
     <focused border_color="#338FFF"/>
@@ -118,7 +118,7 @@
     <normal/>
     <disable bg_color="#F7F7F766" border_color="#C2C2C266" text_color="#44444466"/>
     <empty text_color="#959494"/>
-    <empty_focus text_color="#959494" border_color="#338FFF"/>
+    <empty_focus border_color="#338FFF" text_color="#959494"/>
     <empty_over text_color="#959494"/>
     <error border_color="#FF0000"/>
     <focused border_color="#338FFF"/>
@@ -166,7 +166,7 @@
     <normal/>
     <disable bg_color="#F7F7F766" border_color="#C2C2C266" text_color="#44444466"/>
     <empty text_color="#959494"/>
-    <empty_focus text_color="#959494" border_color="#338FFF"/>
+    <empty_focus border_color="#338FFF" text_color="#959494"/>
     <empty_over text_color="#959494"/>
     <error border_color="#FF0000"/>
     <focused border_color="#338FFF"/>
@@ -203,6 +203,10 @@
     <normal text_color="#444444"/>
     <disable text_color="#44444466"/>
   </style>
+  <style name="setting_menu" font_size="30" icon_at="left">
+    <normal font_name="default" icon="box" text_color="#FFFFFF"/>
+    <selected icon="setting_menu_selec" selected_text_color="#00000000" text_color="#79D9F9"/>
+  </style>
 </label>
 <line_number>
   <style name="default" text_align_h="center">
@@ -231,13 +235,13 @@
   </style>
 </list_view_h>
 <mledit>
-  <style name="default" bg_color="#FFFFFF" border_color="#A0A0A0" margin_left="34" selected_bg_color="#B5D7FD" selected_text_color="#010101" text_align_h="left" text_color="#444444">
-    <normal/>
+  <style name="default" bg_color="#FFFFFF" border_color="#A0A0A0" margin_left="34" selected_bg_color="#B5D7FD" selected_text_color="#010101" text_align_h="left" text_color="#959494">
+    <normal text_color="#444444"/>
     <disable bg_color="#BEBEBE" text_color="#44444466"/>
-    <empty text_color="#959494"/>
-    <empty_focus text_color="#959494"/>
-    <empty_over text_color="#959494"/>
-    <focused/>
+    <empty/>
+    <empty_focus/>
+    <empty_over/>
+    <focused text_color="#444444"/>
   </style>
 </mledit>
 <overlay>
@@ -267,6 +271,12 @@
     <disable fg_color="#338FFF66" text_color="#44444466"/>
   </style>
 </progress_circle>
+<qr>
+  <style name="default">
+    <normal bg_color="#FFFFFF" bg_image="" fg_color="#000000"/>
+    <disable bg_color="#F0F0F0" fg_color="#BEBEBE"/>
+  </style>
+</qr>
 <radio_button>
   <style name="default" icon_at="left" text_color="#444444">
     <normal icon="radio_n"/>
@@ -346,7 +356,7 @@
     <normal/>
     <disable bg_color="#F7F7F766" border_color="#C2C2C266" text_color="#44444466"/>
     <empty text_color="#959494"/>
-    <empty_focus text_color="#959494" border_color="#338FFF"/>
+    <empty_focus border_color="#338FFF" text_color="#959494"/>
     <empty_over text_color="#959494"/>
     <error border_color="#FF0000"/>
     <focused border_color="#338FFF"/>
@@ -414,9 +424,3 @@
     <normal bg_color="#FFFFFF"/>
   </style>
 </window>
-<qr>
-  <style name="default">
-    <normal fg_color="black" bg_color="white" bg_image=""/>
-    <disable fg_color="gray" bg_color="#f0f0f0"/>
-  </style>
-</qr>

@@ -31,13 +31,13 @@ ret_t home_refresh_rpm(uint32_t rpm)
 {
     float step = (float)(ANGLE_MAX * (1.0f)) / RPM_MAX  ;
     uint32_t duration = 300 ;
-
+    int stattAngle = 135 ;
     if(home_speed_widget[SPEED_CRICLE] ){
        widget_animate_value_to(home_speed_widget[SPEED_CRICLE] ,  step * rpm , duration );
     }
 
     if(home_speed_widget[SPEED_POINTER] ){
-       widget_animate_value_to(home_speed_widget[SPEED_POINTER] ,  step * rpm + 135 , duration );
+       widget_animate_value_to(home_speed_widget[SPEED_POINTER] ,  step * rpm + stattAngle , duration );
     }
 
     return RET_OK ;
@@ -106,9 +106,9 @@ ret_t home_refresh_gear(gear_e gear)
    {
       children = widget_get_child(gearWid,i);
       if (gear == i ){
-         widget_set_state(children , "selected");
+         widget_set_state(children , STATE_SELECTE);
       }else{
-        widget_set_state(children , "normal");
+         widget_set_state(children , STATE_NORMAL);
       }
    }
    
