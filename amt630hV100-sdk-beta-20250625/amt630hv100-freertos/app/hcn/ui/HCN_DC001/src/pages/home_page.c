@@ -1,22 +1,12 @@
 ﻿#include "awtk.h"
 #include "../common/navigator.h"
-#include "../view/home_view/speed_view.h"
-#include "../view/home_view/dock_view.h"
-#include "../view/home_view/mileage_view.h"
-#include "../view/home_view/power_view.h"
-#include "../view/home_view/signal_view.h"
-#include "../view/home_view/electrical_view.h"
+#include "../logic/hcn_logic.h"
 #include "../view/view_manager.h"
-#include "../view/home_view/animation_ctrl.h"
 /**
  * 初始化窗口的子控件
  */
 // typedef ret_t (*timer_func_t)(const timer_info_t* timer);
-ret_t home_speed_view_init(widget_t* parent); 
 
-ret_t home_refresh_speed(uint32_t speed);
-
-ret_t home_refresh_rpm(uint32_t rpm) ;
 ret_t refesh_ui(const timer_info_t* timer){
   static int count = 0 ;
   count++;
@@ -33,15 +23,17 @@ ret_t refesh_ui(const timer_info_t* timer){
   home_refresh_mileage_unit(MPH) ;
 
   
-  // deal_key_down_short_press() ;
+  deal_key_down_short_press() ;
 
-  if (count % 2 == 0)
-  {
-    animation_play_out() ;
-  }else
-  {
-    animation_play_in() ;
-  }
+  // home_refresh_speed(count);
+
+  // if (count % 2 == 0)
+  // {
+  //   animation_play_out() ;
+  // }else
+  // {
+  //   animation_play_in() ;
+  // }
   
 
   return RET_REPEAT;
@@ -51,8 +43,6 @@ static ret_t visit_init_child(void* ctx, const void* iter) {
   widget_t* widget = WIDGET(iter);
   (void)ctx;
   const char* name = widget->name;
-
-
 
   // 初始化指定名称的控件（设置属性或注册事件），请保证控件名称在窗口上唯一
   if (name != NULL && *name != '\0') {
@@ -70,7 +60,7 @@ ret_t home_page_init(widget_t* win, void* ctx) {
   return_value_if_fail(win != NULL, RET_BAD_PARAMS);
 
   widget_foreach(win, visit_init_child, win);
-
+#if 0
   home_speed_view_init(win);
   home_dock_view_init(win) ;
   home_signal_view_init(win);
@@ -78,6 +68,10 @@ ret_t home_page_init(widget_t* win, void* ctx) {
   home_elec_view_init(win) ;
   view_manager_init(win) ;
   home_animation_init(win) ;
+
+#endif 
+  demonstration_stop() ;
+  home_view_init(win) ;
 
   timer_add(refesh_ui,NULL , 2000);
 

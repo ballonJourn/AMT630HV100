@@ -1,7 +1,7 @@
 <?xml ruler_x="400" ruler_y="240"?>
 <window name="home_page" style:normal:bg_image="wallpaper" move_focus_up_key="UP" move_focus_down_key="DOWN">
   <view name="time_view" x="1" y="5" w="77" h="40">
-    <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="55"/>
+    <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="19"/>
     <label name="colon" x="26" y="-6" w="32" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="40" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)" style:normal:text_align_v="top" text=":"/>
     <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="15"/>
   </view>
@@ -20,7 +20,7 @@
     <image name="icon_left_bg" x="222" y="0" w="40" h="40" draw_type="default" image="top_left"/>
     <image name="icon_left" x="222" y="0" w="40" h="40" draw_type="default" image="top_left_n" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)"/>
     <image name="icon_ready_bg" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready"/>
-    <image name="icon_ready" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready_n" visible="false"/>
+    <image name="icon_ready" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready_n" visible="true"/>
     <image name="icon_right_bg" x="382" y="0" w="40" h="40" draw_type="default" image="top_right"/>
     <image name="icon_right" x="382" y="0" w="40" h="40" draw_type="default" image="top_right_n" animation="visible(duration=4000,repeat_times=0,easing=elastic_out,from=0,to=1)"/>
     <image name="icon_near_beam" x="437" y="0" w="40" h="40" draw_type="default" image="top_auto_high_beams_n"/>
@@ -52,7 +52,7 @@
         <image name="bg_center" x="57" y="57" w="212" h="212" draw_type="default" image="bg_center"/>
         <image_value name="speed_value" x="56" y="57" w="212" h="212" image="speed_" format="%d" value="0" min="0" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=180)" max="200"/>
         <progress_circle max="360" name="progress_circle" x="0" y="0" w="326" h="326" visible="true" style:normal:fg_color="#FFFFFF" style:normal:fg_image="dashboard_progress_0" line_width="60" show_text="false" line_cap="butt" style:normal:icon="" start_angle="135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=0,to=270)" value="0"/>
-        <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_0" anchor_y="1.0" angle="-135" animation="value(duration=5000,yoyo_times=0,easing=linear,auto_start=false,from=-135,to=135)"/>
+        <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_0" anchor_y="1.0" angle="-135" animation="value(duration=5000,yoyo_times=0,easing=linear,from=-135,to=135)"/>
         <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="default" image="unit_km_h"/>
         <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="drv_mode_0"/>
         <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
@@ -121,8 +121,22 @@
       </list_view>
       <image name="image5" x="126" y="298" w="28" h="12" draw_type="default" image="setting_page_down_n"/>
       <image name="image6" x="126" y="21" w="28" h="12" draw_type="default" image="setting_page_up_n"/>
-      <slide_view x="227" y="0" w="554" h="326" name="setting_menu">
-        <view name="tmps_view" x="0" y="0" w="100%" h="100%"/>
+      <slide_view x="227" y="0" w="554" h="326" name="setting_menu" style:normal:border_color="#00000000">
+        <view name="tmps_view" x="0" y="0" w="100%" h="100%">
+          <image name="tmps_car" x="137" y="53" w="300" h="201" draw_type="default" image="setting_tire_pressure_bg"/>
+          <progress_bar name="tmps_bar_front" x="51" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
+          <progress_bar name="tmps_bar_near" x="460" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
+          <image name="icon_tmps_front" x="69" y="61" w="40" h="40" draw_type="default" image="icon_tmps_w"/>
+          <image name="icon_tmps_rear" x="478" y="61" w="40" h="40" draw_type="default" image="icon_tmps_n"/>
+          <label name="tmps_value_front" x="73" y="111" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="1.5"/>
+          <label name="label" x="113" y="116" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
+          <label name="tmps_value_rear" x="486" y="117" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="1.5"/>
+          <label name="label4" x="526" y="122" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
+          <label name="tmps_temp_front" x="73" y="225" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="65"/>
+          <label name="label4" x="113" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
+          <label name="tmps_temp_front" x="478" y="225" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="65"/>
+          <label name="label4" x="518" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
+        </view>
         <view name="ride_ele_view" x="0" y="0" w="100%" h="100%"/>
         <view name="connect_view" x="0" y="0" w="100%" h="100%"/>
         <view name="language" x="0" y="0" w="100%" h="100%"/>

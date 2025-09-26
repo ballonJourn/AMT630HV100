@@ -94,7 +94,7 @@ void home_page_deal_key_back()
 void home_page_deal_key_down ()
 {
     int index =  get_current_win() ;
-    index = (index + 1 ) % (ICON_SETTING + 1) ;
+    index = (index + 1) % (ICON_SETTING + 1) ;
 
     //设置页面参数
     set_current_win(index) ;

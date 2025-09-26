@@ -1,8 +1,9 @@
 
 #include "speed_view.h"
+#include "../../logic/hcn_selfcheck.h"
 
 const char* home_speed_widget_name[SPEED_NUM_MAX] = {
-    "bg_halo" , "speed_value" , "progress_circle" , "dashboard_pointer" ,"speed_unit" , "driving_mode" , "gear_view"
+   "bg_halo" , "speed_value" , "progress_circle" , "dashboard_pointer" ,"speed_unit" , "driving_mode" , "gear_view"
 } ;
 
 static widget_t* home_speed_widget[SPEED_NUM_MAX] = { NULL };
@@ -19,8 +20,10 @@ ret_t home_speed_view_init(widget_t* parent)
 
 ret_t home_refresh_speed(uint32_t speed)
 {
+    speed = tk_min(speed , SPEED_MAX) ;
+    
     if(home_speed_widget[SPEED_VALUE] ){
-       image_value_set_value(home_speed_widget[SPEED_VALUE], speed);
+      image_value_set_value(home_speed_widget[SPEED_VALUE], speed);
     }
 
     return RET_OK ;
@@ -29,15 +32,22 @@ ret_t home_refresh_speed(uint32_t speed)
 
 ret_t home_refresh_rpm(uint32_t rpm)
 {
+    rpm = tk_min(rpm , RPM_MAX) ;
+
     float step = (float)(ANGLE_MAX * (1.0f)) / RPM_MAX  ;
     uint32_t duration = 300 ;
-    int stattAngle = 135 ;
+
+    if (checkself_get_state() == CHECK_STATE_CHECKING){
+       duration = 30 ;
+    }
+    
+    int startAngle = -135 ;
     if(home_speed_widget[SPEED_CRICLE] ){
        widget_animate_value_to(home_speed_widget[SPEED_CRICLE] ,  step * rpm , duration );
     }
 
     if(home_speed_widget[SPEED_POINTER] ){
-       widget_animate_value_to(home_speed_widget[SPEED_POINTER] ,  step * rpm + stattAngle , duration );
+       widget_animate_value_to(home_speed_widget[SPEED_POINTER] ,  step * rpm + startAngle , duration );
     }
 
     return RET_OK ;

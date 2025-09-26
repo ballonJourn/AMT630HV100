@@ -119,13 +119,15 @@ ret_t animation_play_in()
 }
 
 
-// ret_t set_dock_view(dock_view_e dock_view)
-// {
-//      if (home_animation_widget[DOCK_SLIDER_VIEW])
-//         {
-//             slide_view_set_active_ex(home_animation_widget[DOCK_SLIDER_VIEW] , dock_view , FALSE ) ;
-//         }
+ret_t demonstration_start()
+{
+    //todo
+    
+    return RET_OK ;
+}
 
-//     return RET_OK;
-// }
-
+ret_t demonstration_stop()
+{
+    widget_stop_animator(NULL , NULL);
+    return RET_OK ;
+}

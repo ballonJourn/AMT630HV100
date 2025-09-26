@@ -49,7 +49,8 @@ ret_t home_refresh_signal_visible(bool_t visible )
         if (i == ICON_GMS || i == ICON_GPS )   //不参与自检图表
             continue;
         
-        widget_set_visible(home_signal_widget[i] , visible ? TRUE : FALSE) ;
+        if (home_signal_widget[i])
+            widget_set_visible(home_signal_widget[i] , visible ? TRUE : FALSE) ;
     }
     return RET_OK ;
 }

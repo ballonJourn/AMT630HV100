@@ -6,4 +6,5 @@ res/*
 src/*.obj
 src/**/*.obj
 src/SConscript
+/bin/
 SConstruct

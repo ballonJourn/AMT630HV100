@@ -8,10 +8,12 @@
 
 #define SPEED_MAX (180)        //最大速度
 #define RPM_MAX (180)          //最大转速
+#define POWER_MAX (100)        //最大功率
 #define ANGLE_MAX (270)        //最大角度
 #define ELECTRI_MAX (188)      //最大续航里程 km
 
-#define STATE_NORMAL "normal"
+
+#define STATE_NORMAL  "normal"
 #define STATE_SELECTE "selected"
 typedef enum {
     KM_H,

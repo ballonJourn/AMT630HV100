@@ -20,8 +20,13 @@ ret_t home_animation_init(widget_t* parent) ;
 ret_t animation_listen_out(void* ctx, event_t* e) ;
 
 ret_t animation_listen_in(void* ctx, event_t* e) ;
+
 ret_t animation_play_out();
 
 ret_t animation_play_in();
+
+ret_t demonstration_start() ;
+
+ret_t demonstration_stop();
 
 #endif
