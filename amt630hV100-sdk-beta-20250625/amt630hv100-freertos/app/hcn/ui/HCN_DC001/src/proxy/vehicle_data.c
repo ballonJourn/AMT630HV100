@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include "vehicle_data.h"
 
-#define ON_PC_CACLE 0
 
 #if  ON_PC_CACLE
 #include "E:\HCN_WorkSpace\AMT630HV100\amt630hV100-sdk-beta-20250625\amt630hv100-freertos\app\hcn\mw\vehicle_param/vehicle_param.h"
@@ -40,7 +39,9 @@ int32_t vehicle_get_data_signal_lamp(veh_signal_e lamp)
     int count = sizeof(signalMaps) / sizeof(Signal_Lamp_Mapping_t) ;
     for (size_t i = 0; i < count; i++){
         if (signalMaps[i].signal_lamp == lamp){
-            // return vehicle_get_data(signalMaps[i].veh_data);
+            #if  ON_PC_CACLE == 0 
+            return vehicle_get_data(signalMaps[i].veh_data);
+            #endif
         }
     }
     return VEH_INVALID_VALUE;

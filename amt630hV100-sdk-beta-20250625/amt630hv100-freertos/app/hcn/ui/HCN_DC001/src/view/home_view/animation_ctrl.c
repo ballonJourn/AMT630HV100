@@ -122,12 +122,13 @@ ret_t animation_play_in()
 ret_t demonstration_start()
 {
     //todo
-    
+    widget_start_animator(NULL , "animation_demo");
+
     return RET_OK ;
 }
 
 ret_t demonstration_stop()
 {
-    widget_stop_animator(NULL , NULL);
+    widget_stop_animator(NULL , "animation_demo");
     return RET_OK ;
 }
