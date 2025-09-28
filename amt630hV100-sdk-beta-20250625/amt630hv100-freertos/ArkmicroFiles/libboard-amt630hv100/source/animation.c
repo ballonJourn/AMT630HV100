@@ -293,6 +293,8 @@ void mipi_disp_test(void)
 	}
 }
 #endif
+#define ANIMA_LCD_WIDTH		800
+#define ANIMA_LCD_HEIGHT	480
 
 static void animation_thread(void *param)
 {
@@ -405,19 +407,20 @@ static void animation_thread(void *param)
 
 				if(!first_show_done) {
 #if LCD_ROTATE_ANGLE == LCD_ROTATE_ANGLE_0
-					int align_width = (LCD_WIDTH + 0xF) & (~0xF);
-					int align_height = (LCD_HEIGHT + 0xF) & (~0xF);
+					int align_width = (ANIMA_LCD_WIDTH + 0xF) & (~0xF);
+					int align_height = (ANIMA_LCD_HEIGHT + 0xF) & (~0xF);
 
 					if((align_width == jpegInfo.dec_width) && (align_height == jpegInfo.dec_height)) {
-						ark_lcd_set_osd_size(LCD_VIDEO_LAYER, LCD_WIDTH, LCD_HEIGHT);
+						ark_lcd_set_osd_size(LCD_VIDEO_LAYER, ANIMA_LCD_WIDTH, ANIMA_LCD_HEIGHT);
 					} else {
 						ark_lcd_set_osd_size(LCD_VIDEO_LAYER, jpegInfo.dec_width, jpegInfo.dec_height);
 					}
 					ark_lcd_set_osd_format(LCD_VIDEO_LAYER, lcd_format);
 #else
-					ark_lcd_set_osd_size(LCD_VIDEO_LAYER, LCD_WIDTH, LCD_HEIGHT);
+					ark_lcd_set_osd_size(LCD_VIDEO_LAYER, ANIMA_LCD_WIDTH, ANIMA_LCD_HEIGHT);
 					ark_lcd_set_osd_format(LCD_VIDEO_LAYER, LCD_OSD_FORAMT_RGB565);
 #endif
+					printf("animation first frame show!\r\n");
 					ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 					ark_lcd_osd_enable(LCD_UI_LAYER, 0);
 					first_show_done = 1;

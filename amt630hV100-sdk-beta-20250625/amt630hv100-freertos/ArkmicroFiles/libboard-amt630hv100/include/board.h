@@ -173,7 +173,9 @@
 
 /************ adc configuration ************/
 //#define ADC_TOUCH
+#ifdef HCN_ADC_KEY_ENABLE
 #define ADC_KEY
+#endif
 /*******************************************/
 
 /*******************************************/
@@ -297,18 +299,18 @@
 #define CARLINK_AA          0
 #endif
 
-#define WIFI_RESET_IO		95
-#define WIFI_BT_PWR_GPIO   46
+#define WIFI_RESET_IO		(95)
+#define WIFI_BT_PWR_GPIO    (46)
 
-///<--bengin 用于解决蓝牙wifi 初始化不成功时 复位 
-#define WIFI_BT_SDO_CMD_GPIO   20
-#define WIFI_BT_SDO_CLK_GPIO   22
-#define WIFI_BT_SDO_D3_GPIO   19
-#define WIFI_BT_SDO_D2_GPIO   18
-#define WIFI_BT_SDO_D1_GPIO   17
-#define WIFI_BT_SDO_D0_GPIO   16
-#define WIFI_BT_UART_TX_GPIO   41
-#define WIFI_BT_UART_RX_GPIO   40
+///<用于解决蓝牙wifi 初始化不成功时 复位 
+#define WIFI_BT_SDO_CMD_GPIO   (20)
+#define WIFI_BT_SDO_CLK_GPIO   (22)
+#define WIFI_BT_SDO_D3_GPIO    (19)
+#define WIFI_BT_SDO_D2_GPIO    (18)
+#define WIFI_BT_SDO_D1_GPIO    (17)
+#define WIFI_BT_SDO_D0_GPIO    (16)
+#define WIFI_BT_UART_TX_GPIO   (41)
+#define WIFI_BT_UART_RX_GPIO   (40)
 #else
 #define CARLINK_EY			0
 #define CARLINK_EC			0
