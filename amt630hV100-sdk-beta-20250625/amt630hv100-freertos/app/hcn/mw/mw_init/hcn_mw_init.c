@@ -19,4 +19,10 @@ void hcn_mw_init(void) {
 #ifdef CAN_MODULE_ENABLE
     can_module_init();
 #endif
+
+    dev_state_init();
+    
+#ifdef HCN_ADC_KEY_ENABLE
+    hcn_keypad_msg_init();
+#endif
 }

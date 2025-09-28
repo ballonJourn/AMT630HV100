@@ -24,6 +24,8 @@ extern "C" {
 #include "backlight/hcn_backlight.h"
 #include "key_module/hcn_gpio_key.h"
 #include "can_module/hcn_can_rx.h"
+#include "key_module/hcn_adc_key.h"
+#include "dashboard_state/hcn_dev_state.h"
 
 void hcn_mw_init(void);
 

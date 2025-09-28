@@ -15,8 +15,11 @@
 #include <FreeRTOS.h>
 #include <stdbool.h>
 #include "key_module/hcn_gpio_key.h"
+#include "key_module/hcn_key_common.h"
 #include "log/hcn_log.h"
 #include "task.h"
+
+#ifdef HCN_IO_KEY_ENABLE
 
 #define SCAN_KEY_THREAD_INTERVAL_PERIOD (20)
 
@@ -41,26 +44,8 @@ typedef struct {
 } scan_key_time_t;
 
 static scan_key_time_t scan_key = {0, 0, false, false};
-static key_event_cb_t key_event_cb = NULL;
 static uint8_t key_up_flag = 1;
 static uint8_t key_status = NO_KEY_PRESS;
-
-int set_key_event_cb(key_event_cb_t event_cb) {
-    if (!key_event_cb) {
-        if (event_cb) {
-            key_event_cb = event_cb;
-            return 0;
-        }
-        return -1;
-    } else
-        return 1;
-}
-
-static void send_key_event(uint8_t key_event) {
-    if (key_event_cb) {
-        key_event_cb(key_event);
-    }
-}
 
 static void check_key_status(uint8_t key_status, uint8_t mode) {
     uint8_t key_value = 0;
@@ -177,3 +162,5 @@ int gpio_key_init(void) {
 
     return 0;
 }
+
+#endif //HCN_IO_KEY_ENABLE

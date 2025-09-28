@@ -10,6 +10,8 @@
 #include "keypad.h"
 #endif
 
+#include "config/hcn_config.h"
+
 #define ADC_CTR			0x00
 #define ADC_CFG			0x04
 #define ADC_IMR			0x08
@@ -29,7 +31,12 @@
 #define ADC_DETINTER	0x30
 #define ADC_SCTR		0x34
 
+#ifndef HCN_ADC_KEY_ENABLE
 #define ADC_CLK_FREQ		1000000
+#else
+#define ADC_CLK_FREQ		37000
+#endif
+
 #define ADC_DEBOUNCE_CNT	0x10000
 
 static void adc_set_deinter(uint32_t count)

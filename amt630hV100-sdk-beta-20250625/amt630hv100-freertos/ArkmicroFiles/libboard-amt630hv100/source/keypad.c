@@ -44,17 +44,23 @@ typedef struct {
 } lv_indev_data_t;
 #endif
 
-#define KEYAD_1		10
-#define KEYAD_2		0
-#define KEYAD_3		1440
-#define KEYAD_4		2080
-#define KEYAD_5		2710
-#define KEYAD_6		3170
-#define KEYAD_7		3520
+#define KEY_FILTER_DATA         ///< 定义按键滤值功能
+
+#define KEYAD_1		0  //10
+#define KEYAD_2		1152  //0
+#define KEYAD_3		1658 //1440
+#define KEYAD_4		2268 //2080
+#define KEYAD_5		2833 //2710
+#define KEYAD_6		3367 //3170
+#define KEYAD_7		4000 //3520
 #define KEYAD_NUM	7
 
+#ifndef KEY_FILTER_DATA
 #define KEYAD_RANGE		30
-
+#else
+#define KEYAD_RANGE	  	500
+#define KEY_ERROR_BY_NEIGHBOR_RANGE    (20)      ///< 按键稳定以后，相邻数据误差范围,值不要设的过大
+#endif
 
 static int KeyAdcValue[KEYAD_NUM] =
 {
@@ -113,14 +119,43 @@ static UINT32 GetKeyAVGValue(void)
 	UINT32 ulSum;
 
 	ulSum = 0;
+#ifndef KEY_FILTER_DATA
 	for(i=0;i<lg_ulKeyIndex;i++)
 	{
 		ulSum += lg_arrKeyAvgPool[i];
 	}
 
 	return ulSum/lg_ulKeyIndex;
-}
+#else
 
+    bool is_first = true;
+    UINT32 count = 0;
+
+    for (i = 0; i < lg_ulKeyIndex-1; i++) {
+        if (abs(lg_arrKeyAvgPool[i] - lg_arrKeyAvgPool[i+1]) < KEY_ERROR_BY_NEIGHBOR_RANGE)
+        {
+            if (is_first)
+            {
+                is_first = false;
+                ulSum += lg_arrKeyAvgPool[i];
+                count++;
+                //printf("i = %d value = %d\n", i, lg_arrKeyAvgPool[i]);
+            }
+            ulSum += lg_arrKeyAvgPool[i+1];
+            count++;
+            //printf("i = %d value = %d\n", i+1, lg_arrKeyAvgPool[i+1]);
+        }
+        else
+        {
+            is_first = true;
+        }
+    }
+    if (count == 0)
+        return 0;
+
+   return ulSum/count;
+#endif
+}
 
 static void ResetKeyAVGPool(void)
 {
@@ -130,6 +165,7 @@ static void ResetKeyAVGPool(void)
 
 static UINT32 CheckKey(UINT32 ulSampleValue)
 {
+#ifndef KEY_FILTER_DATA
 	UINT32 i;
 	
 	for(i = 0; i < (sizeof(KeyAdcValue) / sizeof(KeyAdcValue[0])); i++ )
@@ -141,6 +177,29 @@ static UINT32 CheckKey(UINT32 ulSampleValue)
 	}
 
 	return NULL_KEY;
+#else
+	UINT32 i ;
+    UINT32 id = 0;
+    UINT32 range = abs(ulSampleValue - KeyAdcValue[0]);
+	
+	for (i = 1; i < (sizeof(KeyAdcValue) / sizeof(KeyAdcValue[0])); i++)
+	{
+		//if((ulSampleValue >= KeyAdcValue[i] - KEYAD_DOWN_RANGE) && (ulSampleValue <= KeyAdcValue[i] + KEYAD_UPWARD_RANGE))
+		if (abs(ulSampleValue - KeyAdcValue[i]) < range)
+		{
+		    range = abs(ulSampleValue - KeyAdcValue[i]);
+			id = i;
+		}
+	}
+
+    if (range < KEYAD_RANGE)
+    {
+        return id;
+    }
+    
+	return NULL_KEY;
+
+#endif
 }
 
 static void SendKeyPress(UINT32 key)
