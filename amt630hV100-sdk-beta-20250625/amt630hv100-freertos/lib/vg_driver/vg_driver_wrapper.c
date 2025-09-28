@@ -342,7 +342,7 @@ int xm_vg_loop (void *context)
 	tk_snprintf(strName, configMAX_TASK_NAME_LEN-1, "awtk_ui");
 
 	// 修改AWTK线程优先级为16
-	vTaskPrioritySet(NULL, 16);
+	vTaskPrioritySet(NULL, 3);
 
 #ifdef WITH_VGCANVAS
 	gui_app_start (xm_vg_get_width(), xm_vg_get_height());
