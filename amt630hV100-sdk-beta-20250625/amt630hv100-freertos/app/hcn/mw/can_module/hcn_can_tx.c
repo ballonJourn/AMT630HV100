@@ -69,16 +69,17 @@ static void can_tx_cycle_msg_proc(CanPort_t *cap) {
     last_execution_time = current_time;
     for (uint8_t i = 0; i < can_tx_cycle_count; i++) {
         can_tx_cycle_t *p = &can_tx_cycle_msg[i];
-        
-        if (current_time >= p->start) {
-            p->start = current_time + p->cycle; 
-            p->fun(cap, p->param);
+        if (p) {
+            if (current_time >= p->start) {
+                p->start = current_time + p->cycle; 
+                p->fun(cap, p->param);
+            }
         }
     }
 }
 
 static void can_txdemo_thread(void *param) {
-    CanPort_t *cap = param;
+    CanPort_t *cap = (CanPort_t *)param;
 
     for (;;) {
         can_tx_cycle_msg_proc(cap);
@@ -87,6 +88,10 @@ static void can_txdemo_thread(void *param) {
 }
 
 int can_msg_tx_msg_init(CanPort_t *cap) {
+    if (!cap) {
+        hcn_log_error("can port is null!\n");
+        return -1;
+    }
 
 #ifdef HCN_CAN_TX_ENABLE
     int ret = -1;

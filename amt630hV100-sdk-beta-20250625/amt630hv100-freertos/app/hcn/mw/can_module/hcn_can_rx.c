@@ -206,6 +206,7 @@ int can_module_init(void) {
     }
 
     can_msg_tx_msg_init(cap);
+    printf("can moudle init ok!\r\n");
 
     return 0;
 }
