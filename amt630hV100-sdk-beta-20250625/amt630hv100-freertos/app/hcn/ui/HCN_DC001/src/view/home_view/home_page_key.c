@@ -43,7 +43,7 @@ void home_page_deal_key_set()
             /* code */
             break;
         case ICON_NAVI:
-            //navigator_switch_to("link_page",false);
+            navigator_switch_to(LINK_PAGE , false);
             break;
         case ICON_MUSIC:
             set_current_level(MENU_LEVEL_1);
@@ -55,7 +55,6 @@ void home_page_deal_key_set()
             // }
             break;
         case ICON_SETTING:
-            // slider_view();
             set_current_level(MENU_LEVEL_1);
             // set_focused_item();
             break;

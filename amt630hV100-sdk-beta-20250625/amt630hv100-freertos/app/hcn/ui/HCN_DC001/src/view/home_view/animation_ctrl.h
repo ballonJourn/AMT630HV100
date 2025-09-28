@@ -1,6 +1,7 @@
 #ifndef ANIMATION_CTRL_H
 #define ANIMATION_CTRL_H
 #include "common.h"
+#include <stdbool.h>
 
 enum animation_move_com{
     PEED_VIEW        , 
@@ -25,8 +26,12 @@ ret_t animation_play_out();
 
 ret_t animation_play_in();
 
+
+//演示模式API
 ret_t demonstration_start() ;
 
 ret_t demonstration_stop();
+
+bool get_demonstration_state() ; 
 
 #endif

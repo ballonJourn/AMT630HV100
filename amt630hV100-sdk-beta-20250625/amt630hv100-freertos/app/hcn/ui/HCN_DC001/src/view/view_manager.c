@@ -1,10 +1,12 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "home_view/music_page_key.h"
 #include "home_view/home_page_key.h"
 #include "set_view/set_page_key.h"
 #include "view_manager.h"
 #include "home_view/dock_view.h"
-#include <stdio.h>
-#include <stdlib.h>
+
+#include "key_module/hcn_key_common.h"
 
 static dock_view_e current_dock = ICON_INFO ;     //
 
@@ -30,12 +32,65 @@ static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
 } while (0);;                                                                        
 
 
+
+static ret_t on_key_event(void* ctx, event_t* e) {
+
+    if (e->type == EVT_KEY_DOWN) {
+    key_event_t* evt = (key_event_t*)e;
+    uint32_t key     = evt->key;
+    
+    printf("on_key_event key event: %d\n", key);
+    switch (key) {
+        case TK_KEY_w:
+            deal_key_up_short_press() ;
+            break;
+        case TK_KEY_s:
+            deal_key_down_short_press();
+            break;
+        case TK_KEY_a:
+            deal_key_back_short_press();
+            break;
+        case TK_KEY_d:
+            deal_key_set_short_press() ;
+            break;
+        default:
+            printf("Unhandled key event: %u", key);
+            break;
+        }
+    }   
+    return RET_OK;
+}
+
+static void set_key_cb(uint8_t id) 
+{
+    printf( "set_key_cb key = %d \n", id) ;
+    switch (id)
+    {
+    case  SET_KEY_LONG_PR :
+        navigator_switch_to(LINK_PAGE , false)   ;
+        break;
+    case  BACK_KEY_SHORT_PR :
+        navigator_switch_to(HOME_PAGE , false)   ;
+        break;
+    default:
+        break;
+    }
+
+}
+
 ret_t view_manager_init(widget_t* parent)
 {
     if(parent == NULL) return RET_FAIL;
     for (size_t i = 0; i < WINDOWS_NUM_MAX; i++){
         window_page[i] = widget_lookup(parent, window_name_str[i], TRUE);
     }
+    
+
+    widget_t* wm = window_manager();
+    widget_on( window_manager(), EVT_KEY_DOWN, on_key_event, NULL);
+
+
+    set_key_event_cb(set_key_cb);
     return RET_OK ;
 }
 
@@ -111,6 +166,8 @@ void deal_key_down_short_press()
 
    return ;
 }
+
+
 
 
 

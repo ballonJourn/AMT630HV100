@@ -15,6 +15,12 @@
 
 #define STATE_NORMAL  "normal"
 #define STATE_SELECTE "selected"
+
+#define HOME_PAGE    "home_page"
+#define LINK_PAGE    "link_page"
+#define SETTING_PAGE "setting_page"
+#define DEVICE_PAGE  "device_page"
+
 typedef enum {
     KM_H,
     MPH ,

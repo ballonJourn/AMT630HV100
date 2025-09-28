@@ -12,6 +12,7 @@ static char* animation_name[MVOE_NUM_MAX][ANIMATION_TYPE_MAX] = {
     {"move_dock_out"  , "move_dock_in" } ,
 };
 
+static bool is_demo_state = false ;
 
 ret_t home_animation_init(widget_t* parent)
 {
@@ -119,10 +120,13 @@ ret_t animation_play_in()
 }
 
 
+
+
 ret_t demonstration_start()
 {
     //todo
     widget_start_animator(NULL , "animation_demo");
+    is_demo_state = true ;
 
     return RET_OK ;
 }
@@ -130,5 +134,11 @@ ret_t demonstration_start()
 ret_t demonstration_stop()
 {
     widget_stop_animator(NULL , "animation_demo");
+    is_demo_state = false ;
     return RET_OK ;
+}
+
+bool get_demonstration_state() 
+{
+    return is_demo_state ;
 }

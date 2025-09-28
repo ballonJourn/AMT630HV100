@@ -2,7 +2,7 @@
 <window name="home_page" style:normal:bg_image="wallpaper" move_focus_up_key="UP" move_focus_down_key="DOWN">
   <view name="time_view" x="1" y="5" w="77" h="40">
     <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="19"/>
-    <label name="colon" x="26" y="-6" w="32" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="40" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)" style:normal:text_align_v="top" text=":"/>
+    <label name="colon" x="25" y="-6" w="32" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="40" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,auto_start=false,auto_destroy=false,from=0,to=1)" style:normal:text_align_v="top" text=":"/>
     <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="15"/>
   </view>
   <view name="dock_view" x="10" y="123" w="38" h="235" children_layout="default(r=0,c=1,ym=10,s=3)">
@@ -18,7 +18,7 @@
     <image name="icon_bt" x="77" y="0" w="40" h="40" draw_type="default" image="top_bluetooth_n"/>
     <image name="icon_high_beam" x="127" y="0" w="40" h="40" draw_type="default" image="top_high_beam_n"/>
     <image name="icon_left_bg" x="222" y="0" w="40" h="40" draw_type="default" image="top_left"/>
-    <image name="icon_left" x="222" y="0" w="40" h="40" draw_type="default" image="top_left_n" animation="visible(duration=4000,yoyo_times=0,easing=elastic_out,from=0,to=1)"/>
+    <image name="icon_left" x="222" y="0" w="40" h="40" draw_type="default" image="top_left_n" animation="visible(name=animation_demo,duration=4000,yoyo_times=0,easing=elastic_out,auto_start=false,auto_destroy=false,from=0,to=1)"/>
     <image name="icon_ready_bg" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready"/>
     <image name="icon_ready" x="272" y="0" w="100" h="40" draw_type="default" image="top_ready_n" visible="true"/>
     <image name="icon_right_bg" x="382" y="0" w="40" h="40" draw_type="default" image="top_right"/>

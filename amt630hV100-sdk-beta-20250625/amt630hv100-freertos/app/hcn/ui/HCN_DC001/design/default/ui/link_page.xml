@@ -1,6 +1,6 @@
-<window name="link_page" style:normal:bg_color="#00000000">
+<window name="link_page" style:normal:bg_color="#00000000" style:normal:border_color="#00000000">
   <view name="view" x="590" y="10" w="200" h="200" style:normal:bg_image="interconnection_bg">
-    <label name="speed_lab" x="0" y="-16" w="118" h="99" style:normal:text_color="#FFFFFF" style:normal:font_size="98" text="109"/>
+    <label name="speed_lab" x="0" y="-16" w="118" h="99" style:normal:text_color="#FFFFFF" style:normal:font_size="98" text="0"/>
     <label name="unit_lab" x="143" y="36" w="49" h="28" style:normal:text_color="#606060" style:normal:font_size="28" text="km/h"/>
   </view>
   <image name="image" x="612" y="94" w="21" h="17" draw_type="default" image="drv_mode_0"/>
@@ -11,4 +11,5 @@
   </slide_menu>
   <slider name="slider" x="599" y="177" w="84" h="23" style:normal:icon="box_power_pointer" style:normal:bg_color="#555555" style:normal:fg_color="#FFFFFF" dragger_adapt_to_icon="true" slide_with_bar="false" bar_size="4" dragger_size="0" sensitive="false" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" value="50"/>
   <label name="label" x="599" y="139" w="58" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="100"/>
+  <qr name="link_qr" x="22" y="22" w="240" h="240" value="https://github.com/zlgopen/awtk"/>
 </window>
