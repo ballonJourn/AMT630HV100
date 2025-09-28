@@ -2,6 +2,12 @@
 #include "os_adapt.h"
 #include <FreeRTOS_POSIX.h>
 #include <task.h>
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
+#include "FreeRTOS_Sockets.h"
+#include "FreeRTOS_DHCP.h"
+#include "FreeRTOS_DHCP_Server.h"
+#include <FreeRTOS_IP.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -16,6 +22,7 @@
 #if CARLINK_EC
 #include "ECTiny.h"
 #include "ECTypes.h"
+#include "config/hcn_carlink_def.h"
 
 #define ENABLE_EC_DASHCAM  0
 
@@ -35,7 +42,14 @@ extern int wps_connect_done;
 static bool  g_ec_disable = false;
 
 struct ICalinkEventCallbacks gCarlinkECEventCB;
+//static IECAccessDevice bleDev;
 
+static const uint8_t        ap_ucip_address[4] = {192, 168, 13, 1};
+static const uint8_t        ucNetMask[4] = {255, 255, 255, 0};
+//static const uint8_t        ucGatewayAddress[4] = {0, 0, 0, 0};
+static uint8_t                gphone_type = 0;
+static uint8_t   android_ap_connect_flag = 0;
+static uint8_t   apple_connect_flag = 0;
 
 #if ENABLE_EC_DASHCAM
 int start_http_camera();
@@ -192,10 +206,15 @@ void onRequestBuildNetCancel()
 {
 }
 
-
 void onPhoneBuildNetFinish(const char* ip)
 {
+    printf("\r\n[ouchunhua]onPhoneBuildNetFinish ip=%s\r\n", ip);
 
+    struct carlink_event ev = {0};
+    ev.type = CARLINK_EVENT_BUILD_NET_OK;
+    ev.link_type = CARLINK_ECLINK;
+
+	carlink_notify_event(&ev);
 }
 
 void  onPhoneAPInfo(const ECBTNetInfo* netDeviceInfo)
@@ -412,6 +431,28 @@ static void ec_access_clear(const char* name)
                 __func__ ,__LINE__,name);
 }
 
+static void setNetInterfaceInfo()
+{
+	struct ECNetInterfaceInfo info;
+	uint32_t ulIPAddress = 0, netMask = 0;
+
+	memset(&info, 0, sizeof(info));
+	strcpy(info.name, "wlan0");
+	if (gphone_type == 1)
+		ulIPAddress = (ap_ucip_address[0]) | (ap_ucip_address[1] << 8) | (ap_ucip_address[2] << 16) | (ap_ucip_address[3] << 24);
+	else
+		ulIPAddress = FreeRTOS_GetIPAddress();
+	sprintf(info.ip, "%d.%d.%d.%d", (ulIPAddress >> 0) & 0xFF,
+				(ulIPAddress >> 8) & 0xFF, (ulIPAddress >> 16) & 0xFF, (ulIPAddress >> 24) & 0xFF);
+	if (gphone_type == 1)
+		netMask = (ucNetMask[0]) | (ucNetMask[1] << 8) | (ucNetMask[2] << 16) | (ucNetMask[3] << 24);
+	else
+		netMask = FreeRTOS_GetNetmask();
+	sprintf(info.mask, "%d.%d.%d.%d", (netMask >> 0) & 0xFF,
+				(netMask >> 8) & 0xFF, (netMask >> 16) & 0xFF, (netMask >> 24) & 0xFF);
+	EC_setNetInterfaceInfo(&info, 1);
+}
+
 static void onEventEC(void* ctx, const struct carlink_event *ev)
 {
 	enum CARLINK_EVENT_TYPE type;
@@ -424,32 +465,97 @@ static void onEventEC(void* ctx, const struct carlink_event *ev)
 	type = ev->type;
 
 	switch (type) {
-	case -1: {
+        case -1: {
+            break;
+        }
+
+        case CARLINK_EVENT_INIT_DONE:
+            break;
+
+        case CARLINK_EVENT_BT_CONNECT: {
+            printf("TRACE[%s][%d]:EC_BT_CONNECT_1\r\n",__func__ ,__LINE__);
+            printf("TRACE[%s][%d]:EC_BT_CONNECT_2\r\n",__func__ ,__LINE__);
+            break;
+        }
+
+        case CARLINK_EVENT_BT_AA_RFCOMM_READY: {
+            break;
+        }
+
+        case CARLINK_EVENT_BT_DISCONNECT: {
+            printf("TRACE[%s][%d]:EC_BT_DISCONNECT\r\n",__func__ ,__LINE__);
+            break;
+        }
+
+        case CARLINK_EVENT_CLIENT_DHCP_READY: {
+            if (gphone_type == 1) {
+                if(apple_connect_flag == 1) {
+                    printf("TRACE[%s][%d]:dhpc has been ready\r\n",__func__ ,__LINE__);
+                    break;
+                }
+                apple_connect_flag = 1;
+			}
+
+            ECNetWorkInfo netInfo = {0};
+            netInfo.state = EC_WIFI_STATE_CONNECTED;
+            EC_notifyWifiStateChanged(EC_WIFI_STATE_CHANGED_ACTION, &netInfo);
+            setNetInterfaceInfo();
+            printf("TRACE[%s][%d]:EC_EVENT_CLIENT_DHCP_READY\r\n",__func__ ,__LINE__);
+
+            break;
+        }
+
+        case CARLINK_EVENT_BUILD_NET_OK: {
+            if (gphone_type == 1)
+            {
+                ECNetWorkInfo netInfo = {0};
+                netInfo.state = EC_WIFI_STATE_CONNECTED;
+                EC_notifyWifiStateChanged(EC_WIFI_STATE_CHANGED_ACTION, &netInfo);
+                apple_connect_flag = 0;
+            }
+
+            setNetInterfaceInfo();
+            printf("TRACE[%s][%d]:EC_EVENT_BUILD_NET_OK--------------\r\n", __func__, __LINE__);
+            break;
+        }
+
+        case CARLINK_EVENT_WIFI_DISCONNECT: {
+            if (android_ap_connect_flag == 1) {
+                ECNetWorkInfo netInfo = {0};
+                netInfo.state = EC_WIFI_STATE_DISCONNECTED;
+                EC_notifyWifiStateChanged(EC_WIFI_STATE_CHANGED_ACTION, &netInfo);
+                printf("TRACE[%s][%d]:EC_EVENT_WIFI_DISCONNECT--------------\r\n", __func__, __LINE__);
+            }
+			android_ap_connect_flag = 0;
+            break;
+        }
+
+        case CARLINK_EVENT_WIFI_CONNECT: {
+            android_ap_connect_flag = 1;
+            printf("TRACE[%s][%d]:EC_EVENT_WIFI_CONNECT--------------\r\n", __func__, __LINE__);
+            break;
+        }
+
+        case CARLINK_EVENT_AP_DISCONNECT: {
+            printf("TRACE[%s][%d]:EC_EVENT_AP_DISCONNECT--------------\r\n", __func__, __LINE__);
+            break;
+        } 
+
+        case CARLINK_EVENT_AP_CONNECT: {
+            printf("TRACE[%s][%d]:EC_EVENT_AP_CONNECT--------------\r\n", __func__, __LINE__);
+            break;
+        }
+
+        case CARLINK_EVENT_MSG_SESSION_CONNECT: {
+            break;
+        }
+
+        case CARLINK_EVENT_MSG_SESSION_STOP: {
+            break;
+        }
+        
+        default:
         break;
-    }
-	case CARLINK_EVENT_INIT_DONE:
-		break;
-    case CARLINK_EVENT_BT_CONNECT: {
-        break;
-    }
-	case CARLINK_EVENT_BT_AA_RFCOMM_READY: {
-        break;
-    }
-    case CARLINK_EVENT_BT_DISCONNECT: {
-        break;
-    }
-    case CARLINK_EVENT_WIFI_CONNECT: {
-        break;
-    }
-	case CARLINK_EVENT_MSG_SESSION_CONNECT: {
-        break;
-    }
-	case CARLINK_EVENT_MSG_SESSION_STOP: {
-        break;
-    }
-	
-	default:
-	break;
 	}
 }
 
@@ -490,7 +596,12 @@ void* initECTiny(void* param)
 
 	sprintf(uuid, "CARBIT%s", bt_mac);
 	printf("carbit  uuid :%s\r\n", uuid);
-	EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
+	//EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
+    EC_setBaseConfig(mECTinyCfg, uuid, ECSDK_VERSION, "B:/");
+
+    int32_t value = EC_SUPPORT_CONNECT_WIFIDIRECT;
+    EC_setCommonConfig1(mECTinyCfg, "car_supportConnect", value);
+
     printf("\r\n2.register ECTiny callback functions\r\n");
     mECTinyCallback = registerECCallback();
 
@@ -501,8 +612,6 @@ void* initECTiny(void* param)
     ECMirrorConfig mirrorCfg;
     memset(&mirrorCfg, 0, sizeof(ECMirrorConfig));
 
-    //mirrorCfg.width = 1280;
-    //mirrorCfg.height = 480;
     mirrorCfg.width = get_carlink_video_width();
     mirrorCfg.height = get_carlink_video_height();
     mirrorCfg.height = ((mirrorCfg.height + 0xf) & (~0xf));
@@ -511,6 +620,35 @@ void* initECTiny(void* param)
     mirrorCfg.type = EC_VIDEO_TYPE_H264;
     mirrorCfg.quality = 4 * 1024 * 1024;
     mirrorCfg.capScreenMode = 0x08;
+
+#ifdef HCN_CARLINK_SAFEAREA_ENABLE
+    mirrorCfg.screenPhysicsWidth = HCN_EC_screenPhysicsWidth;
+    mirrorCfg.screenPhysicsHeight = HCN_EC_screenPhysicsHeight;
+
+     /**
+        ECVideoView ec_v_view = {
+        0,
+        {1, 0, 0, HCN_LCD_EC_WIDTH, HCN_LCD_EC_HEIGHT}, // viewArea
+        {1, 98, 147, 348, 270}  // safeArea
+        mirrorCfg.viewConfig.viewGroup = &ec_v_view;    
+        }; 
+        **/
+    
+    ECVideoView ec_v_view = {
+        0,
+        {HCN_EC_VIDEO_viewArea_present, HCN_EC_VIDEO_viewArea_originXPixels, 
+            HCN_EC_VIDEO_viewArea_originYPixels, HCN_EC_VIDEO_viewArea_widthPixels, 
+            HCN_EC_VIDEO_viewArea_heightPixels}, // viewArea
+
+        {HCN_EC_VIDEO_safeArea_present, HCN_EC_VIDEO_safeArea_originXPixels, 
+        HCN_EC_VIDEO_safeArea_originYPixels, HCN_EC_VIDEO_safeArea_widthPixels, 
+        HCN_EC_VIDEO_safeArea_heightPixels}  // safeArea
+    };
+
+    mirrorCfg.viewConfig.viewGroup = &ec_v_view;
+    mirrorCfg.viewConfig.initArea = HCN_EC_VIEW_CONFIG_initArea;
+    mirrorCfg.viewConfig.viewCount = HCN_EC_VIEW_CONFIG_viewCount;
+#endif
 
     printf("\r\n5.init ECTiny\r\n");
 

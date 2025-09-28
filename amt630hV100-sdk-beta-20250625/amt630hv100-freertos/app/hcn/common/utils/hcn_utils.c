@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "utils/hcn_utils.h"
 
 void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data,
@@ -41,3 +42,28 @@ void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data
     sprintf(buffer + strlen(buffer), "\n");
     printf("%s", buffer);
 }
+
+void sting_2_lower(char *str)
+{
+    if (str == NULL) {
+        return;   
+    }
+
+    while (*str) {  
+        *str = tolower((unsigned char)*str);  
+        str++;  
+    }  
+}
+
+void sting_2_upper(char *str)
+{
+    if (str == NULL) {
+        return;   
+    }
+
+    while (*str) {  
+        *str = toupper((unsigned char)*str);  
+        str++;  
+    }  
+}
+

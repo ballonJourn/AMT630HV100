@@ -116,6 +116,33 @@ static void wifi_reset(void)
 	gpio_direction_output(WIFI_RESET_IO, 1);
 	mdelay(10);
 }
+
+#if 0
+static void wifi_config(void)
+{
+	// wifi power off	
+	gpio_direction_output(WIFI_BT_PWR_GPIO, 0);
+	// set the wifi IOs to input mode 	
+	gpio_direction_input(WIFI_BT_SDO_CMD_GPIO);
+	gpio_direction_input(WIFI_BT_SDO_CLK_GPIO);
+	gpio_direction_input(WIFI_BT_SDO_D3_GPIO);
+	gpio_direction_input(WIFI_BT_SDO_D2_GPIO);
+	gpio_direction_input(WIFI_BT_SDO_D1_GPIO);
+	gpio_direction_input(WIFI_BT_SDO_D0_GPIO);
+	gpio_direction_input(WIFI_BT_UART_TX_GPIO);
+	gpio_direction_input(WIFI_BT_UART_RX_GPIO);
+	mdelay(100);
+	// wifi module power on
+	gpio_direction_output(WIFI_BT_PWR_GPIO, 1);
+	mdelay(200);
+
+    // resume the wifi module config
+	vPinctrlSetup();
+	mdelay(250);
+	wifi_reset();
+}
+#endif
+
 #endif
 
 static void prvBoardLateInitTask( void *pvParameters )

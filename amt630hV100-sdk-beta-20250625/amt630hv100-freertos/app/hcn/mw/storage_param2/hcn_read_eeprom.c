@@ -146,9 +146,7 @@ int e2prom_read_data(uint16_t addr, uint8_t *buf, int size) {
     if(page_off) {
         hcn_log_error("e2prom read data add error!\n");    
         return -2;
-    }
-    else
-    {
+    } else {
         msg_cnt = (size - 1) / 16 + 1;
         if (size < 16) {
             page_first_size = size;
@@ -193,8 +191,7 @@ int e2prom_read_data(uint16_t addr, uint8_t *buf, int size) {
         msg[1].buf = dst;
 
         retries = 0;
-        while (retries < 3) 
-        {
+        while (retries < 3) {
             ret = i2c_transfer(adap, msg, 2);
             if (ret == 2) {
                 break;
@@ -251,8 +248,7 @@ int e2prom_byte_write (uint16_t addr,uint8_t *buf, uint8_t length) {
         msg[1].addr = addr_high;
 
         retires = 0;
-        while (retires < 3)
-        {
+        while (retires < 3) {
             ret = i2c_transfer(adap, msg, 2);
             if (ret == 2) {
                ret = 0;
@@ -312,7 +308,7 @@ int e2prom_byte_read (uint16_t addr, uint8_t *buf, uint8_t length) {
             if (ret == 2) {
                 ret = 0;
                 break;
-            } else{
+            } else {
                 hcn_log_error("i2c_transfer error %d at address 0x%04X.\n", ret, addr + i);
                 retires++;
                 ret = -1;
@@ -333,8 +329,7 @@ int e2prom_test(uint16_t addr,int size,uint16_t start_data) {
     uint16_t *p = (uint16_t *)w_buf;
 
     hcn_log_info("%s(0x%08X, %d)\r\n",__FUNCTION__,addr, size);
-    if(w_buf == NULL || r_buf==NULL)
-    {
+    if (w_buf == NULL || r_buf==NULL) {
         hcn_log_error("%s pvPortMalloc fail!\r\n",__FUNCTION__);
         rtn = -1;
         goto _error1;
@@ -394,10 +389,10 @@ int e2prom_test(uint16_t addr,int size,uint16_t start_data) {
 
     return 0;
 _error1:
-    if(w_buf)
+    if (w_buf)
         vPortFree(w_buf);
 
-    if(r_buf)
+    if (r_buf)
         vPortFree(r_buf);
     
     return rtn;

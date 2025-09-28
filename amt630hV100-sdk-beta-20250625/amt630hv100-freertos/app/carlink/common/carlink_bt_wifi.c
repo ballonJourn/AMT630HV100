@@ -1,6 +1,12 @@
 //#include "os_adapt.h"
 #include <FreeRTOS_POSIX.h>
 #include <task.h>
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_IP_Private.h"
+#include "FreeRTOS_Sockets.h"
+#include "FreeRTOS_DHCP.h"
+#include "FreeRTOS_DHCP_Server.h"
+#include <FreeRTOS_IP.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -30,11 +36,16 @@
 #include "mycommon.h"
 #include "wifi_conf.h"
 #include "carlink_common.h"
+#include "utils/hcn_utils.h"
+#include "config/hcn_config.h"
+#include "bt_module/hcn_bt_parse.h"
 
 #define DEV_NAME_PREFIX   "AP630_CARLINK"
 
 static char g_cp_bt_mac[13] = {0};
+static char g_cp_ble_mac[13] = {0};
 static bool g_cp_bt_mac_ready = false;
+static bool g_cp_ble_mac_ready = false;
 
 static uint8_t                carlink_p2p_name[64]     = {0};
 static uint8_t                carlink_ap_ssid[64]     = {"ap63011"};
@@ -77,6 +88,13 @@ const char *carlink_get_bt_mac()
 	return (const char *)g_cp_bt_mac;
 }
 
+const char *carlink_get_ble_mac()
+{
+	if (!g_cp_ble_mac_ready)
+		return NULL;
+	return (const char *)g_cp_ble_mac;
+}
+
 const char *carlink_get_wifi_p2p_name()
 {
 	return (const char *)carlink_p2p_name;
@@ -102,6 +120,18 @@ const char *carlink_get_wifi_passwd()
 void carlink_get_ap_ip_addr(char ip[4])
 {
 	memcpy((void*)ip, (void*)ucIPAddress, 4);
+}
+
+///< 取蓝牙地址mac后4位作为wifi的ssid后缀
+static void format_ssid_name(char *ssid_name, char *bt_addr_suffix) {
+	if (ssid_name == NULL || bt_addr_suffix == NULL)
+		return;
+
+	sprintf(ssid_name, "%s-%s", HCN_CUSTOMER_NAME, bt_addr_suffix);
+
+#ifdef HCN_STRING_LOWER_ENABLE
+	sting_2_lower(ssid_name);
+#endif
 }
 
 
@@ -200,8 +230,20 @@ static void carlink_start_wlan()
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 	memcpy(ap_prefix, g_cp_bt_mac + 8, 4);
+
+#ifdef HCN_WIFI_NAME_FORMAT_ENABLE
+	char ssid_name[20] = {0};
+	format_ssid_name(ssid_name, ap_prefix);
+	carlink_reset_wifi_ap_info(ssid_name);
+#else
 	carlink_reset_wifi_ap_info(ap_prefix);
+#endif
+
 #if (CARLINK_EC)
+
+	printf("start p2p\r\n");
+	printf("p2p name:%s, ssid:%s, passwd:%s\r\n", carlink_p2p_name, carlink_ap_ssid, carlink_ap_passwd);
+
 	start_p2p((const char *)carlink_p2p_name, (const char *)carlink_ap_ssid, (const char *)carlink_ap_passwd);
 #else
 	start_ap(36, (const char *)carlink_ap_ssid, (const char *)carlink_ap_passwd, 1);
@@ -325,12 +367,31 @@ int restart_p2p()
 static void carlink_reset_wifi_ap_info(const char *prefex)
 {
 	if (prefex) {
+#ifndef HCN_WIFI_NAME_FORMAT_ENABLE
 		memset(carlink_ap_ssid, 0, sizeof(carlink_ap_ssid));
     	sprintf((char *)carlink_ap_ssid,   "%s_%s", DEV_NAME_PREFIX, prefex);
 		memset(carlink_p2p_name, 0, sizeof(carlink_p2p_name));
 		sprintf((char *)carlink_p2p_name, "DIRECT-%s_p2p_%s", DEV_NAME_PREFIX, prefex);//do not delete "DIRECT-" !!!
+#else
+		memset(carlink_ap_ssid, 0, sizeof(carlink_ap_ssid));
+		memset(carlink_p2p_name, 0, sizeof(carlink_p2p_name));
+
+	 	snprintf((char *)carlink_ap_ssid, sizeof(carlink_ap_ssid), "%s", prefex);
+		snprintf((char *)carlink_p2p_name, sizeof(carlink_p2p_name), "%s-p2p", prefex);
+#endif
 	}
 }
+
+#ifdef HCN_WIFI_NAME_FORMAT_ENABLE
+static void hcn_wifi_info_init(void)
+{
+	memset(carlink_p2p_name, 0, sizeof(carlink_p2p_name));
+	memset(carlink_ap_ssid, 0, sizeof(carlink_ap_ssid));
+	memset(carlink_ap_passwd, 0, sizeof(carlink_ap_passwd));
+	snprintf((char *)carlink_ap_passwd, sizeof(carlink_ap_passwd), "%s", HCN_CUSTOMER_AP_PASSWD);	
+	snprintf((char *)carlink_ap_ssid, sizeof(carlink_ap_ssid), "%s", HCN_DEFAULT_AP_NAME);
+}
+#endif
 
 static void carlink_bt_callback(char * cAtStr)
 {
@@ -379,12 +440,26 @@ static void carlink_bt_callback(char * cAtStr)
 		carlink_notify_event(&ev);
 	} else if (0 == strncmp(cAtStr, "+ADDR=",       6)) {
 		char cmd_str[64] = {0};
+
+#ifdef HCN_WIFI_NAME_FORMAT_ENABLE
+		char bt_name[20] = {0};
+		format_ssid_name(bt_name, (cAtStr + 6 + 8));
+        sprintf(cmd_str, "AT+NAME=%s\r\n", bt_name);
+#else
 		sprintf(cmd_str, "AT+NAME=%s_%s\r\n", DEV_NAME_PREFIX, (cAtStr + 6 + 8));
+#endif
+
 		printf("ADDR:%s\r\n", cAtStr + 6);
+		printf("set bt name:%s\r\n", cmd_str);
+
 		console_send_atcmd(cmd_str, strlen(cmd_str));//get mac addr
+#if 0	
+		///< leddr处设置ble name
 		memset(cmd_str, 0, sizeof(cmd_str));
 		sprintf(cmd_str, "AT+LENAME=%s_%s\r\n", DEV_NAME_PREFIX, (cAtStr + 6 + 8));
 		console_send_atcmd(cmd_str, strlen(cmd_str));//get mac addr
+#endif
+
 		memcpy(g_cp_bt_mac, (cAtStr + 6), 12);
 		carlink_carplay_ie_replace_bt_mac(cAtStr + 6, 12);
 		g_cp_bt_mac_ready = true;
@@ -401,6 +476,27 @@ static void carlink_bt_callback(char * cAtStr)
       string2hex(&cAtStr[8], 12, hexMacAddr, sizeof(hexMacAddr));
       sprintf(m_tmp_buf, "AT+ADVDATA=%s\r\n", hexMacAddr);
       console_send_atcmd(m_tmp_buf, 19);
+
+	  ///< 设置ble name
+	  g_cp_ble_mac_ready = true;
+	  memcpy(g_cp_ble_mac, cAtStr + 8, 12);
+	  char cmd_str[64] = {0};
+	
+#ifdef HCN_WIFI_NAME_FORMAT_ENABLE
+	  memset(cmd_str, 0, sizeof(cmd_str));
+
+	  char bt_ssid_name_ble[20] = {0};
+      format_ssid_name(bt_ssid_name_ble,  (cAtStr + 8));
+      sprintf(cmd_str, "AT+LENAME=%s\r\n", bt_ssid_name_ble);
+#else
+	   memset(cmd_str, 0, sizeof(cmd_str));
+	   sprintf(cmd_str, "AT+LENAME=%s_%s\r\n", DEV_NAME_PREFIX, (cAtStr + 6 + 8));
+#endif
+	   	
+	   printf("BLE_ADDR:%s\r\n", cAtStr + 8);
+	   printf("set ble name:%s\r\n", cmd_str);
+
+	   console_send_atcmd(cmd_str, strlen(cmd_str)); ///<set ble name
     } else if (0 == strncmp(cAtStr, "+GATTSENT=", 10)) {
         return;
     } else if (0 == strncmp(cAtStr, "+IAPSTAT=3", 10)) {
@@ -423,6 +519,8 @@ static void carlink_bt_callback(char * cAtStr)
 		ev.link_type = AUTO_WIRELESS;
 		carlink_notify_event(&ev);
     }
+
+	on_bt_str_parse(cAtStr);
 }
 
 int carlink_iap_data_write(unsigned char *data, int len)
@@ -517,8 +615,6 @@ static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
     WIFIEventType_t xEventType = xEvent->xEventType;
 	char mac_str[32] = {0};
 	char *mac = NULL;
-	struct carlink_event ev;
-	memset((void*)&ev, 0, sizeof(ev));
 
 	if (xEvent) {
 		mac = (char *)xEvent->xInfo.xAPStationConnected.ucMac;
@@ -529,19 +625,45 @@ static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
 
     if (0) {
     } else if (eWiFiEventConnected                    == xEventType) {// meter is sta
+		struct carlink_event ev = {0};
+		ev.type = CARLINK_EVENT_WIFI_CONNECT;
+		ev.link_type = CARLINK_ECLINK;
+
+		carlink_notify_event(&ev);
+
         printf("\r\n The meter is connected to ap \r\n");
     } else if (eWiFiEventDisconnected                == xEventType) {// meter is sta
+		struct carlink_event ev = {0};
+		ev.type = CARLINK_EVENT_WIFI_DISCONNECT;
+		ev.link_type = CARLINK_ECLINK;
+
+		carlink_notify_event(&ev);
+
         printf("\r\n The meter is disconnected from ap \r\n");
     } else if (eWiFiEventAPStationConnected       == xEventType) {// meter is ap
+		struct carlink_event ev = {0};
+		ev.type = CARLINK_EVENT_AP_CONNECT;
+		ev.link_type = CARLINK_ECLINK;
+
+		carlink_notify_event(&ev);
+
         printf("\r\n The meter in AP is connected by sta %s \r\n", mac_str);
     } else if (eWiFiEventAPStationDisconnected   == xEventType) {// meter is ap
-        printf("\r\n The sta %s is disconnected from the meter \r\n", mac_str);
+		struct carlink_event ev = {0};
+		ev.type = CARLINK_EVENT_AP_DISCONNECT;
+		ev.link_type = CARLINK_ECLINK;
 
+		carlink_notify_event(&ev);
+
+        printf("\r\n The sta %s is disconnected from the meter \r\n", mac_str);
+#if 0
 		ev.type = CARLINK_EVENT_WIFI_DISCONNECT;
 		ev.disable_filter = true;
 		memcpy((void*)ev.u.para, (void*)mac_str, strlen(mac_str));
 		carlink_notify_event(&ev);
-    }
+#endif
+	
+	}
 }
 
 #if ( ipconfigUSE_DHCP_HOOK != 0 )
@@ -550,6 +672,7 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 {
 	eDHCPCallbackAnswer_t eReturn;
 	char g_ip_str[32] = {0};
+	struct carlink_event ev;
 
 	sprintf(g_ip_str, "%d.%d.%d.%d\r\n", (ulIPAddress >> 0) & 0xFF, 
 	(ulIPAddress >> 8) & 0xFF, (ulIPAddress >> 16) & 0xFF, (ulIPAddress >> 24) & 0xFF);
@@ -559,7 +682,13 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 
 	switch( eDHCPPhase )
 	{
-	case eDHCPPhaseFinished:
+	case eDHCPPhaseFinished: {
+			printf("[ouchunhua]dhcp client get ip:%s\r\n", g_ip_str);
+			ev.type = CARLINK_EVENT_CLIENT_DHCP_READY;
+			ev.link_type = CARLINK_ECLINK;
+			carlink_notify_event(&ev);
+		}
+
 		eReturn = eDHCPContinue;
 	break;
 	case eDHCPPhasePreDiscover  :
@@ -569,6 +698,14 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 	case eDHCPPhasePreRequest  :
 		eReturn = eDHCPContinue;
 	break;
+
+	case 0xFF:
+		{
+			printf("[ouchunhua]dhcp test 0xFF\r\n");
+		}
+		eReturn = eDHCPContinue;
+	break;
+	
 	default :
 		eReturn = eDHCPContinue;
 	break;
@@ -619,6 +756,7 @@ static void  taskInitCarlinkWlanThread(void* param)
 	carlink_start_wlan();
 	vTaskDelete(NULL);
 }
+
 int carlink_bt_wifi_init()
 {
 	int retry_count = 0;
@@ -627,8 +765,13 @@ int carlink_bt_wifi_init()
 		pthread_mutex_unlock(&btwifiLocker);
 		return 0;
 	}
-	//carlink_ey_video_init();
+	
 	carlink_wifi_init();
+
+#ifdef HCN_WIFI_NAME_FORMAT_ENABLE
+	hcn_wifi_info_init();
+#endif
+
 	console_register_cb(NULL, carlink_bt_callback);
 	fsc_bt_main();
 	//bt_set_support_carplay();

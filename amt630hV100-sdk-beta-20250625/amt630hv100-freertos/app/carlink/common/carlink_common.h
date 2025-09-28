@@ -36,7 +36,11 @@ enum CARLINK_EVENT_TYPE
 	CARLINK_EVENT_BT_DISCONNECT,
 	CARLINK_EVENT_WIFI_DISCONNECT,
 	CARLINK_EVENT_WIFI_CONNECT,
-	
+	CARLINK_EVENT_CLIENT_DHCP_READY,
+	CARLINK_EVENT_BUILD_NET_OK,
+	CARLINK_EVENT_AP_CONNECT,
+	CARLINK_EVENT_AP_DISCONNECT,
+
 	CARLINK_EVENT_INIT_DONE,
 	CARLINK_EVENT_MSG_SESSION_CONNECT,
 	CARLINK_EVENT_MSG_SESSION_STOP,
@@ -77,6 +81,7 @@ void carlink_bt_open();
 void carlink_bt_close();
 void carlink_restart_bt_wifi();
 const char *carlink_get_bt_mac();
+const char *carlink_get_ble_mac();
 const char *carlink_get_wifi_p2p_name();
 const char *carlink_get_wifi_ssid();
 const char *carlink_get_wifi_passwd();

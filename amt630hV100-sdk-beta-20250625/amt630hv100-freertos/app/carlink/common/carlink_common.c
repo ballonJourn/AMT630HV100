@@ -39,7 +39,6 @@ void carlink_rfcomm_data_read_hook(void* buf, int len)
 	}
 }
 
-
 void carlink_notify_event(struct carlink_event *ev)
 {
 	if (CARLINK_EVENT_NONE != ev->type && NULL != carlink_event_queue) {

@@ -49,6 +49,10 @@ extern int ulog_console_backend_init(void);
 #include "config/hcn_config.h"
 #include "mw_init/hcn_mw_init.h"
 
+#ifdef HCN_ADC_KEY_ENABLE
+#include "key_module/hcn_adc_key.h"
+#endif
+
 #define WIFI_TEST			0
 #define BT_TEST				0
 #define SDMMC_TEST			0
@@ -106,7 +110,7 @@ __no_init static uint8_t vgHeap[VG_HEAP_SIZE];
 #endif
 
 #ifdef CARLINK_ENABLE
-static char qr_text_buf[100] = {0};	//手机互联二维码数据缓存
+static char qr_text_buf[256] = {0};	//手机互联二维码数据缓存
 
 int get_qr_text_buf(char *buf, int len)
 {
@@ -184,9 +188,30 @@ extern void carlink_send_key_event(uint8_t key, bool pressed);
 void SendKeypadInputEventFromISR(void *indata)
 {
 	lv_indev_data_t* input = (lv_indev_data_t *)indata;
-	//printf("isr %d:%d\n", input->key, input->state);
+#if 0
+	if (input->key == 2) {
+		printf("key = LV_KEY_HOME\r\n");
+	} else if (input->key == 10) {
+		printf("key = LV_KEY_ENTER\r\n");
+	} else if (input->key == 27) {
+		printf("key = LV_KEY_ESC\r\n");
+	} else if (input->key == 17) {
+		printf("key = LV_KEY_UP\r\n");
+	} else if (input->key == 18) {	
+		printf("key = LV_KEY_DOWN\r\n");
+	} else if (input->key == 19) {
+		printf("key = LV_KEY_RIGHT\r\n");
+	} else if (input->key == 20) {
+		printf("key = LV_KEY_LEFT\r\n");
+	} 
+#else
+	#ifdef HCN_ADC_KEY_ENABLE
+	
+	send_keypad_event_isr(input->key, input->state);
+	#endif
 
-	carlink_send_key_event((uint8_t)input->key, (bool)input->state);
+#endif
+	//carlink_send_key_event((uint8_t)input->key, (bool)input->state);
 }
 #ifdef WIFI_SUPPORT
 #if WIFI_TEST

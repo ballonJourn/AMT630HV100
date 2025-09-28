@@ -55,8 +55,8 @@ extern "C" {
 #define HCN_LCD_PWM_CH              2
 
 ///< OSD显示设置, UI显示大小
-#define OSD_WIDTH      HCN_LCD_WIDTH 
-#define OSD_HEIGHT     HCN_LCD_HEIGHT             
+#define OSD_WIDTH      800 
+#define OSD_HEIGHT     480            
 
 /**
  * @brief memory config 以FreeRTos + AWTK为例
@@ -101,6 +101,21 @@ extern "C" {
 #define FSC_BW121       (1)
 #define GK_GOCRS440     (2)
 #define BT_WIFI_MODULE_TYPE  FSC_BW121
+
+///< KEY使能
+///#define HCN_IO_KEY_ENABLE
+
+#ifndef HCN_IO_KEY_ENABLE
+#define HCN_ADC_KEY_ENABLE   ///< ADC KEY使能
+#endif  
+
+///< 手机互联名称信息配置
+#define HCN_WIFI_NAME_FORMAT_ENABLE                 ///< hcn wifi名称格式化使能,否则使用默认名称
+#define HCN_DEFAULT_AP_NAME             "ap63011"   ///< 默认wifi ap名称
+#define HCN_CUSTOMER_NAME               "HCN"       ///< 客户名称前缀
+#define HCN_CUSTOMER_AP_PASSWD          "88888888"  ///< wifi ap/p2p密码
+#undef HCN_STRING_LOWER_ENABLE                      ///< 字符名称默认是大写
+
 
 #ifdef __cplusplus
 }

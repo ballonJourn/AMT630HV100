@@ -20,8 +20,31 @@ extern "C" {
 
 #include <stdint.h>
 
+/**
+ * @brief  打印十六进制配置数据
+ * @param function 函数名称
+ * @param  prefix 前缀
+ * @param data 需要打印的数据
+ * @param length 数据长度(不超过260字节，否则会被截断)
+ * @return 无
+ */
 void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data,
                               uint8_t length);
+
+/**
+ * @brief  字符串转小写
+ * @param  str 需要转换的字符串
+ * @return 无
+ */
+void sting_2_lower(char *str);
+
+/**
+ * @brief  字符串转大写
+ * @param  str 需要转换的字符串
+ * @return 无
+ */
+void sting_2_upper(char *str);
+
 
 #ifdef __cplusplus
 }

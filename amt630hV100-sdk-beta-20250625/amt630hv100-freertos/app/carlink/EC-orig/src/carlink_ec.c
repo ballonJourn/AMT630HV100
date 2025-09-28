@@ -651,17 +651,19 @@ void* initECTiny(void* param)
         printf("\r\n1.inti ECTiny config\r\n");
         mECTinyCfg = EC_createECConfig();
 
-	 while(!g_bt_mac_ready) {
-	 	vTaskDelay(pdMS_TO_TICKS(10));
-	 }
-	 {
-	 	char ap_prefix[5] = {0};
-		memcpy(ap_prefix, g_bt_mac + 8, 4);
-	 	ec_reset_wifi_ap_info(ap_prefix);
-		printf("ap_ssid:%s\r\n", ap_ssid);
-	 }
-	 sprintf(uuid, "CARBIT%s", g_bt_mac);
-	 printf("carbit  uuid :%s\r\n", uuid);
+        while(!g_bt_mac_ready) {
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+
+        {
+            char ap_prefix[5] = {0};
+            memcpy(ap_prefix, g_bt_mac + 8, 4);
+            ec_reset_wifi_ap_info(ap_prefix);
+            printf("ap_ssid:%s\r\n", ap_ssid);
+        }
+
+        sprintf(uuid, "CARBIT%s", g_bt_mac);
+        printf("carbit  uuid :%s\r\n", uuid);
         EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
 
         printf("\r\n2.register ECTiny callback functions\r\n");
@@ -687,11 +689,11 @@ void* initECTiny(void* param)
 
         printf("\r\n5.init ECTiny\r\n");
 
-	accessFile.size = ec_access_size;
-	accessFile.read = ec_access_read;
-	accessFile.write = ec_access_write;
-	accessFile.clear = ec_access_clear;
-	EC_bindAccessFile(&accessFile);
+        accessFile.size = ec_access_size;
+        accessFile.read = ec_access_read;
+        accessFile.write = ec_access_write;
+        accessFile.clear = ec_access_clear;
+        EC_bindAccessFile(&accessFile);
 
         //EC_bindAccessFile(&license2File);
         EC_initialize(mECTinyCfg, mECTinyCallback);
@@ -712,42 +714,42 @@ void* initECTiny(void* param)
         //EC_bindWIFIDevice(EC_TRANSPORT_ANDROID_WIFI, "192.168.43.1");
         //EC_bindWIFIDevice(EC_TRANSPORT_IOS_WIFI_APP, "192.168.13.20");
 
-//        ECQRInfo info;
-//        memset(&info,0, sizeof(ECQRInfo));
-//        strcpy(info.ssid,"QJ501");
-//        strcpy(info.pwd,"88888888");
-//        strcpy(info.auth,"WPA");
-//        info.action = EC_QR_ACTION_WIFI_AP_MODE_ACCESS_INTERNET;
-//
-//        EC_generateQRCodeUrl(&info);
+        //        ECQRInfo info;
+        //        memset(&info,0, sizeof(ECQRInfo));
+        //        strcpy(info.ssid,"QJ501");
+        //        strcpy(info.pwd,"88888888");
+        //        strcpy(info.auth,"WPA");
+        //        info.action = EC_QR_ACTION_WIFI_AP_MODE_ACCESS_INTERNET;
+        //
+        //        EC_generateQRCodeUrl(&info);
 
         mInited = true;
 
-//        while (1) {
-//            sleep(20);
-//        }
+        //        while (1) {
+        //            sleep(20);
+        //        }
     }
-    
+
 
     printf("------ initECTiny end ------\n");
-	if (1) {
-		char ap_prefix[5] = {0};
-		memcpy(ap_prefix, g_bt_mac + 8, 4);
+    if (1) {
+        char ap_prefix[5] = {0};
+        memcpy(ap_prefix, g_bt_mac + 8, 4);
 
-		memset(&qr_info, 0, sizeof(ECQRInfo));
-		qr_info.action = EC_QR_ACTION_WIFI_STATION_MODE | EC_QR_ACTION_WIFI_AP_MODE_CUSTOMIZED;
-		memcpy(ap_prefix, g_bt_mac + 8, 4);
-		//sprintf(qr_info.name, "ark630hv100_p2p_%s", ap_prefix);
-		sprintf(qr_info.ssid, "%s", ap_ssid);
-		sprintf(qr_info.pwd, (char const *)ap_passwd);
-		sprintf(qr_info.auth, "WPA-PSK");
-		printf("ssid:%s\r\n", qr_info.ssid);
-		const char *UrlData = EC_generateQRCodeUrl(&qr_info);
-		printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
-#ifdef AWTK
-		set_qr_text_buf(UrlData);
-#endif
-	}
+        memset(&qr_info, 0, sizeof(ECQRInfo));
+        qr_info.action = EC_QR_ACTION_WIFI_STATION_MODE | EC_QR_ACTION_WIFI_AP_MODE_CUSTOMIZED;
+        memcpy(ap_prefix, g_bt_mac + 8, 4);
+        //sprintf(qr_info.name, "ark630hv100_p2p_%s", ap_prefix);
+        sprintf(qr_info.ssid, "%s", ap_ssid);
+        sprintf(qr_info.pwd, (char const *)ap_passwd);
+        sprintf(qr_info.auth, "WPA-PSK");
+        printf("ssid:%s\r\n", qr_info.ssid);
+        const char *UrlData = EC_generateQRCodeUrl(&qr_info);
+        printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
+        #ifdef AWTK
+        set_qr_text_buf(UrlData);
+        #endif
+    }
 
     return NULL;
 }
