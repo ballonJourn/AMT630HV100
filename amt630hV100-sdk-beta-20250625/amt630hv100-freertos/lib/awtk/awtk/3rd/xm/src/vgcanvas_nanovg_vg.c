@@ -1206,4 +1206,24 @@ void vgcanvas_nanovg_free_image(vgcanvas_nanovg_t* canvas, bitmap_t* img)
 	bitmap_unlock_buffer(img);
 }
 
+void clear_rect(float x, float y, float w, float h, float a, float r, float g, float b) {
+	VGfloat m[9];
+	// save current VG_MATRIX_MODE
+	VGint matrix_mode = vgGeti(VG_MATRIX_MODE);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+	// save the current matrix
+	vgGetMatrix(m);
+	vgLoadIdentity();
+
+	VGfloat clear_color[4] = {r, g, b, a};
+	vgSetfv(VG_CLEAR_COLOR, 4, clear_color);
+	vgClear(x, y, w, h);
+
+	vgFinish();
+	// restore the old matrix
+	vgLoadMatrix(m);
+	// restore the old VG_MATRIX_MODE
+	vgSeti(VG_MATRIX_MODE, matrix_mode);
+}
+
 #endif

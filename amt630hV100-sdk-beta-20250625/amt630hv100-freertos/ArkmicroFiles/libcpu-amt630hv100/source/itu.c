@@ -305,7 +305,7 @@ void itu_display_thread(void *param)
 		ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 		ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
 #ifndef REVERSE_UI
-		ark_lcd_osd_enable(LCD_OSD1, 0);
+		// ark_lcd_osd_enable(LCD_OSD1, 0);
 		ark_lcd_set_osd_sync(LCD_OSD1);
 #endif
 		vVideoDisplayBufRender(dstaddr);
