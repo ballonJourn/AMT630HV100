@@ -1,6 +1,13 @@
 #ifndef __AUDIO_H__
 #define __AUDIO_H__
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
+#include "queue.h"
+
 /* AUDIO command */
 #define _AUDIO_CTL(a) (0x10 + a)
 

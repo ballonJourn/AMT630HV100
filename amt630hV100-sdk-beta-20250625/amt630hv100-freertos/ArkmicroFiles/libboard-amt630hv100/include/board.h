@@ -363,7 +363,7 @@
 #define AUDIO_CODEC_DAC_ES8156	1 	//Use codec dac ic es8156.
 
 /* choose your audio use type */
-//#define AUDIO_REPLAY
+#define AUDIO_REPLAY
 //#define AUDIO_RECORD
 
 #ifdef AUDIO_REPLAY
