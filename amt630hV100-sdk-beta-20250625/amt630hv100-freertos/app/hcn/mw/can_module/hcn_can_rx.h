@@ -28,6 +28,7 @@ typedef struct {
 } can_rx_timeout;
 
 int can_module_init(void);
+bool can_get_communication_status(void);
 
 #ifdef __cplusplus
 }

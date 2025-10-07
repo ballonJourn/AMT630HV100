@@ -25,4 +25,8 @@ void hcn_mw_init(void) {
 #ifdef HCN_ADC_KEY_ENABLE
     hcn_keypad_msg_init();
 #endif
+
+#ifdef HCN_UART_COMM_ENABLE
+    uart_mcu_init();
+#endif
 }

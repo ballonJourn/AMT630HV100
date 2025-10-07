@@ -160,6 +160,13 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param);
  */
 bool set_hcn_usr_param(usr_param_handle_e id, void *param);
 
+/**
+ * @brief  检测仪表启动源，恢复部分设置参数
+ * @param  start_src 0:bat 1:ign
+ * @return 无
+ */
+void check_start_source(uint8_t start_src);
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus

@@ -39,10 +39,13 @@ typedef enum {
     VEH_TRAM_POWR,      /// Tram powr, unit:KW
 
     ///< Mileage Data
-    VEH_MILEAGE_ENDURANCE,  ///< Endurance mileage, precision 0.1
-    VEH_MILEAGE_TOTAL,      ///< Total mileage (km), precision 0.1
-    VEH_MILEAGE_SUB_A,      ///< Subtotal mileage A (km), precision 0.1
-    VEH_MILEAGE_SUB_B,      ///< Subtotal mileage B (km), precision 0.1
+    VEH_MILEAGE_ENDURANCE_A,    ///< Endurance mileage A, precision 0.1
+    VEH_MILEAGE_ENDURANCE_B,    ///< Endurance mileage A, precision 0.1
+    VEG_AVG_FUEL_CONSUMPTION_A, ///< Average fuel consumption A, precision 0.1
+    VEG_AVG_FUEL_CONSUMPTION_B, ///<Average fuel consumption B, precision 0.1
+    VEH_MILEAGE_TOTAL,          ///< Total mileage (km), precision 0.1
+    VEH_MILEAGE_SUB_A,          ///< Subtotal mileage A (km), precision 0.1
+    VEH_MILEAGE_SUB_B,          ///< Subtotal mileage B (km), precision 0.1
 
     ///< Temperature Data
     VEH_TEMP_WATER,        ///< Water temperature (℃ ), precision 0.1
@@ -51,6 +54,7 @@ typedef enum {
 
     ///< Light and Indicator Status
     VEH_LIGHT_HIGH_BEAM,        ///< High beam, 0: off, 1: on
+    VEH_LIGHT_LOW_BEAM,         ///< Low beam, 0: off, 1: on
     VEH_INDICATOR_TURN_LEFT,    ///< Left turn signal, 0: off, 1: on
     VEH_INDICATOR_TURN_RIGHT,   ///< Right turn signal, 0: off, 1: on
     VEH_LIGHT_LOCATION,         ///< Location LED status, 0: off, 1: on
@@ -70,6 +74,7 @@ typedef enum {
     ///< Ignition and Side Stand Status
     VEH_IGNITION_SIGNAL,  ///< Ignition electric signal, 0: OFF, 1: ON
     VEH_IGNITION_STATUS,  ///< Ignition status, 0: OFF, 1: ON
+    VEH_TILT_SWITCH,      ///< Veh tilt switch 0: OFF, 1: ON
     VEH_SIDE_STAND,       ///< Side stand status, 0: not deployed, 1: deployed
 
     ///< Maintenance Reminder
@@ -130,8 +135,13 @@ typedef enum {
     VEH_TBOX_SET_MILE,         ///< Tbox set odo or trip: 0:No 1:yes
 
     ///< display info
-    VEH_CUR_DISPALY_MODE,    // auto display mode  0：day 1:night
+    VEH_CUR_DISPALY_MODE,    ///< auto display mode  0：day 1:night
 
+    ///< Cruise infp 
+    VEH_CRUISE_MAIN_SWITCH, ///< Cruise main switch 0: OFF, 1: ON
+    VEH_CRUISE_STATUS,      ///< Cruise status 0: OFF, 1: ON
+    VEH_CRUISE_CONTROL_SPEED, ///< Cruise control speed Km/h
+    
     VEH_DATA_END,
 } veh_data_e;
 

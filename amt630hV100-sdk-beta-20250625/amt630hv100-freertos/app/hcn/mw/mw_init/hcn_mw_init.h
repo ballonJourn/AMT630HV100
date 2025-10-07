@@ -26,6 +26,7 @@ extern "C" {
 #include "can_module/hcn_can_rx.h"
 #include "key_module/hcn_adc_key.h"
 #include "dashboard_state/hcn_dev_state.h"
+#include "uart_communicate/hcn_uart_common.h"
 
 void hcn_mw_init(void);
 

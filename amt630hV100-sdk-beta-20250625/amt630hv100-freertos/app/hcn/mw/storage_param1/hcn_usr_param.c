@@ -557,7 +557,6 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
     return true;
 }
 
-
 static void read_usr_param(void) {
     if (read_hcn_info() != 0) {
         hcn_log_error("Get hcn Meter info failed!\n");

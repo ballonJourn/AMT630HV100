@@ -116,6 +116,15 @@ extern "C" {
 #define HCN_CUSTOMER_AP_PASSWD          "88888888"  ///< wifi ap/p2p密码
 #undef HCN_STRING_LOWER_ENABLE                      ///< 字符名称默认是大写
 
+///< 串口通信使能,与MCU通信
+//#define HCN_UART_COMM_ENABLE
+#ifdef HCN_UART_COMM_ENABLE
+#define HCN_UART_MCU_PORT    (2)
+#define HCN_UART_MCU_BAUDRATE (115200)
+#endif
+
+///< 里程保养使能
+#define HCN_MILEAGE_MAINTENCE_ENABLE
 
 #ifdef __cplusplus
 }

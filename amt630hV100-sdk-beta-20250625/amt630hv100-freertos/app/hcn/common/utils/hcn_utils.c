@@ -67,3 +67,10 @@ void sting_2_upper(char *str)
     }  
 }
 
+int bcd_2_decimal(int bcd) {
+    return (bcd - (bcd >>4) * 6);
+}
+
+int decimal_2_bcd( int decimal) {
+    return (decimal + (decimal/10) * 6);
+}

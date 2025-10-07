@@ -129,7 +129,7 @@ int e2prom_read_data(uint16_t addr, uint8_t *buf, int size) {
     uint8_t addr_low;
     int ret;
     uint8_t retries = 0;
-    uint16_t msg_cnt=0;
+    uint16_t msg_cnt = 0;
     uint16_t msg_buf_size;
     uint16_t msg_addr;
     uint8_t page_off;

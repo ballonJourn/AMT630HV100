@@ -45,6 +45,19 @@ void sting_2_lower(char *str);
  */
 void sting_2_upper(char *str);
 
+/**
+ * @brief  BCD码转十进制数据
+ * @param  bcd bcd码数据
+ * @return 十进制数据
+ */
+int bcd_2_decimal(int bcd);
+
+/**
+ * @brief  十进制数转BCD码
+ * @param  decimal 十进制数据
+ * @return BCD码
+ */
+int decimal_2_bcd( int decimal);
 
 #ifdef __cplusplus
 }

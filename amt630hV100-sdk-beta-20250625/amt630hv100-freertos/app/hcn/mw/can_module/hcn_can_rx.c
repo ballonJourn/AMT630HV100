@@ -124,6 +124,10 @@ static int parse_can_msg_12b_msg(uint8_t *buf, uint8_t size) {
     return 0;
 }
 
+bool can_get_communication_status(void) {
+    return is_can_com;
+}
+
 static void can_recv_msg_process(CanMsg *pMsg) {
     if (!pMsg) {
         return;
