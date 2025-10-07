@@ -6,7 +6,7 @@
   "type": "PROJECT_WIDGETS_APPLICATION",
   "appTitle": "HCN_DC001",
   "appExeName": "demo",
-  "appType": "APP_SIMULATOR",
+  "appType": "APP_DESKTOP",
   "dependencies": {
     "awtk": ">=2210",
     "awtk-widget-qr": "1.0.1"

@@ -8,3 +8,4 @@ src/**/*.obj
 src/SConscript
 /bin/
 SConstruct
+src/proxy/vehicle_param

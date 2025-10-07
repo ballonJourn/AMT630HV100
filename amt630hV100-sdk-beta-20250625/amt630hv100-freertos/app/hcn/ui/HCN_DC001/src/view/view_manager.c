@@ -3,10 +3,14 @@
 #include "home_view/music_page_key.h"
 #include "home_view/home_page_key.h"
 #include "set_view/set_page_key.h"
-#include "view_manager.h"
 #include "home_view/dock_view.h"
+#include "proxy/vehicle_data.h"
+#include "common/navigator.h"
+#include "view_manager.h"
 
+#if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
+#endif
 
 static dock_view_e current_dock = ICON_INFO ;     //
 
@@ -39,7 +43,7 @@ static ret_t on_key_event(void* ctx, event_t* e) {
     key_event_t* evt = (key_event_t*)e;
     uint32_t key     = evt->key;
     
-    printf("on_key_event key event: %d\n", key);
+    // printf("on_key_event key event: %d\n", key);
     switch (key) {
         case TK_KEY_w:
             deal_key_up_short_press() ;
@@ -61,7 +65,8 @@ static ret_t on_key_event(void* ctx, event_t* e) {
     return RET_OK;
 }
 
-static void set_key_cb(uint8_t id) 
+#if !ON_PC_CACLE
+static void hcn_key_cb(uint8_t id) 
 {
     printf( "set_key_cb key = %d \n", id) ;
     switch (id)
@@ -70,13 +75,15 @@ static void set_key_cb(uint8_t id)
         navigator_switch_to(LINK_PAGE , false)   ;
         break;
     case  BACK_KEY_SHORT_PR :
-        navigator_switch_to(HOME_PAGE , false)   ;
+        navigator_back_to_home( )   ;
         break;
     default:
         break;
     }
 
 }
+#endif
+
 
 ret_t view_manager_init(widget_t* parent)
 {
@@ -85,12 +92,12 @@ ret_t view_manager_init(widget_t* parent)
         window_page[i] = widget_lookup(parent, window_name_str[i], TRUE);
     }
     
-
-    widget_t* wm = window_manager();
     widget_on( window_manager(), EVT_KEY_DOWN, on_key_event, NULL);
 
+#if !ON_PC_CACLE
+    set_key_event_cb(hcn_key_cb);
+#endif
 
-    set_key_event_cb(set_key_cb);
     return RET_OK ;
 }
 
@@ -102,7 +109,7 @@ ret_t set_dock_view(dock_view_e dock_view)
         slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
     }
 
-    home_refresh_dock_item(dock_view) ;
+    home_refresh_dock_icon(dock_view) ;
 
     set_window_page( dock_view == ICON_SETTING );
 

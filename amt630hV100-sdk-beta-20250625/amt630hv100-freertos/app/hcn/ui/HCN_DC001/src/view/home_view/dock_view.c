@@ -22,7 +22,7 @@ ret_t home_dock_view_init(widget_t* parent)
     return RET_OK ;
 }
 
-ret_t home_refresh_dock_item(int index)
+ret_t home_refresh_dock_icon(int index)
 {
     index = tk_min(index, ICON_NUM_MAX);
     index = tk_max(index, ICON_INFO);

@@ -1,15 +1,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include "vehicle_data.h"
-
-
-#if  ON_PC_CACLE
-#include "E:\HCN_WorkSpace\AMT630HV100\amt630hV100-sdk-beta-20250625\amt630hv100-freertos\app\hcn\mw\vehicle_param/vehicle_param.h"
-#else 
-#include "vehicle_param/vehicle_param.h"
-#endif
-
 #include "view/home_view/common.h"
+#include "vehicle_param/vehicle_param.h"
+
 
 typedef struct {
   veh_signal_e signal_lamp;
@@ -49,43 +43,41 @@ int32_t vehicle_get_data_signal_lamp(veh_signal_e lamp)
 
 int32_t vehicle_get_data_speed()
 {
-
-#if  ON_PC_CACLE
-    return 0 ; 
-#else 
+#if !ON_PC_CACLE
     int32_t speed = vehicle_get_data(VEH_SPEED_CURRENT) ;
     return speed > SPEED_MAX ? SPEED_MAX : speed;
 #endif
 
+    return 0 ; 
 }
 
 int32_t vehicle_get_data_rpm()
 {
-#if  ON_PC_CACLE
-    return 0 ; 
-#else 
+#if !ON_PC_CACLE
     int32_t rpm = vehicle_get_data(VEH_SPEED_ENGINE);
     return rpm > RPM_MAX ? RPM_MAX : rpm;
 #endif
+
+    return 0 ; 
 }
 
 int32_t vehicle_get_data_gear() {
-#if  ON_PC_CACLE
-    return 0 ; 
-#else 
-  int32_t gear_id = vehicle_get_data(VEH_GEAR_POSITION);
-  return (gear_id > GEAR_R) ?  VEH_INVALID_VALUE : gearMaps[gear_id] ;
+#if !ON_PC_CACLE
+    int32_t gear_id = vehicle_get_data(VEH_GEAR_POSITION);
+    return (gear_id > GEAR_R) ?  VEH_INVALID_VALUE : gearMaps[gear_id] ;
 #endif 
+
+    return 0 ; 
 
 }
 
 int32_t vehicle_get_data_power() {
-#if  ON_PC_CACLE
-    return 0 ; 
-#else 
-  int32_t power = vehicle_get_data(VEH_TRAM_POWR);
-  return power > POWER_MAX ? POWER_MAX : power;
+
+#if !ON_PC_CACLE
+    int32_t power = vehicle_get_data(VEH_TRAM_POWR);
+    return power > POWER_MAX ? POWER_MAX : power;
 #endif
 
+    return 0 ; 
 }
 

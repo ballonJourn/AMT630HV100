@@ -2,37 +2,7 @@
 #include "dock_view.h"
 #include "../view_manager.h"
 #include "animation_ctrl.h"
-
-#if 0
-static ret_t on_key_event(void* ctx, event_t* e) {
-  if (e->type == EVT_KEY_DOWN) {
-    key_event_t* evt = (key_event_t*)e;
-    uint32_t key     = evt->key;
-
-    switch (key) {
-      case TK_KEY_UP:
-        button_manager_event(BUTTON_ID_SHORT_UP);
-        break;
-      case TK_KEY_DOWN:
-        button_manager_event(BUTTON_ID_SHORT_DOWN);
-        break;
-      case TK_KEY_LEFT:
-        button_manager_event(BUTTON_ID_SHORT_BACK);
-        break;
-      case TK_KEY_RIGHT:
-        button_manager_event(BUTTON_ID_SHORT_SET);
-        break;
-      default:
-        button_manager_event(key);
-        LOG_WARN("Unhandled key event: %u", key);
-        break;
-    }
-  }
-  return RET_OK;
-}
-widget_on(window, EVT_KEY_DOWN, on_key_event, NULL);
-#endif 
-     
+#include "view/set_view/setting_menu.h"
 
 void home_page_deal_key_set()
 {
@@ -48,6 +18,7 @@ void home_page_deal_key_set()
         case ICON_MUSIC:
             set_current_level(MENU_LEVEL_1);
             animation_play_out();
+            music_ex_view_init();
             break;
         case ICON_PHONE:
             // if (bt_call_is_connect)
@@ -56,6 +27,7 @@ void home_page_deal_key_set()
             break;
         case ICON_SETTING:
             set_current_level(MENU_LEVEL_1);
+            setting_menu_init();
             // set_focused_item();
             break;
         default:

@@ -5,14 +5,13 @@
 /**
  * 初始化窗口的子控件
  */
-// typedef ret_t (*timer_func_t)(const timer_info_t* timer);
+
 
 ret_t refesh_ui(const timer_info_t* timer){
   static int count = 0 ;
   count++;
   home_refresh_drv_mode(count % 3) ;
 
-  home_refresh_dock_item(count % 5) ;
 
   home_refresh_gear(count % 3) ;
 
@@ -23,7 +22,7 @@ ret_t refesh_ui(const timer_info_t* timer){
   home_refresh_mileage_unit(MPH) ;
 
   
-  deal_key_down_short_press() ;
+  // deal_key_down_short_press() ;
 
   // home_refresh_speed(count);
 
@@ -34,7 +33,7 @@ ret_t refesh_ui(const timer_info_t* timer){
   // {
   //   animation_play_in() ;
   // }
-  
+
 
   return RET_REPEAT;
 }
@@ -60,16 +59,7 @@ ret_t home_page_init(widget_t* win, void* ctx) {
   return_value_if_fail(win != NULL, RET_BAD_PARAMS);
 
   widget_foreach(win, visit_init_child, win);
-#if 0
-  home_speed_view_init(win);
-  home_dock_view_init(win) ;
-  home_signal_view_init(win);
-  home_mileage_view_init(win) ;
-  home_elec_view_init(win) ;
-  view_manager_init(win) ;
-  home_animation_init(win) ;
 
-#endif 
   demonstration_stop() ;
   home_view_init(win) ;
 

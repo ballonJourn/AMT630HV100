@@ -16,6 +16,6 @@ typedef enum home_dock_com{
 
 ret_t home_dock_view_init(widget_t* parent) ;
 
-ret_t home_refresh_dock_item(int power) ;
+ret_t home_refresh_dock_icon(int power) ;
 
 #endif

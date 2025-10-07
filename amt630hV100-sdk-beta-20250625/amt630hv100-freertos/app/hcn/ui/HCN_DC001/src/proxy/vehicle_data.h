@@ -1,13 +1,8 @@
 #ifndef VEHICLE_SIGNAL_H
 #define VEHICLE_SIGNAL_H
 
-#define ON_PC_CACLE 0
-
-#if ON_PC_CACLE 
-#include "E:\HCN_WorkSpace\AMT630HV100\amt630hV100-sdk-beta-20250625\amt630hv100-freertos\app\hcn\mw\vehicle_param/vehicle_param.h"
-#else
-#include "vehicle_param/vehicle_param.h"
-#endif
+#include <stdint.h>
+#define ON_PC_CACLE  0
 
 typedef enum signal{
     VEH_GMS            ,   
