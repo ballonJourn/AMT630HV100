@@ -1,8 +1,8 @@
 #include "home_page_key.h"
-#include "dock_view.h"
 #include "../view_manager.h"
-#include "animation_ctrl.h"
 #include "view/set_view/setting_menu.h"
+#include "home_view_interface.h"
+#include "common/navigator.h"
 
 void home_page_deal_key_set()
 {

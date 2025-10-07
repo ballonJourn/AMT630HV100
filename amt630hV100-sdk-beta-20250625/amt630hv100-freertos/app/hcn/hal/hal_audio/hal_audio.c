@@ -11,7 +11,7 @@
 * @author zjc
 *
 */
-
+#include <stdio.h>
 #include "audio.h"
 #include "board.h"
 #include "hal_audio/hal_audio.h"

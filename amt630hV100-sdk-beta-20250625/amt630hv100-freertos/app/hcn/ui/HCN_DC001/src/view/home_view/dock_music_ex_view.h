@@ -40,4 +40,6 @@ ret_t home_refresh_music_state(bool_t isplay);
 
 void music_ex_view_set_focused_item(music_ex_focused_e focusedIndex) ;
 
+void music_ex_view_init() ;
+
 #endif
