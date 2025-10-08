@@ -4740,6 +4740,9 @@
                 <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\ark7116.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\aw88082.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\board_lowlevel.c</name>
             </file>
             <file>

@@ -560,4 +560,9 @@ void notify_enter_carback(void);
 void notify_exit_carback(void);
 int get_carback_status(void);
 
+
+ void aw88082_init(void);
+ int aw_pa_start(void);
+ void aw_pa_stop(void);
+
 #endif

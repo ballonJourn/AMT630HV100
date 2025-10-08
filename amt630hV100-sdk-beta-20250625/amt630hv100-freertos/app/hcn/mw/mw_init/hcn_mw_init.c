@@ -51,7 +51,7 @@ void hcn_mw_init(void) {
 
     ///< 开启亮度
     set_backlight_level(5);
-
+    hal_audio_init();
 #if 0
     if (xTaskCreate(reg_read_thread, "reg_read", configMINIMAL_STACK_SIZE,
                     NULL, configMAX_PRIORITIES / 4, NULL) != pdPASS) {
