@@ -109,6 +109,7 @@ void vApplicationIRQHandler( void );
 #ifdef WIFI_SUPPORT
 static void wifi_reset(void)
 {
+	gpio_direction_output(WIFI_BT_PWR_GPIO, 1);
 	gpio_direction_output(WIFI_RESET_IO, 1);
 	mdelay(10);
 	gpio_direction_output(WIFI_RESET_IO, 0);
@@ -121,25 +122,32 @@ static void wifi_reset(void)
 static void wifi_config(void)
 {
 	// wifi power off	
-	gpio_direction_output(WIFI_BT_PWR_GPIO, 0);
-	// set the wifi IOs to input mode 	
-	gpio_direction_input(WIFI_BT_SDO_CMD_GPIO);
-	gpio_direction_input(WIFI_BT_SDO_CLK_GPIO);
-	gpio_direction_input(WIFI_BT_SDO_D3_GPIO);
-	gpio_direction_input(WIFI_BT_SDO_D2_GPIO);
-	gpio_direction_input(WIFI_BT_SDO_D1_GPIO);
-	gpio_direction_input(WIFI_BT_SDO_D0_GPIO);
-	gpio_direction_input(WIFI_BT_UART_TX_GPIO);
-	gpio_direction_input(WIFI_BT_UART_RX_GPIO);
-	mdelay(100);
-	// wifi module power on
 	gpio_direction_output(WIFI_BT_PWR_GPIO, 1);
-	mdelay(200);
+	// set the wifi IOs to input mode 	
+	gpio_direction_output(WIFI_BT_SDO_CMD_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_CLK_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D3_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D2_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D1_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D0_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART_TX_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART_RX_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART_RX_GPIO, 0);
+	gpio_direction_output(WIFI_RESET_IO, 0);
+	gpio_direction_output(BT_RESET_IO, 0);
+	vTaskDelay(pdMS_TO_TICKS(500));
 
-    // resume the wifi module config
+	gpio_direction_output(WIFI_BT_SDO_CMD_GPIO, 1);
+	gpio_direction_output(WIFI_BT_SDO_D3_GPIO,  1);
+	gpio_direction_output(WIFI_BT_SDO_D2_GPIO,  1);
+	gpio_direction_output(WIFI_BT_SDO_D1_GPIO,  1);
+	gpio_direction_output(WIFI_BT_SDO_D0_GPIO,  1);
+	gpio_direction_output(WIFI_BT_UART_TX_GPIO, 1);
+	gpio_direction_output(WIFI_BT_UART_RX_GPIO, 1);
+	gpio_direction_output(WIFI_RESET_IO, 1);
+	gpio_direction_output(BT_RESET_IO, 1);
 	vPinctrlSetup();
 	mdelay(250);
-	wifi_reset();
 }
 #endif
 
@@ -151,6 +159,7 @@ static void prvBoardLateInitTask( void *pvParameters )
 #ifdef WIFI_SUPPORT
 	wifi_reset();
 #endif
+
 #ifdef SDMMC_SUPPORT
 	mmcsd_core_init();
 	mmc_init();

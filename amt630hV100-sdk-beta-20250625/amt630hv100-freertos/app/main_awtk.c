@@ -808,6 +808,7 @@ extern int ark_network_init(void);
 void awtk_thread(void *data)
 {
 	printf("awtk thread start.\n");
+	//init_lcd_bl_pwm();
 
 #if DEVICE_TYPE_SELECT != EMMC_FLASH
 	/* initialize the spi flash */

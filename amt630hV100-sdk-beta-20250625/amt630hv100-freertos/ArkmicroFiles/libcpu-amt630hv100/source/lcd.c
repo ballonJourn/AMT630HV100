@@ -1047,6 +1047,7 @@ static unsigned int ark_lcd_set_clk_below16(uint32_t freq)
 
 static int ark_lcd_clk_init(uint32_t freq)
 {
+	vClkDisable(CLK_LCD);
 	if (freq >= 16000000) {
 		vClkSetRate(CLK_LCD, freq);
 		printf("%s, set clk:%d\n", __func__, ulClkGetRate(CLK_LCD));
@@ -1055,6 +1056,9 @@ static int ark_lcd_clk_init(uint32_t freq)
 		printf("%s, set clk:%d\n", __func__, real_freq);
 	}
 
+	mdelay(10);
+	vClkEnable(CLK_LCD);
+	
 	return 0;
 }
 
@@ -1115,7 +1119,7 @@ int lcd_init(void)
 		return -ENOMEM;
 	}
 	memset(lcd, 0, sizeof(struct ark_lcd_data));
-
+	gpio_direction_output(26, 1);
 	fb_buf = pvPortMalloc(FB_SIZE * FB_COUNT);
 	if (!fb_buf) {
 		printf("ERR: malloc framebuffer fail.\n");

@@ -178,10 +178,13 @@ static xPinGroup_t pin_groups[] = {
 	{.groupid = PGRP_SPI1, .pins_num = 3, .pins = {/*{23, 1},*/ {24, 1}, {25, 1}, {26, 1}}},
 	{.groupid = PGRP_SDMMC0, .pins_num = 7, .pins = {{16, 1}, {17, 1}, {18, 1}, {19, 1},
 													{20, 1}, {21, 1}, {22, 1}}},
+#ifdef HCN_BL_PWM_ENABLE
 	{.groupid = PGRP_PWM0, .pins_num = 1, .pins = {{0, 1}}},
+#else
 	{.groupid = PGRP_PWM1, .pins_num = 1, .pins = {{1, 1}}},
 	{.groupid = PGRP_PWM2, .pins_num = 1, .pins = {{2, 1}}},
 	{.groupid = PGRP_PWM3, .pins_num = 1, .pins = {{3, 1}}},
+#endif
 	{.groupid = PGRP_PWM0_IN, .pins_num = 1, .pins = {{4, 0}},//pin18   GPIO4
         .mux_reg = 0x60000120, .mux_offset = 12, .mux_mask = 0x3, .mux_val = 0},
 	{.groupid = PGRP_PWM1_IN, .pins_num = 1, .pins = {{5, 0}},//pin19   GPIO5
@@ -316,8 +319,14 @@ void vPinctrlSetup(void)
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
 	pinctrl_set_group(PGRP_LCD_LVDS);
 #endif
+
+#ifdef HCN_CARBACK_SUPPORT_ENABLE
 	pinctrl_set_group(PGRP_ITU_CH1_INV);
-	pinctrl_set_group(PGRP_CAN0_CH0);
+#endif
+
+#ifdef CAN_MODULE_ENABLE
+	pinctrl_set_group(PGRP_CAN1_CH0);
+#endif
 
 #ifdef AUDIO_REPLAY
 #if	(AUDIO_REPLAY_I2S == I2S_ID1)
@@ -333,5 +342,9 @@ void vPinctrlSetup(void)
 #else
 	pinctrl_set_group(PGRP_I2S0_RECORD);
 #endif
+#endif
+
+#ifdef HCN_BL_PWM_ENABLE
+	pinctrl_set_group(PGRP_PWM0);
 #endif
 }

@@ -299,8 +299,8 @@
 #define CARLINK_AA          0
 #endif
 
-#define WIFI_RESET_IO		(95)
-#define WIFI_BT_PWR_GPIO    (46)
+#define WIFI_RESET_IO		(45)
+#define WIFI_BT_PWR_GPIO    (44)
 
 ///<用于解决蓝牙wifi 初始化不成功时 复位 
 #define WIFI_BT_SDO_CMD_GPIO   (20)
@@ -328,7 +328,7 @@
 #define USE_LWIP			0
 #endif
 
-#define BT_RESET_IO        94
+#define BT_RESET_IO        46
 #define BT_UART_PORT       1
 
 //#define RELTECK_WIFI_AP_MODE
