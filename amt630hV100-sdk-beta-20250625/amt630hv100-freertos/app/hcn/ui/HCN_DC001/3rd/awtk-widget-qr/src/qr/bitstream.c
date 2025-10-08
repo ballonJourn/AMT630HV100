@@ -32,13 +32,13 @@ BitStream *BitStream_new(void)
 {
 	BitStream *bstream;
 
-	bstream = (BitStream *)TKMEM_ALLOC(sizeof(BitStream));
+	bstream = (BitStream *)malloc(sizeof(BitStream));
 	if(bstream == NULL) return NULL;
 
 	bstream->length = 0;
-	bstream->data = (unsigned char *)TKMEM_ALLOC(DEFAULT_BUFSIZE);
+	bstream->data = (unsigned char *)malloc(DEFAULT_BUFSIZE);
 	if(bstream->data == NULL) {
-		tk_free(bstream);
+		free(bstream);
 		return NULL;
 	}
 	bstream->datasize = DEFAULT_BUFSIZE;
@@ -53,12 +53,12 @@ BitStream *BitStream_newWithBits(size_t size, unsigned char *bits)
 
 	if(size == 0) return BitStream_new();
 
-	bstream = (BitStream *)TKMEM_ALLOC(sizeof(BitStream));
+	bstream = (BitStream *)malloc(sizeof(BitStream));
 	if(bstream == NULL) return NULL;
 
-	bstream->data = (unsigned char *)TKMEM_ALLOC(size);
+	bstream->data = (unsigned char *)malloc(size);
 	if(bstream->data == NULL) {
-		tk_free(bstream);
+		free(bstream);
 		return NULL;
 	}
 
@@ -74,7 +74,7 @@ static int BitStream_expand(BitStream *bstream)
 {
 	unsigned char *data;
 
-	data = (unsigned char *)TKMEM_REALLOC(bstream->data, bstream->datasize * 2);
+	data = (unsigned char *)realloc(bstream->data, bstream->datasize * 2);
 	if(data == NULL) {
 		return -1;
 	}
@@ -189,7 +189,7 @@ unsigned char *BitStream_toByte(BitStream *bstream)
 	if(size == 0) {
 		return NULL;
 	}
-	data = (unsigned char *)TKMEM_ALLOC((size + 7) / 8);
+	data = (unsigned char *)malloc((size + 7) / 8);
 	if(data == NULL) {
 		return NULL;
 	}
@@ -223,7 +223,7 @@ unsigned char *BitStream_toByte(BitStream *bstream)
 void BitStream_free(BitStream *bstream)
 {
 	if(bstream != NULL) {
-		tk_free(bstream->data);
-		tk_free(bstream);
+		free(bstream->data);
+		free(bstream);
 	}
 }

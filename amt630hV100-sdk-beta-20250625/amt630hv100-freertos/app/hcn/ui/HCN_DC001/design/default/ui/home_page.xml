@@ -131,6 +131,14 @@
       <image name="image5" x="126" y="298" w="28" h="12" draw_type="default" image="setting_page_down_n"/>
       <image name="image6" x="126" y="21" w="28" h="12" draw_type="default" image="setting_page_up_n"/>
       <slide_view x="227" y="0" w="554" h="326" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
+        <view name="ride_ele_view" x="0" y="0" w="100%" h="100%">
+          <chart_view name="chartview" x="83" y="67" w="398" h="180" style:normal:grid_color="#000000">
+            <x_axis name="x_axis" axis_type="value" min="0" max="10" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[0.0km,1.0km,2.0km,3.0km,4.0km,5.0km]" at="auto" w="471" h="225" style:normal:split_line_color="#00000000" style:normal:tick_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:font_size="16" style:normal:fg_color="#00000000"/>
+            <y_axis name="y_axis" axis_type="value" min="-30" max="90" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[-30,0,30,60,90]" at="right" w="475" style:normal:selected_bg_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:split_line_color="#757070" style:normal:odd_bg_color="#00000000" style:normal:tick_color="#00000000" style:normal:grid_color="#00000000" style:normal:fg_color="#00000000" style:normal:font_size="18"/>
+            <line_series name="line_series" capacity="11" value_animation="500" line="{smooth:false}" area="{show:true}" symbol="{show:true}" series_axis="x_axis" value_axis="y_axis" style:normal:line_border_color="#59E9FF" style:normal:area_color="#00000000" style:normal:line_border_width="3" value="-30,60,0,50,90,-15,40,-10,90,13,60,-5,45,-15" style:normal:symbol_bg_color="#D9E2F2" text=""/>
+            <tooltip name="tooltip" w="448" h="185"/>
+          </chart_view>
+        </view>
         <view name="tmps_view" x="0" y="0" w="100%" h="100%">
           <image name="tmps_car" x="137" y="53" w="300" h="201" draw_type="default" image="setting_tire_pressure_bg"/>
           <progress_bar name="tmps_bar_front" x="51" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
@@ -145,9 +153,6 @@
           <label name="label4" x="113" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
           <label name="tmps_temp_front" x="478" y="225" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="65"/>
           <label name="label4" x="518" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
-        </view>
-        <view name="ride_ele_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="106" y="46" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="骑行能耗"/>
         </view>
         <view name="connect_view" x="0" y="0" w="100%" h="100%">
           <label name="label3" x="126" y="44" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="手机连接"/>

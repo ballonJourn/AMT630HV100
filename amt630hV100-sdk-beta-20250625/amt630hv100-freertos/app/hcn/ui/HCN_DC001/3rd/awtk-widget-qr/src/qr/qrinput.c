@@ -48,19 +48,20 @@ static QRinput_List *QRinput_List_newEntry(QRencodeMode mode, int size, const un
 	QRinput_List *entry;
 
 	if(QRinput_check(mode, size, data)) {
+		errno = EINVAL;
 		return NULL;
 	}
 
-	entry = (QRinput_List *)TKMEM_ALLOC(sizeof(QRinput_List));
+	entry = (QRinput_List *)malloc(sizeof(QRinput_List));
 	if(entry == NULL) return NULL;
 
 	entry->mode = mode;
 	entry->size = size;
 	entry->data = NULL;
 	if(size > 0) {
-		entry->data = (unsigned char *)TKMEM_ALLOC((size_t)size);
+		entry->data = (unsigned char *)malloc((size_t)size);
 		if(entry->data == NULL) {
-			tk_free(entry);
+			free(entry);
 			return NULL;
 		}
 		memcpy(entry->data, data, (size_t)size);
@@ -74,9 +75,9 @@ static QRinput_List *QRinput_List_newEntry(QRencodeMode mode, int size, const un
 static void QRinput_List_freeEntry(QRinput_List *entry)
 {
 	if(entry != NULL) {
-		tk_free(entry->data);
+		free(entry->data);
 		BitStream_free(entry->bstream);
-		tk_free(entry);
+		free(entry);
 	}
 }
 
@@ -84,14 +85,14 @@ static QRinput_List *QRinput_List_dup(QRinput_List *entry)
 {
 	QRinput_List *n;
 
-	n = (QRinput_List *)TKMEM_ALLOC(sizeof(QRinput_List));
+	n = (QRinput_List *)malloc(sizeof(QRinput_List));
 	if(n == NULL) return NULL;
 
 	n->mode = entry->mode;
 	n->size = entry->size;
-	n->data = (unsigned char *)TKMEM_ALLOC((size_t)n->size);
+	n->data = (unsigned char *)malloc((size_t)n->size);
 	if(n->data == NULL) {
-		tk_free(n);
+		free(n);
 		return NULL;
 	}
 	memcpy(n->data, entry->data, (size_t)entry->size);
@@ -114,12 +115,12 @@ QRinput *QRinput_new2(int version, QRecLevel level)
 {
 	QRinput *input;
 
-	if(version < 0 || version > QRSPEC_VERSION_MAX  || level > QR_ECLEVEL_H) {
-
+	if(version < 0 || version > QRSPEC_VERSION_MAX || level > QR_ECLEVEL_H) {
+		errno = EINVAL;
 		return NULL;
 	}
 
-	input = (QRinput *)TKMEM_ALLOC(sizeof(QRinput));
+	input = (QRinput *)malloc(sizeof(QRinput));
 	if(input == NULL) return NULL;
 
 	input->head = NULL;
@@ -147,6 +148,7 @@ QRinput *QRinput_newMQR(int version, QRecLevel level)
 	return input;
 
 INVALID:
+	errno = EINVAL;
 	return NULL;
 }
 
@@ -158,6 +160,7 @@ int QRinput_getVersion(QRinput *input)
 int QRinput_setVersion(QRinput *input, int version)
 {
 	if(input->mqr || version < 0 || version > QRSPEC_VERSION_MAX) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -174,6 +177,7 @@ QRecLevel QRinput_getErrorCorrectionLevel(QRinput *input)
 int QRinput_setErrorCorrectionLevel(QRinput *input, QRecLevel level)
 {
 	if(input->mqr || level > QR_ECLEVEL_H) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -198,6 +202,7 @@ int QRinput_setVersionAndErrorCorrectionLevel(QRinput *input, int version, QRecL
 	return 0;
 
 INVALID:
+	errno = EINVAL;
 	return -1;
 }
 
@@ -244,9 +249,11 @@ STATIC_IN_RELEASE int QRinput_insertStructuredAppendHeader(QRinput *input, int s
 	unsigned char buf[3];
 
 	if(size > MAX_STRUCTURED_SYMBOLS) {
+		errno = EINVAL;
 		return -1;
 	}
 	if(number <= 0 || number > size) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -269,6 +276,7 @@ int QRinput_appendECIheader(QRinput *input, unsigned int ecinum)
 	unsigned char data[4];
 
 	if(ecinum > 999999) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -292,7 +300,7 @@ void QRinput_free(QRinput *input)
 			QRinput_List_freeEntry(list);
 			list = next;
 		}
-		tk_free(input);
+		free(input);
 	}
 }
 
@@ -511,6 +519,7 @@ static int QRinput_encodeModeAn(QRinput_List *entry, BitStream *bstream, int ver
 
 	if(mqr) {
 		if(version < 2) {
+			errno = EINVAL;
 			return -1;
 		}
 		ret = BitStream_appendNum(bstream, (size_t)(version - 1), MQRSPEC_MODEID_AN);
@@ -572,6 +581,7 @@ static int QRinput_encodeMode8(QRinput_List *entry, BitStream *bstream, int vers
 
 	if(mqr) {
 		if(version < 3) {
+			errno = EINVAL;
 			return -1;
 		}
 		ret = BitStream_appendNum(bstream, (size_t)(version - 1), MQRSPEC_MODEID_8);
@@ -647,6 +657,7 @@ static int QRinput_encodeModeKanji(QRinput_List *entry, BitStream *bstream, int 
 
 	if(mqr) {
 		if(version < 2) {
+			errno = EINVAL;
 			return -1;
 		}
 		ret = BitStream_appendNum(bstream, (size_t)(version - 1), MQRSPEC_MODEID_KANJI);
@@ -696,6 +707,7 @@ static int QRinput_encodeModeStructure(QRinput_List *entry, BitStream *bstream, 
 	int ret;
 
 	if(mqr) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -876,17 +888,13 @@ static int QRinput_estimateBitStreamSizeOfEntry(QRinput_List *entry, int version
 	}
 
 	if(mqr) {
-		l = MQRspec_lengthIndicator(entry->mode, version);
+		l = QRspec_lengthIndicator(entry->mode, version);
 		m = version - 1;
 		bits += l + m;
 	} else {
 		l = QRspec_lengthIndicator(entry->mode, version);
 		m = 1 << l;
-		if(entry->mode == QR_MODE_KANJI) {
-			num = (entry->size/2 + m - 1) / m;
-		} else {
-			num = (entry->size + m - 1) / m;
-		}
+		num = (entry->size + m - 1) / m;
 
 		bits += num * (MODE_INDICATOR_SIZE + l);
 	}
@@ -929,9 +937,6 @@ static int QRinput_estimateVersion(QRinput *input)
 		prev = version;
 		bits = QRinput_estimateBitStreamSize(input, prev);
 		version = QRspec_getMinimumVersion((bits + 7) / 8, input->level);
-		if(prev == 0 && version > 1) {
-			version--;
-		}
 	} while (version > prev);
 
 	return version;
@@ -1004,11 +1009,7 @@ static int QRinput_encodeBitStream(QRinput_List *entry, BitStream *bstream, int 
 
 	prevsize = (int)BitStream_size(bstream);
 
-	if(mqr) {
-		words = MQRspec_maximumWords(entry->mode, version);
-	} else {
-		words = QRspec_maximumWords(entry->mode, version);
-	}
+	words = QRspec_maximumWords(entry->mode, version);
 	if(words != 0 && entry->size > words) {
 		st1 = QRinput_List_newEntry(entry->mode, words, entry->data);
 		if(st1 == NULL) goto ABORT;
@@ -1140,6 +1141,7 @@ static int QRinput_appendPaddingBit(BitStream *bstream, QRinput *input)
 	maxbits = maxwords * 8;
 
 	if(maxbits < bits) {
+		errno = ERANGE;
 		return -1;
 	}
 	if(maxbits == bits) {
@@ -1188,6 +1190,7 @@ static int QRinput_appendPaddingBitMQR(BitStream *bstream, QRinput *input)
 	maxwords = maxbits / 8;
 
 	if(maxbits < bits) {
+		errno = ERANGE;
 		return -1;
 	}
 	if(maxbits == bits) {
@@ -1337,7 +1340,7 @@ static QRinput_InputList *QRinput_InputList_newEntry(QRinput *input)
 {
 	QRinput_InputList *entry;
 
-	entry = (QRinput_InputList *)TKMEM_ALLOC(sizeof(QRinput_InputList));
+	entry = (QRinput_InputList *)malloc(sizeof(QRinput_InputList));
 	if(entry == NULL) return NULL;
 
 	entry->input = input;
@@ -1350,7 +1353,7 @@ static void QRinput_InputList_freeEntry(QRinput_InputList *entry)
 {
 	if(entry != NULL) {
 		QRinput_free(entry->input);
-		tk_free(entry);
+		free(entry);
 	}
 }
 
@@ -1358,7 +1361,7 @@ QRinput_Struct *QRinput_Struct_new(void)
 {
 	QRinput_Struct *s;
 
-	s = (QRinput_Struct *)TKMEM_ALLOC(sizeof(QRinput_Struct));
+	s = (QRinput_Struct *)malloc(sizeof(QRinput_Struct));
 	if(s == NULL) return NULL;
 
 	s->size = 0;
@@ -1379,6 +1382,7 @@ int QRinput_Struct_appendInput(QRinput_Struct *s, QRinput *input)
 	QRinput_InputList *e;
 
 	if(input->mqr) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -1408,7 +1412,7 @@ void QRinput_Struct_free(QRinput_Struct *s)
 			QRinput_InputList_freeEntry(list);
 			list = next;
 		}
-		tk_free(s);
+		free(s);
 	}
 }
 
@@ -1432,11 +1436,11 @@ static int QRinput_List_shrinkEntry(QRinput_List *entry, int bytes)
 {
 	unsigned char *data;
 
-	data = (unsigned char *)TKMEM_ALLOC((size_t)bytes);
+	data = (unsigned char *)malloc((size_t)bytes);
 	if(data == NULL) return -1;
 
 	memcpy(data, entry->data, (size_t)bytes);
-	tk_free(entry->data);
+	free(entry->data);
 	entry->data = data;
 	entry->size = bytes;
 
@@ -1474,6 +1478,7 @@ QRinput_Struct *QRinput_splitQRinputToStruct(QRinput *input)
 	BitStream *bstream = NULL;
 
 	if(input->mqr) {
+		errno = EINVAL;
 		return NULL;
 	}
 
@@ -1547,6 +1552,7 @@ QRinput_Struct *QRinput_splitQRinputToStruct(QRinput *input)
 	ret = QRinput_Struct_appendInput(s, input);
 	if(ret < 0) goto ABORT;
 	if(s->size > MAX_STRUCTURED_SYMBOLS) {
+		errno = ERANGE;
 		QRinput_Struct_free(s);
 		BitStream_free(bstream);
 		return NULL;
@@ -1599,6 +1605,7 @@ int QRinput_Struct_insertStructuredAppendHeaders(QRinput_Struct *s)
 int QRinput_setFNC1First(QRinput *input)
 {
 	if(input->mqr) {
+		errno = EINVAL;
 		return -1;
 	}
 	input->fnc1 = 1;
@@ -1609,6 +1616,7 @@ int QRinput_setFNC1First(QRinput *input)
 int QRinput_setFNC1Second(QRinput *input, unsigned char appid)
 {
 	if(input->mqr) {
+		errno = EINVAL;
 		return -1;
 	}
 	input->fnc1 = 2;

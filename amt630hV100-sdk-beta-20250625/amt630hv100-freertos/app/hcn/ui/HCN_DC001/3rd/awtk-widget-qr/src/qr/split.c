@@ -36,18 +36,18 @@
 
 #define isdigit(__c__) ((unsigned char)((signed char)(__c__) - '0') < 10)
 #define isalnum(__c__) (QRinput_lookAnTable(__c__) >= 0)
-/*
+
 #if !HAVE_STRDUP
 #undef strdup
 char *strdup(const char *s)
 {
 	size_t len = strlen(s) + 1;
-	void *newstring = (void*)TKMEM_ALLOC(len);
+	void *newstring = malloc(len);
 	if(newstring == NULL) return NULL;
 	return (char *)memcpy(newstring, s, len);
 }
 #endif
-*/
+
 static QRencodeMode Split_identifyMode(const char *string, QRencodeMode hint)
 {
 	unsigned char c, d;
@@ -255,23 +255,21 @@ static int Split_splitString(const char *string, QRinput *input,
 	int length;
 	QRencodeMode mode;
 
-	while(*string != '\0') {
-		mode = Split_identifyMode(string, hint);
-		if(mode == QR_MODE_NUM) {
-			length = Split_eatNum(string, input, hint);
-		} else if(mode == QR_MODE_AN) {
-			length = Split_eatAn(string, input, hint);
-		} else if(mode == QR_MODE_KANJI && hint == QR_MODE_KANJI) {
-			length = Split_eatKanji(string, input, hint);
-		} else {
-			length = Split_eat8(string, input, hint);
-		}
-		if(length == 0) break;
-		if(length < 0) return -1;
-		string += length;
-	}
+	if(*string == '\0') return 0;
 
-	return 0;
+	mode = Split_identifyMode(string, hint);
+	if(mode == QR_MODE_NUM) {
+		length = Split_eatNum(string, input, hint);
+	} else if(mode == QR_MODE_AN) {
+		length = Split_eatAn(string, input, hint);
+	} else if(mode == QR_MODE_KANJI && hint == QR_MODE_KANJI) {
+		length = Split_eatKanji(string, input, hint);
+	} else {
+		length = Split_eat8(string, input, hint);
+	}
+	if(length == 0) return 0;
+	if(length < 0) return -1;
+	return Split_splitString(&string[length], input, hint);
 }
 
 static char *dupAndToUpper(const char *str, QRencodeMode hint)
@@ -305,13 +303,14 @@ int Split_splitStringToQRinput(const char *string, QRinput *input,
 	int ret;
 
 	if(string == NULL || *string == '\0') {
+		errno = EINVAL;
 		return -1;
 	}
 	if(!casesensitive) {
 		newstr = dupAndToUpper(string, hint);
 		if(newstr == NULL) return -1;
 		ret = Split_splitString(newstr, input, hint);
-		tk_free(newstr);
+		free(newstr);
 	} else {
 		ret = Split_splitString(string, input, hint);
 	}

@@ -9,7 +9,8 @@
   "appType": "APP_DESKTOP",
   "dependencies": {
     "awtk": ">=2210",
-    "awtk-widget-qr": "1.0.1"
+    "awtk-widget-qr": "1.0.1",
+    "awtk-widget-chart-view": "1.0.4"
   },
   "assets": {
     "activedTheme": "default",

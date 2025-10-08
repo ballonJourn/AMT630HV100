@@ -1,5 +1,6 @@
 #include "awtk.h"
 #include "../3rd/awtk-widget-qr/src/qr_register.h"
+#include "../3rd/awtk-widget-chart-view/src/chart_view_register.h"
 #include "common/navigator.h"
 
 #ifndef APP_SYSTEM_BAR
@@ -19,7 +20,7 @@
  */
 static ret_t custom_widgets_register(void) {
   qr_register();
-
+  chart_view_register();
   return RET_OK;
 }
 
@@ -46,13 +47,13 @@ ret_t application_init(void) {
   custom_widgets_register();
   application_on_launch();
 
-  if (strlen(APP_SYSTEM_BAR) > 0) {
-    navigator_to(APP_SYSTEM_BAR);
-  }
+  // if (strlen(APP_SYSTEM_BAR) > 0) {
+  //   navigator_to(APP_SYSTEM_BAR);
+  // }
 
-  if (strlen(APP_BOTTOM_SYSTEM_BAR) > 0) {
-    navigator_to(APP_BOTTOM_SYSTEM_BAR);
-  }
+  // if (strlen(APP_BOTTOM_SYSTEM_BAR) > 0) {
+  //   navigator_to(APP_BOTTOM_SYSTEM_BAR);
+  // }
 
   return navigator_to(APP_START_PAGE);
 }

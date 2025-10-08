@@ -103,12 +103,6 @@ widget_t* qr_cast(widget_t* widget);
  * @return {ret_t} 返回RET_OK表示成功，否则表示失败。
  */
 ret_t qr_set_value(widget_t* widget, const char* value);
-/**
- * @method qr_set_value_hq
- * 设置要转成二维码的字符串 [ 高密度二维码 by fanghui 241205]
- * QR_ECLEVEL_H [QRcode_encodeString(qr->value, 3, QR_ECLEVEL_H, QR_MODE_8, 1);]
- */
-ret_t qr_set_value_h(widget_t* widget, char* value);
 
 #define WIDGET_TYPE_QR "qr"
 #define QR(widget) ((qr_t*)(qr_cast(WIDGET(widget))))

@@ -2,6 +2,11 @@
 import scripts.app_helper as app
 
 CUSTOM_WIDGET_LIBS = [{
+    "root" : '3rd/awtk-widget-chart-view',
+    'shared_libs': ['chart_view'],
+    'static_libs': []
+},
+{
     "root" : '3rd/awtk-widget-qr',
     'shared_libs': ['qr'],
     'static_libs': []

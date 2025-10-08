@@ -150,7 +150,7 @@ unsigned char *Mask_makeMaskedFrame(int width, unsigned char *frame, int mask)
 {
 	unsigned char *masked;
 
-	masked = (unsigned char *)TKMEM_ALLOC((size_t)(width * width));
+	masked = (unsigned char *)malloc((size_t)(width * width));
 	if(masked == NULL) return NULL;
 
 	maskMakers[mask](width, frame, masked);
@@ -164,10 +164,11 @@ unsigned char *Mask_makeMask(int width, unsigned char *frame, int mask, QRecLeve
 	unsigned char *masked;
 
 	if(mask < 0 || mask >= maskNum) {
+		errno = EINVAL;
 		return NULL;
 	}
 
-	masked = (unsigned char *)TKMEM_ALLOC((size_t)(width * width));
+	masked = (unsigned char *)malloc((size_t)(width * width));
 	if(masked == NULL) return NULL;
 
 	maskMakers[mask](width, frame, masked);
@@ -326,11 +327,11 @@ unsigned char *Mask_mask(int width, unsigned char *frame, QRecLevel level)
 	int demerit;
 	int w2 = width * width;
 
-	mask = (unsigned char *)TKMEM_ALLOC((size_t)w2);
+	mask = (unsigned char *)malloc((size_t)w2);
 	if(mask == NULL) return NULL;
-	bestMask = (unsigned char *)TKMEM_ALLOC((size_t)w2);
+	bestMask = (unsigned char *)malloc((size_t)w2);
 	if(bestMask == NULL) {
-		tk_free(mask);
+		free(mask);
 		return NULL;
 	}
 
@@ -349,6 +350,6 @@ unsigned char *Mask_mask(int width, unsigned char *frame, QRecLevel level)
 			memcpy(bestMask, mask, (size_t)w2);
 		}
 	}
-	tk_free(mask);
+	free(mask);
 	return bestMask;
 }

@@ -189,7 +189,7 @@ static unsigned char *MQRspec_createFrame(int version)
 	int x, y;
 
 	width = mqrspecCapacity[version].width;
-	frame = (unsigned char *)TKMEM_ALLOC((size_t)(width * width));
+	frame = (unsigned char *)malloc((size_t)(width * width));
 	if(frame == NULL) return NULL;
 
 	memset(frame, 0, (size_t)(width * width));

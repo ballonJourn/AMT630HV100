@@ -424,3 +424,48 @@
     <normal bg_color="#FFFFFF"/>
   </style>
 </window>
+<pie_slice>
+  <style name="default">
+    <normal fg_color="#a0a0a0" text_color="#213b4d"/>
+  </style>
+</pie_slice>
+<chart_view>
+  <style name="default">
+    <normal margin_bottom="20" margin_left="20" margin_right="10" margin_top="10"/>
+  </style>
+</chart_view>
+<tooltip>
+  <style name="default">
+    <normal fg_color="#cccccc" bg_color="#26262666" text_color="#ffffff" round_radius="4" symbol_border_color="#262626" symbol_border_width="3" symbol_bg_color="#ffffff" symbol_round_radius="4" margin="4"/>
+  </style>
+</tooltip>
+<line_series>
+  <style name="default">
+    <normal line_border_color="#338fff" line_border_width="1" area_color="#338fff66" symbol_border_color="#338fff" symbol_bg_color="#ffffff" symbol_round_radius="4"/>
+  </style>
+</line_series>
+<bar_series>
+  <style name="default">
+    <normal margin_left="4" margin_right="4" fg_color="#0070c0"/>
+  </style>
+</bar_series>
+<x_axis>
+  <style name="default">
+    <normal text_color="#444444" font_size="16" split_line_color="#c2c2c2" tick_color="#c2c2c2" fg_color="#c2c2c2"/>
+  </style>
+</x_axis>
+<y_axis>
+  <style name="default">
+    <normal text_color="#444444" font_size="16" split_line_color="#c2c2c2" tick_color="#c2c2c2" fg_color="#c2c2c2"/>
+  </style>
+</y_axis>
+<line_series_colorful>
+  <style name="default">
+    <normal line_border_width="1" symbol_border_color="#ffc393" symbol_round_radius="4"/>
+  </style>
+</line_series_colorful>
+<bar_series_minmax>
+  <style name="default">
+    <normal margin_left="4" margin_right="4" fg_color="#0070c0" round_radius="20"/>
+  </style>
+</bar_series_minmax>

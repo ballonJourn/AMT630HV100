@@ -1,9 +1,6 @@
 #ifndef QRENCODER_CONFIG_H
 #define QRENCODER_CONFIG_H
 
-#include "awtk.h"
-#include "tkc/mem.h"
-
 #define STATIC_IN_RELEASE static
 #define MAJOR_VERSION 4
 #define MINOR_VERSION 1
