@@ -335,7 +335,7 @@
 /*******************************************/
 
 /************ i2c configuration ************/
-#define HW_I2C0_SUPPORT			//Hardware i2c0 support
+// #define HW_I2C0_SUPPORT			//Hardware i2c0 support
 #define HW_I2C1_SUPPORT			//Hardware i2c1 support
 //#define ANALOG_I2C_SUPPORT		//Analog i2c support
 
