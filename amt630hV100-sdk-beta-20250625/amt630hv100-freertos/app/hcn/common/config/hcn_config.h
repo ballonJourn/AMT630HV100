@@ -97,9 +97,30 @@ extern "C" {
 
 ///< wifi相关信息
 #define HCN_WIFI_SUPPORT
+#define HCN_WIFI_INIT_DELAY_ENABLE  ///< wifi初始化延时
+#define WIFI_RESET_IO		(45)
+#define WIFI_BT_PWR_GPIO    (44)
+
+///< 蓝牙reset io
+#define BT_RESET_IO        (46) 
+#define BT_UART_PORT       1  ///< bt通信串口号
+
+///<用于解决蓝牙wifi 初始化不成功时 复位 
+#define WIFI_BT_SDO_CMD_GPIO   (20)
+#define WIFI_BT_SDO_CLK_GPIO   (22)
+#define WIFI_BT_SDO_D3_GPIO    (19)
+#define WIFI_BT_SDO_D2_GPIO    (18)
+#define WIFI_BT_SDO_D1_GPIO    (17)
+#define WIFI_BT_SDO_D0_GPIO    (16)
+#define WIFI_BT_UART_TX_GPIO   (41)
+#define WIFI_BT_UART_RX_GPIO   (40)
+#define WIFI_BT_UART1_CTS_GPIO (100)
+#define WIFI_BT_UART1_RTS_GPIO (101)
 
 ///< 手机互联使能
 #define HCN_CARLINK_ENABLE
+#define HCN_LCD_EC_WIDTH        800
+#define HCN_LCD_EC_HEIGHT       480
 
 ///< OTA功能
 #ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
@@ -129,8 +150,13 @@ extern "C" {
 #define HCN_CUSTOMER_AP_PASSWD          "88888888"  ///< wifi ap/p2p密码
 #undef HCN_STRING_LOWER_ENABLE                      ///< 字符名称默认是大写
 
+#define HCN_CARLINK_PROTOTYPE_MODE
+#ifdef HCN_CARLINK_PROTOTYPE_MODE
+#define HCN_CHINESE_UUID    "CARBITDC0D30226452"
+#endif
+
 ///< 串口通信使能,与MCU通信
-//#define HCN_UART_COMM_ENABLE
+#define HCN_UART_COMM_ENABLE
 #ifdef HCN_UART_COMM_ENABLE
 #define HCN_UART_MCU_PORT    (2)
 #define HCN_UART_MCU_BAUDRATE (115200)
@@ -141,6 +167,9 @@ extern "C" {
 
 ///< 倒车使能
 //#define HCN_CARBACK_SUPPORT_ENABLE
+
+///< 光感使能
+#define HCN_ADC_LIGHT_SENSOR_ENABLE
 
 #ifdef __cplusplus
 }

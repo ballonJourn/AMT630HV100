@@ -107,6 +107,7 @@ void vApplicationIRQHandler( void );
 
 
 #ifdef WIFI_SUPPORT
+#if 0
 static void wifi_reset(void)
 {
 	gpio_direction_output(WIFI_BT_PWR_GPIO, 1);
@@ -118,7 +119,6 @@ static void wifi_reset(void)
 	mdelay(10);
 }
 
-#if 0
 static void wifi_config(void)
 {
 	// wifi power off	
@@ -156,12 +156,23 @@ static void wifi_config(void)
 static void prvBoardLateInitTask( void *pvParameters )
 {
 	ark_lcd_enable(1);
-#ifdef WIFI_SUPPORT
-	wifi_reset();
-#endif
 
 #ifdef SDMMC_SUPPORT
 	mmcsd_core_init();
+#endif
+
+#ifdef WIFI_SUPPORT
+	gpio_direction_output(WIFI_BT_SDO_CMD_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_CLK_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D3_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D2_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D1_GPIO, 0);
+	gpio_direction_output(WIFI_BT_SDO_D0_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART_TX_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART_RX_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART1_CTS_GPIO, 0);
+	gpio_direction_output(WIFI_BT_UART1_RTS_GPIO, 0);
+#else
 	mmc_init();
 #endif
 

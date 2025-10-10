@@ -53,6 +53,10 @@ extern int ulog_console_backend_init(void);
 #include "key_module/hcn_adc_key.h"
 #endif
 
+#ifdef HCN_WIFI_INIT_DELAY_ENABLE
+#include "hal_wifi/hal_wifi.h"
+#endif
+
 #define WIFI_TEST			0
 #define BT_TEST				0
 #define SDMMC_TEST			0
@@ -187,7 +191,9 @@ extern void carlink_send_key_event(uint8_t key, bool pressed);
 
 void SendKeypadInputEventFromISR(void *indata)
 {
+#ifdef HCN_ADC_KEY_ENABLE
 	lv_indev_data_t* input = (lv_indev_data_t *)indata;
+#endif
 #if 0
 	if (input->key == 2) {
 		printf("key = LV_KEY_HOME\r\n");
@@ -903,9 +909,13 @@ void awtk_thread(void *data)
 	carlink_ey_init();
 #endif
 #if CARLINK_EC
+	#ifndef HCN_WIFI_INIT_DELAY_ENABLE
 	set_carlink_display_info(0, 0, LCD_WIDTH, LCD_HEIGHT);
 	set_carlink_video_info(LCD_WIDTH, LCD_HEIGHT, 30);
 	carlink_ec_init(0, NULL);
+	#else
+	hcn_wifi_init();
+	#endif
 #endif
 
 #if CARLINK_CP

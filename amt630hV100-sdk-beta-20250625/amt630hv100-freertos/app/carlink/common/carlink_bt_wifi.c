@@ -20,6 +20,7 @@
 #include "console.h"
 #include "fsc_bt.h"
 #include "iap.h"
+#include "config/hcn_config.h"
 
 
 #if (CARLINK_EC == 1) || (CARLINK_CP == 1) || (CARLINK_AA == 1)
@@ -715,12 +716,16 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase,
 }
 #endif
 
+#ifndef HCN_WIFI_INIT_DELAY_ENABLE
 static BaseType_t carlink_wifi_init()
 {
 	static int wifi_sdio_status = MMCSD_HOST_UNPLUGED;
 
 	if (wifi_sdio_status == MMCSD_HOST_PLUGED)
 		return 0;
+
+	printf("wifi_init_sdio\n");
+
 	WIFI_Context_init();
 	WIFI_RegisterEvent(eWiFiEventMax, carlink_wifi_event_handler);
 	for (;;) {
@@ -732,6 +737,30 @@ static BaseType_t carlink_wifi_init()
 	}
 	return 0;
 }
+#else
+
+int carlink_wifi_init() {
+   	static int wifi_sdio_status = MMCSD_HOST_UNPLUGED;
+	if (wifi_sdio_status == MMCSD_HOST_PLUGED)
+		return 0;
+
+    printf("wifi_init_sdio\n");
+	WIFI_Context_init();
+	WIFI_RegisterEvent(eWiFiEventMax, carlink_wifi_event_handler);
+	for (;;) {
+		wifi_sdio_status = mmcsd_wait_sdio_ready(pdMS_TO_TICKS(2000));
+		if (wifi_sdio_status == MMCSD_HOST_PLUGED) {
+			printf("detect sdio device\r\n");
+			break;
+		} else {
+            return -1;
+        }
+	}
+
+	return 0;
+}
+
+#endif
 
 #if 0
 static void bt_set_support_carplay() // cp
@@ -766,7 +795,9 @@ int carlink_bt_wifi_init()
 		return 0;
 	}
 	
+#ifndef HCN_WIFI_INIT_DELAY_ENABLE
 	carlink_wifi_init();
+#endif
 
 #ifdef HCN_WIFI_NAME_FORMAT_ENABLE
 	hcn_wifi_info_init();
