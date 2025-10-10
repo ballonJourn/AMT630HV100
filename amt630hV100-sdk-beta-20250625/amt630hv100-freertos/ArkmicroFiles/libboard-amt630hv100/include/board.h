@@ -299,18 +299,6 @@
 #define CARLINK_AA          0
 #endif
 
-#define WIFI_RESET_IO		(45)
-#define WIFI_BT_PWR_GPIO    (44)
-
-///<用于解决蓝牙wifi 初始化不成功时 复位 
-#define WIFI_BT_SDO_CMD_GPIO   (20)
-#define WIFI_BT_SDO_CLK_GPIO   (22)
-#define WIFI_BT_SDO_D3_GPIO    (19)
-#define WIFI_BT_SDO_D2_GPIO    (18)
-#define WIFI_BT_SDO_D1_GPIO    (17)
-#define WIFI_BT_SDO_D0_GPIO    (16)
-#define WIFI_BT_UART_TX_GPIO   (41)
-#define WIFI_BT_UART_RX_GPIO   (40)
 #else
 #define CARLINK_EY			0
 #define CARLINK_EC			0
@@ -328,14 +316,11 @@
 #define USE_LWIP			0
 #endif
 
-#define BT_RESET_IO        46
-#define BT_UART_PORT       1
-
 //#define RELTECK_WIFI_AP_MODE
 /*******************************************/
 
 /************ i2c configuration ************/
-#define HW_I2C0_SUPPORT			//Hardware i2c0 support
+//#define HW_I2C0_SUPPORT			//Hardware i2c0 support
 #define HW_I2C1_SUPPORT			//Hardware i2c1 support
 //#define ANALOG_I2C_SUPPORT		//Analog i2c support
 
@@ -560,4 +545,8 @@ void notify_enter_carback(void);
 void notify_exit_carback(void);
 int get_carback_status(void);
 
+ void aw88082_init(void);
+ int aw_pa_start(void);
+ void aw_pa_stop(void);
+ 
 #endif

@@ -3,7 +3,7 @@
 * Please copy the contents of aw88262.c to the main.c *
 *
 * External API are as follows:
-* 1.aw_init();
+* 1.aw88082_init();
 * 2.aw_pa_start();
 * 3.aw_pa_stop();
 *
@@ -20,12 +20,17 @@
 #include "FreeRTOS.h"
 #include "board.h"
 #include "chip.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
 #define	AW_FAIL		(-1)
 #define	AW_OK		(0)
 
+struct i2c_adapter *adap = NULL;
 
 /* #1.Device I2C address, taking 0x40 as an example*/
-#define    I2C_ADDR    (0x35)
+#define    I2C_ADDR    (0x34)
 
 
 /* #2.Print Function*/
@@ -70,58 +75,111 @@ int i2c_read_func(uint16_t dev_addr, uint8_t reg_addr,
 ****************** Function definition **********************
 *
 ************************************************************/
-extern int i2c_read(unsigned char reg_addr, unsigned int *reg_data);
-extern int i2c_write(unsigned char reg_addr, unsigned int reg_data);
-extern void aw_init(void);
-extern int aw_pa_start(void);
-extern void aw_pa_stop(void);
 
 /******* General I2C Read/Write API *******/
 
 int i2c_read(unsigned char reg_addr, unsigned int *reg_data)
 {
 	int ret = AW_FAIL;
-	unsigned char cnt = 0;
-	unsigned char buf[2] = { 0 };
+	// unsigned char cnt = 0;
+	// unsigned char buf[2] = { 0 };
 	uint16_t data = 0;
 
-	while (cnt < 5) {
-		ret = i2c_read_func(I2C_ADDR, reg_addr, buf, 2);
-		if (ret < 0) {
-			aw_printf("i2c_read cnt=%d error=%d", cnt, ret);
-		} else {
-					data = (uint16_t)(buf[0] & 0x00ff);
-					data <<= 8;
-					data |= (uint16_t)(buf[1] & 0x00ff);
-					*reg_data = data;
-			break;
-		}
-		cnt++;
-	}
+	// while (cnt < 5) {
+	// 	ret = i2c_read_func(I2C_ADDR, reg_addr, buf, 2);
+	// 	if (ret < 0) {
+	// 		aw_printf("i2c_read cnt=%d error=%d", cnt, ret);
+	// 	} else {
+	// 				data = (uint16_t)(buf[0] & 0x00ff);
+	// 				data <<= 8;
+	// 				data |= (uint16_t)(buf[1] & 0x00ff);
+	// 				*reg_data = data;
+	// 		break;
+	// 	}
+	// 	cnt++;
+	// }
 
-	return ret;
+	struct i2c_msg msgs[2];
+	uint8_t wbuf[2];
+	uint8_t rbuf[2] = {0};
+	// int ret;
+	int i;
+
+	wbuf[0] = reg_addr;
+
+	msgs[0].flags = 0;
+	msgs[0].addr  = I2C_ADDR;
+	msgs[0].len   = 1;
+	msgs[0].buf   = wbuf;
+
+	msgs[1].flags = I2C_M_RD;
+	msgs[1].addr  = I2C_ADDR;
+	msgs[1].len   = 2;
+	msgs[1].buf   = rbuf;
+
+	for(i=0; i<5; i++)
+	{
+		ret = i2c_transfer(adap, msgs, 2);
+		if(ret == 2)
+			break;
+	}
+	
+	aw_printf("aw8082 read :%x  %x\n",rbuf[0],rbuf[1]);
+
+	data = (uint16_t)(rbuf[0] & 0x00ff);
+	data <<= 8;
+	data |= (uint16_t)(rbuf[1] & 0x00ff);
+	*reg_data = data;
+	
+	return (ret==ARRAY_SIZE(msgs)) ? 0 : -EIO;
+
 }
 
 int i2c_write(unsigned char reg_addr, unsigned int reg_data)
 {
 	int ret = AW_FAIL;
-	unsigned char cnt = 0;
+	// unsigned char cnt = 0;
 	unsigned char buf[2];
 
 	buf[0] = (reg_data&0xff00)>>8;
 	buf[1] = (reg_data&0x00ff)>>0;
 
-	while (cnt < 5) {
-		ret = i2c_write_func(I2C_ADDR, reg_addr, buf, 2);
-		if (ret < 0) {
-			aw_printf("i2c_write cnt=%d error=%d", cnt, ret);
-		} else {
+	// while (cnt < 5) {
+	// 	ret = i2c_write_func(I2C_ADDR, reg_addr, buf, 2);
+	// 	if (ret < 0) {
+	// 		aw_printf("i2c_write cnt=%d error=%d", cnt, ret);
+	// 	} else {
+	// 		break;
+	// 	}
+	// 	cnt++;
+	// }
+
+	struct i2c_msg msg;
+	uint8_t addr_buf[3];
+	// int ret;
+	int i;
+
+	addr_buf[0] = reg_addr;
+	addr_buf[1] = buf[0];
+	addr_buf[2] = buf[1];
+
+	msg.flags = 0;
+	msg.addr = I2C_ADDR;
+	msg.buf = addr_buf;
+	msg.len = 3;
+
+	for(i=0; i<5; i++)
+	{
+		ret = i2c_transfer(adap, &msg, 1);
+		if(ret == 1)
 			break;
-		}
-		cnt++;
 	}
 
-	return ret;
+	//printf("reg[0x%x], val:0x%x, read:0x%x\n", reg, val, es7243e_i2c_read(client, reg));
+
+	return (ret != 1 ? -EIO : 0);
+
+	// return ret;
 }
 
 /*General I2C Write bits API*/
@@ -143,9 +201,9 @@ int i2c_write_bits(unsigned char reg_addr, unsigned int mask, unsigned int reg_d
 }
 /*NOTE: i2c read/write concurrency is not allowed at this time, please use LOCK protection*/
 
-/******* Relevant internal API of aw_init() *******/
+/******* Relevant internal API of aw88082_init() *******/
 
-/* aw_init():register configuration sequence*/
+/* aw88082_init():register configuration sequence*/
 const uint16_t config_register[] = {
 0x03,0x61FF,
 0x04,0x2246,
@@ -221,12 +279,23 @@ static void aw_reg_update()
 
 
 /*PA initialization API*/
-void aw_init(void)
+void aw88082_init(void)
 {
+	
+	if (!(adap = i2c_open("i2c1"))) {
+		aw_printf("%s, open i2c1 fail.\n", __func__);
+		return ;
+	}
+
 	/*step1:configuration register*/
 	aw_reg_update();
 
-	aw_printf("done");
+	/*step2:   read version*/
+	unsigned int reg_val = 0;
+	i2c_read(0x00,&reg_val);
+	aw_printf("=======> version 0x%x \n",reg_val);
+
+	aw_printf("done \n");
 }
 
 /******* Relevant internal API of aw_pa_stop() *******/
