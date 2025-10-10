@@ -1249,6 +1249,13 @@ static struct ark_mmc_obj mmc0_obj =
     .dma_args = {SDMMC0_RTX, 1, 0},
 };
 
+struct mmcsd_host *g_sdio_host = NULL;
+
+void reset_rescan()
+{
+	mmcsd_change(g_sdio_host);
+}
+
 int ark_mmc_probe(struct ark_mmc_obj *mmc_obj)
 {
     struct mmc_driver *mmc_drv;
@@ -1303,6 +1310,7 @@ int ark_mmc_probe(struct ark_mmc_obj *mmc_obj)
 	{
 		ark_mmc_enable_sdio_irq(host, 1);
 		mmcsd_change(host);
+        g_sdio_host = host;
 	}
 
     TRACE_DEBUG("%s end\n", __func__);

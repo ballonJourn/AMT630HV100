@@ -10,6 +10,7 @@ Note    : The size the code(*.bin) loaded should never exceed 10K Bytes.
 History : From the ark2116 SoC boot rom code file.
 ***********************************************************************
 */
+#include "hcn_config.h"
 #include "typedef.h"
 #include "amt630h.h"
 #include "BootModeSel.h"
@@ -392,6 +393,7 @@ void main(void)
 	unsigned int val;
 
 	//set all io drive to 4ma(default 8ma).
+#if 0
 	rSYS_IO_DRIVER00=0x55555555;
 	rSYS_IO_DRIVER01=0x55555555;
 	rSYS_IO_DRIVER02=0x55555555;
@@ -399,7 +401,16 @@ void main(void)
 	rSYS_IO_DRIVER04=0x55555555;
 	rSYS_IO_DRIVER05=0x55555555;
 	rSYS_IO_DRIVER06=0x55555555;
-
+#else
+	rSYS_IO_DRIVER00=0x00000000;
+	rSYS_IO_DRIVER01=0x00000000;
+	rSYS_IO_DRIVER02=0x00000000;
+	rSYS_IO_DRIVER03=0x00000000;
+	rSYS_IO_DRIVER04=0x00000000;
+	rSYS_IO_DRIVER05=0x00000000;
+	rSYS_IO_DRIVER06=0x00000000;
+	rSYS_IO_DRIVER07=0x00000000;
+#endif
 #if PROJECT_PURPOSE == PROJECT_FOR_LAUNCH_EMMC
 	timer_init();
 	InitUart(115200);
@@ -411,7 +422,9 @@ void main(void)
 	SwitchTo24MHz();
 	timer_init();		
 	InitUart(115200);
-	SendUartString("\nARK AMT630Hv100 AMTLDR 0906_700M\n");
+	SendUartString("\nARK AMT630Hv100 AMTLDR 0906_600M\n");
+	SendUartString("\nARK AMT630Hv100 sys all drive io 2ma\n");
+
 /*
 	val = rSYS_ANA1_CFG;
 	val |= (1 << 4)|(5 << 1);

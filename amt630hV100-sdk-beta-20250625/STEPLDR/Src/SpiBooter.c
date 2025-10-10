@@ -594,6 +594,11 @@ static void SpiLoadImage(void (*readfunc)(UINT32, UINT32 *))
 	readfunc(sysinfo->image_offset / BYTESPERPAGE, buf);
 	header = (UpFileHeader*)buf;
 	appfile = &header->files[0];
+    PrintVariableValueHex("header_size", header->size);
+    PrintVariableValueHex("header_reserve1", header->reserved1);
+    PrintVariableValueHex("header_reserve2", header->reserved2);
+    PrintVariableValueHex("appfile_offset", appfile->offset);
+    PrintVariableValueHex("appfile_size", appfile->size);
 	if (appfile->offset & (BYTESPERPAGE - 1)) {
 		SendUartString("\nImage positon is not align to flash pagesize, can't load.\r\n");
 		while(1);
@@ -603,6 +608,7 @@ static void SpiLoadImage(void (*readfunc)(UINT32, UINT32 *))
 		appsize = sysinfo->app_size;
 	else
 		appsize = appfile->size;
+        PrintVariableValueHex("appsize", appsize);
 	nPageCount = (appsize + BYTESPERPAGE - 1) / BYTESPERPAGE;
 	nPageStart = (appfile->offset + sysinfo->image_offset) / BYTESPERPAGE;
 	for(i = nPageStart; i < nPageStart + nPageCount; i++)

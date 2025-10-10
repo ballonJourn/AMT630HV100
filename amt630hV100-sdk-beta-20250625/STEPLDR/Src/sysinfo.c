@@ -16,17 +16,27 @@ SysInfo *GetSysInfo(void)
 
 void SetDefaultSysInfo(void)
 {
+#if 0
 #if DEVICE_TYPE_SELECT != EMMC_FLASH
 	sysinfo.update_media_type = UPDATE_MEDIA_SD;
+  
 #else
 	sysinfo.update_media_type = UPDATE_MEDIA_USB;
     sysinfo.loader_offset = LOADERB_OFFSET;
     sysinfo.loader_size = LOADER_MAX_SIZE;
     sysinfo.image_offset = IMAGEB_OFFSET;
-#endif		
+#endif	
+
 	sysinfo.update_status = UPDATE_STATUS_START;
 	sysinfo.stepldr_offset = STEPLDRB_OFFSET;
 	sysinfo.stepldr_size = STEPLDR_MAX_SIZE;
+#endif
+	sysinfo.update_status = UPDATE_STATUS_END;
+	sysinfo.loader_offset = LOADER_OFFSET;
+	sysinfo.loader_size = LOADER_MAX_SIZE;
+	sysinfo.stepldr_offset = STEPLDRA_OFFSET;
+	sysinfo.stepldr_size = STEPLDR_MAX_SIZE;
+	sysinfo.image_offset = IMAGE_OFFSET;
 }
 
 int ReadSysInfo(void)

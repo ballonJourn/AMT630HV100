@@ -4409,6 +4409,12 @@
                         <name>$PROJ_DIR$\..\app\hcn\hal\hal_pwm\hal_pwm.c</name>
                     </file>
                 </group>
+                <group>
+                    <name>hal_wifi</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\hal\hal_wifi\hal_wifi.c</name>
+                    </file>
+                </group>
             </group>
             <group>
                 <name>mw</name>
@@ -4440,6 +4446,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>io_module</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\io_module\hcn_gpio_light.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>key_module</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\key_module\hcn_adc_key.c</name>
@@ -4449,6 +4461,12 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\key_module\hcn_key_common.c</name>
+                    </file>
+                </group>
+                <group>
+                    <name>light_sensor</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\light_sensor\hcn_light_sensor.c</name>
                     </file>
                 </group>
                 <group>
