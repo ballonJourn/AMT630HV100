@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "audio.h"
 
 int hal_audio_set_volume(uint32_t v);
 void hal_audio_write_audio_buf(struct audio_device *audio, const void *buffer, size_t size);
