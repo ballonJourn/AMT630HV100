@@ -133,7 +133,7 @@ static void can_recv_msg_process(CanMsg *pMsg) {
         return;
     }
 
-#ifdef  CAN_RX_DEBUG
+#ifdef CAN_RX_DEBUG
     hcn_hex_config_data_print(__FUNCTION__, ":recv(0x)", pMsg->Data, pMsg->DLC);
 #endif
 
@@ -182,14 +182,16 @@ static void can_rxdemo_thread(void *param) {
 }
 
 int can_module_init(void) {
-    CanPort_t *cap = xCanOpen(CAN_ID0);
+    CanPort_t *cap = xCanOpen(CAN_ID1);
     if (!cap) {
         hcn_log_error("open can %d failed!\n", CAN_ID1);
         return -1;
     }
 
-    hal_gpio_set_output(CAN_STB_GPIO, 0);
-    
+    hal_gpio_set_output(23, 1);
+    hal_gpio_set_output(24, 1);
+    vTaskDelay(pdMS_TO_TICKS(2));
+    hal_gpio_set_output(58, 0);
     vCanInit(cap, CAN500kBaud, CAN_MODE_NORMAL);
 
 #if 0
