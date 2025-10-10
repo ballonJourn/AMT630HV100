@@ -67,7 +67,6 @@ typedef enum {
 int gpio_key_init(void);
 
 
-
 #endif //HCN_IO_KEY_ENABLE
 
 #ifdef __cplusplus
