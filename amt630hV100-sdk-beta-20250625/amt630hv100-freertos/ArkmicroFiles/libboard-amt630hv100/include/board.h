@@ -320,7 +320,7 @@
 /*******************************************/
 
 /************ i2c configuration ************/
-//#define HW_I2C0_SUPPORT			//Hardware i2c0 support
+// #define HW_I2C0_SUPPORT			//Hardware i2c0 support
 #define HW_I2C1_SUPPORT			//Hardware i2c1 support
 //#define ANALOG_I2C_SUPPORT		//Analog i2c support
 
@@ -545,8 +545,9 @@ void notify_enter_carback(void);
 void notify_exit_carback(void);
 int get_carback_status(void);
 
+
  void aw88082_init(void);
  int aw_pa_start(void);
  void aw_pa_stop(void);
- 
+
 #endif
