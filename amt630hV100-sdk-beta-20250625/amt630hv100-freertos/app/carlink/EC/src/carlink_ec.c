@@ -605,8 +605,8 @@ void* initECTiny(void* param)
     snprintf(uuid, sizeof(uuid), "%s", HCN_CHINESE_UUID);
 #endif
 
-	EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
-    //EC_setBaseConfig(mECTinyCfg, uuid, ECSDK_VERSION, "B:/");
+	//EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
+    EC_setBaseConfig(mECTinyCfg, uuid, ECSDK_VERSION, "B:/");
 
     int32_t value = EC_SUPPORT_CONNECT_WIFIDIRECT;
     EC_setCommonConfig1(mECTinyCfg, "car_supportConnect", value);
@@ -671,8 +671,6 @@ void* initECTiny(void* param)
     EC_initialize(mECTinyCfg, mECTinyCallback);
 
     printf("\r\n6.set log info\r\n");
-
-#define HCN_DEBUG_CARLINK_LOG_LEVEL
 
 #ifdef HCN_DEBUG_CARLINK_LOG_LEVEL
 	EC_setLogInfo(EC_LOG_LEVEL_DEBUG, EC_LOG_OUT_STD, NULL, EC_LOG_MODULE_SDK | EC_LOG_MODULE_APP);

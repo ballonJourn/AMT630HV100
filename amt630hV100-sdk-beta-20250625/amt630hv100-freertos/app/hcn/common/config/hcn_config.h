@@ -130,6 +130,7 @@ extern "C" {
 ///< CAN功能
 #define CAN_MODULE_ENABLE
 #define CAN_STB_GPIO   (58)
+//#define DEBUG_CAN_INFO_ENABLE
 
 ///< BT_WIFI模块类型
 #define FSC_BW121       (1)

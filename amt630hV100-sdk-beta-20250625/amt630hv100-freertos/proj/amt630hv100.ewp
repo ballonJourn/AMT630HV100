@@ -3127,7 +3127,7 @@
                     <state>$PROJ_DIR$\..\lib\vg_driver\VG_DRIVER_AWTK.a</state>
                     <state>$PROJ_DIR$\..\lib\awtk\awtk_rgb565.a</state>
                     <state>$PROJ_DIR$\..\lib\awtk\nanovg.a</state>
-                    <state>$PROJ_DIR$\..\lib\wlan\rtl8821cs\wlan_lib\wlan_lib_rs440_v1.3.a</state>
+                    <state>$PROJ_DIR$\..\lib\wlan\rtl8821cs\wlan_lib\wlan_lib_rs440_v1.4.a</state>
                     <state>$PROJ_DIR$\..\lib\bt\fsc_bt\lib\blueware.a</state>
                     <state>$PROJ_DIR$\..\app\carlink\EC\lib\ECTiny.a</state>
                     <state>$PROJ_DIR$\..\lib\faad2\libfaad.a</state>

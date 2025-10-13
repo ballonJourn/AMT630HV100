@@ -69,15 +69,16 @@ reset_wifi:
         goto reset_wifi;
     }
 
-    //rtlk_wlan_set_wifi_log(0); ///< 关闭或打开wifi打印
+    extern void rtlk_wlan_set_wifi_log(uint8_t enable);
+    rtlk_wlan_set_wifi_log(0); ///< 关闭或打开wifi打印
+
     //enable_btco_log();		///< 开启wifi btco
 
     set_carlink_display_info(0, 0, HCN_LCD_EC_WIDTH, HCN_LCD_EC_HEIGHT);
     set_carlink_video_info(HCN_LCD_EC_WIDTH, HCN_LCD_EC_HEIGHT, 30);
     carlink_ec_init(0, NULL);
 
-    // while (get_self_check_done_state() != SYS_SELF_CHECK_DONE)
-    { vTaskDelay(pdMS_TO_TICKS(200)); }
+    vTaskDelay(pdMS_TO_TICKS(200)); 
 
     hcn_log_info("wifi init ok!\n");
 
