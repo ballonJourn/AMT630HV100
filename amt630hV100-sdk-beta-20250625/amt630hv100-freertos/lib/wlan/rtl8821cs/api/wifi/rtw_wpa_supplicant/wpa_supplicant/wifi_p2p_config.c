@@ -192,7 +192,6 @@ void cmd_wifi_p2p_start_ex(char dev_addr[6])
 #ifdef wifi_RS440
 void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 {
-	printf("====[ouchunhua]goc wifi start=====\r\n");
 	u8 *passphrase = "12345678";
 #if CONFIG_CUSTOMER_REQUEST_ITE //for 5G channel
 	u8 channel = 40;	// 36, 40, 44, 48
@@ -243,7 +242,6 @@ void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 #else
 void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 {
-	printf("====[ouchunhua]fsc wifi start=====\r\n");
 	u8 *passphrase = "12345678";
 #if CONFIG_CUSTOMER_REQUEST_ITE //for 5G channel
 	u8 channel = 40;	// 36, 40, 44, 48

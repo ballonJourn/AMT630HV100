@@ -2189,6 +2189,12 @@
             <name>$PROJ_DIR$\Src\pinctrl.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\Src\pwm.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Src\pwm.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\Src\pxp.c</name>
         </file>
         <file>

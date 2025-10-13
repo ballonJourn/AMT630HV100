@@ -19,7 +19,7 @@
 #include "semphr.h"
 #include "log/hcn_log.h"
 
-#define DEBUG_HCN_CHECK_SELF
+//#define DEBUG_HCN_CHECK_SELF
 
 #ifdef DEBUG_HCN_CHECK_SELF
 
