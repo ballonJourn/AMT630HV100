@@ -41,6 +41,7 @@ int32_t vehicle_get_data_signal_lamp(veh_signal_e lamp)
     return VEH_INVALID_VALUE;
 }
 
+
 int32_t vehicle_get_data_speed()
 {
 #if !ON_PC_CACLE
@@ -50,6 +51,7 @@ int32_t vehicle_get_data_speed()
 
     return 0 ; 
 }
+
 
 int32_t vehicle_get_data_rpm()
 {
@@ -61,7 +63,9 @@ int32_t vehicle_get_data_rpm()
     return 0 ; 
 }
 
-int32_t vehicle_get_data_gear() {
+
+int32_t vehicle_get_data_gear() 
+{
 #if !ON_PC_CACLE
     int32_t gear_id = vehicle_get_data(VEH_GEAR_POSITION);
     return (gear_id > GEAR_R) ?  VEH_INVALID_VALUE : gearMaps[gear_id] ;
@@ -71,7 +75,9 @@ int32_t vehicle_get_data_gear() {
 
 }
 
-int32_t vehicle_get_data_power() {
+
+int32_t vehicle_get_data_power() 
+{
 
 #if !ON_PC_CACLE
     int32_t power = vehicle_get_data(VEH_TRAM_POWR);

@@ -1,6 +1,6 @@
 #ifndef HOME_MILEAGE_VIEW_H
 #define HOME_MILEAGE_VIEW_H
-#include "./common.h"
+#include "common.h"
 
 enum home_mileage_com{
     TRIP_LABEL      ,

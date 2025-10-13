@@ -1,6 +1,7 @@
 #include "home_page_key.h"
 #include "../view_manager.h"
 #include "view/set_view/setting_menu.h"
+#include "view/set_view/set_page_key.h"
 #include "home_view_interface.h"
 #include "common/navigator.h"
 
@@ -12,8 +13,7 @@ void home_page_deal_key_set()
         case ICON_INFO:
             /* code */
             break;
-        case ICON_NAVI:
-            navigator_switch_to(LINK_PAGE , false);
+        case ICON_NAVI: navigator_switch_to(LINK_PAGE , false);
             break;
         case ICON_MUSIC:
             set_current_level(MENU_LEVEL_1);
@@ -22,13 +22,12 @@ void home_page_deal_key_set()
             break;
         case ICON_PHONE:
             // if (bt_call_is_connect)
-            // {
+            // { to do
             // }
             break;
         case ICON_SETTING:
             set_current_level(MENU_LEVEL_1);
-            setting_menu_init();
-            // set_focused_item();
+            setting_menu_set_focused_item(get_current_menu_index());
             break;
         default:
             break;
@@ -67,9 +66,6 @@ void home_page_deal_key_down ()
     int index =  get_current_win() ;
     index = (index + 1) % (ICON_SETTING + 1) ;
 
-    //设置页面参数
-    set_current_win(index) ;
-    
     //刷新页面
     set_dock_view(index) ;
 }
@@ -79,9 +75,6 @@ void home_page_deal_key_up   ()
     int index =  get_current_win() ;
     index = (index - 1 + ICON_MUSIC_EX ) % (ICON_SETTING + 1) ;
 
-    //设置页面参数
-    set_current_win(index) ;
-    
     //刷新页面
     set_dock_view(index) ;
     

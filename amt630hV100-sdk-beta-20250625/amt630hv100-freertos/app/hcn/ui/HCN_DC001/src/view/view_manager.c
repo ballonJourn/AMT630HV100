@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "home_view/music_page_key.h"
-#include "home_view/home_page_key.h"
 #include "set_view/set_page_key.h"
-#include "home_view/dock_view.h"
+#include "home_view/home_view_interface.h"
 #include "proxy/vehicle_data.h"
 #include "common/navigator.h"
 #include "view_manager.h"
+#include "link_view/link_page_key.h"
 
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
@@ -14,9 +13,8 @@
 
 static dock_view_e current_dock = ICON_INFO ;     //
 
-static menu_level_e current_level = MENU_LEVEL_0 ;   //初始状态为0级别 进去music 、setting为二级  setting进入选项为三级 时间调整为四级
+static menu_level_e current_level = MENU_LEVEL_0 ;   //初始状态为0级别 进去music 、setting为一级  setting进入选项为二级 时间调整为三级
 
-// static menu_list_e current_list_item = MENU_SET_TMPS ;  //应该丢到设置页面当中
 
 const char* window_name_str[WINDOWS_NUM_MAX] = {
     "pages" , "dock_slider_view" 
@@ -25,16 +23,22 @@ const char* window_name_str[WINDOWS_NUM_MAX] = {
 static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
 
 
-#define HCN_KEY_DISPATCH(key_type) do {                                               \
-    if ((current_level) == (MENU_LEVEL_0)) {                                          \
-        home_page_deal_key_##key_type();                                              \
-    } else if (((current_level) == (MENU_LEVEL_1)) && ((current_dock) == (ICON_MUSIC))) { \
-        music_page_deal_key_##key_type();                                             \
-    } else {                                                                          \
-        set_page_deal_key_##key_type();                                               \
-    }                                                                                 \
-} while (0);;                                                                        
-
+#define HCN_KEY_DISPATCH(keyType)      do {                                                           \
+            widget_t* top_win_ = window_manager_get_top_window(window_manager());                     \
+            if (top_win_ == NULL) return;                                                             \
+            const char* top_win_name = top_win_->name;                                                \
+            if (tk_str_eq(top_win_name, HOME_PAGE)) {                                                 \
+                if ((current_level) == (MENU_LEVEL_0)) {                                              \
+                    home_page_deal_key_##keyType();                                                   \
+                } else if (((current_level) == (MENU_LEVEL_1)) && ((current_dock) == (ICON_MUSIC))) { \
+                    music_page_deal_key_##keyType();                                                  \
+                } else {                                                                              \
+                    set_page_deal_key_##keyType();                                                    \
+                }                                                                                     \
+            } else if (tk_str_eq(top_win_name, LINK_PAGE)) {                                          \
+                link_page_deal_key_##keyType();                                                       \
+            }                                                                                         \
+        } while(0);        
 
 
 static ret_t on_key_event(void* ctx, event_t* e) {
@@ -61,7 +65,11 @@ static ret_t on_key_event(void* ctx, event_t* e) {
             printf("Unhandled key event: %u", key);
             break;
         }
-    }   
+    }
+    else if (e->type == EVT_KEY_LONG_PRESS){
+        get_demonstration_state() ? demonstration_stop() : demonstration_start();
+        printf("EVT_KEY_LONG_PRESS \n");
+    }
     return RET_OK;
 }
 
@@ -71,11 +79,24 @@ static void hcn_key_cb(uint8_t id)
     printf( "set_key_cb key = %d \n", id) ;
     switch (id)
     {
-    case  SET_KEY_LONG_PR :
-        navigator_switch_to(LINK_PAGE , false)   ;
+    case  SET_KEY_LONG_PR   :
+        get_demonstration_state() ? demonstration_stop() : demonstration_start();
         break;
+
     case  BACK_KEY_SHORT_PR :
-        navigator_back_to_home( )   ;
+        deal_key_back_short_press() ;
+        break;
+
+    case  SET_KEY_SHORT_PR  :
+        deal_key_set_short_press()  ;
+        break;
+
+    case  UP_KEY_SHORT_PR   :
+        deal_key_up_short_press()   ;
+        break;
+
+    case  MODE_KEY_SHORT_PR :
+        deal_key_down_short_press() ;
         break;
     default:
         break;
@@ -93,6 +114,7 @@ ret_t view_manager_init(widget_t* parent)
     }
     
     widget_on( window_manager(), EVT_KEY_DOWN, on_key_event, NULL);
+    widget_on( window_manager(), EVT_KEY_LONG_PRESS, on_key_event, NULL);
 
 #if !ON_PC_CACLE
     set_key_event_cb(hcn_key_cb);
@@ -108,6 +130,8 @@ ret_t set_dock_view(dock_view_e dock_view)
     {
         slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
     }
+
+    set_current_win(dock_view) ;
 
     home_refresh_dock_icon(dock_view) ;
 
@@ -154,24 +178,29 @@ void set_current_level(int cur_level){
 
 void deal_key_set_short_press()
 {
-    HCN_KEY_DISPATCH(set) ;
+    HCN_KEY_DISPATCH(set);
+    return ;
 }
+
 
 void deal_key_back_short_press()
 {
-    HCN_KEY_DISPATCH(back) ;
+    HCN_KEY_DISPATCH(back);
+    return ;
 }
+    
 
 void deal_key_up_short_press()
 {
-    HCN_KEY_DISPATCH(up) ;
+    HCN_KEY_DISPATCH(up);
+    return ;
 }
+
 
 void deal_key_down_short_press()
 {
-   HCN_KEY_DISPATCH(down) ;
-
-   return ;
+    HCN_KEY_DISPATCH(down);
+    return ;
 }
 
 

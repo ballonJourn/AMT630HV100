@@ -100,7 +100,7 @@ ret_t home_refresh_music_state(bool_t isplay)
         // printf("value_t = %s  " , value_str(&v)) ;
         state = (tk_str_cmp(value_str(&v) , STATE_NORMAL) == 0) ? MUSIC_NORMAL : MUSIC_SELECTED ;
         (void)state ;
-        widget_set_style_str(music_state_widget ,STATE_NORMAL "." STYLE_ID_ICON , music_play_state_image_str[MUSIC_NORMAL][is_playing]);
+        widget_set_style_str(music_state_widget ,STATE_NORMAL "." STYLE_ID_ICON ,  music_play_state_image_str[MUSIC_NORMAL][is_playing]);
         widget_set_style_str(music_state_widget ,STATE_SELECTE "." STYLE_ID_ICON , music_play_state_image_str[MUSIC_SELECTED][is_playing]);
     }
     
@@ -112,13 +112,15 @@ void music_ex_view_set_focused_item(music_ex_focused_e focusedIndex)
     int offset = MUSIC_NEXT - MUSIC_FOCUSED_NEXT ;
     for (size_t i = 0; i < MUSIC_FOCUSED_MAX ; i++)
     {
-        if (i == focusedIndex){
-            if (home_dock_music_ex_widget[i + offset])
+        if (home_dock_music_ex_widget[i + offset])
+        {
+            if (i == focusedIndex)
                 widget_set_state(home_dock_music_ex_widget[i + offset], STATE_SELECTE) ;
-        }
-        else{
-            if (home_dock_music_ex_widget[i + offset])
+            else
                 widget_set_state(home_dock_music_ex_widget[i + offset], STATE_NORMAL ) ;
+
+                
+            widget_invalidate_force(home_dock_music_ex_widget[i + offset] , NULL)  ;
         }
     }
     

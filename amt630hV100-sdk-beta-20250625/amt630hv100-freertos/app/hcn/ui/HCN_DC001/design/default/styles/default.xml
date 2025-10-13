@@ -1,3 +1,13 @@
+<bar_series>
+  <style name="default">
+    <normal fg_color="#0070C0" margin_left="4" margin_right="4"/>
+  </style>
+</bar_series>
+<bar_series_minmax>
+  <style name="default">
+    <normal fg_color="#0070C0" margin_left="4" margin_right="4" round_radius="20"/>
+  </style>
+</bar_series_minmax>
 <button>
   <style name="default" bg_color="#F4F4F4" border_color="#338FFF" round_radius="4" text_color="#444444">
     <normal border_color="#C2C2C2"/>
@@ -71,6 +81,11 @@
     <normal bg_color="#FAFAFA" text_color="#444444"/>
   </style>
 </candidates>
+<chart_view>
+  <style name="default">
+    <normal margin_bottom="20" margin_left="20" margin_right="10" margin_top="10"/>
+  </style>
+</chart_view>
 <check_button>
   <style name="default" icon_at="left" text_color="#444444">
     <normal icon="check_n"/>
@@ -203,9 +218,21 @@
     <normal text_color="#444444"/>
     <disable text_color="#44444466"/>
   </style>
+  <style name="clock_option" font_size="80" text_color="#FFFFFF">
+    <normal/>
+    <selected bg_color="#0085A464" selected_text_color="#00000000"/>
+  </style>
+  <style name="ride_menu" font_size="20" round_radius="8" text_color="#FFFFFF">
+    <normal bg_color="#595959"/>
+    <selected bg_color="#0085A464" selected_text_color="#00000000"/>
+  </style>
   <style name="setting_menu" font_size="30" icon_at="left">
     <normal font_name="default" icon="box" text_color="#FFFFFF"/>
     <selected icon="setting_menu_selec" selected_text_color="#00000000" text_color="#79D9F9"/>
+  </style>
+  <style name="setting_option" bg_image_draw_type="icon" font_size="26" icon="">
+    <normal bg_image="" text_color="#FFFFFF"/>
+    <selected bg_image="setting_selected" selected_text_color="#00000000" text_color="#2BF8FF"/>
   </style>
 </label>
 <line_number>
@@ -214,6 +241,16 @@
     <disable bg_color="#D0D0D066" text_color="#44444466"/>
   </style>
 </line_number>
+<line_series>
+  <style name="default">
+    <normal area_color="#338FFF66" line_border_color="#338FFF" line_border_width="1" symbol_bg_color="#FFFFFF" symbol_border_color="#338FFF" symbol_round_radius="4"/>
+  </style>
+</line_series>
+<line_series_colorful>
+  <style name="default">
+    <normal line_border_width="1" symbol_border_color="#FFC393" symbol_round_radius="4"/>
+  </style>
+</line_series_colorful>
 <list_item>
   <style name="default" border_color="#E9E9E9" text_color="#444444">
     <normal bg_color="#FFFFFF"/>
@@ -254,6 +291,11 @@
     <normal border_color="#C2C2C2"/>
   </style>
 </pages>
+<pie_slice>
+  <style name="default">
+    <normal fg_color="#A0A0A0" text_color="#213B4D"/>
+  </style>
+</pie_slice>
 <popup>
   <style name="default">
     <normal bg_color="#FFFFFF" border_color="#C2C2C2"/>
@@ -414,6 +456,11 @@
     <disable border_color="#C2C2C266" mask_color="#C0C0C0" text_color="#44444466"/>
   </style>
 </text_selector>
+<tooltip>
+  <style name="default">
+    <normal bg_color="#26262666" fg_color="#CCCCCC" margin="4" round_radius="4" symbol_bg_color="#FFFFFF" symbol_border_color="#262626" symbol_border_width="3" symbol_round_radius="4" text_color="#FFFFFF"/>
+  </style>
+</tooltip>
 <view>
   <style name="default">
     <has_value has_value="1"/>
@@ -424,48 +471,13 @@
     <normal bg_color="#FFFFFF"/>
   </style>
 </window>
-<pie_slice>
-  <style name="default">
-    <normal fg_color="#a0a0a0" text_color="#213b4d"/>
-  </style>
-</pie_slice>
-<chart_view>
-  <style name="default">
-    <normal margin_bottom="20" margin_left="20" margin_right="10" margin_top="10"/>
-  </style>
-</chart_view>
-<tooltip>
-  <style name="default">
-    <normal fg_color="#cccccc" bg_color="#26262666" text_color="#ffffff" round_radius="4" symbol_border_color="#262626" symbol_border_width="3" symbol_bg_color="#ffffff" symbol_round_radius="4" margin="4"/>
-  </style>
-</tooltip>
-<line_series>
-  <style name="default">
-    <normal line_border_color="#338fff" line_border_width="1" area_color="#338fff66" symbol_border_color="#338fff" symbol_bg_color="#ffffff" symbol_round_radius="4"/>
-  </style>
-</line_series>
-<bar_series>
-  <style name="default">
-    <normal margin_left="4" margin_right="4" fg_color="#0070c0"/>
-  </style>
-</bar_series>
 <x_axis>
   <style name="default">
-    <normal text_color="#444444" font_size="16" split_line_color="#c2c2c2" tick_color="#c2c2c2" fg_color="#c2c2c2"/>
+    <normal fg_color="#C2C2C2" font_size="16" split_line_color="#C2C2C2" text_color="#444444" tick_color="#C2C2C2"/>
   </style>
 </x_axis>
 <y_axis>
   <style name="default">
-    <normal text_color="#444444" font_size="16" split_line_color="#c2c2c2" tick_color="#c2c2c2" fg_color="#c2c2c2"/>
+    <normal fg_color="#C2C2C2" font_size="16" split_line_color="#C2C2C2" text_color="#444444" tick_color="#C2C2C2"/>
   </style>
 </y_axis>
-<line_series_colorful>
-  <style name="default">
-    <normal line_border_width="1" symbol_border_color="#ffc393" symbol_round_radius="4"/>
-  </style>
-</line_series_colorful>
-<bar_series_minmax>
-  <style name="default">
-    <normal margin_left="4" margin_right="4" fg_color="#0070c0" round_radius="20"/>
-  </style>
-</bar_series_minmax>

@@ -43,7 +43,7 @@
     <label name="electrical_value" x="296" y="8" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999"/>
     <label name="electrical_unit" x="348" y="8" w="41" h="28" style:normal:text_color="#327889" style:normal:font_size="28" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
   </view>
-  <pages name="pages" x="0" y="77" w="800" h="326" style:normal:border_color="#00000000" value="1">
+  <pages name="pages" x="0" y="77" w="800" h="326" style:normal:border_color="#00000000" value="0">
     <view name="home_pg" x="0" y="0" w="100%" h="100%">
       <view name="speed_view" x="237" y="0" w="326" h="326" animation="move(name=move_speed_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=237,x_to=454,y_from=77,y_to=77);move(name=move_speed_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=454,x_to=237,y_from=77,y_to=77)">
         <image name="bg_cricle" x="0" y="0" w="326" h="326" draw_type="default" image="bg_cricle"/>
@@ -65,24 +65,24 @@
         <image_value name="power_value" x="64" y="72" w="141" h="78" image="power_" format="%d" value="100" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
         <slider min="0" name="power_progress" x="40" y="200" w="181" h="21" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="2" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" style="default"/>
       </view>
-      <view name="dock_selec_view" x="0" y="18" w="276" h="290">
-        <slide_view name="dock_slider_view" x="0" y="0" w="100%" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="icon" vertical="true" animating_time="500" auto_play="0" animation="w(name=move_dock_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,from=276,to=486);w(name=move_dock_in,duration=350,easing=linear,auto_start=false,auto_destroy=false,from=486,to=276)">
-          <view name="info_page" x="0" y="0" w="100%" h="100%" style:normal:bg_image="">
+      <view name="dock_selec_view" x="0" y="18" w="506" h="290">
+        <slide_view name="dock_slider_view" x="0" y="0" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default" vertical="true" animating_time="500" auto_play="0" animation="w(name=move_dock_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,from=276,to=486);w(name=move_dock_in,duration=350,easing=linear,auto_start=false,auto_destroy=false,from=486,to=276)" w="100%">
+          <view name="info_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="image" x="107" y="48" w="40" h="40" draw_type="default" image="icon_riding_time"/>
             <image name="image1" x="107" y="141" w="40" h="40" draw_type="default" image="icon_riding_distance"/>
             <label name="riding_time" x="69" y="98" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="1H 48min"/>
             <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="100km"/>
           </view>
-          <view name="navi_page" x="0" y="0" w="100%" h="100%">
-            <qr name="qr" x="81" y="63" w="104" h="104" value="https://github.com/zlgopen/awtk" style:activated:bg_image=""/>
+          <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+            <qr name="qr" x="68" y="53" w="132" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image=""/>
             <label name="label2" x="53" y="193" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="扫码连接"/>
           </view>
-          <view name="music_page" x="0" y="0" w="355" h="290">
+          <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="image2" x="100" y="66" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
             <label name="music_title" x="50" y="161" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="Title"/>
             <label name="musiclyric" x="50" y="199" w="160" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
           </view>
-          <view name="phone_page" x="0" y="0" w="100%" h="100%">
+          <view name="phone_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
               <image name="icon_state" x="36" y="57" w="100" h="100" draw_type="default" image="icon_incoming_call"/>
               <label name="phone_tips" x="6" y="0" w="160" h="57" style:normal:text_color="#FFFFFF" word_wrap="false" line_wrap="true" style:normal:font_size="24" text="短按确认键接听\n长按挂断"/>
@@ -92,8 +92,8 @@
               <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
             </view>
           </view>
-          <view name="setting_page" x="0" y="0" w="448" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default"/>
-          <view name="music_expand_page" x="0" y="0" w="506" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default">
+          <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
+          <view name="music_expand_page" x="0" y="0" w="506" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
             <image name="music_image_ex" x="214" y="21" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
             <label name="music_title_ex" x="164" y="100" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="Title"/>
             <label name="music_lyric_ex" x="111" y="138" w="267" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
@@ -114,7 +114,8 @@
         <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" h="50" y="200" text="亮度"/>
         <label name="unit" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="250" text="单位"/>
         <label name="clock" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="300" text="时间"/>
-        <label name="device" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="350" text="设备信息"/>
+        <label name="display" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="350" text="显示设置"/>
+        <label name="device" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="400" text="设备信息"/>
       </scroll_view>
       <list_view name="list_view" x="54" y="38" w="177" h="250" default_item_height="40" style:normal:bg_color="#00000000" item_height="50" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
         <scroll_view name="scroll_menu1" x="0" y="0" w="177" h="250" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
@@ -130,47 +131,94 @@
       </list_view>
       <image name="image5" x="126" y="298" w="28" h="12" draw_type="default" image="setting_page_down_n"/>
       <image name="image6" x="126" y="21" w="28" h="12" draw_type="default" image="setting_page_up_n"/>
-      <slide_view x="227" y="0" w="554" h="326" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
-        <view name="ride_ele_view" x="0" y="0" w="100%" h="100%">
-          <chart_view name="chartview" x="83" y="67" w="398" h="180" style:normal:grid_color="#000000">
-            <x_axis name="x_axis" axis_type="value" min="0" max="10" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[0.0km,1.0km,2.0km,3.0km,4.0km,5.0km]" at="auto" w="471" h="225" style:normal:split_line_color="#00000000" style:normal:tick_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:font_size="16" style:normal:fg_color="#00000000"/>
-            <y_axis name="y_axis" axis_type="value" min="-30" max="90" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[-30,0,30,60,90]" at="right" w="475" style:normal:selected_bg_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:split_line_color="#757070" style:normal:odd_bg_color="#00000000" style:normal:tick_color="#00000000" style:normal:grid_color="#00000000" style:normal:fg_color="#00000000" style:normal:font_size="18"/>
-            <line_series name="line_series" capacity="11" value_animation="500" line="{smooth:false}" area="{show:true}" symbol="{show:true}" series_axis="x_axis" value_axis="y_axis" style:normal:line_border_color="#59E9FF" style:normal:area_color="#00000000" style:normal:line_border_width="3" value="-30,60,0,50,90,-15,40,-10,90,13,60,-5,45,-15" style:normal:symbol_bg_color="#D9E2F2" text=""/>
-            <tooltip name="tooltip" w="448" h="185"/>
-          </chart_view>
-        </view>
+      <slide_view x="275" y="0" w="522" h="326" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
         <view name="tmps_view" x="0" y="0" w="100%" h="100%">
-          <image name="tmps_car" x="137" y="53" w="300" h="201" draw_type="default" image="setting_tire_pressure_bg"/>
-          <progress_bar name="tmps_bar_front" x="51" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
-          <progress_bar name="tmps_bar_near" x="460" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
-          <image name="icon_tmps_front" x="69" y="61" w="40" h="40" draw_type="default" image="icon_tmps_w"/>
-          <image name="icon_tmps_rear" x="478" y="61" w="40" h="40" draw_type="default" image="icon_tmps_n"/>
-          <label name="tmps_value_front" x="73" y="111" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="1.5"/>
-          <label name="label" x="113" y="116" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
-          <label name="tmps_value_rear" x="486" y="117" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="1.5"/>
-          <label name="label4" x="526" y="122" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
-          <label name="tmps_temp_front" x="73" y="225" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="65"/>
-          <label name="label4" x="113" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
-          <label name="tmps_temp_front" x="478" y="225" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="65"/>
-          <label name="label4" x="518" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
+          <image name="tmps_car" x="112" y="53" w="300" h="201" draw_type="default" image="setting_tire_pressure_bg"/>
+          <progress_bar name="tmps_bar_front" x="28" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="80"/>
+          <progress_bar name="tmps_bar_near" x="423" y="61" w="8" h="200" vertical="true" reverse="true" style:normal:fg_color="#FFFFFF" style:normal:bg_color="#FFFFFF19" value="40"/>
+          <image name="icon_tmps_front" x="46" y="61" w="40" h="40" draw_type="default" image="icon_tmps_w"/>
+          <image name="icon_tmps_rear" x="439" y="61" w="40" h="40" draw_type="default" image="icon_tmps_n"/>
+          <label name="tmps_value_front" x="50" y="111" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="1.5"/>
+          <label name="label" x="90" y="116" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
+          <label name="tmps_value_rear" x="447" y="117" w="33" h="36" style:normal:font_size="35" style:normal:text_color="#FFAA00" text="2.5"/>
+          <label name="label4" x="486" y="122" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" text="bar"/>
+          <label name="tmps_temp_front" x="50" y="225" w="36" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="35"/>
+          <label name="label4" x="90" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
+          <label name="tmps_temp_front" x="439" y="225" w="40" h="36" style:normal:font_size="35" style:normal:text_color="#5BB5FF" text="100"/>
+          <label name="label4" x="480" y="230" w="33" h="28" style:normal:text_color="#ffffff64" style:normal:font_size="28" style:normal:text_align_h="left" text="℃"/>
+        </view>
+        <view name="ride_ele_view" x="0" y="0" w="100%" h="100%">
+          <chart_view name="chartview" x="10" y="77" w="424" h="148" style:normal:grid_color="#000000">
+            <x_axis name="x_axis" axis_type="value" min="0" max="10" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[0.0km,1.0km,2.0km,3.0km,4.0km,5.0km]" at="auto" w="471" h="225" style:normal:split_line_color="#00000000" style:normal:tick_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:font_size="16" style:normal:fg_color="#00000000" disg:lock="true"/>
+            <y_axis name="y_axis" axis_type="value" min="-30" max="90" tick="{show:true}" split_line="{show:true}" label="{show:true}" data="[-30,0,30,60,90]" at="right" w="475" style:normal:selected_bg_color="#00000000" style:normal:text_color="#FFFFFF" style:normal:split_line_color="#757070" style:normal:odd_bg_color="#00000000" style:normal:tick_color="#00000000" style:normal:grid_color="#00000000" style:normal:fg_color="#00000000" style:normal:font_size="18" disg:lock="true"/>
+            <line_series name="line_series" capacity="11" value_animation="500" line="{smooth:false}" area="{show:true}" symbol="{show:true}" series_axis="x_axis" value_axis="y_axis" style:normal:line_border_color="#59E9FF" style:normal:area_color="#29d1ff32" style:normal:line_border_width="2" value="-30,60,0,50,90,-15,40,-10,90,13,60,-5,45,-15" style:normal:symbol_bg_color="#D9E2F2" style:normal:symbol_round_radius="3" disg:lock="true" text=""/>
+            <tooltip name="tooltip" w="448" h="185" line="{show:true}" symbol="{show:true,size:3}" tip="{show:true}" y="11" disg:lock="true"/>
+          </chart_view>
+          <label name="label5" x="18" y="29" w="140" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" text="确认后按上下键切换"/>
+          <label name="label5" x="158" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" text="上次骑行"/>
+          <label name="ride_5km" x="239" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" text="近5km"/>
+          <label name="ride_20km" x="321" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" text="近20km"/>
+          <label name="label6" x="252" y="59" w="132" h="20" style:normal:text_color="#FFFFFF" text="电耗（Wh/hm）"/>
+          <label name="label7" x="22" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="上次骑行电耗"/>
+          <label name="last_elec" x="22" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="133.0wh"/>
+          <label name="label7" x="170" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="单次电耗"/>
+          <label name="curr_elec" x="170" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="33.0wh"/>
+          <label name="label7" x="309" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="平均电耗"/>
+          <label name="avg_ele" x="309" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="133.0wh"/>
         </view>
         <view name="connect_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="126" y="44" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="手机连接"/>
+          <label name="label3" x="27" y="34" w="89" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="蓝牙"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="bt_on_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="开"/>
+          <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="关"/>
+          <image name="bt_state" x="394" y="30" w="80" h="40" draw_type="default" image="setting_bluebooth_open"/>
         </view>
         <view name="language" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="137" y="48" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="语言设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="语言设置"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="chinese_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="中文"/>
+          <label name="english_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="英文"/>
         </view>
         <view name="brightness" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="151" y="47" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="亮度"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="亮度设置"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <scroll_view name="brightness_scroll" x="49" y="89" w="450" h="180">
+            <label name="brightness_auto_option" x="0" y="0" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="自动"/>
+            <label name="brightness_1_option" x="0" y="60" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="1"/>
+            <label name="brightness_2_option" x="0" y="120" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="2"/>
+            <label name="brightness_3_option" x="0" y="180" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="3"/>
+            <label name="brightness_4_option" x="0" y="240" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="4"/>
+          </scroll_view>
         </view>
         <view name="unit_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="152" y="52" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="单位"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="单位设置"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="unit_km_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="公制"/>
+          <label name="unit_mile_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="英制"/>
         </view>
         <view name="clock_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="147" y="54" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="时间"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="时间设置"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="clock_h_1" x="160" y="136" w="37" h="85" style="clock_option" text="1"/>
+          <label name="clock_h_2" x="197" y="136" w="37" h="85" style="clock_option" text="8"/>
+          <label name="colon" x="245" y="136" w="37" h="85" style="clock_option" text=":"/>
+          <label name="clock_m_1" x="292" y="136" w="37" h="85" style="clock_option" text="1"/>
+          <label name="clock_m_2" x="329" y="136" w="37" h="85" style="clock_option" text="9"/>
+        </view>
+        <view name="display_view" x="0" y="0" w="100%" h="100%">
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="显示设置"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="display_auto_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="自动"/>
+          <label name="display_day_option" x="49" y="167" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="白天"/>
+          <label name="display_night_option" x="49" y="238" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="黑夜"/>
         </view>
         <view name="device_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="166" y="53" w="238" h="90" style:normal:text_color="#FFFFFF" style:normal:font_size="58" text="设备信息"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="设备信息"/>
+          <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
+          <label name="label3" x="19" y="105" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" text="序列号"/>
+          <label name="device_sn" x="19" y="148" w="420" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="left" text="WDW454A56WD4A56"/>
+          <label name="label3" x="19" y="203" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" text="版本号"/>
+          <label name="device_ver" x="19" y="246" w="420" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="left" text="v1.0.0"/>
         </view>
       </slide_view>
     </view>

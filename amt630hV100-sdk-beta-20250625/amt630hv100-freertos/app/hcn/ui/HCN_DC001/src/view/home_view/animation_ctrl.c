@@ -14,6 +14,20 @@ static char* animation_name[MVOE_NUM_MAX][ANIMATION_TYPE_MAX] = {
 
 static bool is_demo_state = false ;
 
+static int timerId = 0 ;
+
+ret_t _timer_refresh(const timer_info_t *info)
+{
+    if (home_animation_widget[DOCK_SLIDER_VIEW])
+        widget_invalidate_force(home_animation_widget[DOCK_SLIDER_VIEW] , NULL);
+    
+    
+    printf("_timer_refresh \n ");
+    return RET_REPEAT ;
+}
+
+
+
 ret_t home_animation_init(widget_t* parent)
 {
 
@@ -59,9 +73,11 @@ ret_t animation_listen_out(void* ctx, event_t* e)
         printf("animation end\n") ;
         if (home_animation_widget[DOCK_SLIDER_VIEW])
         {
-            widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_p") ;
+            // widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_p") ;
             slide_view_set_active_ex(home_animation_widget[DOCK_SLIDER_VIEW] , ICON_MUSIC_EX , FALSE ) ;
             widget_invalidate_force(home_animation_widget[DOCK_SLIDER_VIEW] , NULL);
+
+            timerId = timer_add( _timer_refresh ,  NULL , 32 ) ;
         }
         
     }
@@ -77,9 +93,14 @@ ret_t animation_listen_in(void* ctx, event_t* e)
     {
         if (home_animation_widget[DOCK_SLIDER_VIEW])
         {
-            widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_n") ;
+            // widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_n") ;
             slide_view_set_active_ex(home_animation_widget[DOCK_SLIDER_VIEW] , ICON_MUSIC , FALSE ) ;
             widget_invalidate_force(home_animation_widget[DOCK_SLIDER_VIEW] , NULL);
+        }
+        
+        if (timerId != 0 && timer_find(timerId))
+        {
+            timer_remove(timerId);
         }
         
     }

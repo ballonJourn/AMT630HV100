@@ -62,6 +62,7 @@ ret_t home_page_init(widget_t* win, void* ctx) {
 
   demonstration_stop() ;
   home_view_init(win) ;
+  set_view_init(win) ;
 
   timer_add(refesh_ui,NULL , 2000);
 

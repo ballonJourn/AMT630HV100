@@ -7,4 +7,6 @@ void set_page_deal_key_up   ();
 void set_page_deal_key_set  ();
 void set_page_deal_key_back ();
 
+
+int get_current_menu_index();
 #endif

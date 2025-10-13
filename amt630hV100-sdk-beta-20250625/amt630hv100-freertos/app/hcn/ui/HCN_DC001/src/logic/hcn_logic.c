@@ -6,14 +6,25 @@
 #include "hcn_selfcheck.h"
 #include "speed_view_logic.h"
 #include "signal_view_logic.h"
-#include "view/set_view/setting_menu.h"
+#include "view/set_view/set_view_interface.h"
 
-#define REFRESH_INTERVAL_10_MS (10)
+#define REFRESH_INTERVAL_33_MS (33)
 #define REFRESH_INTERVAL_50_MS (50)
 #define REFRESH_INTERVAL_500_MS (500)
 #define REFRESH_INTERVAL_1000_MS (1000)
 
 static uint32_t timer_array[REFRESH_TIMER_NUM_MAX] = { 0 } ;
+
+
+ret_t set_view_init(widget_t * win)
+{
+    if(win == NULL) return RET_FAIL ;
+
+    set_cycling_energy_view_init(win) ;
+    set_clock_view_init         (win) ;
+    
+    return RET_OK ;
+}
 
 ret_t home_view_init(widget_t * win)
 {
@@ -59,12 +70,6 @@ ret_t add_timer_init()
 
 ret_t timer_refresh_500_ms(const timer_info_t *info)
 {
-    static bool is_demo_start = false ;
-    if ( checkself_get_state() == CHECK_STATE_FINISHED && (is_demo_start == false) )
-    {
-        //demonstration_start();     is_demo_start = true ; 
-    }
-
     //时间刷新闪烁
     static int  clock_min   = 0 ;
     static int  clock_sec   = 0 ;

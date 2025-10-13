@@ -4,6 +4,7 @@ const char* home_power_widget_name[POWER_NUM_MAX] = {
     "power_value" , "power_progress" 
 } ;
 
+
 static widget_t* home_power_widget[POWER_NUM_MAX] = { NULL };;
 
 

@@ -14,7 +14,7 @@ typedef enum
     REFRESH_TIMER_NUM_MAX,
 }timer_type_e;
 
-
+ret_t set_view_init(widget_t * win);
 
 ret_t home_view_init(widget_t * view) ;
 

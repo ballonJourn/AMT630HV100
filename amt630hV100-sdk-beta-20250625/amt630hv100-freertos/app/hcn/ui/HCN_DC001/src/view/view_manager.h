@@ -2,13 +2,16 @@
 #define VIEW_MANAGER
 
 #include "home_view/dock_view.h"
+
+typedef void (*short_click_deal)();
+
 typedef enum 
 {
-    KEY_ID_UP, 
-    KEY_ID_DOWN,
+    KEY_SHORT_UP, 
+    KEY_SHORT_DOWN,
 
-    KEY_ID_SET, 
-    KEY_ID_MODE,
+    KEY_SHORT_SET, 
+    KEY_SHORT_BACK,
 
 }key_id_e ;
 
