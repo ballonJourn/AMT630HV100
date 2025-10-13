@@ -25,6 +25,7 @@ Author  : Sim
 #include "crc32.h"
 #include "sdmmc.h"
 #include "gpio.h"
+#include "pwm.h"
 
 #include <intrinsics.h>
 
@@ -364,6 +365,11 @@ void main(void)
 	if (pSysInfo->update_status == UPDATE_STATUS_START) {
 		lcd_init();
 		wdt_stop();
+
+		pwm_config(HCN_LCD_PWM_CH, 700000, 1000000);
+		pwm_enable(HCN_LCD_PWM_CH); 
+		gpio_direction_output(HCN_LCD_BL_EN_GPIO, 1);	///< 背光使能
+
 		switch (pSysInfo->update_media_type) {
 		case UPDATE_MEDIA_SD:
 			updateFromSD(0);
