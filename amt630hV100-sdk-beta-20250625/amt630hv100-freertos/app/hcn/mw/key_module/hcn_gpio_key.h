@@ -29,10 +29,10 @@ extern "C" {
 #define KEY_UP    (0)
 #define KEY_DOWN  (1)  
 
-#define KEY_MODE_GPIO           (15)
-#define KEY_UP_GPIO             (14)
-#define KEY_SET_GPIO            (13)
-#define KEY_BACK_GPIO           (12)
+#define KEY_MODE_GPIO           (5)
+#define KEY_UP_GPIO             (1)
+#define KEY_SET_GPIO            (49)
+#define KEY_BACK_GPIO           (4)
 
 #define  UP_KEY    hal_gpio_get_input_value(KEY_UP_GPIO)
 #define  DOWN_KEY  hal_gpio_get_input_value(KEY_MODE_GPIO)
@@ -65,7 +65,6 @@ typedef enum {
  * @return 0:成功 -1:失败 
  */
 int gpio_key_init(void);
-
 
 
 #endif //HCN_IO_KEY_ENABLE

@@ -18,6 +18,7 @@
 #include "key_module/hcn_key_common.h"
 #include "log/hcn_log.h"
 #include "task.h"
+#include "gpio.h"
 
 #ifdef HCN_IO_KEY_ENABLE
 
@@ -84,7 +85,7 @@ static void check_key_status(uint8_t key_status, uint8_t mode) {
 }
 
 static void scan_gpio_key(void) {
-    if (key_up_flag && (UP_KEY || DOWN_KEY || ENTER_KEY || BACK_KEY)) {
+    if (key_up_flag && (!UP_KEY || !DOWN_KEY || !ENTER_KEY || !BACK_KEY)) {
         if (scan_key.defibrate_time <= SCAN_KEY_DEFIBRATE_INDEX - 1) {
             scan_key.defibrate_time++;
         }
@@ -96,15 +97,15 @@ static void scan_gpio_key(void) {
     }
 
     if (scan_key.is_real_key_press &&
-        (UP_KEY || DOWN_KEY || ENTER_KEY || BACK_KEY)) {
+        (!UP_KEY || !DOWN_KEY || !ENTER_KEY || !BACK_KEY)) {
         scan_key.scan_key_time++;
-        if (UP_KEY) {
+        if (!UP_KEY) {
             key_status = UP_KEY_PRESS;
-        } else if (DOWN_KEY) {
+        } else if (!DOWN_KEY) {
             key_status = DOWN_KEY_PRESS;
-        } else if (ENTER_KEY) {
+        } else if (!ENTER_KEY) {
             key_status = ENTER_KEY_PRESS;
-        } else if (BACK_KEY) {
+        } else if (!BACK_KEY) {
             key_status = BACK_KEY_PRESS;
         }
 
@@ -117,7 +118,7 @@ static void scan_gpio_key(void) {
         }
     }
 
-    if (!UP_KEY && !DOWN_KEY && !ENTER_KEY && !BACK_KEY) {
+    if (UP_KEY && DOWN_KEY && ENTER_KEY && BACK_KEY) {
         key_up_flag = 1;
         scan_key.defibrate_time = 0;
         scan_key.is_long_press = false;
@@ -145,7 +146,6 @@ static void gpio_key_thread(void *param) {
     hal_gpio_set_input(KEY_SET_GPIO);
     hal_gpio_set_input(KEY_UP_GPIO);
     hal_gpio_set_input(KEY_BACK_GPIO);
-
     for (;;) {
         scan_gpio_key();
         vTaskDelay(pdMS_TO_TICKS(SCAN_KEY_THREAD_INTERVAL_PERIOD));
@@ -159,6 +159,8 @@ int gpio_key_init(void) {
         hcn_log_error("Create gpio_key_thread failed.\n");
         return -1;
     }
+
+    hcn_log_info("gpio key init ok!\n");
 
     return 0;
 }

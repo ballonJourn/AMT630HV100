@@ -7,6 +7,8 @@ Date    : 2021.08.20
 Author  : Sim
 ***********************************************************************
 */
+
+#include "hcn_config.h"
 #include "typedef.h"
 #include "amt630h.h"
 #include "uart.h"
@@ -22,6 +24,7 @@ Author  : Sim
 #include "fs/diskio.h"
 #include "crc32.h"
 #include "sdmmc.h"
+#include "gpio.h"
 
 #include <intrinsics.h>
 
@@ -310,6 +313,9 @@ readapp:
 		if (calc_checksum != checksum) {
 			SendUartString("app checksum fail, update again.\n");
 		} else {
+#if DEVICE_TYPE_SELECT != EMMC_FLASH
+			//sysinfo->image_offset = IMAGE_OFFSET;
+#endif
 			sysinfo->app_checksum = header->checksum = checksum;
 			sysinfo->app_size = app_size;
 			update_ok = 1;

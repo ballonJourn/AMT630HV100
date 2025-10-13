@@ -3127,7 +3127,7 @@
                     <state>$PROJ_DIR$\..\lib\vg_driver\VG_DRIVER_AWTK.a</state>
                     <state>$PROJ_DIR$\..\lib\awtk\awtk_rgb565.a</state>
                     <state>$PROJ_DIR$\..\lib\awtk\nanovg.a</state>
-                    <state>$PROJ_DIR$\..\lib\wlan\rtl8821cs\wlan_lib\wlan_lib_v2.1.a</state>
+                    <state>$PROJ_DIR$\..\lib\wlan\rtl8821cs\wlan_lib\wlan_lib_rs440_v1.4.a</state>
                     <state>$PROJ_DIR$\..\lib\bt\fsc_bt\lib\blueware.a</state>
                     <state>$PROJ_DIR$\..\app\carlink\EC\lib\ECTiny.a</state>
                     <state>$PROJ_DIR$\..\lib\faad2\libfaad.a</state>
@@ -4409,6 +4409,12 @@
                         <name>$PROJ_DIR$\..\app\hcn\hal\hal_pwm\hal_pwm.c</name>
                     </file>
                 </group>
+                <group>
+                    <name>hal_wifi</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\hal\hal_wifi\hal_wifi.c</name>
+                    </file>
+                </group>
             </group>
             <group>
                 <name>mw</name>
@@ -4440,6 +4446,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>io_module</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\io_module\hcn_gpio_light.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>key_module</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\key_module\hcn_adc_key.c</name>
@@ -4449,6 +4461,12 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\key_module\hcn_key_common.c</name>
+                    </file>
+                </group>
+                <group>
+                    <name>light_sensor</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\light_sensor\hcn_light_sensor.c</name>
                     </file>
                 </group>
                 <group>
@@ -4594,23 +4612,11 @@
                             </group>
                             <group>
                                 <name>link_view</name>
-                                <file>
-                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\link_view\link_page_key.c</name>
-                                </file>
                             </group>
                             <group>
                                 <name>set_view</name>
                                 <file>
-                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\cycling_energy.c</name>
-                                </file>
-                                <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_page_key.c</name>
-                                </file>
-                                <file>
-                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_view_interface.h</name>
-                                </file>
-                                <file>
-                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\setting_clock.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\setting_menu.c</name>
@@ -4750,6 +4756,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\ark7116.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\aw88082.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\ArkmicroFiles\libboard-amt630hv100\source\board_lowlevel.c</name>

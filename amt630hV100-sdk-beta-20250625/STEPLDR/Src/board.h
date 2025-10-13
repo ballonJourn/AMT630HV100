@@ -1,6 +1,9 @@
 #ifndef _BOARD_H
 #define _BOARD_H
 
+///< add hcn config 2025/9/17
+#include "hcn_config.h"
+
 /********** display configuration **********/
 #define LCD_INTERFACE_TTL		0
 #define LCD_INTERFACE_LVDS		1
@@ -41,10 +44,10 @@
 #define LCD_BPP		16
 #define LCD_INTERFACE_TYPE		LCD_INTERFACE_LVDS
 #else
-#define LCD_WIDTH	1024
-#define LCD_HEIGHT	600
+#define LCD_WIDTH	HCN_LCD_WIDTH//1024
+#define LCD_HEIGHT	HCN_LCD_HEIGHT//32
 #define LCD_BPP		16
-#define LCD_INTERFACE_TYPE		LCD_INTERFACE_TTL
+#define LCD_INTERFACE_TYPE		HCN_LCD_INTERFACE_TYPE//LCD_INTERFACE_TTL
 #endif
 
 #define LCD_H_FLIP				0//水平镜像
@@ -58,7 +61,7 @@
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
 #define LCD_WIRING_MODE			LCD_WIRING_MODE_BGR
 #define LCD_WIRING_BIT_ORDER	LCD_WIRING_BIT_ORDER_MSB
-#define LVDS_SCREEN_RST_GPIO	74
+#define LVDS_SCREEN_RST_GPIO	HCN_LVDS_SCREEN_RST_GPIO
 #define LVDS_PANEL_FORMAT		LVDS_PANEL_FORMAT_TI
 #define LVDS_PANEL_DATA			LVDS_PANEL_DATA_8BIT
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_CPU
@@ -73,6 +76,8 @@
 #define VIDEO_DISPLAY_WIDTH			LCD_WIDTH
 #define VIDEO_DISPLAY_HEIGHT		LCD_HEIGHT
 #define VIDEO_DISPLAY_BUF_NUM		2
+
+#ifndef HCN_SCREEN_ENABLE
 
 #if (LCD_WIDTH == 1024 && LCD_HEIGHT == 600)
 #define LCD_TIMING_VBP		1
@@ -125,6 +130,21 @@
 #else
 #error "no lcd timing configuraion."
 #endif
+#else
+
+#if defined (HCN_LCD_TIMING_VBP) && defined(HCN_LCD_TIMING_VFP) && defined(HCN_LCD_TIMING_VSW) && defined(HCN_LCD_TIMING_HBP) && defined(HCN_LCD_TIMING_HFP) && defined(HCN_LCD_TIMING_HSW) && defined(HCN_LCD_CLK_FREQ)
+#define LCD_TIMING_VBP		HCN_LCD_TIMING_VBP 
+#define LCD_TIMING_VFP		HCN_LCD_TIMING_VFP 
+#define LCD_TIMING_VSW	    HCN_LCD_TIMING_VSW 
+#define LCD_TIMING_HBP		HCN_LCD_TIMING_HBP 
+#define LCD_TIMING_HFP		HCN_LCD_TIMING_HFP 
+#define LCD_TIMING_HSW	    HCN_LCD_TIMING_HSW 
+#define LCD_CLK_FREQ		HCN_LCD_CLK_FREQ
+#else
+#error "no lcd timing configuraion."
+#endif
+
+#endif
 /*******************************************/
 
 /*********** uart configuration ************/
@@ -140,6 +160,8 @@
 /************ spi configuration ************/
 #define SPI0_QSPI_MODE
 /*******************************************/
+
+/************ watch dog io ************/
 
 /************ i2c configuration ************/
 //#define I2C_SUPPORT

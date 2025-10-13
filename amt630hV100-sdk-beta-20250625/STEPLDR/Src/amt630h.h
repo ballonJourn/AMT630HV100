@@ -378,16 +378,16 @@ typedef enum IRQn
 #define SYSINFOB_OFFSET									0x3e000
 #define SYSINFO_MAX_SIZE								0x1000
 
-#define IMAGE_OFFSET									0x40000
-#define IMAGE_MAX_SIZE									0xb00000
+#define IMAGE_OFFSET									  0x40000
+#define IMAGE_MAX_SIZE									0xf00000
 #ifdef OTA_UPDATE_SUPPORT
-#define IMAGEB_OFFSET									0xc00000
+#define IMAGEB_OFFSET									  0x1000000
 #else
 #define IMAGEB_OFFSET									IMAGE_OFFSET
 #endif
 #define IMAGE_READ_SIZE									0x10000
 
-#define OTA_OFFSET										0x1800000
+#define OTA_OFFSET									    0x01f00000
 
 #define LOADER_FILE_NAME								"spildr.bin"
 #define STEPLDR_FILE_NAME								"stepldr.bin"

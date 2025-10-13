@@ -18,6 +18,8 @@
 #include "sfud.h"
 #include "carlink_common.h"
 #include "carlink_video.h"
+#include "config/hcn_config.h"
+#include "log/hcn_log.h"
 
 #if CARLINK_EC
 #include "ECTiny.h"
@@ -596,6 +598,13 @@ void* initECTiny(void* param)
 
 	sprintf(uuid, "CARBIT%s", bt_mac);
 	printf("carbit  uuid :%s\r\n", uuid);
+
+#ifdef HCN_CARLINK_PROTOTYPE_MODE
+    memset(uuid, 0, sizeof(uuid));
+    hcn_log_info("use prototype mode uuid:%s\r\n", HCN_CHINESE_UUID);
+    snprintf(uuid, sizeof(uuid), "%s", HCN_CHINESE_UUID);
+#endif
+
 	//EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
     EC_setBaseConfig(mECTinyCfg, uuid, ECSDK_VERSION, "B:/");
 
@@ -662,7 +671,12 @@ void* initECTiny(void* param)
     EC_initialize(mECTinyCfg, mECTinyCallback);
 
     printf("\r\n6.set log info\r\n");
+
+#ifdef HCN_DEBUG_CARLINK_LOG_LEVEL
+	EC_setLogInfo(EC_LOG_LEVEL_DEBUG, EC_LOG_OUT_STD, NULL, EC_LOG_MODULE_SDK | EC_LOG_MODULE_APP);
+#else
     EC_setLogInfo(EC_LOG_LEVEL_ERROR, EC_LOG_OUT_STD, NULL, EC_LOG_MODULE_SDK | EC_LOG_MODULE_APP);
+#endif
 
     printf("\r\n7.set Mirror config\r\n");
     EC_setMirrorConfig(&mirrorCfg);

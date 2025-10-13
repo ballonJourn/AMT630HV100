@@ -19,7 +19,7 @@
 
 void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data,
                               uint8_t length) {
-#define HCN_HEX_CONFIG_OUTPUT_LEN 260
+#define HCN_HEX_CONFIG_OUTPUT_LEN 512
     char buffer[HCN_HEX_CONFIG_OUTPUT_LEN];
     buffer[HCN_HEX_CONFIG_OUTPUT_LEN - 1] = 0;
 

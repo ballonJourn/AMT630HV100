@@ -11,6 +11,7 @@
 #include "jpegdecapi.h"
 #include "dwl.h"
 #include "animation.h"
+#include "gpio.h"
 
 #if DEVICE_TYPE_SELECT == EMMC_FLASH
 #include "mmcsd_core.h"
@@ -421,6 +422,9 @@ static void animation_thread(void *param)
 					ark_lcd_set_osd_format(LCD_VIDEO_LAYER, LCD_OSD_FORAMT_RGB565);
 #endif
 					printf("animation first frame show!\r\n");
+
+					gpio_direction_output(25, 1);
+
 					ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 					ark_lcd_osd_enable(LCD_UI_LAYER, 0);
 					first_show_done = 1;

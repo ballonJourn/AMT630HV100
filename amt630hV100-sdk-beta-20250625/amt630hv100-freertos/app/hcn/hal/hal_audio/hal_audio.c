@@ -15,7 +15,7 @@
 #include "audio.h"
 #include "board.h"
 #include "hal_audio/hal_audio.h"
-#include "aw88082.h"
+
 
 
 static  struct audio_caps caps = {0};
@@ -36,12 +36,13 @@ void hal_audio_write_audio_buf(struct audio_device *audio, const void *buffer, s
 
 void hal_audio_init() {
 
+    printf("audio init aw88082 \n");
     /*1.此处添加外设芯片初始化接口：
      * aw88082qnr芯片外设初始化,寄存器配置
     */
-    aw_init();
+     aw88082_init();
 
-
+    
     /*2.内部codec的基本初始化操作
     * I2S0为输出：设置采样率、通道、采样位数等音频参数信息 
     */

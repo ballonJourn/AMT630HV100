@@ -31,28 +31,37 @@ extern "C" {
 #define HCN_LCD_INTERFACE_MIPI		(3)
 
 ///< 屏幕分辨率
-#define HCN_LCD_WIDTH	            1024
-#define HCN_LCD_HEIGHT	            600
-#define HCN_LCD_EC_WIDTH            1024
-#define HCN_LCD_EC_HEIGHT           600
+#define HCN_LCD_WIDTH	            800
+#define HCN_LCD_HEIGHT	            480
+#define HCN_LCD_EC_WIDTH            800
+#define HCN_LCD_EC_HEIGHT           480
 
 ///< 屏幕色深
 #define HCN_LCD_BPP		            32
 #define HCN_LCD_INTERFACE_TYPE		HCN_LCD_INTERFACE_TTL
 
 ///< 屏幕参数配置
-#define HCN_LCD_TIMING_VBP          1//16
-#define HCN_LCD_TIMING_VFP		    1//16
-#define HCN_LCD_TIMING_VSW	        30//4
-#define HCN_LCD_TIMING_HBP		    100//8
-#define HCN_LCD_TIMING_HFP		    100//8
-#define HCN_LCD_TIMING_HSW		    370//4
-#define HCN_LCD_CLK_FREQ            50000000//25000000
+#define HCN_LCD_TIMING_VBP          16
+#define HCN_LCD_TIMING_VFP		    16
+#define HCN_LCD_TIMING_VSW	        4
+#define HCN_LCD_TIMING_HBP		    8
+#define HCN_LCD_TIMING_HFP		    8
+#define HCN_LCD_TIMING_HSW		    4
+#define HCN_LCD_CLK_FREQ            26000000
 
 ///< 屏幕GPIO配置
+#if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
 #define HCN_LVDS_SCREEN_RST_GPIO    74
-#define HCN_LCD_BL_EN_GPIO          6
-#define HCN_LCD_PWM_CH              2
+#endif
+
+///< 背光使能GPIO
+#define HCN_LCD_BL_EN_GPIO          25
+
+///< 背光亮度控制使能
+#define HCN_BL_PWM_ENABLE
+#ifdef  HCN_BL_PWM_ENABLE
+#define HCN_LCD_PWM_CH              0
+#endif
 
 ///< OSD显示设置, UI显示大小
 #define OSD_WIDTH      800 
@@ -71,8 +80,11 @@ extern "C" {
 #define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024) 
 #define HCN_AWTK_HEAP_SIZE ((17) * 1024 * 1024)
 
+///< 背光亮度控制使能
+#define HCN_BL_PWM_ENABLE
+
 ///< 定义MCU串口使能
-#define HCN_MCU_UART_ENABLE
+//#define HCN_MCU_UART_ENABLE
 
 ///< 定义32MB spi nor flash使能
 //#define HCN_SPI_NOR_FLASH_32MB_ENABLE
@@ -85,9 +97,30 @@ extern "C" {
 
 ///< wifi相关信息
 #define HCN_WIFI_SUPPORT
+#define HCN_WIFI_INIT_DELAY_ENABLE  ///< wifi初始化延时
+#define WIFI_RESET_IO		(45)
+#define WIFI_BT_PWR_GPIO    (44)
+
+///< 蓝牙reset io
+#define BT_RESET_IO        (46) 
+#define BT_UART_PORT       1  ///< bt通信串口号
+
+///<用于解决蓝牙wifi 初始化不成功时 复位 
+#define WIFI_BT_SDO_CMD_GPIO   (20)
+#define WIFI_BT_SDO_CLK_GPIO   (22)
+#define WIFI_BT_SDO_D3_GPIO    (19)
+#define WIFI_BT_SDO_D2_GPIO    (18)
+#define WIFI_BT_SDO_D1_GPIO    (17)
+#define WIFI_BT_SDO_D0_GPIO    (16)
+#define WIFI_BT_UART_TX_GPIO   (41)
+#define WIFI_BT_UART_RX_GPIO   (40)
+#define WIFI_BT_UART1_CTS_GPIO (100)
+#define WIFI_BT_UART1_RTS_GPIO (101)
 
 ///< 手机互联使能
 #define HCN_CARLINK_ENABLE
+#define HCN_LCD_EC_WIDTH        800
+#define HCN_LCD_EC_HEIGHT       480
 
 ///< OTA功能
 #ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
@@ -96,14 +129,16 @@ extern "C" {
 
 ///< CAN功能
 #define CAN_MODULE_ENABLE
+#define CAN_STB_GPIO   (58)
+//#define DEBUG_CAN_INFO_ENABLE
 
 ///< BT_WIFI模块类型
 #define FSC_BW121       (1)
 #define GK_GOCRS440     (2)
-#define BT_WIFI_MODULE_TYPE  FSC_BW121
+#define BT_WIFI_MODULE_TYPE  GK_GOCRS440
 
 ///< KEY使能
-///#define HCN_IO_KEY_ENABLE
+#define HCN_IO_KEY_ENABLE
 
 #ifndef HCN_IO_KEY_ENABLE
 #define HCN_ADC_KEY_ENABLE   ///< ADC KEY使能
@@ -116,8 +151,13 @@ extern "C" {
 #define HCN_CUSTOMER_AP_PASSWD          "88888888"  ///< wifi ap/p2p密码
 #undef HCN_STRING_LOWER_ENABLE                      ///< 字符名称默认是大写
 
+#define HCN_CARLINK_PROTOTYPE_MODE
+#ifdef HCN_CARLINK_PROTOTYPE_MODE
+#define HCN_CHINESE_UUID    "CARBITDC0D30226452"
+#endif
+
 ///< 串口通信使能,与MCU通信
-//#define HCN_UART_COMM_ENABLE
+#define HCN_UART_COMM_ENABLE
 #ifdef HCN_UART_COMM_ENABLE
 #define HCN_UART_MCU_PORT    (2)
 #define HCN_UART_MCU_BAUDRATE (115200)
@@ -125,6 +165,12 @@ extern "C" {
 
 ///< 里程保养使能
 #define HCN_MILEAGE_MAINTENCE_ENABLE
+
+///< 倒车使能
+//#define HCN_CARBACK_SUPPORT_ENABLE
+
+///< 光感使能
+#define HCN_ADC_LIGHT_SENSOR_ENABLE
 
 #ifdef __cplusplus
 }
