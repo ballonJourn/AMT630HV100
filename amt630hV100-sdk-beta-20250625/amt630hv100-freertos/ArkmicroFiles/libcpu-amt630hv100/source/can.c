@@ -4,6 +4,7 @@
 
 #include "FreeRTOS.h"
 #include "chip.h"
+#include "config/hcn_config.h"
 
 //#define CAN_USE_TX_DEMO
 
@@ -300,7 +301,9 @@ static void vCanIntHandler(void *param)
 	/*错误中断*/
 	if (status  & CAN_IR_EI)
 	{
-		printf("Can%d int ERROR happened!\n", cap->id);
+#ifdef DEBUG_CAN_INFO_ENABLE
+		printf("Can%d int ERROR happened,SR[0x%08X]\r\n", cap->id, CANx->SR);
+#endif
 		if (CANx->SR & CAN_SR_ES) {
 			/* 接收或者发送错误超过设置的阈值 */
 			can_reinit(cap);
