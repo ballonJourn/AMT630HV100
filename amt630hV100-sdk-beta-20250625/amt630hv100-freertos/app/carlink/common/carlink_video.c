@@ -11,6 +11,8 @@
 #include "semphr.h"
 #include "os_adapt.h"
 #include "ff_stdio.h"
+#include "vehicle_param/vehicle_param.h"
+
 #if !DISABLE_CARLINK_H264_FRAME_BUF
 static List_t								frame_free_list;
 static List_t								frame_ready_list;
@@ -105,6 +107,7 @@ void h264_dec_ctx_init()
 void set_carlink_display_state(int on)
 {
 	g_hide_carlink_flag = on;
+	vehicle_set_data(VEH_CARLINK_CONNECTED, on);
 	xQueueSend(h264_frame_queue, NULL, 0);
 }
 
