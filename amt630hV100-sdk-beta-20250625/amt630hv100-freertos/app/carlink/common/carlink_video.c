@@ -107,7 +107,6 @@ void h264_dec_ctx_init()
 void set_carlink_display_state(int on)
 {
 	g_hide_carlink_flag = on;
-	vehicle_set_data(VEH_CARLINK_CONNECTED, on);
 	xQueueSend(h264_frame_queue, NULL, 0);
 }
 
@@ -440,6 +439,7 @@ void* h264_video_player_init()
 	}
 
 	g_hide_carlink_flag = 1;
+	vehicle_set_data(VEH_CARLINK_CONNECTED, 1);
 
 	return (void*)handle;
 }
@@ -452,6 +452,8 @@ void h264_video_player_uninit(void* h264_Handle)
 		mfc_uninit(handle);
 	}
 	g_hide_carlink_flag = 0;
+	vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
+
 	ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
 	ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
 	ark_lcd_osd_enable(LCD_UI_LAYER, 1);
