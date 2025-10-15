@@ -4482,6 +4482,18 @@
                     </file>
                 </group>
                 <group>
+                    <name>shutdown_manage</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\shutdown_manage\hcn_ign.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\shutdown_manage\hcn_shutdown.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\shutdown_manage\hcn_shutdown_anim.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>storage_param1</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\storage_param1\hcn_read_nor_flash.c</name>

@@ -363,6 +363,7 @@ void main(void)
 	//pSysInfo->update_status = UPDATE_STATUS_START;
 	//pSysInfo->update_media_type = UPDATE_MEDIA_USB;
 	if (pSysInfo->update_status == UPDATE_STATUS_START) {
+		gpio_direction_output(HCN_LCD_DISPLAY_EN_GPIO, 1);	///< 屏幕供电
 		lcd_init();
 		wdt_stop();
 
