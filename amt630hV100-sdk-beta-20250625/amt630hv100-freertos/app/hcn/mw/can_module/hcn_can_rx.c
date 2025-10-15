@@ -188,10 +188,8 @@ int can_module_init(void) {
         return -1;
     }
 
-    hal_gpio_set_output(23, 1);
-    hal_gpio_set_output(24, 1);
     vTaskDelay(pdMS_TO_TICKS(2));
-    hal_gpio_set_output(58, 0);
+    hal_gpio_set_output(CAN_STB_GPIO, 0);
     vCanInit(cap, CAN500kBaud, CAN_MODE_NORMAL);
 
 #if 0

@@ -936,6 +936,8 @@ void awtk_thread(void *data)
 	tp_init();
 #endif
 
+	hcn_mw_init();
+
 #ifdef VG_DRIVER
 	xm_vg_init((unsigned int)vgHeap, VG_HEAP_SIZE);
 #else
@@ -944,7 +946,6 @@ void awtk_thread(void *data)
 #endif
 
 // ark_lcd_osd_enable(LCD_UI_LAYER,0);
-	hcn_mw_init();
 
     while(1) {
 #ifdef TASK_STATUS_MONITOR

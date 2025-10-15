@@ -423,7 +423,7 @@ static void animation_thread(void *param)
 #endif
 					printf("animation first frame show!\r\n");
 
-					gpio_direction_output(25, 1);
+					gpio_direction_output(HCN_LCD_BL_EN_GPIO, 1);
 
 					ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 					ark_lcd_osd_enable(LCD_UI_LAYER, 0);

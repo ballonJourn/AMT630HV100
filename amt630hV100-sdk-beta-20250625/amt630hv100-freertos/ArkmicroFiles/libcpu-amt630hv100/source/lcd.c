@@ -1119,7 +1119,9 @@ int lcd_init(void)
 		return -ENOMEM;
 	}
 	memset(lcd, 0, sizeof(struct ark_lcd_data));
-	gpio_direction_output(26, 1);
+
+	gpio_direction_output(HCN_LCD_DISPLAY_EN_GPIO, 1);
+
 	fb_buf = pvPortMalloc(FB_SIZE * FB_COUNT);
 	if (!fb_buf) {
 		printf("ERR: malloc framebuffer fail.\n");

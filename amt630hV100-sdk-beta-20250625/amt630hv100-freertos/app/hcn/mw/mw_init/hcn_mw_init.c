@@ -65,7 +65,14 @@ static void reg_read_thread(void *param) {
 }
 #endif
 
+static void hcn_power_io_init(void) {
+    hal_gpio_set_output(AW_88028_PWR_EN_GPIO, 1);
+    hal_gpio_set_output(CAN_PWR_EN_GPIO, 1);
+}
+
 void hcn_mw_init(void) {
+    hcn_power_io_init();
+
 #ifdef CAN_MODULE_ENABLE
     can_module_init();
 #endif

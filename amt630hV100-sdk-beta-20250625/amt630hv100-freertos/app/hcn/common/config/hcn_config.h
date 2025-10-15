@@ -33,8 +33,6 @@ extern "C" {
 ///< 屏幕分辨率
 #define HCN_LCD_WIDTH	            800
 #define HCN_LCD_HEIGHT	            480
-#define HCN_LCD_EC_WIDTH            800
-#define HCN_LCD_EC_HEIGHT           480
 
 ///< 屏幕色深
 #define HCN_LCD_BPP		            32
@@ -55,12 +53,15 @@ extern "C" {
 #endif
 
 ///< 背光使能GPIO
-#define HCN_LCD_BL_EN_GPIO          25
+#define HCN_LCD_BL_EN_GPIO          (25)
+
+///< lcd屏幕供电,可控制屏幕显示
+#define HCN_LCD_DISPLAY_EN_GPIO     (26)
 
 ///< 背光亮度控制使能
 #define HCN_BL_PWM_ENABLE
 #ifdef  HCN_BL_PWM_ENABLE
-#define HCN_LCD_PWM_CH              0
+#define HCN_LCD_PWM_CH              (0)
 #endif
 
 ///< OSD显示设置, UI显示大小
@@ -83,9 +84,6 @@ extern "C" {
 ///< 背光亮度控制使能
 #define HCN_BL_PWM_ENABLE
 
-///< 定义MCU串口使能
-//#define HCN_MCU_UART_ENABLE
-
 ///< 定义32MB spi nor flash使能
 //#define HCN_SPI_NOR_FLASH_32MB_ENABLE
 
@@ -103,7 +101,7 @@ extern "C" {
 
 ///< 蓝牙reset io
 #define BT_RESET_IO        (46) 
-#define BT_UART_PORT       1  ///< bt通信串口号
+#define BT_UART_PORT       (1)  ///< bt通信串口号
 
 ///<用于解决蓝牙wifi 初始化不成功时 复位 
 #define WIFI_BT_SDO_CMD_GPIO   (20)
@@ -119,17 +117,22 @@ extern "C" {
 
 ///< 手机互联使能
 #define HCN_CARLINK_ENABLE
-#define HCN_LCD_EC_WIDTH        800
-#define HCN_LCD_EC_HEIGHT       480
+#define HCN_LCD_EC_WIDTH        (800)
+#define HCN_LCD_EC_HEIGHT       (480)
 
 ///< OTA功能
 #ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
 #define HCN_OTA_UPDATE_ENABLE
 #endif
 
+///< AW功放供电
+#define AW_88028_PWR_EN_GPIO   (23)
+
 ///< CAN功能
 #define CAN_MODULE_ENABLE
-#define CAN_STB_GPIO   (58)
+#define CAN_STB_GPIO        (58)
+#define CAN_PWR_EN_GPIO     (24)
+
 //#define DEBUG_CAN_INFO_ENABLE
 
 ///< BT_WIFI模块类型
@@ -171,6 +174,12 @@ extern "C" {
 
 ///< 光感使能
 #define HCN_ADC_LIGHT_SENSOR_ENABLE
+
+///< SOC IGN 使能
+//#define HCN_SOC_IGN_ENABLE
+
+///< 关机动画使能
+//#define HCN_SHUTDOWN_ANIM_ENABLE
 
 #ifdef __cplusplus
 }
