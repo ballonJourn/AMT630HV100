@@ -24,10 +24,8 @@ extern "C" {
 
 #ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
 
-void light_sensor_init(void);
-uint32_t get_light_sensor_value();
-void set_light_sensor_value(uint32_t value);
-void light_sensor_process(void);
+uint32_t get_light_sensor_value(void);
+void set_light_sensor_value(void);
 
 #endif
 
