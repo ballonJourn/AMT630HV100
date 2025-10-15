@@ -21,11 +21,8 @@ ret_t _timer_refresh(const timer_info_t *info)
     if (home_animation_widget[DOCK_SLIDER_VIEW])
         widget_invalidate_force(home_animation_widget[DOCK_SLIDER_VIEW] , NULL);
     
-    
-    printf("_timer_refresh \n ");
     return RET_REPEAT ;
 }
-
 
 
 ret_t home_animation_init(widget_t* parent)
@@ -141,11 +138,8 @@ ret_t animation_play_in()
 }
 
 
-
-
 ret_t demonstration_start()
 {
-    //todo
     widget_start_animator(NULL , "animation_demo");
     is_demo_state = true ;
 

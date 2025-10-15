@@ -8,4 +8,11 @@ src/**/*.obj
 src/SConscript
 /bin/
 SConstruct
-src/proxy/vehicle_param
+src/backlight
+src/bt_module 
+src/carlink_cb 
+src/dashboard_state
+src/maintence
+src/storage_param1 
+src/storage_param2
+src/vehicle_param

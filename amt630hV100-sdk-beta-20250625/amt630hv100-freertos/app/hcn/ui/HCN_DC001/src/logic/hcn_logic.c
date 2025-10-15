@@ -7,6 +7,7 @@
 #include "speed_view_logic.h"
 #include "signal_view_logic.h"
 #include "view/set_view/set_view_interface.h"
+#include "proxy/vehicle_data.h"
 
 #define REFRESH_INTERVAL_33_MS (33)
 #define REFRESH_INTERVAL_50_MS (50)
@@ -19,6 +20,8 @@ static uint32_t timer_array[REFRESH_TIMER_NUM_MAX] = { 0 } ;
 ret_t set_view_init(widget_t * win)
 {
     if(win == NULL) return RET_FAIL ;
+
+    setting_menu_view_init(win) ;
 
     set_cycling_energy_view_init(win) ;
     set_clock_view_init         (win) ;
@@ -40,8 +43,9 @@ ret_t home_view_init(widget_t * win)
     home_signal_view_init (win) ;       
     view_manager_init     (win) ;  
     
+    //sliderview
     home_dock_music_ex_view_init(win);
-    setting_menu_view_init(win) ;
+    
     // 设置语言
 
     // 设置时间 
@@ -82,6 +86,13 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     clock_colon = !clock_colon ;
     home_refresh_clock_colon(clock_colon) ;
     
+#if ON_PC_CACLE == 0
+    char buff[256 ] ;
+    extern int get_qr_text_buf(char *buf, int len) ;
+    get_qr_text_buf(buff , sizeof(buff)) ;
+    home_refresh_qr(buff);
+#endif
+
 
     return RET_REPEAT ;
 }

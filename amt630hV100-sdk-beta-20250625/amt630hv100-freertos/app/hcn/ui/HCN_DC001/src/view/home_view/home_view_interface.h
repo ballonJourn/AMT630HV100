@@ -13,5 +13,9 @@
 #include "view/home_view/speed_view.h"
 #include "view/home_view/clock_view.h"
 #include "view/home_view/dock_music_ex_view.h"
+#include "view/home_view/navigation_view.h"
+#include "view/home_view/info_view.h"
+#include "view/home_view/music_view.h"
+#include "view/home_view/phone_view.h"
 
 #endif

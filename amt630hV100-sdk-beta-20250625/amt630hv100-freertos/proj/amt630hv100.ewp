@@ -4595,10 +4595,22 @@
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\home_view_interface.h</name>
                                 </file>
                                 <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\info_view.c</name>
+                                </file>
+                                <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\mileage_view.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\music_page_key.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\music_view.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\navigation_view.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\phone_view.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\power_view.c</name>
@@ -4612,11 +4624,23 @@
                             </group>
                             <group>
                                 <name>link_view</name>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\link_view\link_page_key.c</name>
+                                </file>
                             </group>
                             <group>
                                 <name>set_view</name>
                                 <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\cycling_energy.c</name>
+                                </file>
+                                <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_page_key.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_view_interface.h</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\setting_clock.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\setting_menu.c</name>

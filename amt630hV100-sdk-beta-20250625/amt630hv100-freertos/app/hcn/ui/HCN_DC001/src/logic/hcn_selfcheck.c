@@ -1,6 +1,8 @@
 #include "hcn_selfcheck.h"
 #include "awtk.h"
 #include "hcn_logic.h"
+#include "proxy/vehicle_data.h"
+#include "dashboard_state/hcn_dev_state.h"
 
 #define SELF_CHECK_DURATION 2000 
 #define SELF_CHECK_INTERVAL 50
@@ -27,8 +29,14 @@ static void handle_state_idle() {
 static void handle_state_waiting() {
     uint32_t elapsed = time_now_ms() - manager.start_tick;
 
-    if (elapsed > 1000 ) 
-    {     //动画播放完毕
+#if ON_PC_CACLE == 0
+    if (get_boot_animation_status() == ANIMATION_STATE_RUNNING)
+        set_check_self_state(CHECK_SELF_STATE_START) ;
+#else 
+    if (elapsed > 1000) ;
+#endif
+    else
+    {   //动画播放完毕
         manager.state      = CHECK_STATE_CHECKING;
         manager.start_tick = time_now_ms();
     }
@@ -65,6 +73,8 @@ static void handle_state_finished() {
     }
 
     home_refresh_signal_visible(FALSE);
+
+    set_check_self_state(CHECK_SELF_STATE_SUCCESS) ;
 
     manager.state       = CHECK_STATE_FINISHED ;
 

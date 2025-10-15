@@ -2,6 +2,8 @@
 #include "../common/navigator.h"
 #include "proxy/vehicle_data.h"
 #include "../../3rd/awtk-widget-qr/src/qr/qr.h"
+#include "vehicle_param/vehicle_param.h"
+
 /**
  * 初始化窗口的子控件
  */
@@ -38,12 +40,21 @@ ret_t refresh_ui(const timer_info_t* timer)
   get_qr_text_buf(buff , sizeof(buff)) ;
 
   qr = widget_lookup(timer->ctx,"link_qr", TRUE);
+
+  static int state = 0 ;
+  int _state = vehicle_get_data(VEH_CARLINK_CONNECTED) ;
+
   if (qr)
   {
     qr_set_value(qr , buff) ;
+    if (state !=  _state)
+    {
+      widget_set_visible(qr , _state ? false : true);
+      state = _state ;
+    }
+    
   }
-  
-  return RET_OK;
+  return RET_REPEAT;
 }
 #endif
 
