@@ -31,7 +31,6 @@ ret_t home_nav_view_init(widget_t* parent)
 
 ret_t home_refresh_qr(char *value)
 {
-
     if (home_navi_widget[NAVI_QR])
     {
         qr_set_value(home_navi_widget[NAVI_QR], value);

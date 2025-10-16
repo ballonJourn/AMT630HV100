@@ -75,8 +75,8 @@
           </view>
           <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="qr_view" x="51" y="40" w="189" h="206">
-              <qr name="navi_qr" x="20" y="10" w="130" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000"/>
-              <label name="label2" x="10" y="156" w="151" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="扫码连接"/>
+              <qr name="navi_qr" x="15" y="10" w="130" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000"/>
+              <label name="label2" x="9" y="157" w="143" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="扫码连接"/>
             </view>
             <view name="navigate_view" x="51" y="40" w="189" h="206" visible="false">
               <label name="label_road" x="14" y="151" w="160" h="42" style:normal:text_color="#FFFFFF" style:normal:font_size="25" text="道路"/>
@@ -208,7 +208,7 @@
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <label name="clock_h_1" x="160" y="136" w="37" h="85" style="clock_option" text="1"/>
           <label name="clock_h_2" x="197" y="136" w="37" h="85" style="clock_option" text="8"/>
-          <label name="colon" x="245" y="136" w="37" h="85" style="clock_option" text=":"/>
+          <label name="colon" x="245" y="131" w="37" h="85" style="clock_option" text=":"/>
           <label name="clock_m_1" x="292" y="136" w="37" h="85" style="clock_option" text="1"/>
           <label name="clock_m_2" x="329" y="136" w="37" h="85" style="clock_option" text="9"/>
         </view>

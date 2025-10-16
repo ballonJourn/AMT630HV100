@@ -12,7 +12,6 @@ ret_t refesh_ui(const timer_info_t* timer){
   count++;
   home_refresh_drv_mode(count % 3) ;
 
-
   home_refresh_gear(count % 3) ;
 
   home_refresh_signal_visible((count % 2 == 0)) ;
@@ -20,20 +19,6 @@ ret_t refesh_ui(const timer_info_t* timer){
   home_refresh_trip(1888.6) ;
   home_refresh_odo(1888.6) ;
   home_refresh_mileage_unit(MPH) ;
-
-  
-  // deal_key_down_short_press() ;
-
-  // home_refresh_speed(count);
-
-  // if (count % 2 == 0)
-  // {
-  //   animation_play_out() ;
-  // }else
-  // {
-  //   animation_play_in() ;
-  // }
-
 
   return RET_REPEAT;
 }

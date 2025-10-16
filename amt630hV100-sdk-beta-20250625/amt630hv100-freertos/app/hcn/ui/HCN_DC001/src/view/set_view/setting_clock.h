@@ -26,10 +26,18 @@ ret_t set_clock_view_init(widget_t* parent) ;
 
 void clock_init() ;
 
+void refresh_clock(int min ,int sec);
+
 void on_clock_deal_short_key(key_id_e key) ;
 
 void clock_view_clean_state() ;
 
 void clock_view_set_focused_item(clock_option_e focusedIndex) ;
+
+/// @brief 三级页面
+void clock_option_init() ;
+
+void on_clock_option_deal_short_key(key_id_e key) ;
+
 
 #endif

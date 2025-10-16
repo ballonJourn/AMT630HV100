@@ -45,6 +45,7 @@ ret_t home_view_init(widget_t * win)
     
     //sliderview
     home_dock_music_ex_view_init(win);
+    home_nav_view_init    (win) ;
     
     // 设置语言
 
@@ -87,12 +88,14 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     home_refresh_clock_colon(clock_colon) ;
     
 #if ON_PC_CACLE == 0
-    char buff[256 ] ;
-    extern int get_qr_text_buf(char *buf, int len) ;
+    char buff[ 256 ] = { 0 };
     get_qr_text_buf(buff , sizeof(buff)) ;
-    home_refresh_qr(buff);
+    if (tk_strlen(buff))
+        home_refresh_qr(buff);
+    
 #endif
 
+    // refresh_clock(19,16);
 
     return RET_REPEAT ;
 }

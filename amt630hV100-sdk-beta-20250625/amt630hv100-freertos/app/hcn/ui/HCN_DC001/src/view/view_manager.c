@@ -11,17 +11,16 @@
 #include "key_module/hcn_key_common.h"
 #endif
 
-static dock_view_e current_dock = ICON_INFO ;     //
+static dock_view_e current_dock = ICON_INFO ;     
 
-static menu_level_e current_level = MENU_LEVEL_0 ;   //初始状态为0级别 进去music 、setting为一级  setting进入选项为二级 时间调整为三级
-
+//初始状态为0级别 进去music 、setting为一级  setting进入选项为二级 时间调整为三级
+static menu_level_e current_level = MENU_LEVEL_0 ;   
 
 const char* window_name_str[WINDOWS_NUM_MAX] = {
     "pages" , "dock_slider_view" 
 } ;
 
 static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
-
 
 #define HCN_KEY_DISPATCH(keyType)      do {                                                           \
             widget_t* top_win_ = window_manager_get_top_window(window_manager());                     \
@@ -41,37 +40,38 @@ static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
         } while(0);        
 
 
-static ret_t on_key_event(void* ctx, event_t* e) {
+static ret_t on_key_event(void* ctx, event_t* e) 
+{
 
-    if (e->type == EVT_KEY_DOWN) {
-    key_event_t* evt = (key_event_t*)e;
-    uint32_t key     = evt->key;
+    if (e->type == EVT_KEY_DOWN){
+        key_event_t* evt = (key_event_t*)e;
+        uint32_t key     = evt->key;
     
-    // printf("on_key_event key event: %d\n", key);
-    switch (key) {
-        case TK_KEY_w:
-            deal_key_up_short_press() ;
-            break;
-        case TK_KEY_s:
-            deal_key_down_short_press();
-            break;
-        case TK_KEY_a:
-            deal_key_back_short_press();
-            break;
-        case TK_KEY_d:
-            deal_key_set_short_press() ;
-            break;
-        default:
-            printf("Unhandled key event: %u", key);
-            break;
+        switch (key) 
+        {
+            case TK_KEY_w:
+                deal_key_up_short_press() ;
+                break;
+            case TK_KEY_s:
+                deal_key_down_short_press();
+                break;
+            case TK_KEY_a:
+                deal_key_back_short_press();
+                break;
+            case TK_KEY_d:
+                deal_key_set_short_press() ;
+                break;
+            default:
+                printf("Unhandled key event: %u", key);
+                break;
         }
     }
     else if (e->type == EVT_KEY_LONG_PRESS){
         get_demonstration_state() ? demonstration_stop() : demonstration_start();
-        printf("EVT_KEY_LONG_PRESS \n");
     }
     return RET_OK;
 }
+
 
 #if !ON_PC_CACLE
 static void hcn_key_cb(uint8_t id) 
@@ -79,27 +79,27 @@ static void hcn_key_cb(uint8_t id)
     printf( "set_key_cb key = %d \n", id) ;
     switch (id)
     {
-    case  SET_KEY_LONG_PR   :
-        get_demonstration_state() ? demonstration_stop() : demonstration_start();
-        break;
+        case  SET_KEY_LONG_PR   :
+                get_demonstration_state() ? demonstration_stop() : demonstration_start();
+                break;
 
-    case  BACK_KEY_SHORT_PR :
-        deal_key_back_short_press() ;
-        break;
+        case  BACK_KEY_SHORT_PR :
+                deal_key_back_short_press() ;
+                break;
 
-    case  SET_KEY_SHORT_PR  :
-        deal_key_set_short_press()  ;
-        break;
+        case  SET_KEY_SHORT_PR  :
+                deal_key_set_short_press()  ;
+                break;
 
-    case  UP_KEY_SHORT_PR   :
-        deal_key_up_short_press()   ;
-        break;
+        case  UP_KEY_SHORT_PR   :
+                deal_key_up_short_press()   ;
+                break;
 
-    case  MODE_KEY_SHORT_PR :
-        deal_key_down_short_press() ;
-        break;
-    default:
-        break;
+        case  MODE_KEY_SHORT_PR :
+                deal_key_down_short_press() ;
+                break;
+        default:
+                break;
     }
 
 }
@@ -112,8 +112,8 @@ ret_t view_manager_init(widget_t* parent)
     for (size_t i = 0; i < WINDOWS_NUM_MAX; i++){
         window_page[i] = widget_lookup(parent, window_name_str[i], TRUE);
     }
-    
-    widget_on( window_manager(), EVT_KEY_DOWN, on_key_event, NULL);
+
+    widget_on( window_manager(), EVT_KEY_DOWN,       on_key_event, NULL);
     widget_on( window_manager(), EVT_KEY_LONG_PRESS, on_key_event, NULL);
 
 #if !ON_PC_CACLE
@@ -169,6 +169,7 @@ int get_current_levle(){
 
     return  current_level ;
 }
+
 
 void set_current_level(int cur_level){
 

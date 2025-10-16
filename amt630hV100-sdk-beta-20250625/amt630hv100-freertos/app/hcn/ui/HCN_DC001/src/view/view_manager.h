@@ -19,7 +19,7 @@ typedef enum menu_level{
     MENU_LEVEL_0 ,
     MENU_LEVEL_1 ,
     MENU_LEVEL_2 ,
-    MENU_LEVEL_3 , //时钟上下调节
+    MENU_LEVEL_3 , 
 }menu_level_e;
 
 

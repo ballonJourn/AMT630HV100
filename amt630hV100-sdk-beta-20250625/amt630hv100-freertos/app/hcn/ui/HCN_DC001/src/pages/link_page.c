@@ -30,16 +30,17 @@ static ret_t visit_init_child(void* ctx, const void* iter) {
 }
 
 
+
 #if ON_PC_CACLE == 0
 extern int get_qr_text_buf(char *buf, int len) ;
 widget_t* qr ;
-
+int timerId = 0 ;
 ret_t refresh_ui(const timer_info_t* timer)
 {
   char buff[256 ] ;
   get_qr_text_buf(buff , sizeof(buff)) ;
 
-  qr = widget_lookup(timer->ctx,"link_qr", TRUE);
+  qr = widget_lookup((widget_t *)timer->ctx,"link_qr", TRUE);
 
   static int state = 0 ;
   int _state = vehicle_get_data(VEH_CARLINK_CONNECTED) ;
@@ -56,8 +57,20 @@ ret_t refresh_ui(const timer_info_t* timer)
   }
   return RET_REPEAT;
 }
-#endif
 
+ret_t onWindowChanged(void *ctx, event_t *e)
+{
+  if (e->type == EVT_WINDOW_CLOSE)
+  {
+    if(timerId != 0 && timer_find(timerId))
+    {
+      timer_remove(timerId) ;
+      timerId = 0 ;
+    }
+  }
+  return RET_OK ;
+}
+#endif
 
 /**
  * 初始化窗口
@@ -70,8 +83,10 @@ ret_t link_page_init(widget_t* win, void* ctx) {
 
 #if ON_PC_CACLE == 0
   widget_on(win, EVT_BEFORE_PAINT, onClearBg, win);
-  timer_add(refresh_ui , win , 1000) ;
+  timerId =  timer_add(refresh_ui , win , 1000) ;
+  widget_on(win , EVT_WINDOW_CLOSE , onWindowChanged ,NULL);
 #endif
 
+  
   return RET_OK;
 }

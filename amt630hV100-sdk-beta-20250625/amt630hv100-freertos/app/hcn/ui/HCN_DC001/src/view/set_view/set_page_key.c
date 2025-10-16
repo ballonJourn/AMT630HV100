@@ -7,7 +7,6 @@ static setting_menu_e menu_index = SETTING_MENU_TMPS ;
 
 // static menu_list_e current_list_item = MENU_SET_TMPS ;  //应该丢到设置页面当中
 
-
 typedef struct {
     void (*view_init)();
     void (*deal_short_key)(key_id_e);
@@ -19,6 +18,9 @@ static setting_entry_t setting_entry[SETTING_MENU_NUM_MAX] = {
     [SETTING_MENU_CLOCK]    = { clock_init           , on_clock_deal_short_key          } ,
 };
 
+static setting_entry_t option_entry[SETTING_MENU_NUM_MAX] = {
+    [SETTING_MENU_CLOCK]    = { clock_option_init           , on_clock_option_deal_short_key      } ,
+};
 
 void set_page_deal_key_down ()
 {
@@ -35,7 +37,8 @@ void set_page_deal_key_down ()
                 setting_entry[menu_index].deal_short_key(KEY_SHORT_DOWN);
             break;
         case MENU_LEVEL_3: 
-
+            if (option_entry[menu_index].deal_short_key)
+                option_entry[menu_index].deal_short_key(KEY_SHORT_DOWN);
             break;
         default:
             break;
@@ -60,7 +63,8 @@ void set_page_deal_key_up   ()
             
             break;
         case MENU_LEVEL_3: 
-
+            if (option_entry[menu_index].deal_short_key)
+                option_entry[menu_index].deal_short_key(KEY_SHORT_UP);
             break;
         default:
             break;
@@ -72,23 +76,26 @@ void set_page_deal_key_up   ()
 void set_page_deal_key_set  ()
 {
     int level = get_current_levle() ;
-    if (level == MENU_LEVEL_1)
+    switch (level)
     {
-        if (setting_entry[menu_index].view_init){
-        setting_entry[menu_index].view_init();
-        }else{
-            printf ("setting_entry deal_short_key == NULL   \n ") ;
-            return ;
-        }
-        set_current_level( level + 1 ) ;
-    }
-    else if(level == MENU_LEVEL_2){
-        if (setting_entry[menu_index].view_init){
-            setting_entry[menu_index].deal_short_key(KEY_SHORT_SET);
-        }else{
-            printf ("setting_entry deal_short_key == NULL   \n ") ;
-            return ;
-        }
+        case MENU_LEVEL_0: break;
+        case MENU_LEVEL_1:  
+            if (setting_entry[menu_index].view_init){
+                setting_entry[menu_index].view_init();
+                set_current_level( level + 1 ) ;
+            }
+            break;
+        case MENU_LEVEL_2: 
+            if (setting_entry[menu_index].deal_short_key){
+                setting_entry[menu_index].deal_short_key(KEY_SHORT_SET);
+            }
+            break;
+        case MENU_LEVEL_3: 
+            if (option_entry[menu_index].deal_short_key)
+                option_entry[menu_index].deal_short_key(KEY_SHORT_SET);
+            break;
+        default:
+            break;
     }
     
 }
@@ -97,21 +104,27 @@ void set_page_deal_key_set  ()
 void set_page_deal_key_back ()
 {
     int level = get_current_levle() ;
-    if (level == MENU_LEVEL_1)
+    switch (level)
     {
-        set_current_level( level - 1 ) ;
-        setting_menu_clean_state();
-        // menu_index = SETTING_MENU_TMPS ;
-    }else if(level == MENU_LEVEL_2)
-    {
-        if (setting_entry[menu_index].deal_short_key){
-            setting_entry[menu_index].deal_short_key(KEY_SHORT_BACK);
-        }else{
-            printf ("setting_entry deal_short_key KEY_SHORT_BACK == NULL   \n ") ;
-            return ;
-        }
+        case MENU_LEVEL_0: break;
+        case MENU_LEVEL_1:  
+            set_current_level( level - 1 ) ;
+            setting_menu_clean_state();
+            break;
+        case MENU_LEVEL_2: 
+            if (setting_entry[menu_index].deal_short_key){
+                setting_entry[menu_index].deal_short_key(KEY_SHORT_BACK);
+            }
+            
+            break;
+        case MENU_LEVEL_3: 
+            if (option_entry[menu_index].deal_short_key)
+                option_entry[menu_index].deal_short_key(KEY_SHORT_BACK);
+            break;
+        default:
+            break;
     }
-    
+
 }
 
 
