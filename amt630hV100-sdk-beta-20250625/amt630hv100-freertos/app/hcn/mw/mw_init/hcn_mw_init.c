@@ -21,50 +21,6 @@
 #include "board.h"
 #include "task.h"
 
-#define SYS_PADCTL1_ADDR    (0x000000C4U)
-#define SYS_PADCTL0_ADDR    (0x000000C0U)
-
-#if 0
-static void read_reg(void) {
-    uint32_t reg_val = *((volatile uint32_t *)(REGS_SYSCTL_BASE + SYS_PADCTL1_ADDR));
-    hcn_log_info("pad ctrl value = 0x%08X\n", reg_val);
-}
-
-static void backlight_test(void) {
-    static uint8_t level = 5;
-    static bool inc = true;
-
-    if ((level > 1) && inc) {
-        level--;
-        if (level == 1) {
-            inc = false;
-        }
-    }
-
-    if (level < 5 && !inc) {
-        level++;
-        if (level == 5) {
-            inc = true;
-        }
-    }
-    
-    hcn_log_info("current level:%d\n", level);
-    set_backlight_level(level);
-}
-
-static void reg_read_thread(void *param) {
-    light_gpio_init(500);
-
-    for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        scan_frame_light();
-        //start_record();
-        send_mcu_heartbeat();
-        //light_sensor_process();
-    }
-}
-#endif
-
 static void hcn_power_io_init(void) {
     hal_gpio_set_output(AW_88028_PWR_EN_GPIO, 1);
     hal_gpio_set_output(CAN_PWR_EN_GPIO, 1);
@@ -72,6 +28,12 @@ static void hcn_power_io_init(void) {
 
 void hcn_mw_init(void) {
     hcn_power_io_init();
+
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE    
+    usr_param_init();
+#endif
+
+    mw_common_init();
 
 #ifdef CAN_MODULE_ENABLE
     can_module_init();
@@ -91,13 +53,8 @@ void hcn_mw_init(void) {
 
     ///< 开启亮度
     set_backlight_level(5);
-#if 0
-    if (xTaskCreate(reg_read_thread, "reg_read", configMINIMAL_STACK_SIZE,
-                    NULL, configMAX_PRIORITIES / 4, NULL) != pdPASS) {
-        hcn_log_error("create keypad task fail.\n");
-        return;
-    }
-#endif
 
     hal_audio_init();
+
+    carlink_cb_init();
 }

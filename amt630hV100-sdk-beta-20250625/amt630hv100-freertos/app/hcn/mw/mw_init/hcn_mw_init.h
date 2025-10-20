@@ -33,6 +33,8 @@ extern "C" {
 #include "io_module/hcn_gpio_light.h"
 #include "light_sensor/hcn_light_sensor.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
+#include "carlink_cb/hcn_carlink_cb.h"
+#include "mw_init/hcn_mw_common.h"
 
 void hcn_mw_init(void);
 
