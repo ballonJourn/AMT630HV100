@@ -20,6 +20,10 @@
 
 static hcnNavigationHudInfo easy_navi_info;
 
+const hcnNavigationHudInfo *get_easy_navi_info(void) {
+    return &easy_navi_info;
+} 
+
 void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
     if (info == NULL) {
         return;
@@ -49,6 +53,33 @@ void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
     vehicle_set_data(VEH_EASY_NAV_STATUS, navi_status);		
 }
 
-hcnNavigationHudInfo *get_easy_navi_info(void) {
-    return &easy_navi_info;
-} 
+void parse_lane_guidance_pic_info(const road_junction_pic_t *info) {
+    if (info == NULL) {
+        return;
+    }
+
+    hcn_log_info("\r\nparse_lane_guidance_pic_info status:%d, picDataLen:%d\r\n",
+        info->status,
+        info->pictureLength); 
+    if (info->status) {
+        hcn_log_info("\r\nshow lane guidance pic data\r\n");
+    } else {
+        hcn_log_info("\r\nhide lane guidance pic data\r\n");
+    }
+}
+
+void parse_road_junction_pic_info(const road_junction_pic_t *info) {
+    if (info == NULL) {
+        return;
+    }
+
+    ///< 路口放大图片太大了，最大需要2MB内存，亿连如果不做优化，后期不建议在简易导航中使用
+    hcn_log_info("\r\nparse_road_junction_pic_info status:%d, picDataLen:%d\r\n",
+        info->status,
+        info->pictureLength); 
+    if (info->status) {
+        hcn_log_info("\r\nshow road junction pic data\r\n");
+    } else {
+        hcn_log_info("\r\nhide road junction pic data\r\n");
+    }
+}

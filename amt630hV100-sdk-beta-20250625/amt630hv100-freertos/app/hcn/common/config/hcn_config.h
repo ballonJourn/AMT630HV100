@@ -121,6 +121,9 @@ extern "C" {
 #define HCN_LCD_EC_HEIGHT       (480)
 #define HCN_CARLINK_WEATHER_ENABLE
 
+///< 简易导航中的路口放大和车道引导图片使能
+//#define HCN_CARLINK_ROAD_PIC_ENABLE
+
 ///< OTA功能
 #ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
 #define HCN_OTA_UPDATE_ENABLE

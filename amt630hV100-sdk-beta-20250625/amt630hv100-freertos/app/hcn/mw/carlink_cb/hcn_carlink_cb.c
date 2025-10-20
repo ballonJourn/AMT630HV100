@@ -125,7 +125,12 @@ static void onHcnLinkConnect(void) {
 static void onHcnVideoStatus(bool status) {
     if (status) {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 1);
+#ifdef HCN_CARLINK_ROAD_PIC_ENABLE
+        EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_LANE_GUIDANCE_PICTURE |
+                                     EC_APP_HUD_SUPPORT_FUNCTION_ROAD_JUNCTION_PICTURE);
+#else
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_DEFAULT); 
+#endif
     } else {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
         vehicle_set_data(VEH_QUETY_WEATHER_STATUS, 0);
@@ -165,9 +170,23 @@ static void onHcnWeatherReceived(const char *weather_json) {
     }
 }
 
-static void onHcnEasyNavigation(hcnNavigationHudInfo * naviData) {
+static void onHcnEasyNavigation(const hcnNavigationHudInfo * naviData) {
     if (naviData) {
         parse_easy_navi_info(naviData);
+    }
+}
+
+static void onHcnPhoneAppHUDLaneGuidancePicture(
+    const road_junction_pic_t * data) {
+    if (data) {
+        parse_lane_guidance_pic_info(data);
+    }
+}
+
+static void onHcnPhoneAppHUDRoadJunctionPicture(
+    const road_junction_pic_t* data) {
+    if (data) {
+        parse_road_junction_pic_info(data);
     }
 }
 
@@ -180,6 +199,10 @@ static IhcnCallBack *register_hcn_callback(void) {
     callback->onHcnLinkConnect = onHcnLinkConnect;
     callback->onHcnWeatherReceived = onHcnWeatherReceived;
     callback->onHcnEasyNavigation = onHcnEasyNavigation;
+    callback->onHcnPhoneAppHUDLaneGuidancePicture = \
+                onHcnPhoneAppHUDLaneGuidancePicture;
+    callback->onHcnPhoneAppHUDRoadJunctionPicture = \
+                onHcnPhoneAppHUDRoadJunctionPicture;
 
     return callback;
 }

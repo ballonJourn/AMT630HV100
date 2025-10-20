@@ -244,7 +244,6 @@ void onRequestBuildNet(const ECBTClientInfo *clientInfo)
     printf("TRACE[%s][%d]:",__func__ ,__LINE__);
 }
 
-
 void onRequestBuildNetCancel()
 {
 }
@@ -272,6 +271,43 @@ void  onPhoneAPInfo(const ECBTNetInfo* netDeviceInfo)
     printf("------ onPhoneAPInfo ------\r\n");
 }
 
+void onPhoneAppHUDLaneGuidancePicture(const ECHudLaneGuidancePictureInfo * data)
+{
+    printf("\r\nonPhoneAppHUDLaneGuidancePicture\r\n");
+    if (data) {
+        if (get_hcn_callback() 
+            && get_hcn_callback()->onHcnPhoneAppHUDLaneGuidancePicture) {
+            road_junction_pic_t *recv_data = pvPortMalloc(sizeof(road_junction_pic_t));
+            if (recv_data) {                
+               recv_data->status = data->status; 
+               recv_data->format = data->format;
+               recv_data->pictureLength = data->pictureLength;
+               recv_data->pictureData = data->pictureData;
+               get_hcn_callback()->onHcnPhoneAppHUDLaneGuidancePicture(recv_data);                
+               vPortFree(recv_data);
+            }     
+        }
+    }
+}
+
+void onPhoneAppHUDRoadJunctionPicture(const ECHudRoadJunctionPictureInfo* data)
+{
+    printf("\r\nonPhoneAppHUDRoadJunctionPicture\r\n");
+    if (data) {
+        if (get_hcn_callback() 
+            && get_hcn_callback()->onHcnPhoneAppHUDRoadJunctionPicture) {
+            road_junction_pic_t *recv_data = pvPortMalloc(sizeof(road_junction_pic_t));
+            if (recv_data) {                
+               recv_data->status = data->status; 
+               recv_data->format = data->format;
+               recv_data->pictureLength = data->pictureLength;
+               recv_data->pictureData = data->pictureData;
+               get_hcn_callback()->onHcnPhoneAppHUDRoadJunctionPicture(recv_data);                
+               vPortFree(recv_data);
+            }     
+        }
+    }
+}
 
 IECCallBack * registerECCallback()
 {
@@ -302,6 +338,8 @@ IECCallBack * registerECCallback()
 	callBack->onRequestBuildNetCancel = onRequestBuildNetCancel;
 	callBack->onPhoneBuildNetFinish = onPhoneBuildNetFinish;
 	callBack->onPhoneAPInfo = onPhoneAPInfo;
+    callBack->onPhoneAppHUDLaneGuidancePicture = onPhoneAppHUDLaneGuidancePicture;
+    callBack->onPhoneAppHUDRoadJunctionPicture = onPhoneAppHUDRoadJunctionPicture;
 
     return callBack;
 }

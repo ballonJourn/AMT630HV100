@@ -22,8 +22,10 @@ extern "C" {
 #include <stdbool.h>    
 #include "carlink_cb/hcn_carlink_cb.h"
 
+const hcnNavigationHudInfo *get_easy_navi_info(void);
 void parse_easy_navi_info(const hcnNavigationHudInfo *info);
-hcnNavigationHudInfo *get_easy_navi_info(void);
+void parse_lane_guidance_pic_info(const road_junction_pic_t *info);
+void parse_road_junction_pic_info(const road_junction_pic_t *info);
 
 #ifdef __cplusplus
 }

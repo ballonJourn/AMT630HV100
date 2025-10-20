@@ -361,18 +361,17 @@ typedef struct {
 
 	void (*onHcnBtCallStatus)(bt121_call_t * btCall);
 
-    //void (*onHcnWeatherReceived)(weather_data_t *weather);
     void (*onHcnWeatherReceived)(const char *weather_json);
 
-    void (*onHcnPhoneNotification)(phone_notification_t *notification);
+    void (*onHcnPhoneNotification)(const phone_notification_t *notification);
 
-    void (*onHcnPhoneAppHUDLaneGuidancePicture)(road_junction_pic_t * picData);
+    void (*onHcnPhoneAppHUDLaneGuidancePicture)(const road_junction_pic_t * picData);
 
-    void (*onHcnPhoneAppHUDRoadJunctionPicture)(road_junction_pic_t* picData);
+    void (*onHcnPhoneAppHUDRoadJunctionPicture)(const road_junction_pic_t* picData);
 
-    void (*onHcnEasyNavigation)(hcnNavigationHudInfo * naviData);    
+    void (*onHcnEasyNavigation)(const hcnNavigationHudInfo * naviData);    
 
-    void (*onHcnPhoneModel)(hcnPhoneInfo * phoneInfo);
+    void (*onHcnPhoneModel)(const hcnPhoneInfo * phoneInfo);
 } IhcnCallBack;
 
 typedef struct {
