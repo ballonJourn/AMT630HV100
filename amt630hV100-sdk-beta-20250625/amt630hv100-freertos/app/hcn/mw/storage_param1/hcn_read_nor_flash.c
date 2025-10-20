@@ -21,6 +21,8 @@
 #include "storage_param1/hcn_usr_param.h"
 #include "log/hcn_log.h"
 
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
+
 static meter_info_t meter_info;
 
 int read_hcn_info(void) {
@@ -56,3 +58,5 @@ int save_hcn_info(void) {
 meter_info_t *get_hcn_info(void) {
      return &meter_info; 
 }
+
+#endif //HCN_NOR_FLASH_PARAM_ENABLE

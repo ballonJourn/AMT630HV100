@@ -21,7 +21,10 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "config/hcn_config.h"
 #include "tpms/hcn_uart_tpms.h"
+
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
 
 #define pads(index, num)   uint8_t pads##index[num]
 #define MAX_UUID_LEN        (20)
@@ -161,11 +164,27 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param);
 bool set_hcn_usr_param(usr_param_handle_e id, void *param);
 
 /**
+ * @brief  保存usr param参数
+ * @param  none
+ * @return 0:保存成功  -1:保存失败
+ */
+int save_hcn_usr_param(void);
+
+/**
  * @brief  检测仪表启动源，恢复部分设置参数
  * @param  start_src 0:bat 1:ign
  * @return 无
  */
 void check_start_source(uint8_t start_src);
+
+/**
+ * @brief  用户参数初始化
+ * @param  none
+ * @return 0:初始化成功  -1:初始化失败
+ */
+int usr_param_init(void);
+
+#endif //HCN_NOR_FLASH_PARAM_ENABLE
 
 #ifdef __cplusplus
 }

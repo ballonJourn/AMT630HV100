@@ -18,8 +18,11 @@
 #include "log/hcn_log.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "vehicle_param/vehicle_param.h"
 
-#define USE_PARAM_PRINTF (0)
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
+
+#define USE_PARAM_PRINTF (1)
 
 static usr_param_t usr_param;
 static usr_param_t usr_param_pre = {
@@ -56,7 +59,7 @@ static void printf_usr_param(usr_param_t * param) {
 
         printf("maintain_days:%d\r\n",param->maintain_info.maintain_time.maintain_days);
         printf("is sync time:%d\r\n",param->maintain_info.maintain_time.is_sync_time);
-        printf("maintain data:%04d/%2d/%02d\r\n",param->maintain_info.maintain_time.last_maintain_date.year, 
+        printf("maintain data:%04d/%02d/%02d\r\n",param->maintain_info.maintain_time.last_maintain_date.year, 
                 param->maintain_info.maintain_time.last_maintain_date.mon, 
                 param->maintain_info.maintain_time.last_maintain_date.day);
 
@@ -85,11 +88,12 @@ static void printf_usr_param(usr_param_t * param) {
             printf("tpms_info[%d].temp:%d\n", i, param->tpms[i].tpms_temp);
         }
 
-        printf("\r\nuuid:\r\n");
+        printf("\r\nuuid:");
         for(int i = 0; i < 20; i++)
         {
             printf("%d",param->carlink_uuid[i]);
         }
+        printf("\r\n");
         printf("\r\n ...............usr param end......................\r\n");
     }
 }
@@ -171,6 +175,8 @@ static void check_usr_param(void) {
 #if USE_PARAM_PRINTF
     printf_usr_param(&usr_param);
 #endif
+
+    vehicle_set_data(VEH_LICENSE_AUTH_STATUS, (int)usr_param.usr_set.uuid_active_staus);
 }
 
 void check_start_source(uint8_t start_src) {
@@ -192,32 +198,38 @@ void check_start_source(uint8_t start_src) {
     is_recovery_usr_param = true;
 }
 
-void save_hcn_usr_param(void) {
+int save_hcn_usr_param(void) {
     if (!is_recovery_usr_param) {
-        return;
+        hcn_log_error("Usr param is not get ready!\n");
+        return -1;
     }
 
     meter_info_t * param = get_hcn_info();
     if (!param) {
         hcn_log_error("Get meter pointer is null!\n");
-        return;
+        return -1;
     }
+
+    param->usr = usr_param;
 
     if (memcmp(&usr_param_pre, &usr_param, sizeof(usr_param_t)) == 0) {
         hcn_log_error("param is same, do not save!\n");
-        return;
+        return -1;
     }
-
 
     memcpy(&usr_param_pre, &usr_param, sizeof(usr_param_t));
 
     if (save_hcn_info() != 0) {
         hcn_log_error("Save usr param failed!\n");
+        return -1;
     }
+
+    return 0;
 }
 
 bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
     if (!get_recovery_usr_param()) {
+        hcn_log_error("Usr param is not get ready!\n");
         return false;
     }
 
@@ -357,6 +369,7 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
 
 bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
      if (!get_recovery_usr_param()) {
+        hcn_log_error("Usr param is not get ready!\n");
         return false;
     }
 
@@ -442,7 +455,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
 
         case HCN_PARAM_UUID_REGISTER:
             if (usr_param.usr_set.uuid_active_staus != *((uint8_t *)param)) {
-                usr_param.usr_set.uuid_active_staus = *((uint8_t *)param);  
+                usr_param.usr_set.uuid_active_staus = *((uint8_t *)param); 
             }
             break;
 
@@ -558,10 +571,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
 }
 
 static void read_usr_param(void) {
-    if (read_hcn_info() != 0) {
-        hcn_log_error("Get hcn Meter info failed!\n");
-        return;
-    }
+    read_hcn_info();
 
     meter_info_t * meter_info = get_hcn_info();
     if (!meter_info) {
@@ -603,6 +613,8 @@ static void read_usr_param(void) {
   }
 
   usr_param = meter_info->usr;
+
+  hcn_log_info("usr param init ok!\n");
 }
 
 int usr_param_init(void) {
@@ -613,3 +625,5 @@ int usr_param_init(void) {
 bool get_recovery_usr_param(void) {
     return is_recovery_usr_param;
 }
+
+#endif //HCN_NOR_FLASH_PARAM_ENABLE

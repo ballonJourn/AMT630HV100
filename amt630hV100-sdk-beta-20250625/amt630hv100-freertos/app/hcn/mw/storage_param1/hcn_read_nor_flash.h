@@ -18,7 +18,10 @@
 extern "C" {
 #endif
 
+#include "config/hcn_config.h"
 #include "storage_param1/hcn_usr_param.h"
+
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
 
 #define HCN_USR_PARAM_ADDR          (0x35000)  ///< nor falsh扇区开始地址
 #define NOR_FLASH_MAGIC_NUM_PREFIX  (0xdd)  ///< 魔数前缀
@@ -55,6 +58,8 @@ int save_hcn_info(void);
  * @return hcn仪表参数指针
  */
 meter_info_t *get_hcn_info(void);
+
+#endif //HCN_NOR_FLASH_PARAM_ENABLE
 
 #ifdef __cplusplus
 }
