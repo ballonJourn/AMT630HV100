@@ -21,6 +21,7 @@
 #include "config/hcn_config.h"
 #include "log/hcn_log.h"
 #include "carlink_cb/hcn_carlink_provide.h"
+#include "vehicle_param/vehicle_param.h"
 
 #if CARLINK_EC
 #include "ECTiny.h"
@@ -743,6 +744,10 @@ void* initECTiny(void* param)
     printf("carbit  uuid :%s\r\n", uuid);
 	const char *UrlData = EC_generateQRCodeUrl(&qr_info);
 	printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
+
+    if (UrlData) {
+        vehicle_set_data(VEH_CARLINK_URL_STATUS, 1);
+    }
 
 #ifdef AWTK
 	set_qr_text_buf(UrlData);

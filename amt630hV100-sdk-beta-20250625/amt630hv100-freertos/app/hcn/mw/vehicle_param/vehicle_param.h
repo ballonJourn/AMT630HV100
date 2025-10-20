@@ -82,6 +82,7 @@ typedef enum {
 
     ///< WIFI
     VEH_CARLINK_CONNECTED,  ///< 0:disconnect  1:connect
+    VEH_CARLINK_URL_STATUS,  ///< carlink url status 0: no url 1: has url
  
     ///< Bluetooth and Phone Status
     VEH_BT_DEV_STATE,  ///< Bluetooth device state, >=1: powered on and working
