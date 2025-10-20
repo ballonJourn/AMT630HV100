@@ -2657,6 +2657,7 @@
                     <state>$PROJ_DIR$\..\app\hcn\ui</state>
                     <state>$PROJ_DIR$\..\app\hcn\common</state>
                     <state>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src</state>
+                    <state>$PROJ_DIR$\..\lib\cJSON</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -4440,6 +4441,21 @@
                     </file>
                 </group>
                 <group>
+                    <name>carlink_cb</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_cb.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_provide.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_task.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_easy_navi.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>dashboard_state</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\dashboard_state\hcn_dev_state.c</name>
@@ -4477,6 +4493,9 @@
                 </group>
                 <group>
                     <name>mw_init</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\mw_init\hcn_mw_common.c</name>
+                    </file>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\mw_init\hcn_mw_init.c</name>
                     </file>
@@ -5283,6 +5302,12 @@
                     <name>$PROJ_DIR$\..\lib\bt\fsc_bt\fsc_bt.c</name>
                 </file>
             </group>
+        </group>
+        <group>
+            <name>cJSON</name>
+            <file>
+                <name>$PROJ_DIR$\..\lib\cJSON\cJSON.c</name>
+            </file>
         </group>
         <group>
             <name>EasyFlash</name>

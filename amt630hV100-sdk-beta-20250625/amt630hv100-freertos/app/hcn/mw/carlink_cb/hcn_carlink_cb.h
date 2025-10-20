@@ -361,7 +361,8 @@ typedef struct {
 
 	void (*onHcnBtCallStatus)(bt121_call_t * btCall);
 
-    void (*onHcnWeatherReceived)(weather_data_t *weather);
+    //void (*onHcnWeatherReceived)(weather_data_t *weather);
+    void (*onHcnWeatherReceived)(const char *weather_json);
 
     void (*onHcnPhoneNotification)(phone_notification_t *notification);
 
@@ -419,9 +420,6 @@ const char* hcn_bt121_getName();                    ///< 获取121蓝牙名称
 const char* hcn_bt121_getMacAddr();
 const char* hcn_bt121_getBleName();
 const char* hcn_bt121_getBleMacAddr();
-
-///< 初始化接口
-void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback);
 
 void carlink_cb_init(void);
 

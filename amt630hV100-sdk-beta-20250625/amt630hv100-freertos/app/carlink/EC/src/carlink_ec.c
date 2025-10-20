@@ -20,6 +20,7 @@
 #include "carlink_video.h"
 #include "config/hcn_config.h"
 #include "log/hcn_log.h"
+#include "carlink_cb/hcn_carlink_provide.h"
 
 #if CARLINK_EC
 #include "ECTiny.h"
@@ -80,6 +81,10 @@ void onECConnectStatus(ECConnectedStatus status, ECConnectedType type)
         EC_startMirror();
 
         //EC_startIperfTcpServer("192.168.43.103",11150);
+        printf("\r\nEC start mirror\r\n");
+        if (get_hcn_callback() && get_hcn_callback()->onHcnLinkConnect) {
+            get_hcn_callback()->onHcnLinkConnect();
+        }
     }
 }
 
@@ -95,12 +100,32 @@ void onMirrorStatus(ECMirrorStatus status)
 
 void onECStatusMessage(ECStatusMessage status)
 {
+#if 0
     printf("\r\nITE onECStatusMessage:status=%d\r\n", status);
+#endif
 }
 
 void onPhoneAppHUD(const ECNavigationHudInfo *data)
 {
-    printf("\r\nECNavigationHudInfo\r\n");
+    if (get_hcn_callback() && get_hcn_callback()->onHcnEasyNavigation) {
+        if (data) {
+            hcnNavigationHudInfo navi_data;
+            memset(&navi_data, 0, sizeof(navi_data));
+
+            navi_data.status = data->status;
+            navi_data.naviIcon = data->naviIcon;
+            navi_data.destinationRemainingDistance =\
+            data->destinationRemainingDistance;
+            navi_data.roadRemainingDistance = data->roadRemainingDistance;
+            navi_data.signalIntensity = data->signalIntensity;
+            snprintf(navi_data.currentRoad,sizeof(navi_data.currentRoad), 
+                    "%s", data->currentRoad);
+            snprintf(navi_data.nextRoad, sizeof(navi_data.nextRoad), 
+                    "%s", data->nextRoad);
+
+            get_hcn_callback()->onHcnEasyNavigation(&navi_data);
+        }
+    }
 }
 
 void onPhoneAppMusicInfo(const ECAppMusicInfo *data)
@@ -110,7 +135,9 @@ void onPhoneAppMusicInfo(const ECAppMusicInfo *data)
 
 void onPhoneAppInfo(const void *data, uint32_t length)
 {
+    vTaskDelay(pdMS_TO_TICKS(100));
     printf("\r\nonPhoneAppInfo\r\n");
+    hcn_log_info("\r\nonPhoneAppInfo data:%s\r\n", (const char *)data);
 }
 
 void onCallAction(ECCallType type, const char *name, const char *number)
@@ -131,11 +158,19 @@ void onMirrorInfoChanged(const ECVideoInfo *info)
 void onLicenseAuthFail(int32_t errCode, const char *errMsg)
 {
     printf("\r\nonLicenseAuthFail\r\n");
+
+    if (get_hcn_callback() && get_hcn_callback()->onHcnLicenseStatus) {
+        get_hcn_callback()->onHcnLicenseStatus(0);
+    }
 }
 
 void onLicenseAuthSuccess(int32_t code, const char *msg)
 {
     printf("\r\nonLicenseAuthSuccess\r\n");
+
+    if (get_hcn_callback() && get_hcn_callback()->onHcnLicenseStatus) {
+        get_hcn_callback()->onHcnLicenseStatus(1);
+    }
 }
 
 void onCarCmdNotified(const ECCarCmd *carCmd)
@@ -181,7 +216,12 @@ void onPageIconReceived(const ECIconInfo *icons, int32_t length)
 void onWeatherReceived(const char *data, int32_t length)
 {
     printf("\r\nonWeatherReceived\r\n");
-
+    if (data) {
+        printf("weather data:%s\r\n", data);
+        if (get_hcn_callback() && get_hcn_callback()->onHcnWeatherReceived) {
+            get_hcn_callback()->onHcnWeatherReceived(data);
+        }
+    }
 }
 
 void onVRTipsReceived(const char *data, int32_t length)
@@ -288,6 +328,9 @@ void    vp_start(int32_t width, int32_t height)
 #else
 	gECVideoHandle = h264_video_player_init();
 #endif
+    if (get_hcn_callback() && get_hcn_callback()->onHcnVideoStatus) {
+        get_hcn_callback()->onHcnVideoStatus(1);
+    }
 }
 
 void    vp_stop()
@@ -299,6 +342,9 @@ void    vp_stop()
 #else
 	h264_video_player_uninit(gECVideoHandle);
 #endif
+    if (get_hcn_callback() && get_hcn_callback()->onHcnVideoStatus) {
+        get_hcn_callback()->onHcnVideoStatus(0);
+    }
 }
 
 void    vp_play(const void *data, uint32_t read_len)

@@ -119,6 +119,7 @@ extern "C" {
 #define HCN_CARLINK_ENABLE
 #define HCN_LCD_EC_WIDTH        (800)
 #define HCN_LCD_EC_HEIGHT       (480)
+#define HCN_CARLINK_WEATHER_ENABLE
 
 ///< OTA功能
 #ifdef HCN_SPI_NOR_FLASH_32MB_ENABLE
@@ -180,6 +181,9 @@ extern "C" {
 
 ///< 关机动画使能
 //#define HCN_SHUTDOWN_ANIM_ENABLE
+
+///< nor flash参数配置
+#define HCN_NOR_FLASH_PARAM_ENABLE
 
 #ifdef __cplusplus
 }
