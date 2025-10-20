@@ -21,7 +21,7 @@
 #define DEBUG_MILE_PARAM_ENABLE
 
 #define MILEAGE_PARAM_START_ADDR (0x00)
-#define OTHER_PRAM_START_ADDR  (0x280)
+#define OTHER_PARAM_START_ADDR  (0x280)
 #define MILEAGE_PARAM_MAX_SIZE  (640)   ///< 里程参数最大区域为640个字节
 #define MILEAGE_PARAM_PAGE_NUM  (40)    ///< 40页
 
@@ -238,7 +238,7 @@ int save_mile_param(void) {
 
     uint8_t page_num = get_page_num();
     g_mile_write_addr = g_mile_write_addr + page_num * E2PROM_PAGE_SIZE;
-    if (g_mile_write_addr >= OTHER_PRAM_START_ADDR) {
+    if (g_mile_write_addr >= OTHER_PARAM_START_ADDR) {
         g_mile_write_addr = MILEAGE_PARAM_START_ADDR;
     }
     mile_param.checksum =  xcrc32((uint8_t*)&mile_param, sizeof(mile_param_t) - 4, 0xffffffff);
@@ -267,7 +267,7 @@ static int read_mile_param(void) {
 #endif
             return 0;
         } else {
-            hcn_log_error("Read mile param check sum!\n");
+            hcn_log_error("Read mile param check sum failed!\n");
         }
     } else {
         hcn_log_error("Read mile param failed!\n");

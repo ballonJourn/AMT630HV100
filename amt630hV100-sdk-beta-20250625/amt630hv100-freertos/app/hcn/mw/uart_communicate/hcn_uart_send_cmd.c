@@ -162,7 +162,7 @@ int send_mcu_set_time(SystemTime_t time) {
         msg->buffer[11] = decimal_2_bcd(time.tm_mday);
         msg->buffer[12] = decimal_2_bcd(time.tm_hour);
         msg->buffer[13] = decimal_2_bcd(time.tm_min);
-        msg->buffer[14] = 0;
+        msg->buffer[14] = decimal_2_bcd(time.tm_sec);
         msg->buffer[15] = 0;
         msg->buffer[16] = 0;
         msg->buffer[17] = uart_mcu_calc_crc(msg->buffer);

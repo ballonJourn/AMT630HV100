@@ -46,7 +46,7 @@ static bool is_acc_on = false;
 
 static void start_source_timeout(TimerHandle_t xTimer) {
     hcn_log_info("Mcu rx start source timeout \n");
-    //check_start_source(0x01);
+    check_start_source(0x01);
 }
 
 static void handshake_timeout(TimerHandle_t xTimer) {

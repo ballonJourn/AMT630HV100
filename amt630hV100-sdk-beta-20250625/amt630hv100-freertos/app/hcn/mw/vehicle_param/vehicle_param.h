@@ -82,7 +82,7 @@ typedef enum {
 
     ///< WIFI
     VEH_CARLINK_CONNECTED,  ///< 0:disconnect  1:connect
-
+ 
     ///< Bluetooth and Phone Status
     VEH_BT_DEV_STATE,  ///< Bluetooth device state, >=1: powered on and working
     VEH_BT_SWITCH_STATUS,     ///< Bluetooth switch status, 0: off, 1: on
@@ -100,13 +100,15 @@ typedef enum {
     VEH_BT_PHONE_BATTERY,  ///< Phone battery level, 0-5
 
     ///< Weather and Navigation
+    VEH_QUETY_WEATHER_STATUS, ///< Query weather status 0: no 1: yes
     VEH_WEATHER_TYPE,  ///< Weather type, 0: none, 1-7: various weather types
+    VEH_ENV_TEMP,   ///< Environmental temperature (℃)
     VEH_NAV_MODE,      ///< Navigation mode, 0: none, 1: basic, 2: full screen
-    VEH_NAV_STATUS,    ///< Navigation status, 0: off, 1: on
+    VEH_EASY_NAV_STATUS,    ///< Navigation status, 0: easy navi off, 1: easy navi on
 
     ///< Miscellaneous
-    VEH_LICENSE_AUTH_FAIL,  ///< License authentication fail, 0: registered, 1:
-                            ///< not registered
+    VEH_LICENSE_AUTH_STATUS,  ///< License authentication status, 0: not registered, 1:
+                            ///< registered
     VEH_ACC_OFF_STATUS,  ///< ACC off status, 0: connected, 1: disconnected
 
     ///< Traction Control System (TCS)
