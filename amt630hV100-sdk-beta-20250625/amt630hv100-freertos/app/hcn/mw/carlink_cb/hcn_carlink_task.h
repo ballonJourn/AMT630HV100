@@ -20,8 +20,11 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "config/hcn_config.h"
 
+#ifdef HCN_CARLINK_WEATHER_ENABLE
 void carlink_query_init(void);
+#endif
 
 #ifdef __cplusplus
 }

@@ -30,6 +30,7 @@
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #include "carlink_cb/hcn_easy_navi.h"
 #include "carlink_cb/hcn_carlink_task.h"
+#include "carlink_cb/hcn_carlink_phone_model.h"
 
 static IhcnCallBack *gHcnCallback = NULL;
  
@@ -190,6 +191,12 @@ static void onHcnPhoneAppHUDRoadJunctionPicture(
     }
 }
 
+static void onHcnPhoneModel(const char * phoneInfo) {
+    if (phoneInfo) {
+        parse_phone_model_info(phoneInfo);
+    }
+}
+
 static IhcnCallBack *register_hcn_callback(void) {
     IhcnCallBack *callback = (IhcnCallBack*)malloc(sizeof(IhcnCallBack));
     memset(callback, 0, sizeof(IhcnCallBack));
@@ -203,7 +210,8 @@ static IhcnCallBack *register_hcn_callback(void) {
                 onHcnPhoneAppHUDLaneGuidancePicture;
     callback->onHcnPhoneAppHUDRoadJunctionPicture = \
                 onHcnPhoneAppHUDRoadJunctionPicture;
-
+    callback->onHcnPhoneModel = onHcnPhoneModel;
+    
     return callback;
 }
 
@@ -229,8 +237,9 @@ void carlink_cb_init(void) {
         gHcnCallback = register_hcn_callback();
         hcn_initialize(&hcn_cfg, gHcnCallback);
 
+#ifdef HCN_CARLINK_WEATHER_ENABLE
         carlink_query_init();
-
+#endif
         inited = true;
     }
 }

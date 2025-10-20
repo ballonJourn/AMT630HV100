@@ -139,6 +139,11 @@ void onPhoneAppInfo(const void *data, uint32_t length)
     vTaskDelay(pdMS_TO_TICKS(100));
     printf("\r\nonPhoneAppInfo\r\n");
     hcn_log_info("\r\nonPhoneAppInfo data:%s\r\n", (const char *)data);
+    if (data) {
+        if (get_hcn_callback() && get_hcn_callback()->onHcnPhoneModel) {
+            get_hcn_callback()->onHcnPhoneModel(data);
+        }
+    }
 }
 
 void onCallAction(ECCallType type, const char *name, const char *number)

@@ -4446,6 +4446,9 @@
                         <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_cb.c</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_phone_model.c</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\carlink_cb\hcn_carlink_provide.c</name>
                     </file>
                     <file>

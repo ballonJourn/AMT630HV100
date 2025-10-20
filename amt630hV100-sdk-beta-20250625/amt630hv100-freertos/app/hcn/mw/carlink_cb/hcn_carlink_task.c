@@ -15,11 +15,12 @@
 #include <FreeRTOS.h>
 #include "task.h"
 #include "ECTiny.h"
-#include "config/hcn_config.h"
 #include "carlink_cb/hcn_carlink_task.h"
 #include "vehicle_param/vehicle_param.h"
 #include "log/hcn_log.h"
 #include "carlink_cb/hcn_carlink_cb.h"
+
+#ifdef HCN_CARLINK_WEATHER_ENABLE
 
 #define QUERY_EC_PERIOD  (200) ///< 200MS
 #define QUERY_WEATHER_INTERVAL_TIME         (30) ///< 天气查询间隔时间，单位min，30min
@@ -60,12 +61,11 @@ static void query_ec_thread(void *param) {
 }
 
 void carlink_query_init(void) {
-#ifdef HCN_CARLINK_WEATHER_ENABLE
     if (xTaskCreate(query_ec_thread, "query_ec_thread", configMINIMAL_STACK_SIZE,
                     NULL, configMAX_PRIORITIES / 4, NULL) != pdPASS) {
         hcn_log_error("create query_ec_thread fail.\n");
         return;
     }
-#endif
 }
 
+#endif

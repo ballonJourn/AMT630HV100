@@ -119,7 +119,9 @@ extern "C" {
 #define HCN_CARLINK_ENABLE
 #define HCN_LCD_EC_WIDTH        (800)
 #define HCN_LCD_EC_HEIGHT       (480)
-#define HCN_CARLINK_WEATHER_ENABLE
+
+///< 天气功能使能
+//#define HCN_CARLINK_WEATHER_ENABLE
 
 ///< 简易导航中的路口放大和车道引导图片使能
 //#define HCN_CARLINK_ROAD_PIC_ENABLE

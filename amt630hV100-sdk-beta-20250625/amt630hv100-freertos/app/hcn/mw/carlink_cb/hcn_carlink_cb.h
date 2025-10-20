@@ -323,8 +323,8 @@ typedef struct {
 
 typedef struct {
     uint8_t phoneType;             //手机类型      0:安卓  1:苹果
-    char phoneModels[128];          //手机机型
-    char blueToothName[32];        //蓝牙名称
+    char phoneModels[128];          //手机型号  
+    char phoneDevName[128];        //手机设备名称 ,iphone无法获取设备名称
 } hcnPhoneInfo;
 
 typedef struct  {
@@ -371,7 +371,7 @@ typedef struct {
 
     void (*onHcnEasyNavigation)(const hcnNavigationHudInfo * naviData);    
 
-    void (*onHcnPhoneModel)(const hcnPhoneInfo * phoneInfo);
+    void (*onHcnPhoneModel)(const char * phoneInfo);
 } IhcnCallBack;
 
 typedef struct {
