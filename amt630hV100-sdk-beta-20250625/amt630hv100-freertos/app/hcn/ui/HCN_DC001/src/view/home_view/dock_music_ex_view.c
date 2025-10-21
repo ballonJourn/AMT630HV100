@@ -56,6 +56,7 @@ ret_t home_refresh_music_ex_image(char *image)
     }
     
     return RET_OK ;
+
 }
 
 ret_t home_refresh_music_ex_title(char *title)
@@ -126,4 +127,55 @@ void music_ex_view_set_focused_item(music_ex_focused_e focusedIndex)
     
     widget_invalidate_force(home_dock_music_ex_widget[MUSIC_BAR] ,NULL);
     return ;
+
+    // image_set_image();
 }
+
+#if 0
+// 图片名默认为assets_manager_load_file加载的路径
+#define IMAGE_NAME "/media/sda1/AWTK.png" 
+
+static ret_t on_unload_button_click(void* ctx, event_t* e) 
+{ 
+    // 点击卸载图片按钮卸载图片缓存  
+    bitmap_t bitmap = {0};  widget_t* win = WIDGET(ctx);  widget_t* image = widget_lookup(win, "image", TRUE);  
+    // 卸载图片管理器缓存  
+    image_manager_get_bitmap(image_manager(), IMAGE_NAME, &bitmap);  image_manager_unload_bitmap(image_manager(), &bitmap);
+    // 卸载资源管理器缓存 
+    assets_manager_clear_cache_ex(assets_manager(), ASSET_TYPE_IMAGE, IMAGE_NAME);  widget_invalidate(image, NULL); 
+    return RET_OK;
+}
+
+static ret_t on_load_button_click(void* ctx, event_t* e) 
+{ 
+    // 点击加载图片按钮重新加载图片缓存  
+    widget_t* win = WIDGET(ctx);  widget_t* image = widget_lookup(win, "image", TRUE);
+    // 将新的图片数据添加到资源管理器缓存中  
+    asset_info_t* img = assets_manager_load_file(assets_manager(), ASSET_TYPE_IMAGE, IMAGE_NAME);  assets_manager_add(assets_manager(), img);
+    image_set_image(image, IMAGE_NAME);
+    widget_invalidate(image, NULL);  
+    return RET_OK;
+}
+
+
+
+// 假设 album_cover_data 是蓝牙接收到的图片数据
+extern uint8_t album_cover_data[];
+extern size_t album_cover_data_size;
+
+void load_album_cover() {
+    // 创建一个 image 控件
+    widget_t *image = image_create(NULL, 0, 0, 200, 200);
+    if (!image) {
+        // 处理创建失败的情况
+        return;
+    }
+
+    // 将图片数据添加到资源管理器
+    assets_manager_add_data(assets_manager(), "album_cover", ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, album_cover_data, album_cover_data_size);
+
+    // 设置图片控件的图片
+    image_set_image(image, "album_cover");
+}
+
+#endif

@@ -4665,7 +4665,19 @@
                             <group>
                                 <name>set_view</name>
                                 <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\brightness.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\bt_connect.c</name>
+                                </file>
+                                <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\cycling_energy.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\display.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\language.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_page_key.c</name>
@@ -4678,6 +4690,9 @@
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\setting_menu.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\unit.c</name>
                                 </file>
                             </group>
                             <file>

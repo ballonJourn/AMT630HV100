@@ -9,9 +9,9 @@
 #include "view/set_view/set_view_interface.h"
 #include "proxy/vehicle_data.h"
 
-#define REFRESH_INTERVAL_33_MS (33)
-#define REFRESH_INTERVAL_50_MS (50)
-#define REFRESH_INTERVAL_500_MS (500)
+#define REFRESH_INTERVAL_33_MS   (33)
+#define REFRESH_INTERVAL_50_MS   (50)
+#define REFRESH_INTERVAL_500_MS  (500)
 #define REFRESH_INTERVAL_1000_MS (1000)
 
 static uint32_t timer_array[REFRESH_TIMER_NUM_MAX] = { 0 } ;
@@ -21,10 +21,15 @@ ret_t set_view_init(widget_t * win)
 {
     if(win == NULL) return RET_FAIL ;
 
-    setting_menu_view_init(win) ;
+    setting_menu_view_init      (win) ;
 
     set_cycling_energy_view_init(win) ;
     set_clock_view_init         (win) ;
+    set_bt_connect_view_init    (win) ;
+    set_language_view_init      (win) ;
+    set_unit_view_init          (win) ;
+    set_display_view_init       (win) ;
+    set_brightness_view_init    (win) ;
     
     return RET_OK ;
 }

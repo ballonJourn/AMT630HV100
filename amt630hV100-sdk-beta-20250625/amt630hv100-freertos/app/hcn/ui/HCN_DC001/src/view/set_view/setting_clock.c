@@ -42,7 +42,7 @@ void refresh_clock(int min ,int sec)
     return ;
 }
 
-int32_t option_current_value = 0 ;
+int32_t option_current_value = 0 ;  //记录设置时的时间
 
 static void setting_menu_view_deal_set()
 {
@@ -185,7 +185,7 @@ void clock_cacle(int direc)
         default:
             break;
     }
-    
+
     widget_set_value_int(set_clock_widget[option] ,option_time) ;
 }
 
@@ -196,7 +196,7 @@ static void setting_option_view_deal_set()
     clock_ctrl_end();
 
     //to do  set systerm time
-   return ;
+    return ;
 }
 
 static void setting_option_view_deal_back()
@@ -207,7 +207,7 @@ static void setting_option_view_deal_back()
 
     if (set_clock_widget[option])
     {
-     widget_set_value_int(set_clock_widget[option] , option_current_value) ;
+        widget_set_value_int(set_clock_widget[option] , option_current_value) ;
     }
 
     return ;
@@ -223,49 +223,6 @@ static void setting_option_view_deal_up()
 static void setting_option_view_deal_down()
 {
     clock_cacle(1) ;
-
-    // if(set_clock_widget[option] == NULL) return ;
-    // uint32_t option_time = widget_get_value_int(set_clock_widget[option]);
-    // uint32_t temp_time  ;
-    // switch (option)
-    // {
-    //     case CLOCK_H_1_OPTION:
-    //         temp_time = widget_get_value_int(set_clock_widget[CLOCK_H_2_OPTION]);
-    //         if (temp_time > 3 )
-    //         {
-    //             option_time = (option_time - 1 + 2) % 2 ;
-    //         }
-    //         else
-    //         {
-    //             option_time = (option_time - 1 + 3) % 3 ;
-    //         }
-    //         break;
-    //     case CLOCK_H_2_OPTION:
-    //         temp_time = widget_get_value_int(set_clock_widget[CLOCK_H_1_OPTION]);
-    //         if (temp_time == 2 )
-    //         {
-    //             option_time = (option_time - 1 + 4) % 4 ;
-    //         }
-    //         else
-    //         {
-    //             option_time = (option_time - 1 + 10) % 10 ;
-    //         }
-    //         break;
-    //     case CLOCK_M_1_OPTION:
-        
-    //         option_time = (option_time - 1 + 5) % 5 ;
-    //         break;
-    //     case CLOCK_M_2_OPTION:
-    //         option_time = (option_time - 1 + 10) % 10 ;
-        
-    //         break;
-        
-    //     default:
-    //         break;
-    // }
-
-    // widget_set_value_int(set_clock_widget[option] ,option_time) ;
-
     return ;
 }
 
@@ -303,8 +260,3 @@ void on_clock_option_deal_short_key(key_id_e key)
 
     return  ;
 }
-
-
-#ifndef TYPE_CHECK_SIZE
-#define TYPE_CHECK_SIZE(type, size) extern int sizeof_##type##_is_error [!!(sizeof(type)==(size_t)(size)) - 1]
-#endif

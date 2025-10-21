@@ -5,5 +5,9 @@
 #include "view/set_view/set_page_key.h"
 #include "view/set_view/cycling_energy.h"
 #include "view/set_view/setting_clock.h"
-
+#include "view/set_view/bt_connect.h"
+#include "view/set_view/language.h"
+#include "view/set_view/unit.h"
+#include "view/set_view/display.h" 
+#include "view/set_view/brightness.h" 
 #endif

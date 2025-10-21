@@ -23,24 +23,32 @@ ret_t set_cycling_energy_view_init(widget_t* parent)
 static void setting_menu_view_deal_set()
 {
     printf("on_cycling_engrgy setting_menu_view_deal_set \n") ;
+
+    return  ;
 }
 
 static void setting_menu_view_deal_back()
 {
     set_current_level(MENU_LEVEL_1);
     cycling_engergy_view_clean_state() ;
+
+    return  ;
 }
 
 static void setting_menu_view_deal_up()
 {
     option =  (option - 1 + RIDE_OPTION_MAX) % RIDE_OPTION_MAX ;
     cycling_engergy_view_set_focused_item(option) ;
+
+    return  ;
 }
 
 static void setting_menu_view_deal_down()
 {
     option =  (option + 1 ) % RIDE_OPTION_MAX ;
     cycling_engergy_view_set_focused_item(option) ;
+
+    return  ;
 }
 
 
@@ -103,4 +111,6 @@ void cycling_engergy_view_clean_state()
             widget_invalidate_force(set_energy_widget[i] , NULL)  ;
         }
     }
+
+    return ;
 }

@@ -5,8 +5,6 @@
 
 static setting_menu_e menu_index = SETTING_MENU_TMPS ;
 
-// static menu_list_e current_list_item = MENU_SET_TMPS ;  //应该丢到设置页面当中
-
 typedef struct {
     void (*view_init)();
     void (*deal_short_key)(key_id_e);
@@ -14,12 +12,17 @@ typedef struct {
 
 
 static setting_entry_t setting_entry[SETTING_MENU_NUM_MAX] = {
-    [SETTING_MENU_RIDE_ELE] = { cycling_engrgy_init  , on_cycling_engrgy_deal_short_key } ,
-    [SETTING_MENU_CLOCK]    = { clock_init           , on_clock_deal_short_key          } ,
+    [SETTING_MENU_RIDE_ELE]   = { cycling_engrgy_init  , on_cycling_engrgy_deal_short_key } ,
+    [SETTING_MENU_CLOCK]      = { clock_init           , on_clock_deal_short_key          } ,
+    [SETTING_MENU_CONNECT]    = { bt_connect_init      , on_bt_connect_deal_short_key     } ,
+    [SETTING_MENU_LANGUAGE]   = { language_init        , on_language_deal_short_key       } ,
+    [SETTING_MENU_UNIT]       = { unit_init            , on_unit_deal_short_key           } , 
+    [SETTING_MENU_DISPLAY]    = { display_init         , on_display_deal_short_key        } ,
+    [SETTING_MENU_BRIGHTNESS] = { brightness_init      , on_brightness_deal_short_key     } ,
 };
 
 static setting_entry_t option_entry[SETTING_MENU_NUM_MAX] = {
-    [SETTING_MENU_CLOCK]    = { clock_option_init           , on_clock_option_deal_short_key      } ,
+    [SETTING_MENU_CLOCK]      = { clock_option_init    , on_clock_option_deal_short_key   } ,
 };
 
 void set_page_deal_key_down ()

@@ -26,4 +26,5 @@ ret_t timer_refresh_500_ms(const timer_info_t *info);
 
 
 extern int get_qr_text_buf(char *buf, int len) ;
+
 #endif
