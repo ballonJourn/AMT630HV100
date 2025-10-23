@@ -1,5 +1,10 @@
 #include "dock_music_ex_view.h"
 
+extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
+                     bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565);
+
+#define BLUETOOTH_MUSIC_IMAGE "buletooth_music_image"
+
 const char* home_dock_music_ex_widget_name[MUSIC_DOCK_NUM_MAX] = {
     "music_image_ex" , "music_title_ex" , "music_clyric_ex" , "music_bar" , 
     "music_prev", "music_state" , "music_next"
@@ -49,10 +54,34 @@ void music_ex_view_init()
     return ;
 }
 
-ret_t home_refresh_music_ex_image(char *image)
+ret_t home_refresh_music_ex_image(char *blueMusicImg , int length)
 {
+    // 将图片数据添加到资源管理器
+    // 验证资源是否存在
+    // const asset_info_t* asset = assets_manager_ref(assets_manager(), ASSET_TYPE_IMAGE, BLUETOOTH_MUSIC_IMAGE );
+    // if (asset != NULL) {
+    //     printf("asset_info_t successed! size: %d\n", asset->size);
+    //     assets_manager_unref(assets_manager(), asset);
+    // } else {
+    //     assets_manager_add_data(assets_manager(), BLUETOOTH_MUSIC_IMAGE , ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, (uint8_t*)blueMusicImg, sizeof(blueMusicImg));
+    // }
+    
+    bitmap_t bmp, tmps;
+    // 解码对应的图片
+    if (RET_OK == stb_load_image(ASSET_TYPE_IMAGE_PNG, (uint8_t*)blueMusicImg , length , &bmp, 0, 0, 0)) {
+        // 释放旧的图片缓存
+        if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) {
+            image_manager_unload_bitmap(image_manager(), &tmps);
+        }
+        image_manager_add(image_manager(), BLUETOOTH_MUSIC_IMAGE, &bmp);
+    }else{
+        log_debug("BlueMusicPicData decode error************* \r\n");
+    }
+
+    // 设置图片控件的图片
     if (home_dock_music_ex_widget[MUSIC_IMAGE_EX]){
-        image_set_image(home_dock_music_ex_widget[MUSIC_IMAGE_EX] , image) ;
+        image_set_image(home_dock_music_ex_widget[MUSIC_IMAGE_EX] , BLUETOOTH_MUSIC_IMAGE ) ;
+        widget_invalidate_force(home_dock_music_ex_widget[MUSIC_IMAGE_EX], NULL  ) ;
     }
     
     return RET_OK ;
@@ -131,7 +160,7 @@ void music_ex_view_set_focused_item(music_ex_focused_e focusedIndex)
     // image_set_image();
 }
 
-#if 0
+/***********
 // 图片名默认为assets_manager_load_file加载的路径
 #define IMAGE_NAME "/media/sda1/AWTK.png" 
 
@@ -157,8 +186,6 @@ static ret_t on_load_button_click(void* ctx, event_t* e)
     return RET_OK;
 }
 
-
-
 // 假设 album_cover_data 是蓝牙接收到的图片数据
 extern uint8_t album_cover_data[];
 extern size_t album_cover_data_size;
@@ -177,5 +204,5 @@ void load_album_cover() {
     // 设置图片控件的图片
     image_set_image(image, "album_cover");
 }
+************* */
 
-#endif

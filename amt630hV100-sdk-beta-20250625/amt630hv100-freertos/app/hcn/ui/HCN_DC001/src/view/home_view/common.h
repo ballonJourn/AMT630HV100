@@ -22,22 +22,24 @@
 #define DEVICE_PAGE  "device_page"
 
 typedef enum {
-    KM_H,
-    MPH ,
-    UNIT_MAX
-}unit_e ;
+    KM_H     ,
+    MPH      ,
+    UNIT_MAX ,
+}unit_e;
 
 typedef enum {
-    DRV_MODE_E ,
-    DRV_MODE_N ,
-    DRV_MODE_S ,
-}drv_mode_e ;
+    DRV_MODE_E   ,
+    DRV_MODE_N   ,
+    DRV_MODE_S   ,
+    DRV_MODE_MAX ,
+}drv_mode_e;
 
 typedef enum {
-    GEAR_D ,
-    GEAR_N ,
-    GEAR_R ,
-}gear_e ;
+    GEAR_D   ,
+    GEAR_N   ,
+    GEAR_R   ,
+    GEAR_MAX ,
+}gear_e;
 
 
 

@@ -64,12 +64,12 @@ ret_t home_view_init(widget_t * win)
     selfcheck_init();
 
     //添加定时器
-    add_timer_init();
+    home_timer_init();
 
     return RET_OK ;
 }
 
-ret_t add_timer_init()
+ret_t home_timer_init()
 {
     timer_array[REFRESH_TIMER_50_MS]  = timer_add( timer_refresh_50_ms ,  NULL , REFRESH_INTERVAL_50_MS ) ;
     timer_array[REFRESH_TIMER_500_MS] = timer_add( timer_refresh_500_ms , NULL , REFRESH_INTERVAL_500_MS) ;

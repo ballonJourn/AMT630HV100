@@ -18,7 +18,7 @@ ret_t set_view_init(widget_t * win);
 
 ret_t home_view_init(widget_t * view) ;
 
-ret_t add_timer_init();
+ret_t home_timer_init();
 
 ret_t timer_refresh_50_ms(const timer_info_t *info);
 

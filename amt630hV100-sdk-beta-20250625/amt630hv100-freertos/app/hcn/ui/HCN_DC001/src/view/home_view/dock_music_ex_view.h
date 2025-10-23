@@ -25,10 +25,9 @@ typedef enum music_ex_focused_com{
 }music_ex_focused_e;
 
 
-
 ret_t home_dock_music_ex_view_init(widget_t* parent);
 
-ret_t home_refresh_music_ex_image(char *image);
+ret_t home_refresh_music_ex_image(char *blueMusicImg , int length) ;
 
 ret_t home_refresh_music_ex_title(char *title);
 

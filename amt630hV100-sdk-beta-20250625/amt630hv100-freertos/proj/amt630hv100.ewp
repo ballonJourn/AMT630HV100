@@ -4667,6 +4667,12 @@
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\link_view\link_page_key.c</name>
                                 </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\link_view\link_view.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\link_view\link_view_logic.c</name>
+                                </file>
                             </group>
                             <group>
                                 <name>set_view</name>
