@@ -88,7 +88,7 @@ int send_mcu_set_time(SystemTime_t time);
 
 /**
  * @brief  send mcu clear subtotal mileage
- * @param  type 0:Trip A 1:Trip B 2:Trip A and Trip B
+ * @param  type 0x00:none 1:Trip A 2:Trip B 3:Trip A and Trip B
  * @return 0:success -1:failed
  */
 int send_mcu_clear_subtotal_mileage(uint8_t type);
