@@ -48,6 +48,7 @@ extern int ulog_console_backend_init(void);
 
 #include "config/hcn_config.h"
 #include "mw_init/hcn_mw_init.h"
+#include "msg_manage/hcn_msg_manage.h"
 
 #ifdef HCN_ADC_KEY_ENABLE
 #include "key_module/hcn_adc_key.h"
@@ -685,6 +686,7 @@ static void usb_read_thread(void *para)
 		status = usb_wait_stor_dev_pluged(portMAX_DELAY);
 		if (status == USB_DEV_PLUGED) {
 			printf("usb dev inserted.\n");
+			hcn_usb_status_change(USB_STATUS_INSERTED);
 #ifdef OTA_UPDATE_SUPPORT
 #ifdef DELTA_UPDATE_SUPPORT
 			//Demo从U盘读取patch文件来模拟接收patch文件
@@ -793,6 +795,7 @@ static void usb_read_thread(void *para)
 			}
 #endif
 		} else if (status == USB_DEV_UNPLUGED) {
+			hcn_usb_status_change(USB_STATUS_REMOVED);
 			printf("usb removed.\n");
 		}
 	}
