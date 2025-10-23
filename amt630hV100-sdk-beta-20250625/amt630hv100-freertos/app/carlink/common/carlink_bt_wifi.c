@@ -402,7 +402,8 @@ static void carlink_bt_callback(char * cAtStr)
 	memset((void*)&ev, 0, sizeof(ev));
 	ev.type = CARLINK_EVENT_NONE;
     
-	if (0) {
+	if (0 == strncmp(cAtStr, "ERR", 3) || 0 == strncmp(cAtStr, "OK", 2)) {
+        return;
 	} else if (0 == strncmp(cAtStr, "+IAPDATA=",      9)) {
         char ble_buf[256] = {0};
 		int data_len, i;
@@ -519,9 +520,15 @@ static void carlink_bt_callback(char * cAtStr)
 		ev.type = CARLINK_EVENT_BT_DISCONNECT;
 		ev.link_type = AUTO_WIRELESS;
 		carlink_notify_event(&ev);
-    }
+    } else {
+		if (0 != strncmp(cAtStr, "+PBDATA=1", 9)) {
+            printf("bt_callback_ec %s\r\n", cAtStr);
+        }
 
-	on_bt_str_parse(cAtStr);
+		if (bt_msg_task_add(cAtStr, strlen(cAtStr)) != 0) {
+			printf("bt_callback_ec msg full!\r\n");
+		}
+	}
 }
 
 int carlink_iap_data_write(unsigned char *data, int len)

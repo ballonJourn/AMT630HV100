@@ -29,6 +29,8 @@ static void hcn_power_io_init(void) {
 void hcn_mw_init(void) {
     hcn_power_io_init();
 
+    bt_module_init();
+    
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE    
     usr_param_init();
 #endif

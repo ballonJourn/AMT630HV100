@@ -4495,6 +4495,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>msg_manage</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\msg_manage\hcn_msg_manage.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>mw_init</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\mw_init\hcn_mw_common.c</name>

@@ -21,7 +21,22 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-void on_bt_str_parse(char *at_str);
+#define UART_BT_MSG_MAX_LEN (256)
+
+/**
+ * @brief  add bt message to bt task queue
+ * @param  bt_msg: bt message pointer
+ * @param  len: bt message length
+ * @return 0:success -1:fail
+ */
+int bt_msg_task_add(char *bt_msg, uint16_t len);
+
+/**
+ * @brief  bt module init
+ * @param  none
+ * @return 0:success -1:fail
+ */
+int bt_module_init(void);
 
 #ifdef __cplusplus
 }

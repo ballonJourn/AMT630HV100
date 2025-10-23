@@ -59,6 +59,16 @@ int bcd_2_decimal(int bcd);
  */
 int decimal_2_bcd( int decimal);
 
+/**
+ * @brief  字符串截取
+ * @param  dst 目标字符串
+ * @param  src 源字符串
+ * @param  start 起始位置
+ * @param  len 截取长度
+ * @return 目标字符串指针，失败返回NULL
+ */
+char *substring(char *dst, char *src, int start, int len);
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus

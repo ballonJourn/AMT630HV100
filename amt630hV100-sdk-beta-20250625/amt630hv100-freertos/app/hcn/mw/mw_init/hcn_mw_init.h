@@ -35,6 +35,7 @@ extern "C" {
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #include "carlink_cb/hcn_carlink_cb.h"
 #include "mw_init/hcn_mw_common.h"
+#include "bt_module/hcn_bt_parse.h"
 
 void hcn_mw_init(void);
 
