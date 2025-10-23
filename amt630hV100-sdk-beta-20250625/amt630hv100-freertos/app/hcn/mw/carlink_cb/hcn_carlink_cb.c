@@ -180,14 +180,18 @@ static void onHcnEasyNavigation(const hcnNavigationHudInfo * naviData) {
 static void onHcnPhoneAppHUDLaneGuidancePicture(
     const road_junction_pic_t * data) {
     if (data) {
+#ifdef HCN_CARLINK_ROAD_PIC_ENABLE
         parse_lane_guidance_pic_info(data);
+#endif
     }
 }
 
 static void onHcnPhoneAppHUDRoadJunctionPicture(
     const road_junction_pic_t* data) {
     if (data) {
+#ifdef HCN_CARLINK_ROAD_PIC_ENABLE
         parse_road_junction_pic_info(data);
+#endif
     }
 }
 
@@ -240,6 +244,8 @@ void carlink_cb_init(void) {
 #ifdef HCN_CARLINK_WEATHER_ENABLE
         carlink_query_init();
 #endif
+        carlink_easy_navi_init();
+        
         inited = true;
     }
 }

@@ -37,7 +37,7 @@ typedef enum {
     BT121_BOOK_STATE,               ///< 电话本下载状态
     BT121_CALL_STATE,               ///< 手机通话状态
     BT121_DEVICE_STATE,             ///< 设备状态
-} bt121_id_e;
+} bt_device_id_e;
 
 typedef enum {
     BT936_DATA = 20,                ///< 耳机数据更新
@@ -90,7 +90,7 @@ typedef struct {
     char btCallPerson1[TEXT_PARAM_LEN];      ///< 通话联系人
     char btCallNumber2[TEXT_PARAM_LEN];      ///< 三方通话号码
     char btCallPerson2[TEXT_PARAM_LEN];      ///< 三方通话联系人
- } bt121_call_t;
+ } bt_call_t;
 
 typedef struct {
     dev_state_e btDevState;    ///< 判断模块是否初始化完成 != 0
@@ -107,7 +107,7 @@ typedef struct {
     char btDevName[TEXT_PARAM_LEN];
     char btDevPin[TEXT_PARAM_LEN];
     char btHfpAddr[TEXT_PARAM_LEN];
-} bt121_data_t;
+} bt_data_t;
 
 typedef struct {
     dev_state_e btDevState;        ///< 判断模块是否初始化完成 != 0
@@ -357,9 +357,9 @@ typedef struct {
 
 	void (*onHcnLinkConnect)(void);
 
-	void (*onHcnBt121Change)(bt121_id_e id, uint32_t value);
+	void (*onHcnBt121Change)(bt_device_id_e id, uint32_t value);
 
-	void (*onHcnBtCallStatus)(bt121_call_t * btCall);
+	void (*onHcnBtCallStatus)(bt_call_t * btCall);
 
     void (*onHcnWeatherReceived)(const char *weather_json);
 
@@ -413,8 +413,8 @@ void hcn_bt121_pick_up();                  			///< 接听
 void hcn_bt121_hung_up();                  			///< 挂断
 bool hcn_bt121_is_Call();                   		///< 当前是否在通话
 
-const bt121_call_t* hcn_bt121_get_Call();           ///< 获取通话数据
-const bt121_call_t* hcn_bt121_get_data();           ///< 获取121数据
+const bt_call_t* hcn_bt121_get_Call();           ///< 获取通话数据
+const bt_call_t* hcn_bt121_get_data();           ///< 获取121数据
 const char* hcn_bt121_getName();                    ///< 获取121蓝牙名称
 const char* hcn_bt121_getMacAddr();
 const char* hcn_bt121_getBleName();
