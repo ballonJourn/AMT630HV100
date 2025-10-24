@@ -134,7 +134,10 @@ static void onHcnVideoStatus(bool status) {
 #endif
     } else {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
+
         vehicle_set_data(VEH_QUETY_WEATHER_STATUS, 0);
+
+        vehicle_set_data(VEH_EASY_NAV_STATUS, 0);		
 
         EC_disableDownloadPhoneAppHud(); 
     }
