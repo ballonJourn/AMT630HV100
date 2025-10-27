@@ -1,6 +1,8 @@
 #include "navigation_view.h"
 #include "../../../3rd/awtk-widget-qr/src/qr/qr.h"
 
+#define ICON_NAVI_DEFAULT  "icon_nav_1"
+
 const char* home_navi_widget_name[NAVI_NUM_MAX] = {
     "navi_qr" , "label_road" , "navi_image" , "label_distance"
 } ;
@@ -41,9 +43,9 @@ ret_t home_refresh_qr(char *value)
 
 ret_t home_refresh_nav_road(char *value)
 {
-    if (home_navi_widget[NAVI_QR])
+    if (home_navi_widget[NAVI_LABEL_ROAD])
     {
-        widget_set_text_utf8(home_navi_widget[NAVI_QR], value);
+        widget_set_text_utf8(home_navi_widget[NAVI_LABEL_ROAD], value);
     }
 
     return RET_OK ;
@@ -53,8 +55,14 @@ ret_t home_refresh_nav_image(char *value)
 {
     if (home_navi_widget[NAVI_IMAGE])
     {
-        image_set_image(home_navi_widget[NAVI_IMAGE], value);
+        image_set_image(home_navi_widget[NAVI_IMAGE], value) ;
+
+        const asset_info_t* asset = assets_manager_ref(assets_manager(), ASSET_TYPE_IMAGE, value );
+        if (NULL == asset)
+            image_set_image(home_navi_widget[NAVI_IMAGE] , ICON_NAVI_DEFAULT);
+        
         widget_invalidate_force(home_navi_widget[NAVI_IMAGE] , NULL);
+
     }
 
     return RET_OK ;

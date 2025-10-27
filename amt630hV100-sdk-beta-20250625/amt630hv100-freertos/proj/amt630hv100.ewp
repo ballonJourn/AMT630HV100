@@ -4585,6 +4585,9 @@
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\hcn_selfcheck.c</name>
                             </file>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\navigation_view_logic.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\signal_view_logic.c</name>
                             </file>
                             <file>
@@ -4602,6 +4605,9 @@
                         </group>
                         <group>
                             <name>proxy</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\mirror_data.c</name>
+                            </file>
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_data.c</name>
                             </file>

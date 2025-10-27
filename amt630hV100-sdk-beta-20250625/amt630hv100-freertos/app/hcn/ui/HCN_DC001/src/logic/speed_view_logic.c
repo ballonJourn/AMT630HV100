@@ -56,4 +56,6 @@ void speed_view_update()
     update_drv_mode() ;
     update_rpm() ;
     update_speed() ;
+
+    return ;
 }

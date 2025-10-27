@@ -80,8 +80,8 @@
             </view>
             <view name="navigate_view" x="51" y="40" w="189" h="206" visible="false">
               <image name="navi_image" x="45" y="3" w="90" h="90" draw_type="default" image="icon_nav_1"/>
-              <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:text_color="#FFFFFF" style:normal:font_size="45" text="50 m"/>
-              <label name="label_road" x="14" y="151" w="160" h="42" style:normal:text_color="#FFFFFF" style:normal:font_size="25" text="道路"/>
+              <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:text_color="#FFFFFF" style:normal:font_size="45"/>
+              <label name="label_road" x="14" y="151" w="160" h="42" style:normal:text_color="#FFFFFF" style:normal:font_size="25"/>
             </view>
           </view>
           <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
