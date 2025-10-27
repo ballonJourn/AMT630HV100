@@ -72,7 +72,7 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         }
         speed         = 0 ;
         poewr         = 0 ;
-        drv_mode      = DRV_MODE_E ;
+        // drv_mode      = DRV_MODE_E ;
         gear          = GEAR_N ;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)

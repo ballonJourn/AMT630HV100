@@ -113,3 +113,13 @@ void language_view_clean_state()
 
     return ;
 }
+
+static ret_t change_locale(const char* str) {
+  char country[3];
+  char language[3];
+  strncpy(language, str, 2);
+  strncpy(country, str + 3, 2);
+  locale_info_change(locale_info(), language, country);
+  
+  return RET_OK;
+}
