@@ -8,6 +8,7 @@
 #include "signal_view_logic.h"
 #include "view/set_view/set_view_interface.h"
 #include "proxy/vehicle_data.h"
+#include "navigation_view_logic.h"
 
 #define REFRESH_INTERVAL_33_MS   (33)
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -81,6 +82,8 @@ ret_t home_timer_init()
 ret_t timer_refresh_500_ms(const timer_info_t *info)
 {
     //时间刷新闪烁
+    (void)info ;
+    
     static int  clock_min   = 0 ;
     static int  clock_sec   = 0 ;
     static bool clock_colon = TRUE ;
@@ -92,15 +95,8 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     clock_colon = !clock_colon ;
     home_refresh_clock_colon(clock_colon) ;
     
-#if ON_PC_CACLE == 0
-    char buff[ 256 ] = { 0 };
-    get_qr_text_buf(buff , sizeof(buff)) ;
-    if (tk_strlen(buff))
-        home_refresh_qr(buff);
-    
-#endif
 
-    // refresh_clock(19,16);
+    navigation_view_update();
 
     return RET_REPEAT ;
 }

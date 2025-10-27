@@ -4,7 +4,7 @@
     <label name="unit_lab" x="143" y="36" w="49" h="28" style:normal:text_color="#606060" style:normal:font_size="28" text="km/h"/>
   </view>
   <image name="ride_mode_img" x="612" y="94" w="21" h="17" draw_type="default" image="drv_mode_0"/>
-  <slide_menu name="gear_view" x="671" y="83" w="114" h="38" min_scale="1" align_v="top" value="0">
+  <slide_menu name="gear_view" x="671" y="83" w="114" h="38" min_scale="1" align_v="top" value="1">
     <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>
     <image name="gear_N" draw_type="center" style:normal:icon="gear_n_n" style:selected:icon="gear_n_p"/>
     <image name="gear_R" draw_type="center" style:normal:icon="gear_r_n" style:selected:icon="gear_r_p"/>

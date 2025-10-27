@@ -4,7 +4,7 @@
 #include "view/link_view/link_view.h"
 #include "config/hcn_config.h"
 #include "proxy/vehicle_data.h"
-// #include "../../3rd/awtk-widget-qr/src/qr/qr.h"
+#include "proxy/mirror_data.h"
 #include "../3rd/awtk-widget-qr/src/qr/qr.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -70,10 +70,17 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
             timer_array[REFRESH_TIMER_50_MS] = 0 ;
             printf("on_link_page_changed timer_remove successed\n");
         }
+        speed         = 0 ;
+        poewr         = 0 ;
+        drv_mode      = DRV_MODE_E ;
+        gear          = GEAR_N ;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
     {
         printf("on_link_page_changed EVT_WINDOW_WILL_OPEN\n") ;
+        link_refresh_gear(GEAR_N);
+        timer_refresh_50_ms(NULL);
+
     #if ON_PC_CACLE == 0
         extern int get_qr_text_buf(char *buf, int len) ;
         char buff[256 ] ;
@@ -83,6 +90,7 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
             qr_set_value(qr , buff) ;
  
     #endif
+    
     }
 
   return RET_OK ;
