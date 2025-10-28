@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "carlink_cb/hcn_carlink_cb.h"
 
 /**
  * @brief  打印十六进制配置数据
@@ -68,6 +69,18 @@ int decimal_2_bcd( int decimal);
  * @return 目标字符串指针，失败返回NULL
  */
 char *substring(char *dst, char *src, int start, int len);
+
+/**
+ * @brief  字符串划分
+ * @param  dest_str 目标字符串
+ * @param  token 划分依据，如0xFF, 0x0D等
+ * @param  out_str[][TEXT_PARAM_LEN] 存储划分各段的数组，
+ * @param  out_str_len 二维数组大小
+ * @return 划分出的字符串段数
+ */
+uint16_t string_split(char *dest_str, char *token, 
+                char out_str[][TEXT_PARAM_LEN], 
+                int out_str_len);
 
 #ifdef __cplusplus
 }

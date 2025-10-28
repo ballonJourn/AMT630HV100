@@ -686,13 +686,13 @@ void* initECTiny(void* param)
 	sprintf(qr_info.pwd, "%s", carlink_get_wifi_passwd());
 	sprintf(qr_info.auth, "WPA-PSK");
 
-	sprintf(uuid, "CARBIT%s", bt_mac);
-	printf("carbit  uuid :%s\r\n", uuid);
-
 #ifdef HCN_CARLINK_PROTOTYPE_MODE
     memset(uuid, 0, sizeof(uuid));
     hcn_log_info("use prototype mode uuid:%s\r\n", HCN_CHINESE_UUID);
     snprintf(uuid, sizeof(uuid), "%s", HCN_CHINESE_UUID);
+#else
+    sprintf(uuid, "%s%s", HCN_CUSTOMER_NAME, bt_mac);
+	printf("carbit  uuid :%s\r\n", uuid);
 #endif
 
 	//EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"

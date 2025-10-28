@@ -123,6 +123,15 @@ void carlink_get_ap_ip_addr(char ip[4])
 	memcpy((void*)ip, (void*)ucIPAddress, 4);
 }
 
+bool carlink_ble_mac_addr_is_ready() 
+{
+	return g_cp_ble_mac_ready;
+}
+
+bool carlink_bt_mac_addr_is_ready() {
+	return g_cp_bt_mac_ready;
+}
+
 ///< 取蓝牙地址mac后4位作为wifi的ssid后缀
 static void format_ssid_name(char *ssid_name, char *bt_addr_suffix) {
 	if (ssid_name == NULL || bt_addr_suffix == NULL)
@@ -401,7 +410,7 @@ static void carlink_bt_callback(char * cAtStr)
 	struct carlink_event ev;
 	memset((void*)&ev, 0, sizeof(ev));
 	ev.type = CARLINK_EVENT_NONE;
-    
+
 	if (0 == strncmp(cAtStr, "ERR", 3) || 0 == strncmp(cAtStr, "OK", 2)) {
         return;
 	} else if (0 == strncmp(cAtStr, "+IAPDATA=",      9)) {
@@ -465,14 +474,20 @@ static void carlink_bt_callback(char * cAtStr)
 		memcpy(g_cp_bt_mac, (cAtStr + 6), 12);
 		carlink_carplay_ie_replace_bt_mac(cAtStr + 6, 12);
 		g_cp_bt_mac_ready = true;
-	} else if (0 == strncmp(cAtStr, "+VER",         4)) {
+	} 
+
+#if !CARLINK_EC
+	else if (0 == strncmp(cAtStr, "+VER",         4)) {
 		char* cmd = "AT+ADDR\r\n";
 		console_send_atcmd(cmd, strlen(cmd));//get mac addr
-    } else if (0 == strncmp(cAtStr, "+NAME=", 6)) {
+    } 
+	else if (0 == strncmp(cAtStr, "+NAME=", 6)) {
 		char cmd_str[64] = {0};
 		sprintf(cmd_str, "AT+LEADDR\r\n");
 		console_send_atcmd(cmd_str, strlen(cmd_str));//get LE addr
-	} else if (0 == strncmp(cAtStr, "+LEADDR=", 6)) {
+	} 
+#endif
+	else if (0 == strncmp(cAtStr, "+LEADDR=", 6)) {
       char hexMacAddr[6] = {0};
 	  char m_tmp_buf[64] = {0};
       string2hex(&cAtStr[8], 12, hexMacAddr, sizeof(hexMacAddr));

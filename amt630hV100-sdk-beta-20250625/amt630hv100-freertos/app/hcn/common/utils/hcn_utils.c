@@ -94,3 +94,21 @@ char *substring(char *dst, char *src, int start, int len) {
 
     return dst;
 }
+
+uint16_t string_split(char *dest_str, char *token, 
+                char out_str[][TEXT_PARAM_LEN], 
+                int out_str_len) {
+    char *result = NULL;
+    result = strtok(dest_str, token);
+
+    uint16_t i = 0;
+    while (result != NULL && i < out_str_len) {
+        uint16_t result_len = (uint16_t)strlen(result);
+        strncpy(out_str[i], result, result_len < TEXT_PARAM_LEN ? \
+                result_len : TEXT_PARAM_LEN - 1);
+        result = strtok(NULL, token);
+        i++;
+    }
+    
+    return i;
+}

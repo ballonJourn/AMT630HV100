@@ -21,7 +21,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define UART_BT_MSG_MAX_LEN (256)
+#define UART_BT_MSG_MAX_LEN     (256)
+#define UART_BT_PARAM_NUMBER    (5)
+#define UART_BT_SEND_BUF_LEN    (128)
 
 /**
  * @brief  add bt message to bt task queue

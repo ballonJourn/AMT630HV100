@@ -25,23 +25,25 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "queue.h"
 
-#define BT_SCAN_DEVICE_COUNT    (10)
-#define TEXT_PARAM_LEN      	(31)     
+#define BT_PHONE_BOOK_MAX_NUM   (1000)  ///< 电话本最大下载数目
+#define BT_SCAN_DEVICE_COUNT    (10)    ///< 蓝牙设备最大扫描数目
+#define TEXT_PARAM_LEN      	(31)    ///< 字符串数据最大长度
+#define BT_CONNECT_DEV_NAME_LEN (64)    ///< 蓝牙连接的设备名称长度
 
 typedef enum {
-    BT121_BATTERY_CHANGE = 0,       ///< 手机电量
-    BT121_SIGNAL_CHANGE,            ///< 手机信号
-    BT121_CONNHCNTED_CHANGE,         ///< 手机连接状态
-    BT121_SWTICH_CHANGE,            ///< 手机蓝牙开关状态
-    BT121_BOOK_COUNT,               ///< 手机电话本下载个数
-    BT121_BOOK_STATE,               ///< 电话本下载状态
-    BT121_CALL_STATE,               ///< 手机通话状态
-    BT121_DEVICE_STATE,             ///< 设备状态
+    BT_BATTERY_CHANGE = 0,       ///< 手机电量
+    BT_SIGNAL_CHANGE,            ///< 手机信号
+    BT_CONNHCNTED_CHANGE,         ///< 手机连接状态
+    BT_SWTICH_CHANGE,            ///< 手机蓝牙开关状态
+    BT_BOOK_COUNT,               ///< 手机电话本下载个数
+    BT_BOOK_STATE,               ///< 电话本下载状态
+    BT_CALL_STATE,               ///< 手机通话状态
+    BT_DEVICE_STATE,             ///< 设备状态
 } bt_device_id_e;
 
 typedef enum {
-    BT936_DATA = 20,                ///< 耳机数据更新
-} bt936_id_e;
+    BT_SCAN_DATA = 20,                ///< 耳机数据更新
+} bt_scan_id_e;
 
 typedef enum {
     BT_POWER_OFF = 0,
@@ -55,31 +57,31 @@ typedef enum {
 typedef enum {
     UNSUPPORTED = 0,
     STANDBY = 1,
-    CONNHCNTING = 2,
-    CONNHCNTED = 3,
+    CONNECTING = 2,
+    CONNECTED = 3,                      ///< 已连接
     OUTGOING_CALL = 4,                  ///< 去电
     INCOMING_CALL = 5,                  ///< 来电
     ACTIVE_CALL = 6,                    ///< 通话中
     ACTIVE_HELD = 7,                    ///< 3-way-calling
-    FIRST_ACTIVE_SHCNOND_WAITING = 8,    ///< 3-way-calling
-    FIRST_ACTIVE_SHCNOND_HELD = 9,       ///< 3-way-calling
-    FIRST_OUTGOING_SHCNOND_HELD = 10,    ///< 3-way-calling
+    FIRST_ACTIVE_SECOND_WAITING = 8,    ///< 3-way-calling
+    FIRST_ACTIVE_SECOND_HELD = 9,       ///< 3-way-calling
+    FIRST_OUTGOING_SECOND_HELD = 10,    ///< 3-way-calling
 } hfp_state_e;
 
 typedef enum {
     ///< 电话本状态
     PB_STATE_UNSUPPORTED = 0,
     PB_STATE_STANDBY,
-    PB_STATE_CONNHCNTING,
-    PB_STATE_CONNHCNTED,
+    PB_STATE_CONNECTING,
+    PB_STATE_CONNECTED,
     PB_STATE_DOWNDING
 } pb_state_e;
 
 typedef enum {
     STATE_UNSUPPORTED = 0,
     STATE_STANDBY,
-    STATE_CONNHCNTING,
-    STATE_CONNHCNTED,
+    STATE_CONNECTING,
+    STATE_CONNECTED,
     STATE_PAUSED,
     STATE_STREAMING
 } bt_state_e;
@@ -94,23 +96,25 @@ typedef struct {
 
 typedef struct {
     dev_state_e btDevState;    ///< 判断模块是否初始化完成 != 0
-    uint8_t btPowerState;
-    uint8_t btA2dpState;
-    uint8_t btPbState;              ///< 电话本状态
-    uint8_t btConnHCNtability;       ///< 设备是否可以连接 UI用此变量判断蓝牙的开关状态， 0为关闭，1为打开
+    uint8_t btPowerState;      ///< 电源状态 0：未上电 1:已上电
+    uint8_t btA2dpState;       ///< A2DP状态
+    uint8_t btPbState;           ///< 电话本状态
+    uint8_t btSwitchState;       ///< 蓝牙的开关状态， 0为关闭，1为打开
     uint8_t btHfpAudio;
-    uint8_t btConnHCNted;            ///< 手机蓝牙连接状态 0为未连接  1为已连接
+    uint8_t btConnected;            ///< 手机蓝牙连接状态 0为未连接  1为已连接
     uint8_t btHfpIBR;               ///< 手机是否支持来电铃声
     uint8_t btBatteryLevel;         ///< 手机电量 0-5级
     uint8_t btSignal;               ///< 手机信号 0-5级
-    uint16_t btBookCount;
-    char btDevName[TEXT_PARAM_LEN];
-    char btDevPin[TEXT_PARAM_LEN];
+    uint16_t btBookCount;           ///< 通讯录数量
+    char btDevName[TEXT_PARAM_LEN]; ///< 蓝牙设备名称
+    char btDevPin[TEXT_PARAM_LEN];  ///< 设备配对密码
     char btHfpAddr[TEXT_PARAM_LEN];
+    char btConnectDevName[BT_CONNECT_DEV_NAME_LEN]; ///< 蓝牙连接设备的名称
 } bt_data_t;
 
 typedef struct {
-    dev_state_e btDevState;        ///< 判断模块是否初始化完成 != 0
+    //dev_state_e btDevState;        ///< 判断模块是否初始化完成 != 0
+    int btDevState;
     hfp_state_e btHfpState1;       ///< 耳机1的HFP状态 >=3 代表已经连接
     hfp_state_e btHfpState2;       ///< 耳机2的HFP状态 >=3 代表已经连接
     uint8_t btA2dpState1;   			///< 耳机1的A2DP状态 >=3 代表已经连接
@@ -120,12 +124,12 @@ typedef struct {
     uint8_t devicHCNount;        		///< 扫描到的设备数量 
     char btScanName[BT_SCAN_DEVICE_COUNT][TEXT_PARAM_LEN];
     char btScanAddr[BT_SCAN_DEVICE_COUNT][TEXT_PARAM_LEN];
-} bt936_data_t;
+} bt_scan_data_t;
 
 typedef struct {
-    char person[TEXT_PARAM_LEN];
-    char number[TEXT_PARAM_LEN];
-} bt_book_t;
+    char name[TEXT_PARAM_LEN];  ///< 电话本名字最长字符为30
+    char number[TEXT_PARAM_LEN];  ///< 电话本号码最长字符为30
+} bt_phone_book_t;
 
 typedef enum {
     WIFI_USER_NULL= 0x00,
@@ -405,20 +409,19 @@ const char* hcn_ec_get_Version();                   ///< 获取亿联SDK版本
 const char* hcn_ec_getQRCodeUrl();                  ///< 获取亿联连接的二维码
 const char* hcn_ec_getUuid();	                    ///< 获取UUID
 
-///< 蓝牙
-void hcn_bt121_switch();               				///< 121手机蓝牙模块开关切换  
-void hcn_bt121_switch_on(bool on);     				///< 打开关闭121手机蓝牙  
-void hcn_bt121_download_book();        				///< 121手机蓝牙模块下载电话本
-void hcn_bt121_pick_up();                  			///< 接听
-void hcn_bt121_hung_up();                  			///< 挂断
-bool hcn_bt121_is_Call();                   		///< 当前是否在通话
+///< 蓝牙api
+void hcn_bt_switch_state(bool on);     				///< 打开或关闭手机蓝牙  
+void hcn_bt_download_book();        				///< 手机蓝牙模块下载电话本
+void hcn_bt_pick_up();                  			///< 接听
+void hcn_bt_hung_up();                  			///< 挂断
+bool hcn_bt_is_Call();                   		    ///< 当前是否在通话
 
-const bt_call_t* hcn_bt121_get_Call();           ///< 获取通话数据
-const bt_call_t* hcn_bt121_get_data();           ///< 获取121数据
-const char* hcn_bt121_getName();                    ///< 获取121蓝牙名称
-const char* hcn_bt121_getMacAddr();
-const char* hcn_bt121_getBleName();
-const char* hcn_bt121_getBleMacAddr();
+const bt_call_t* hcn_bt_get_call();           ///< 获取通话数据
+const bt_data_t* hcn_bt_get_data();           ///< 获取数据
+const char* hcn_bt_get_name();                 ///< 获取蓝牙名称
+const char* hcn_bt_get_mac_addr();
+const char* hcn_bt_get_ble_name();
+const char* hcn_bt_get_ble_mac_addr();
 
 void carlink_cb_init(void);
 

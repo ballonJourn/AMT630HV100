@@ -18,6 +18,9 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+#include <stdbool.h>
+
 typedef enum {
     HCN_MSG_USB_STATUS,   ///< U盘状态变更
     HCN_MSG_SD_STATUS,   ///< SD卡状态变更
@@ -34,9 +37,6 @@ typedef enum {
 
 void hcn_usb_status_change(usb_status_t status);
 usb_status_t hcn_get_usb_status(void);
-
-#include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 }

@@ -24,20 +24,6 @@ extern "C" {
 
 #define GPIO_FILTER_ENABLE
 
-typedef union {
-    uint32_t flag;
-    struct {
-        uint32_t left_turn : 1;   ///< 左转信号
-        uint32_t right_turn : 1;  ///< 右转信号
-        uint32_t high_beam : 1;   ///< 远光信号
-        uint32_t position : 1;    ///< 位置灯信号
-        uint32_t n_gear : 1;      ///< 空挡信号
-        uint32_t oil_pressure :1; ///< 机油压力
-        uint32_t abs :1;          ///< ABS灯
-        uint32_t obd :1;          ///< OBD故障灯
-    };
-} light_info_t;
-
 typedef enum {
     FRAME_LIGHT_OFF,
     FRAME_LIGHT_ON,

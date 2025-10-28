@@ -18,6 +18,7 @@
 
 static IhcnCallBack* mHcnCallback = NULL;
 static HcnLibConfig mHcnLibCfg = {0};
+static char g_carlink_uuid[64] = {0};
 
 void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback) {
     if (HcnCfg) {
@@ -29,6 +30,14 @@ void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback) {
     }
 
     hcn_log_info("hcn_initialize done.\n");
+}
+
+void update_carlink_uuid(const char *bt_mac) {
+
+}
+
+const char *get_carlink_uuid() {
+    return g_carlink_uuid;
 }
 
 IhcnCallBack *get_hcn_callback(void) {

@@ -24,8 +24,9 @@ extern "C" {
 
 void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback);
 IhcnCallBack *get_hcn_callback(void);
+void update_carlink_uuid(const char *bt_mac);
+const char *get_carlink_uuid();
 HcnLibConfig *get_hcn_lib_config(void);
-
 #ifdef __cplusplus
 }
 #endif //__cplusplus

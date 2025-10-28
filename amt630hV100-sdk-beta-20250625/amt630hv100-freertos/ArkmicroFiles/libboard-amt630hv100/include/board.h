@@ -349,7 +349,7 @@
 
 /* choose your audio use type */
 #define AUDIO_REPLAY
-//#define AUDIO_RECORD
+#define AUDIO_RECORD
 
 #ifdef AUDIO_REPLAY
 #define AUDIO_REPLAY_I2S		I2S_ID0					/* Select i2s id */
