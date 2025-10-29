@@ -1,0 +1,124 @@
+<string name="tmps">
+  <language name="zh_CN">胎压检测</language>
+  <language name="en_US">Tmps</language>
+</string>
+<string name="ride_ele">
+  <language name="zh_CN">骑行能耗</language>
+  <language name="en_US">Energy</language>
+</string>
+<string name="connect">
+  <language name="zh_CN">连接手机</language>
+  <language name="en_US">Connect</language>
+</string>
+<string name="language">
+  <language name="zh_CN">语言</language>
+  <language name="en_US">Language</language>
+</string>
+<string name="brightness">
+  <language name="zh_CN">亮度</language>
+  <language name="en_US">Brightness</language>
+</string>
+<string name="unit">
+  <language name="zh_CN">单位</language>
+  <language name="en_US">Unit</language>
+</string>
+<string name="clock">
+  <language name="zh_CN">时间</language>
+  <language name="en_US">Time</language>
+</string>
+<string name="display">
+  <language name="zh_CN">显示设置</language>
+  <language name="en_US">Display</language>
+</string>
+<string name="device">
+  <language name="zh_CN">设备信息</language>
+  <language name="en_US">Device</language>
+</string>
+<string name="power">
+  <language name="en_US">power consumption (Wh/hm)</language>
+  <language name="zh_CN">电耗 (Wh/hm)</language>
+</string>
+<string name="last_ride">
+  <language name="zh_CN">上次骑行</language>
+  <language name="en_US">Last Ride</language>
+</string>
+<string name="near_5km">
+  <language name="zh_CN">近5km</language>
+  <language name="en_US">Nearly 5</language>
+</string>
+<string name="near_20km">
+  <language name="zh_CN">近20km</language>
+  <language name="en_US">Nearly 20</language>
+</string>
+<string name="Last_electricity">
+  <language name="en_US">Last energy</language>
+  <language name="zh_CN">上次骑行电耗</language>
+</string>
+<string name="Single_energy">
+  <language name="zh_CN">单次电耗</language>
+  <language name="en_US">Single energy</language>
+</string>
+<string name="average_power">
+  <language name="zh_CN">平均电耗</language>
+  <language name="en_US">Average energy</language>
+</string>
+<string name="bt">
+  <language name="zh_CN">蓝牙</language>
+  <language name="en_US">Bluetooth</language>
+</string>
+<string name="bt_open">
+  <language name="zh_CN">开</language>
+  <language name="en_US">Open</language>
+</string>
+<string name="bt_close">
+  <language name="zh_CN">关</language>
+  <language name="en_US">Close</language>
+</string>
+<string name="auto">
+  <language name="zh_CN">自动</language>
+  <language name="en_US">Atuo</language>
+</string>
+<string name="kilometer">
+  <language name="zh_CN">公制</language>
+  <language name="en_US">Kilometer</language>
+</string>
+<string name="mile">
+  <language name="zh_CN">英制</language>
+  <language name="en_US">Mile</language>
+</string>
+<string name="day">
+  <language name="zh_CN">白天</language>
+  <language name="en_US">Day</language>
+</string>
+<string name="night">
+  <language name="zh_CN">黑夜</language>
+  <language name="en_US">Night</language>
+</string>
+<string name="sn">
+  <language name="zh_CN">序列号</language>
+  <language name="en_US">SN</language>
+</string>
+<string name="version">
+  <language name="zh_CN">版本号</language>
+  <language name="en_US">Version</language>
+</string>
+<string name="incoming_tips">
+  <language name="zh_CN">短按&lt;font color="#FFB459"&gt;确认键&lt;/font&gt;接听
+&lt;font color="#FFB459"&gt;返回键&lt;/font&gt;挂断</language>
+  <language name="en_US">Press&lt;font color="#FFB459"&gt;Confirm&lt;/font&gt;Answer
+&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
+</string>
+<string name="outgoing_tips">
+  <language name="zh_CN">短按&lt;font color="#FFB459"&gt;返回键&lt;/font&gt;挂断</language>
+  <language name="en_US">Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
+</string>
+<string name="calling_tips">
+  <language name="zh_CN">接听中
+短按&lt;font color="#FFB459"&gt;返回键&lt;/font&gt;挂断</language>
+  <language name="en_US">On The Call
+Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
+</string>
+<string name="scan_qr">
+  <language name="zh_CN">扫码连接</language>
+  <language name="en_US">Scan To Connect</language>
+</string>

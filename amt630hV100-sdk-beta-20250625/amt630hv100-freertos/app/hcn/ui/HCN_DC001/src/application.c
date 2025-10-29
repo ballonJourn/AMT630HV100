@@ -28,7 +28,7 @@ static ret_t custom_widgets_register(void) {
  * 当程序初始化完成时调用，全局只触发一次。
  */
 static ret_t application_on_launch(void) {
-
+  
   return RET_OK;
 }
 
@@ -47,14 +47,9 @@ ret_t application_init(void) {
   custom_widgets_register();
   application_on_launch();
 
-  // if (strlen(APP_SYSTEM_BAR) > 0) {
-  //   navigator_to(APP_SYSTEM_BAR);
-  // }
 
-  // if (strlen(APP_BOTTOM_SYSTEM_BAR) > 0) {
-  //   navigator_to(APP_BOTTOM_SYSTEM_BAR);
-  // }
 
+  // locale_info_change(locale_info(), "zh", "CN") ;
   return navigator_to(APP_START_PAGE);
 }
 

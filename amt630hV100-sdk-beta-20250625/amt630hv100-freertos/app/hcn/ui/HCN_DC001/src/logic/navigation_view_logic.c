@@ -6,13 +6,16 @@
 #include "proxy/mirror_data.h"
 #include "view/home_view/navigation_view.h"
 #include "carlink_cb/hcn_easy_navi.h"
+#include "proxy/vehicle_data.h"
 
 static hcnNavigationHudInfo g_navigation_info = { 0 };
 static bool g_mirror_state      = false ;  
 static bool g_mirror_navigation = false ;
 static bool g_mirror_url        = false ;
 
+#if ON_PC_CACLE == 0
 extern int get_qr_text_buf(char *buf, int len) ;
+#endif
 
 void navigation_view_update()
 {

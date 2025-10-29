@@ -76,7 +76,7 @@
           <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="qr_view" x="51" y="40" w="189" h="206" visible="true">
               <qr name="navi_qr" x="15" y="10" w="130" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000"/>
-              <label name="label2" x="9" y="157" w="143" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="扫码连接"/>
+              <label name="label2" x="9" y="157" w="143" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" tr_text="scan_qr"/>
             </view>
             <view name="navigate_view" x="51" y="40" w="189" h="206" visible="false">
               <image name="navi_image" x="45" y="3" w="90" h="90" draw_type="default" image="icon_nav_1"/>
@@ -90,13 +90,13 @@
             <label name="musiclyric" x="50" y="199" w="160" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
           </view>
           <view name="phone_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
-              <image name="icon_state" x="36" y="57" w="100" h="100" draw_type="default" image="icon_incoming_call"/>
-              <label name="phone_tips" x="6" y="0" w="160" h="57" style:normal:text_color="#FFFFFF" word_wrap="false" line_wrap="true" style:normal:font_size="24" text="短按确认键接听\n长按挂断"/>
+            <view name="bt_connected" x="53" y="38" w="201" h="214" visible="true">
+              <image name="phone_state_img" x="36" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
+              <rich_text name="phone_tips" x="0" y="0" w="179" h="57" style:normal:font_size="24" style:normal:text_color="#FFFFFF" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
               <label name="phone_num" x="0" y="175" w="179" h="39" style:normal:font_size="28" style:normal:text_color="#FFFFFF" text="137 9611 2548"/>
             </view>
-            <view name="bt__no_connected" x="53" y="38" w="201" h="214" visible="true">
-              <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
+            <view name="bt_no_connected" x="53" y="38" w="201" h="214" visible="false" disg:lock="true">
+              <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_answer" disg:lock="true"/>
             </view>
           </view>
           <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
@@ -114,15 +114,15 @@
     </view>
     <view name="setting_pg" x="0" y="0" w="100%" h="100%">
       <scroll_view name="scroll_menu" x="54" y="38" w="177" h="250" visible="true" enable="true" snap_to_page="false" move_to_page="false">
-        <label h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="177" text="胎压检测"/>
-        <label name="ride_ele" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="50" text="骑行能耗"/>
-        <label name="connect" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="100" text="连接手机"/>
-        <label name="language" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="150" text="语言"/>
-        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" h="50" y="200" text="亮度"/>
-        <label name="unit" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="250" text="单位"/>
-        <label name="clock" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="300" text="时间"/>
-        <label name="display" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="350" text="显示设置"/>
-        <label name="device" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="400" text="设备信息"/>
+        <label h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="177" tr_text="tmps"/>
+        <label name="ride_ele" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="50" tr_text="ride_ele"/>
+        <label name="connect" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="100" tr_text="connect"/>
+        <label name="language" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="150" tr_text="language"/>
+        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" h="50" y="200" tr_text="brightness"/>
+        <label name="unit" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="250" tr_text="unit"/>
+        <label name="clock" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="300" tr_text="clock"/>
+        <label name="display" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="350" tr_text="display"/>
+        <label name="device" h="50" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="177" y="400" tr_text="device"/>
       </scroll_view>
       <list_view name="list_view" x="54" y="38" w="177" h="250" default_item_height="40" style:normal:bg_color="#00000000" item_height="50" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
         <scroll_view name="scroll_menu1" x="0" y="0" w="177" h="250" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
@@ -162,35 +162,35 @@
             <tooltip name="tooltip" w="448" h="185" line="{show:true}" symbol="{show:true,size:3}" tip="{show:true}" y="11" disg:lock="true"/>
           </chart_view>
           <label name="label5" x="18" y="29" w="140" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" text="确认后按上下键切换"/>
-          <label name="label5" x="158" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" text="上次骑行"/>
-          <label name="ride_5km" x="239" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" text="近5km"/>
-          <label name="ride_20km" x="321" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" text="近20km"/>
-          <label name="label6" x="252" y="59" w="132" h="20" style:normal:text_color="#FFFFFF" text="电耗（Wh/hm）"/>
-          <label name="label7" x="22" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="上次骑行电耗"/>
+          <label name="label5" x="158" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" tr_text="last_ride"/>
+          <label name="ride_5km" x="239" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" tr_text="near_5km"/>
+          <label name="ride_20km" x="321" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" tr_text="near_20km"/>
+          <label name="label6" x="252" y="59" w="175" h="20" style:normal:text_color="#FFFFFF" tr_text="power"/>
+          <label name="label7" x="22" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" tr_text="Last_electricity"/>
           <label name="last_elec" x="22" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="133.0wh"/>
-          <label name="label7" x="170" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="单次电耗"/>
+          <label name="label7" x="170" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" tr_text="Single_energy"/>
           <label name="curr_elec" x="170" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="33.0wh"/>
-          <label name="label7" x="309" y="235" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="平均电耗"/>
+          <label name="label7" x="301" y="235" w="110" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" tr_text="average_power"/>
           <label name="avg_ele" x="309" y="263" w="96" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="22" text="133.0wh"/>
         </view>
         <view name="connect_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="27" y="34" w="89" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="蓝牙"/>
+          <label name="label3" x="27" y="34" w="89" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="bt"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
-          <label name="bt_on_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="开"/>
-          <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="关"/>
+          <label name="bt_on_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="bt_open"/>
+          <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="bt_close"/>
           <image name="bt_state" x="394" y="30" w="80" h="40" draw_type="default" image="setting_bluebooth_open"/>
         </view>
         <view name="language" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="语言设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="language"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <label name="chinese_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="中文"/>
-          <label name="english_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="英文"/>
+          <label name="english_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="English"/>
         </view>
         <view name="brightness" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="亮度设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="brightness"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <scroll_view name="brightness_scroll" x="49" y="89" w="450" h="180">
-            <label name="brightness_auto_option" x="0" y="0" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="自动"/>
+            <label name="brightness_auto_option" x="0" y="0" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="auto"/>
             <label name="brightness_1_option" x="0" y="60" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="1"/>
             <label name="brightness_2_option" x="0" y="120" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="2"/>
             <label name="brightness_3_option" x="0" y="180" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="3"/>
@@ -198,13 +198,13 @@
           </scroll_view>
         </view>
         <view name="unit_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="单位设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="unit"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
-          <label name="unit_km_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="公制"/>
-          <label name="unit_mile_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="英制"/>
+          <label name="unit_km_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="kilometer"/>
+          <label name="unit_mile_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="mile"/>
         </view>
         <view name="clock_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="时间设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="clock"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <label name="clock_h_1" x="160" y="136" w="37" h="85" style="clock_option" text="1"/>
           <label name="clock_h_2" x="197" y="136" w="37" h="85" style="clock_option" text="8"/>
@@ -213,18 +213,18 @@
           <label name="clock_m_2" x="329" y="136" w="37" h="85" style="clock_option" text="9"/>
         </view>
         <view name="display_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="显示设置"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="display"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
-          <label name="display_auto_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="自动"/>
-          <label name="display_day_option" x="49" y="167" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="白天"/>
-          <label name="display_night_option" x="49" y="238" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="黑夜"/>
+          <label name="display_auto_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="auto"/>
+          <label name="display_day_option" x="49" y="167" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="day"/>
+          <label name="display_night_option" x="49" y="238" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="night"/>
         </view>
         <view name="device_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="设备信息"/>
+          <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="device"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
-          <label name="label3" x="19" y="105" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" text="序列号"/>
+          <label name="label3" x="19" y="105" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="sn"/>
           <label name="device_sn" x="19" y="148" w="420" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="left" text="WDW454A56WD4A56"/>
-          <label name="label3" x="19" y="203" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" text="版本号"/>
+          <label name="label3" x="19" y="203" w="140" h="33" style:normal:text_color="#ffffff96" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="version"/>
           <label name="device_ver" x="19" y="246" w="420" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="left" text="v1.0.0"/>
         </view>
       </slide_view>
