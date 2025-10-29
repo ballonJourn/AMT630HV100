@@ -22,11 +22,14 @@
 #include "queue.h"
 #include "timers.h"
 #include "semphr.h"
+#include "rtc.h"
 
 #ifdef HCN_UART_COMM_ENABLE
 
 #undef MCU_DATE_TIME_DEBUG
 #undef UART_MCU_DATA_DEBUG
+
+static SystemTime_t g_data_time = {0};
 
 static void soc_ack_mcu_process(uint8_t *data) {
     if (!data) {
@@ -34,6 +37,23 @@ static void soc_ack_mcu_process(uint8_t *data) {
         return;
     }
 }
+
+static void parse_timing_mcu_time(uint8_t *data) {
+    g_data_time.tm_year = bcd_2_decimal(data[9]) *100 + bcd_2_decimal(data[10]);
+    g_data_time.tm_mon = bcd_2_decimal(data[11]);
+    g_data_time.tm_mday = bcd_2_decimal(data[12]);
+    g_data_time.tm_hour = bcd_2_decimal(data[13]);
+    g_data_time.tm_min = bcd_2_decimal(data[14]);
+    g_data_time.tm_sec = bcd_2_decimal(data[15]);
+
+#ifdef MCU_DATE_TIME_DEBUG
+    hcn_log_info("date time:%04d/%02d/%02d %02d:%02d:%02d\n", g_data_time.tm_year,
+           g_data_time.tm_mon, g_data_time.tm_mday, g_data_time.tm_hour,
+           g_data_time.tm_min, g_data_time.tm_sec);
+#endif
+}
+
+SystemTime_t get_mcu_time(void) { return g_data_time; }
 
 static void timing_info_process(uint8_t *data) {
     if (!data) {
@@ -44,6 +64,7 @@ static void timing_info_process(uint8_t *data) {
     uint16_t cmd_code = ((data[4] << 8) + data[5]);
     switch (cmd_code) {
         case UART_MCU_CMD_REPORT_TIME_INFO:
+            parse_timing_mcu_time(data);
             break;
 
         case UART_MCU_CMD_ACK_TIME_SET:

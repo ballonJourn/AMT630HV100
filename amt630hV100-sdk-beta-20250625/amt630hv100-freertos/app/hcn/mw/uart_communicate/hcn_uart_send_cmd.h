@@ -87,6 +87,13 @@ int send_mcu_ctrl_system_mode(uint8_t abs_mode, uint8_t tcs_mode,
 int send_mcu_set_time(SystemTime_t time);
 
 /**
+ * @brief  get mcu time
+ * @param  none
+ * @return date time
+ */
+SystemTime_t get_mcu_time(void);
+
+/**
  * @brief  send mcu clear subtotal mileage
  * @param  type 0x00:none 1:Trip A 2:Trip B 3:Trip A and Trip B
  * @return 0:success -1:failed
