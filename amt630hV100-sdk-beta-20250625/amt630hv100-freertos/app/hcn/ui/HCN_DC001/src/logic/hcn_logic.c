@@ -52,7 +52,7 @@ ret_t home_view_init(widget_t * win)
     //sliderview
     home_dock_music_ex_view_init(win);
     home_nav_view_init    (win) ;
-    
+    home_phone_view_init  (win) ;
     // 设置语言
 
     // 设置时间 
@@ -66,6 +66,16 @@ ret_t home_view_init(widget_t * win)
 
     //添加定时器
     home_timer_init();
+
+
+ home_refresh_phone_state(CALL_INCOMMING);
+
+ home_refresh_phone_tips(CALL_INCOMMING);
+
+ home_refresh_phone_num("0737 1548254");
+
+//手机通话页面
+ home_refresh_phone_view(PHONE_CONNECT)  ;
 
     return RET_OK ;
 }
@@ -98,6 +108,7 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
 
     navigation_view_update();
 
+    // home_refresh_phone_tips(CALL_INCOMMING);
     return RET_REPEAT ;
 }
 

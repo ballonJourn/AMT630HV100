@@ -29,4 +29,6 @@ void language_view_clean_state() ;
 
 void language_view_set_focused_item(language_option_e focusedIndex) ;
 
+ret_t change_locale_language(const char* str) ;
+
 #endif
