@@ -13,11 +13,13 @@
 */
 
 #include <FreeRTOS.h>
+#include <string.h>
 #include "task.h"
 #include "config/hcn_config.h"
 #include "mw_init/hcn_mw_common.h"
 #include "mw_init/hcn_mw_init.h"    
 #include "log/hcn_log.h"
+#include "uart_communicate/hcn_uart_send_cmd.h"
 
 #define VEHICLE_THREAD_PERIOD  pdMS_TO_TICKS(100)
 
@@ -30,6 +32,27 @@ static void read_reg(void) {
     hcn_log_info("pad ctrl value = 0x%08X\n", reg_val);
 }
 #endif
+
+void set_os_date_time(SystemTime_t date_time) {
+#ifdef HCN_UART_COMM_ENABLE
+    send_mcu_set_time(date_time);
+#else
+    vSetLocalTime(&date_time);
+#endif
+}
+
+SystemTime_t get_os_date_time(void) {
+#ifdef HCN_UART_COMM_ENABLE
+    return get_mcu_time();
+#else
+    SystemTime_t sys_time;
+    memset(sys_time, 0, sizeof(SystemTime_t));
+
+    iGetLocalTime(&sys_time);
+
+    return sys_time;
+#endif
+}
 
 static void common_io_thread(void *param) {
     light_gpio_init(VEHICLE_THREAD_PERIOD);

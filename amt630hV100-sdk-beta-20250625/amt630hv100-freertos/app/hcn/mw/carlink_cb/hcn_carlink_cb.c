@@ -31,6 +31,7 @@
 #include "carlink_cb/hcn_easy_navi.h"
 #include "carlink_cb/hcn_carlink_task.h"
 #include "carlink_cb/hcn_carlink_phone_model.h"
+#include "mw_init/hcn_mw_common.h"
 
 static IhcnCallBack *gHcnCallback = NULL;
  
@@ -72,11 +73,7 @@ static void sync_carlink_data_time(void) {
                      sys_time.tm_year, sys_time.tm_mon, sys_time.tm_mday,
                      sys_time.tm_hour, sys_time.tm_min, sys_time.tm_sec);
                                         
-#ifdef HCN_UART_COMM_ENABLE
-        send_mcu_set_time(sys_time);                
-#else   
-        vSetLocalTime(&sys_time);
-#endif
+        set_os_date_time(sys_time);
     } else {
         hcn_log_error("EC_queryTime failed!\n");
     }
