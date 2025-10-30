@@ -18,12 +18,19 @@
 #include "config/hcn_config.h"
 #include "log/hcn_log.h"
 
+#if 0
 #define LEVEL_1_DUTY_VALUE (500000)
 #define LEVEL_2_DUTY_VALUE (400000)
 #define LEVEL_3_DUTY_VALUE (600000)
 #define LEVEL_4_DUTY_VALUE (200000)
 #define LEVEL_5_DUTY_VALUE (100000)
-
+#else
+#define LEVEL_1_DUTY_VALUE (200000)
+#define LEVEL_2_DUTY_VALUE (150000)
+#define LEVEL_3_DUTY_VALUE (100000)
+#define LEVEL_4_DUTY_VALUE (50000)
+#define LEVEL_5_DUTY_VALUE (0)
+#endif
 #define BREATH_BACKLIGHT_PERIOD (80)
 
 typedef struct {
