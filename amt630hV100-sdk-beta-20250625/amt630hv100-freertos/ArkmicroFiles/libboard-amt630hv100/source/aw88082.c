@@ -450,4 +450,12 @@ int aw_pa_start(void)
 	return AW_OK;
 }
 
+void aw_set_volume(unsigned int volume)
+{
+	//volume addr 0x05
+	i2c_write(0x05,volume);
 
+	unsigned int reg_val = 0;
+	i2c_read(0x05,&reg_val);
+	aw_printf("=======> read volume 0x%x \n",reg_val);
+}

@@ -549,5 +549,5 @@ int get_carback_status(void);
  void aw88082_init(void);
  int aw_pa_start(void);
  void aw_pa_stop(void);
-
+ void aw_set_volume(unsigned int volume);
 #endif

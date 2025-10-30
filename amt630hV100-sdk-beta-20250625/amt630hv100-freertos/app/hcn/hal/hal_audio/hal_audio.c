@@ -60,6 +60,8 @@ void hal_audio_init() {
     caps.udata.config.channels   = 2;                                           /* 采样通道 */
     caps.udata.config.samplebits = 16;                                          /* 采样位数 */
     audio_dev_configure(audio, &caps);
+
+    aw_set_volume(0x0F);
 }
 
 
