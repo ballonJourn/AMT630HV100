@@ -28,11 +28,14 @@ void clock_init() ;
 
 void refresh_clock(int min ,int sec);
 
+void get_label_clock(int32_t *min , int32_t *sec);
+
 void on_clock_deal_short_key(key_id_e key) ;
 
 void clock_view_clean_state() ;
 
 void clock_view_set_focused_item(clock_option_e focusedIndex) ;
+
 
 /// @brief 三级页面
 void clock_option_init() ;

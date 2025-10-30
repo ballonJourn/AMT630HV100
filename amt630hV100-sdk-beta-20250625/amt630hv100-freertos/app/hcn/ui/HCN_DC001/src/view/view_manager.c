@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include "set_view/set_page_key.h"
 #include "home_view/home_view_interface.h"
+#include "set_view/set_view_interface.h"
 #include "proxy/vehicle_data.h"
 #include "common/navigator.h"
 #include "view_manager.h"
 #include "link_view/link_page_key.h"
+#include "proxy/vehicle_time.h"
 
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
@@ -123,6 +125,13 @@ ret_t view_manager_init(widget_t* parent)
     return RET_OK ;
 }
 
+void update_gage_info() 
+{
+    int min = vehicle_get_time_min();
+    int sec = vehicle_get_time_sec();
+    refresh_clock(min , sec);
+}
+
 
 ret_t set_dock_view(dock_view_e dock_view)
 {
@@ -147,7 +156,11 @@ ret_t set_window_page(window_page_e type)
         pages_t *page = PAGES(window_page[MAIN_PAGE]) ;
 
         if(page->active != type )
+        {
+            update_gage_info() ;
             pages_set_active(window_page[MAIN_PAGE] , type);
+
+        }
     }
 
     return RET_OK;

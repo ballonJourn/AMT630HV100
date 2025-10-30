@@ -1,8 +1,8 @@
 <window name="home_page" style:normal:bg_image="wallpaper">
   <view name="time_view" x="1" y="5" w="77" h="40">
-    <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="19"/>
+    <label name="min" x="0" y="0" w="40" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="00"/>
     <label name="colon" x="25" y="-6" w="32" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="40" style:normal:text_align_v="top" text=":"/>
-    <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="15"/>
+    <label name="sec" x="38" y="0" w="47" h="40" style:normal:text_color="#FFFFFF" style:normal:font_size="35" style:normal:text_align_v="top" text="00"/>
   </view>
   <view name="dock_view" x="10" y="123" w="38" h="235" children_layout="default(r=0,c=1,ym=10,s=3)">
     <image name="icon_info" draw_type="default" h="40" style:normal:icon="dock_instrument_n" style:normal:bg_image="" style:selected:icon="dock_instrument_p"/>

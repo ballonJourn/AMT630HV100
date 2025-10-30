@@ -9,6 +9,7 @@
 #include "view/set_view/set_view_interface.h"
 #include "proxy/vehicle_data.h"
 #include "navigation_view_logic.h"
+#include "proxy/vehicle_time.h"
 
 #define REFRESH_INTERVAL_33_MS   (33)
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -98,14 +99,24 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     static int  clock_sec   = 0 ;
     static bool clock_colon = TRUE ;
 
-    home_refresh_clock_min(clock_min) ;
-
-    home_refresh_clock_sec(clock_sec) ;
-
+    int min = vehicle_get_time_min();
+    if (clock_min != min)
+    {
+        clock_min = min;
+        home_refresh_clock_min(min) ;
+    }
+    
+    int sec = vehicle_get_time_sec();
+    if (clock_sec != sec)
+    {
+        clock_sec = sec ;
+        home_refresh_clock_sec(sec) ;
+    }
+    
     clock_colon = !clock_colon ;
     home_refresh_clock_colon(clock_colon) ;
     
-
+    //导航
     navigation_view_update();
 
     // home_refresh_phone_tips(CALL_INCOMMING);

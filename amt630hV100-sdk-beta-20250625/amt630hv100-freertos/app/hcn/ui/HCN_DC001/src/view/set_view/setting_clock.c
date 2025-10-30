@@ -1,5 +1,6 @@
 #include "setting_clock.h"
 #include <stdio.h>
+#include "proxy/vehicle_time.h"
 
 const char* set_clock_widget_name[CLOCK_MAX] = {
     "clock_h_1" , "clock_h_2" , "clock_m_1" , "clock_m_2" 
@@ -19,6 +20,35 @@ ret_t set_clock_view_init(widget_t* parent)
     }
 
     return RET_OK ;
+}
+
+
+void get_label_clock(int32_t *min , int32_t *sec)
+{
+    if (min == NULL || sec == NULL) return ;
+
+    int32_t h_1 = 0, h_2 = 0, m_1 = 0 , m_2 = 0;
+
+    if(set_clock_widget[CLOCK_H_1_OPTION]){
+       h_1 = widget_get_value_int(set_clock_widget[CLOCK_H_1_OPTION]);
+    
+    }
+    if(set_clock_widget[CLOCK_H_2_OPTION]){
+       h_2 = widget_get_value_int(set_clock_widget[CLOCK_H_2_OPTION]);
+
+    }
+    if(set_clock_widget[CLOCK_M_1_OPTION]){
+       m_1 = widget_get_value_int(set_clock_widget[CLOCK_M_1_OPTION]);
+
+    }
+    if(set_clock_widget[CLOCK_M_2_OPTION]){
+       m_2 = widget_get_value_int(set_clock_widget[CLOCK_M_2_OPTION]);
+    }
+
+    *min = h_1 * 10 + h_2;
+    *sec = m_1 * 10 + m_2;   
+
+    return ;
 }
 
 void refresh_clock(int min ,int sec)
@@ -196,6 +226,11 @@ static void setting_option_view_deal_set()
     clock_ctrl_end();
 
     //to do  set systerm time
+    int32_t min = 0, sec = 0 ;
+    get_label_clock(&min , &sec);
+    vehicle_set_time_min(min);
+    vehicle_set_time_sec(sec);
+
     return ;
 }
 
