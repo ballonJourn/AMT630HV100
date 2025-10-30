@@ -24,6 +24,8 @@ extern "C" {
 
 #ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
 
+#define LIGHT_SENSOR_AD_CHANNEL   (ADC_CH_AUX7)
+
 uint32_t get_light_sensor_value(void);
 void set_light_sensor_value(void);
 

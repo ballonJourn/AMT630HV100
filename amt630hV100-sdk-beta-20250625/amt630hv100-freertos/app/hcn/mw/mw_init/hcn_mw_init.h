@@ -36,6 +36,7 @@ extern "C" {
 #include "carlink_cb/hcn_carlink_cb.h"
 #include "mw_init/hcn_mw_common.h"
 #include "bt_module/hcn_bt_parse.h"
+#include "display_mode/hcn_display_mode.h"
 
 void hcn_mw_init(void);
 

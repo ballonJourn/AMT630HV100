@@ -4464,6 +4464,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>display_mode</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\display_mode\hcn_display_mode.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>io_module</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\io_module\hcn_gpio_light.c</name>

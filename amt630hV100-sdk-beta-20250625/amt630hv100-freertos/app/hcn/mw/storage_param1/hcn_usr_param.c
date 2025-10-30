@@ -31,6 +31,7 @@ static usr_param_t usr_param_pre = {
 };
 
 static bool is_recovery_usr_param = false;
+static bool start_by_acc = false;
 
 static void set_default_usr_param(usr_param_t * set_param) {
     if (set_param) {
@@ -181,6 +182,7 @@ static void check_usr_param(void) {
 
 void check_start_source(uint8_t start_src) {
     if (start_src) {
+        start_by_acc = true;
         hcn_log_info("\r\nStart by acc\n");
     } else {
         hcn_log_info("\r\nStart by bat\n");
@@ -624,6 +626,10 @@ int usr_param_init(void) {
 
 bool get_recovery_usr_param(void) {
     return is_recovery_usr_param;
+}
+
+bool is_acc_start(void) {
+  return start_by_acc;
 }
 
 #endif //HCN_NOR_FLASH_PARAM_ENABLE

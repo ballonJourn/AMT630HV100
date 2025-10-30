@@ -53,6 +53,10 @@ void hcn_mw_init(void) {
     uart_mcu_init();
 #endif
 
+#ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
+    display_mode_init();
+#endif
+
     ///< 开启亮度
     set_backlight_level(5);
 

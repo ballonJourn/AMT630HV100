@@ -1,0 +1,159 @@
+/**
+*
+* @file hcn_display_mode.c
+*
+* @brief This message displayed in Doxygen Files index
+*
+* @ingroup PackageName
+* (note: this needs exactly one @defgroup somewhere)
+*
+* @date	2025/10/29 12:27
+* @author och
+*
+*/
+
+#include <FreeRTOS.h>
+#include "task.h"
+#include "display_mode/hcn_display_mode.h"
+#include "storage_param1/hcn_usr_param.h"
+#include "vehicle_param/vehicle_param.h"
+#include "light_sensor/hcn_light_sensor.h"
+#include "log/hcn_log.h"
+
+#ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
+
+#define DISPLAY_MODE_PERIOD (50)
+#define LIGHT_SENSOR_GET_DATA_INTERVAL (3)
+
+typedef struct {
+    int arr_index;
+    int sample_interval;
+    uint8_t is_first_display;
+    uint8_t sensor_level;
+    uint8_t cur_display_mode;
+} display_param_t;
+
+static display_param_t display = {0, 0, true, 0, 0xFF};
+
+static uint16_t lg_ref[LIGHT_SENSOR_ARR_LEVEL];
+static uint16_t lg_value[LIGHT_SENSOR_ARR_SIZE];
+
+static void light_sensor_ref_init(void) {
+    lg_ref[0] = 4060;
+    lg_ref[1] = 3900;
+    lg_ref[2] = 3000;
+    lg_ref[3] = 2000;
+    lg_ref[4] = 1500;
+    lg_ref[5] = 300;
+}
+
+static void check_display_mode(void) {
+    uint8_t display_mode = 0;
+    int cur_display = 0;
+
+    if (!get_recovery_usr_param()) {
+        return;
+    }
+
+    if (!get_hcn_usr_param(HCN_PARAM_THEME, &display_mode)) {
+        hcn_log_error("Get usr param display mode failed!\r\n");
+        return;
+    }
+
+    cur_display = vehicle_get_data(VEH_CUR_DISPALY_MODE);
+    if (display_mode == AUTO_MODE) {
+        if (display.sensor_level > 1) {
+            if (display.cur_display_mode != DAY_MODE) {
+                display.cur_display_mode = DAY_MODE;
+            }
+
+            if (cur_display == NIGHT_MODE) {
+                vehicle_set_data(VEH_CUR_DISPALY_MODE, 0);
+                hcn_log_info("Current display mode: Day %d\n",
+                       display.cur_display_mode);
+            }
+
+        } else if (display.sensor_level <= 1) {
+            if (display.cur_display_mode != NIGHT_MODE) {
+                display.cur_display_mode = NIGHT_MODE;
+            }
+
+            if (cur_display == DAY_MODE) {
+                vehicle_set_data(VEH_CUR_DISPALY_MODE, 1);
+                hcn_log_info("Current display mode: Night %d\n",
+                       display.cur_display_mode);
+            }
+        }
+    } else if (display.cur_display_mode != cur_display) {
+        display.cur_display_mode = cur_display;
+    }
+}
+
+static void check_sensor_level(void) {
+    if (is_acc_start() && display.is_first_display) {
+        display.is_first_display = false;
+        if (lg_value[0] <= lg_ref[1]) {
+            display.sensor_level = 2;
+        } else {
+            display.sensor_level = 1;
+        }
+    } else {
+        for (int i = 0; i < LIGHT_SENSOR_ARR_LEVEL - 1; i++) {
+            int success_count = 0;
+
+            for (int j = 0; j < LIGHT_SENSOR_ARR_SIZE; j++) {
+                if (lg_value[j] > lg_ref[i + 1] && lg_value[j] <= lg_ref[i]) {
+                    success_count++;
+                } else {
+                    break;
+                }
+
+                if (success_count == LIGHT_SENSOR_ARR_LEVEL - 1) {
+                    display.sensor_level = i + 1;
+                }
+            }
+        }
+    }
+
+    check_display_mode();
+}
+
+static void check_light_sensor(void) {
+    if ((display.sample_interval % LIGHT_SENSOR_GET_DATA_INTERVAL) == 0) {
+        if (display.arr_index < LIGHT_SENSOR_ARR_SIZE) {
+            lg_value[display.arr_index] = (uint16_t)get_light_sensor_value();
+            display.arr_index++;
+        }
+
+        if (display.arr_index >= LIGHT_SENSOR_ARR_SIZE) {
+            display.arr_index = 0;
+        }
+
+        check_sensor_level();
+    }
+    display.sample_interval++;
+}
+
+static void display_mode_thread(void *param) {
+    light_sensor_ref_init();
+    //auto_backlight_init();
+
+    for (;;) {
+        set_light_sensor_value();
+        check_light_sensor();
+        //check_auto_backlight_level();
+        vTaskDelay(pdMS_TO_TICKS(DISPLAY_MODE_PERIOD));
+    }
+}
+
+void display_mode_init(void) {
+    if (xTaskCreate(display_mode_thread, "display_mode",
+                    configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES / 5,
+                    NULL) != pdPASS) {
+        hcn_log_error("Create display thread failed!\n");
+    }
+
+    return;
+}
+
+#endif

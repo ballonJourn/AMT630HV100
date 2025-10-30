@@ -184,6 +184,8 @@ void check_start_source(uint8_t start_src);
  */
 int usr_param_init(void);
 
+bool is_acc_start(void);
+
 #endif //HCN_NOR_FLASH_PARAM_ENABLE
 
 #ifdef __cplusplus

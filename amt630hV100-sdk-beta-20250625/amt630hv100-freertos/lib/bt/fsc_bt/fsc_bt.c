@@ -79,7 +79,7 @@ static void bt_task(void* arg)
    bt_sw_cfg.rx_queue = rx_queue;
    bt_sw_cfg.tx_queue = tx_queue;
    bt_sw_cfg.a2dp_resampler = 0;
-   bt_sw_cfg.debug_mode = 1; // debug toggle
+   bt_sw_cfg.debug_mode = 0; // debug toggle
 #if CARLINK_EC
    bt_sw_cfg.ble_connection_type = BLE_EASY_CONNECTION;
 #else

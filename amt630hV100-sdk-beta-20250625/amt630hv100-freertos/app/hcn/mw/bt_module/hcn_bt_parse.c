@@ -42,7 +42,7 @@ static int bt_send_cmd(const char *buff) {
 
     uint16_t len = (uint16_t)strlen(buff);
     if (len > (UART_BT_SEND_BUF_LEN - 2)) {
-        hcn_log_error("The command sent is too long!\r\n");
+        hcn_log_error("The command send is too long!\r\n");
         return -1;
     }
 
