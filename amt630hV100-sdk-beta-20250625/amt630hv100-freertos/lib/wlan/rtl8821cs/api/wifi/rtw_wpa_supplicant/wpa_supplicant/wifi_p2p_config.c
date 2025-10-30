@@ -149,12 +149,21 @@ void cmd_wifi_p2p_start(int argc, char **argv)
 	wifi_p2p_init((u8*)(argv[1]), go_intent, listen_ch, op_ch);	
 }
 
+#ifdef wifi_RS440
+static int p2p_channel = 40;
+#else
 static int p2p_channel = 36;
+#endif
 void cmd_wifi_p2p_start_ex(char dev_addr[6])
 {
 	//extern struct netif xnetif[NET_IF_NUM];
+#ifdef wifi_RS440
+    int listen_ch = p2p_channel;
+#else
 	int listen_ch = 1;
+#endif
 	int op_ch = p2p_channel;
+
 	int go_intent = 1;
 	int ret = -1;
 	char str_mac[32] = {0};
@@ -168,7 +177,11 @@ void cmd_wifi_p2p_start_ex(char dev_addr[6])
 	go_intent = r%15+1; /*1-15*/
 	
 	os_get_random((u8 *) &r, sizeof(r));
+
+#ifndef wifi_RS440
 	listen_ch = 1 + (r % 3) * 5;
+#endif
+
 #if 0
 	os_get_random((u8 *) &r, sizeof(r));
 	op_ch = 1 + (r % 3) * 5;
@@ -198,6 +211,8 @@ void cmd_wifi_p2p_auto_go_start(int argc, char **argv)
 #else
 	u8 channel = 1;	// 1, 6, 11
 #endif
+    channel = p2p_channel;
+	
 	const char *ssid_in = "DIRECT-34-Ameba";
 	const char *dev_name = "ap630hv100_p2p";	// max strlen 32
 	const char *manufacturer = "by customer";	// max strlen 64
