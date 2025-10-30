@@ -4,20 +4,6 @@
 #include "awtk.h"
 #include "../view_manager.h"
 
-// enum set_brightness_com{
-//     DISPLAY_AUTO      ,
-//     DISPLAY_DAY       ,
-//     DISPLAY_NIGHT     ,
-//     DISPLAY_NUM_MAX   ,
-// };
-
-// typedef enum {
-//     DIAPLAY_AUTO_OPTION   ,
-//     DIAPLAY_DAY_OPTION    ,
-//     DIAPLAY_NIGHT_OPTION  ,
-//     DIAPLAY_OPTION_MAX    ,
-// }brightness_option_e ;
-
 
 ret_t set_brightness_view_init(widget_t* parent) ;
 

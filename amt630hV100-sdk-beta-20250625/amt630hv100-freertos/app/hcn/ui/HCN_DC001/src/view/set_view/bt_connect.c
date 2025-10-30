@@ -1,5 +1,6 @@
 #include "bt_connect.h"
 #include <stdio.h>
+#include "proxy/vehicle_argument.h"
 
 const char* set_bt_conn_widget_name[BT_CONNECT_NUM_MAX] = {
     "bt_on_option" , "bt_off_option" , "bt_state" 
@@ -27,6 +28,10 @@ ret_t set_bt_connect_view_init(widget_t* parent)
 static void setting_menu_view_deal_set()
 {
     printf("on_bt_conn setting_menu_view_deal_set \n") ;
+    if (option == BT_CONNECT_ON_OPTION)
+        vehicle_set_param_bluetooth(1);
+    else if(option == BT_CONNECT_OFF_OPTION)
+        vehicle_set_param_bluetooth(0);
 
     return  ;
 }

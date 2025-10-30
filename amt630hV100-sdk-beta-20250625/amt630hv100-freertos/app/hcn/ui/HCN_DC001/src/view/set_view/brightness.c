@@ -1,5 +1,6 @@
 #include "brightness.h"
 #include <stdio.h>
+#include "proxy/vehicle_argument.h"
 
 static widget_t* set_brightness_scroll_widget =  NULL ;
 
@@ -23,7 +24,7 @@ ret_t set_brightness_view_init(widget_t* parent)
 static void setting_menu_view_deal_set()
 {
     printf("brightness setting_menu_view_deal_set \n") ;
-
+    vehicle_set_param_brightness(option);
     return  ;
 }
 

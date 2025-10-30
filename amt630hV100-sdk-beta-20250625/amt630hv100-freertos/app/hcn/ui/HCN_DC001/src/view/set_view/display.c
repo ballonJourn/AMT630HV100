@@ -1,5 +1,6 @@
 #include "display.h"
 #include <stdio.h>
+#include "proxy/vehicle_argument.h"
 
 const char* set_display_widget_name[DISPLAY_NUM_MAX] = {
     "display_auto_option" , "display_day_option" , "display_night_option"
@@ -22,7 +23,14 @@ ret_t set_display_view_init(widget_t* parent)
 static void setting_menu_view_deal_set()
 {
     printf("display setting_menu_view_deal_set \n") ;
-
+    // 显示主题 0：白天 1:黑夜 2:自动
+    if (option == DIAPLAY_AUTO_OPTION)
+        vehicle_get_param_display(2);
+    else if(option == DIAPLAY_DAY_OPTION)
+        vehicle_get_param_display(0);
+    else if (option == DIAPLAY_DAY_OPTION)
+        vehicle_get_param_display(1);
+    
     return  ;
 }
 

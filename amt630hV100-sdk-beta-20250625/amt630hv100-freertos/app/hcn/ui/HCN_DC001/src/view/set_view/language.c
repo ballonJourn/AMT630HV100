@@ -1,5 +1,6 @@
 #include "language.h"
 #include <stdio.h>
+#include "proxy/vehicle_argument.h"
 
 const char* set_language_widget_name[LANGUAGE_NUM_MAX] = {
     "chinese_option" , "english_option" 
@@ -31,7 +32,8 @@ static void setting_menu_view_deal_set()
         // locale_info_change(locale_info(), "en", "US") ;
         printf("English\n") ;
     }
-    
+
+    vehicle_set_param_language(option);
     return  ;
 }
 
