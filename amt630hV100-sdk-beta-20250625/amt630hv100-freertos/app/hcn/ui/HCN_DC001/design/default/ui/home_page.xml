@@ -70,8 +70,8 @@
           <view name="info_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="image" x="107" y="48" w="40" h="40" draw_type="default" image="icon_riding_time"/>
             <image name="image1" x="107" y="141" w="40" h="40" draw_type="default" image="icon_riding_distance"/>
-            <label name="riding_time" x="69" y="98" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="1H 48min"/>
-            <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="100km"/>
+            <label name="ride_time" x="69" y="98" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="0H 0min 0s"/>
+            <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="24" text="0 km"/>
           </view>
           <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="qr_view" x="51" y="40" w="189" h="206" visible="true">
@@ -161,7 +161,7 @@
             <line_series name="line_series" capacity="11" value_animation="500" line="{smooth:false}" area="{show:true}" symbol="{show:true}" series_axis="x_axis" value_axis="y_axis" style:normal:line_border_color="#59E9FF" style:normal:area_color="#29d1ff32" style:normal:line_border_width="2" value="-30,60,0,50,90,-15,40,-10,90,13,60,-5,45,-15" style:normal:symbol_bg_color="#D9E2F2" style:normal:symbol_round_radius="3" disg:lock="true" text=""/>
             <tooltip name="tooltip" w="448" h="185" line="{show:true}" symbol="{show:true,size:3}" tip="{show:true}" y="11" disg:lock="true"/>
           </chart_view>
-          <label name="label5" x="18" y="29" w="140" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" text="确认后按上下键切换"/>
+          <label name="label5" x="18" y="29" w="140" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" tr_text="press_up_down"/>
           <label name="label5" x="158" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" tr_text="last_ride"/>
           <label name="ride_5km" x="239" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" tr_text="near_5km"/>
           <label name="ride_20km" x="321" y="29" w="72" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="20" style:normal:bg_color="#595959" style:normal:round_radius="8" style="ride_menu" tr_text="near_20km"/>

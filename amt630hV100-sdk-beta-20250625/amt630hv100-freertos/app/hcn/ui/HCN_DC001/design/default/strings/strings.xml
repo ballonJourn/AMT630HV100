@@ -122,3 +122,7 @@ Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
   <language name="zh_CN">扫码连接</language>
   <language name="en_US">Scan To Connect</language>
 </string>
+<string name="press_up_down">
+  <language name="zh_CN">确认后按上下键切换</language>
+  <language name="en_US">UP or Down Switch</language>
+</string>
