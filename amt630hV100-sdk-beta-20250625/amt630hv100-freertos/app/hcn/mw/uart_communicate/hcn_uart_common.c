@@ -17,6 +17,7 @@
 #include "uart_communicate/hcn_uart_parse_cmd.h"
 #include "uart_communicate/hcn_uart_tx.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
+#include "uart_mcu_update/hcn_uart_mcu_update.h"
 #include "log/hcn_log.h"
 #include "utils/hcn_utils.h"
 #include "queue.h"
@@ -82,22 +83,25 @@ static void mcu_update_process(uint8_t *data) {
     }
 
     uint16_t cmd_code = ((data[4] << 8) + data[5]);
-    //uint8_t type = hcn_get_mcu_update_type();
-    //if (type) {
+    uint8_t type = get_mcu_update_type();
+    if (type) {
         switch (cmd_code) {
             case UART_CONTINUE_UPDATE_MCU_CMD:
+                mcu_update_msg_continue();
                 break;
 
             case UART_RESEND_MCU_MSG_CMD:
+                mcu_update_msg_resend();
                 break;
 
             case UART_UPDATE_MCU_AGAIN_CMD:
+                mcu_update_msg_data_fail();
                 break;
 
             default:
                 break;
         }
-    //}
+    }
 }
 
 static void mcu_msg_type_divide(uint8_t *data) {
@@ -115,7 +119,9 @@ static void mcu_msg_type_divide(uint8_t *data) {
         timing_info_process(data);
     } else if (cmd_type >= UART_MCU_UPDATE_STAT_CMD &&
                cmd_type <= UART_MCU_UPDATE_END_CMD) {
+#ifdef HCN_UART_MCU_UPDATE_ENABLE
         mcu_update_process(data);
+#endif
     } else if (cmd_type >= UART_MCU_SOC_REQ_START_CMD &&
                cmd_type <= UART_MCU_SOC_REQ_END_CMD) {
         soc_ack_mcu_process(data);

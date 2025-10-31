@@ -172,6 +172,11 @@ extern "C" {
 #define HCN_UART_MCU_BAUDRATE (115200)
 #endif
 
+///< mcu升级
+#ifdef HCN_UART_COMM_ENABLE
+#define HCN_UART_MCU_UPDATE_ENABLE
+#endif
+
 ///< 里程保养使能
 #define HCN_MILEAGE_MAINTENCE_ENABLE
 

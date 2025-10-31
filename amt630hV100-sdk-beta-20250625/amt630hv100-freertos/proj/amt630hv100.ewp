@@ -4563,6 +4563,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>uart_mcu_update</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_mcu_update\hcn_uart_mcu_update.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>vehicle_param</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\vehicle_param\vehicle_param.c</name>
