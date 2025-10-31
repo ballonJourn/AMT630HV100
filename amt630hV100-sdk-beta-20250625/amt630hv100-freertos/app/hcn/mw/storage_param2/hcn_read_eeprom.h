@@ -24,7 +24,7 @@ extern "C" {
 #define E2PROM_CAPACITY_BYTE  (1024)  ///< e2prom容量是1024字节
 #define E2PROM_PAGE_SIZE      (16)   ///< e2prom页大小为16字节
 
-#define T24C08A_DEV_ADDR    (0x50)
+#define T24C08A_DEV_ADDR    (0xA8)
 
 int e2prom_test(uint16_t addr,int size,uint16_t start_data);
 

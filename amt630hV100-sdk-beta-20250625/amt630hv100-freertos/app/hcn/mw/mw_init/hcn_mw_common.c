@@ -58,7 +58,7 @@ static void common_io_thread(void *param) {
     light_gpio_init(VEHICLE_THREAD_PERIOD);
 
     for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(VEHICLE_THREAD_PERIOD);
         scan_frame_light();
     }
 }

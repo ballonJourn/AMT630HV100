@@ -190,6 +190,13 @@ extern "C" {
 ///< nor flash参数配置
 #define HCN_NOR_FLASH_PARAM_ENABLE
 
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
+#define PARAM_WEAR_LEVEL_ENABLE     ///< 磨损均衡使能
+#endif
+
+///< use flash db 
+//#define HCN_USE_FLASH_DB_ENABLE
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus

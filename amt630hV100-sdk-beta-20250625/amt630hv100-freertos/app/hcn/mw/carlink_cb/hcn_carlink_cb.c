@@ -149,13 +149,17 @@ static void onHcnLicenseStatus(bool status) {
             if (uuid_status == 0) {
                 uuid_status = 1;
                 set_hcn_usr_param(HCN_PARAM_UUID_REGISTER, &uuid_status);
+#ifndef PARAM_WEAR_LEVEL_ENABLE
                 save_hcn_usr_param();
+#endif
             } 
         } else {
             if (uuid_status == 1) {
                 uuid_status = 0;
                 set_hcn_usr_param(HCN_PARAM_UUID_REGISTER, &uuid_status);
+#ifndef PARAM_WEAR_LEVEL_ENABLE
                 save_hcn_usr_param();
+#endif
             }
         }
 

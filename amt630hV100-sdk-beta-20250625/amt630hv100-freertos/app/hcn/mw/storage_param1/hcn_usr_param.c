@@ -13,6 +13,9 @@
 */
 
 #include <string.h>
+#include "FreeRTOS.h"
+#include "board.h"
+#include "sfud.h"
 #include "storage_param1/hcn_usr_param.h"
 #include "storage_param1/hcn_read_nor_flash.h"
 #include "log/hcn_log.h"
@@ -380,6 +383,8 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
         return false;
     }
 
+    bool is_save = true;
+
     switch (id) {
         case HCN_PARAM_MAINTAIN_COUNTS:
             if (usr_param.maintain_info.maintain_mile.maintain_count != *((uint16_t *)param)) {
@@ -523,18 +528,21 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             break;
 
         case HCN_PARAM_RIDE_TIME_A:
+            is_save = false;
             if (usr_param.ride_info.ride_time_a != *((uint32_t *)param)) {
                 usr_param.ride_info.ride_time_a = *((uint32_t *)param);  
             }
             break;
 
         case HCN_PARAM_RIDE_TIME_B:
+            is_save = false;
             if (usr_param.ride_info.ride_time_b != *((uint32_t *)param)) {
                 usr_param.ride_info.ride_time_b = *((uint32_t *)param);  
             }
             break;    
 
         case HCN_PARAM_LEFT_FRONT_TIRE_INFO:
+            is_save = false;
             if (memcmp(&usr_param.tpms[TPMS_LEFT_FRONT], param,
                        sizeof(tpms_param_t)) != 0) {
                 memcpy(&usr_param.tpms[TPMS_LEFT_FRONT], param,
@@ -542,6 +550,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             }
             break;
         case HCN_PARAM_RIGHT_FRONT_TIRE_INFO:
+            is_save = false;
             if (memcmp(&usr_param.tpms[TPMS_RIGHT_FRONT], param,
                        sizeof(tpms_param_t)) != 0) {
                 memcpy(&usr_param.tpms[TPMS_RIGHT_FRONT], param,
@@ -550,6 +559,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             break;
 
         case HCN_PARAM_LEFT_REAR_TIRE_INFO:
+            is_save = false;
             if (memcmp(&usr_param.tpms[TPMS_LEFT_REAR], param,
                        sizeof(tpms_param_t)) != 0) {
                 memcpy(&usr_param.tpms[TPMS_LEFT_REAR], param,
@@ -558,6 +568,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             break;
 
         case HCN_PARAM_RIGHT_REAR_TIRE_INFO:
+            is_save = false;
             if (memcmp(&usr_param.tpms[TPMS_RIGHT_REAR], param,
                        sizeof(tpms_param_t)) != 0) {
                 memcpy(&usr_param.tpms[TPMS_RIGHT_REAR], param,
@@ -566,13 +577,24 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             break;
 
         default:
+            is_save = false;
             break;
     }
+    
+#ifdef PARAM_WEAR_LEVEL_ENABLE
+    if (is_save) {
+        is_save = false;
+        if (save_hcn_usr_param() != 0) {
+            return false;
+        }
+    }
+#endif
 
     return true;
 }
 
 static void read_usr_param(void) {
+#ifndef PARAM_WEAR_LEVEL_ENABLE
     read_hcn_info();
 
     meter_info_t * meter_info = get_hcn_info();
@@ -589,7 +611,7 @@ static void read_usr_param(void) {
         memset(&maintence_temp, 0, sizeof(maintain_info_t));
 
         if (meter_info->magic_num != NOR_FLASH_EMPTY_FLAG) {
-            uint8_t temp = ((NOR_FALSH_MAGIC_NUM >> 24) & 0xff);
+            uint8_t temp = ((meter_info->magic_num >> 24) & 0xff);
             if (temp == NOR_FLASH_MAGIC_NUM_PREFIX) {
                 hcn_log_info("Read last maintenance info!\n");
 
@@ -617,6 +639,95 @@ static void read_usr_param(void) {
   usr_param = meter_info->usr;
 
   hcn_log_info("usr param init ok!\n");
+#else
+    if (read_hcn_info() != 0) {        
+        meter_info_t * meter_info = get_hcn_info();
+        if (!meter_info) {
+            hcn_log_error("Get Meter info pointer failed!\n");
+            return;
+        }
+        
+        int scan_index = 0;
+        uint32_t read_addr = 0;
+        uint32_t offset_temp = 0;
+        uint8_t temp = PARAN_RECORD_HEADER_MAGIC_PREFIX;
+
+        ///< 使用默认设置参数
+        hcn_log_info("Use default praram\n");
+
+        maintain_info_t maintence_temp;
+        memset(&maintence_temp, 0, sizeof(maintain_info_t));
+
+        sfud_flash *sflash = sfud_get_device(0);
+        if (!sflash) {
+            hcn_log_error("Open spi nor flash failed!\r\n");
+            return;
+        }
+
+        ///< 尝试从任意记录位置读取保养信息
+        for (uint32_t offset = 0; offset <= NOR_FLASH_SECTOR_SIZE - PARAM_RECORD_SIZE; offset += PARAM_RECORD_SIZE) {
+            uint32_t record_addr = HCN_USR_PARAM_ADDR + offset;
+            record_header_t header;
+            
+            ///< 读取记录头
+            if (sfud_read(sflash, record_addr, sizeof(record_header_t), (void *)&header) != SFUD_SUCCESS) {
+                hcn_log_error("Read head info error!\r\n");
+                continue;
+            }
+            
+            ///< 遍历整个扇区，查找槽头对应的前缀
+            if (header.magic != PARAM_RECORD_HEADER_MAGIC) {
+                uint8_t data_tmp = ((header.magic >> 24) & 0xff);
+                if (data_tmp == temp) {
+                    scan_index++;
+                    hcn_log_info("Read same head prefix, offset = %08x!\r\n", offset);
+                    read_addr = record_addr;
+                }
+            }
+
+            offset_temp = offset;
+        }
+
+        ///< 说明存在相同的槽头前缀，可以读取对应的保养信息
+        if (scan_index >= 1) {
+            meter_info_t temp_info = {0};
+            if (sfud_read(sflash, read_addr + sizeof(record_header_t), 
+                                sizeof(meter_info_t), (void *)&temp_info) == SFUD_SUCCESS) {
+                if (temp_info.usr.maintain_info.maintain_mile.maintain_count > 0 
+                    && temp_info.usr.maintain_info.maintain_mile.maintain_count < 255) {
+                    memcpy(&maintence_temp, &temp_info.usr.maintain_info, 
+                        sizeof(maintain_info_t));
+                    hcn_log_info("Recover maintenance info from offset 0x%lx\n", offset_temp);
+                }
+            }
+        }
+       
+        meter_info->magic_num = NOR_FALSH_MAGIC_NUM;
+        set_default_usr_param(&meter_info->usr);
+        meter_info->usr.maintain_info = maintence_temp;
+        usr_param_pre = meter_info->usr;
+
+        ///< 保存默认参数
+        if (save_hcn_info() != 0) {
+            hcn_log_error("Save default parameters failed!\n");
+            return;
+        }
+    }
+
+    meter_info_t * meter_info = get_hcn_info();
+    if (!meter_info) {
+        hcn_log_error("Get Meter info pointer failed!\n");
+        return;
+    }
+    
+    usr_param = meter_info->usr;
+    
+    ///< 打印Flash使用统计
+    print_flash_usage_stats();
+    
+    hcn_log_info("User param init success!\n");
+
+#endif
 }
 
 int usr_param_init(void) {
