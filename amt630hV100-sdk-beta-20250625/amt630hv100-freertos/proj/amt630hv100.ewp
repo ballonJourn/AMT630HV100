@@ -4584,6 +4584,9 @@
                         <group>
                             <name>logic</name>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\hcn_global.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\hcn_logic.c</name>
                             </file>
                             <file>

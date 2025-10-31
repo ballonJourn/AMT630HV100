@@ -93,10 +93,10 @@ ret_t home_refresh_drv_mode(drv_mode_e mode)
 ret_t home_refresh_unit(unit_e unit)
 {
    char format_buff[128] = { 0 };
-   tk_snprintf(format_buff , sizeof(format_buff) , "bg_halo_%d", (int)unit);
+   tk_snprintf(format_buff , sizeof(format_buff) , "%s", (unit == KM_H) ? "unit_km_h" : "unit_mph");
 
-   if(home_speed_widget[SPEED_HALO] ){
-      image_set_image(home_speed_widget[SPEED_HALO] , format_buff );
+   if(home_speed_widget[SPEED_UNIT] ){
+      image_set_image(home_speed_widget[SPEED_UNIT] , format_buff );
    }
 
    return RET_OK ;

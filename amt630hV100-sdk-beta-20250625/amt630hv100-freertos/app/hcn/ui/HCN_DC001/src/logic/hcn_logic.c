@@ -7,6 +7,7 @@
 #include "speed_view_logic.h"
 #include "signal_view_logic.h"
 #include "view/set_view/set_view_interface.h"
+#include "view/home_view/home_view_interface.h"
 #include "proxy/vehicle_data.h"
 #include "navigation_view_logic.h"
 #include "proxy/vehicle_time.h"
@@ -79,7 +80,7 @@ ret_t home_view_init(widget_t * win)
     home_refresh_phone_num("0737 1548254");
 
     //手机通话页面
-    home_refresh_phone_view(PHONE_CONNECT)  ;
+    //home_refresh_phone_view(PHONE_CONNECT)  ;
 
     time_start =  time_now_s() ;
     return RET_OK ;

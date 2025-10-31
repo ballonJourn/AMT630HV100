@@ -18,7 +18,7 @@ ret_t refesh_ui(const timer_info_t* timer){
 
   home_refresh_trip(1888.6) ;
   home_refresh_odo(1888.6) ;
-  home_refresh_mileage_unit(MPH) ;
+
 
   return RET_REPEAT;
 }

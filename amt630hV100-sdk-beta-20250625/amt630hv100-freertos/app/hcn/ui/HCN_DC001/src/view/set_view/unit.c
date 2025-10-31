@@ -1,6 +1,7 @@
 #include "unit.h"
 #include <stdio.h>
 #include "proxy/vehicle_argument.h"
+#include "logic/hcn_global.h"
 
 const char* set_unit_widget_name[UNIT_NUM_MAX] = {
     "unit_km_option" , "unit_mile_option" 
@@ -24,7 +25,7 @@ static void setting_menu_view_deal_set()
 {
     printf("unit setting_menu_view_deal_set \n") ;
     vehicle_set_param_unit(option);
-    
+    global_refresh_unit((uint8_t)option);
     return  ;
 }
 
