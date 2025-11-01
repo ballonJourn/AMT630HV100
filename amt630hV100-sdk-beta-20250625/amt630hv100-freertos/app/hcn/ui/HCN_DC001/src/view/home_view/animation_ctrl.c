@@ -1,5 +1,8 @@
 #include "animation_ctrl.h"
 #include "dock_view.h"
+#include "../view_manager.h"
+#include <stdbool.h>
+
 const char* home_move_animation_name[MVOE_NUM_MAX] = {
     "speed_view" , "power_view" , "dock_slider_view" 
 } ;
@@ -63,11 +66,13 @@ ret_t animation_listen_out(void* ctx, event_t* e)
     (void)ctx ;
     if (e->type == EVT_ANIM_START)
     {
-        printf("animation start\n") ;
+        printf("animation out start\n") ;
+        set_ready_press_state(false);
     }
     else if (e->type == EVT_ANIM_END)
     {
-        printf("animation end\n") ;
+        printf("animation out end\n") ;
+        set_ready_press_state(true);
         if (home_animation_widget[DOCK_SLIDER_VIEW])
         {
             // widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_p") ;
@@ -88,8 +93,10 @@ ret_t animation_listen_in(void* ctx, event_t* e)
     (void)ctx ;
     if (e->type == EVT_ANIM_START)
     {
+        set_ready_press_state(false);
         if (home_animation_widget[DOCK_SLIDER_VIEW])
         {
+            printf("animation in start\n") ;
             // widget_set_style_str(home_animation_widget[DOCK_SLIDER_VIEW] , STYLE_ID_BG_IMAGE , "left_bg_n") ;
             slide_view_set_active_ex(home_animation_widget[DOCK_SLIDER_VIEW] , ICON_MUSIC , FALSE ) ;
             widget_invalidate_force(home_animation_widget[DOCK_SLIDER_VIEW] , NULL);
@@ -103,7 +110,8 @@ ret_t animation_listen_in(void* ctx, event_t* e)
     }
     else if (e->type == EVT_ANIM_END)
     {
-        printf("animation end\n") ;
+        printf("animation in end\n") ;
+        set_ready_press_state(true);
     }
     
     return RET_OK ;

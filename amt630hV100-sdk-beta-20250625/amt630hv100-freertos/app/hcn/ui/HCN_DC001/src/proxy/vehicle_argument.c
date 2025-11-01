@@ -3,8 +3,17 @@
 #include "storage_param1/hcn_usr_param.h"
 #include "backlight/hcn_backlight.h"
 
-//语言
+///< false:参数未准备好 true:已准备好
+bool vehicle_get_param_recovery()
+{
+#if !ON_PC_CACLE
+    return get_recovery_usr_param() ;
+#endif
 
+    return true ;
+}
+
+///< 语言 0:中文 1:英文,预留位
 uint8_t vehicle_get_param_language()
 {
     uint8_t value ;
@@ -24,7 +33,7 @@ void vehicle_set_param_language(uint8_t value)
     return ;
 }
 
-//单位
+///< 里程格式 0:公制 1：英制
 uint8_t vehicle_get_param_unit()
 {
     uint8_t value ;

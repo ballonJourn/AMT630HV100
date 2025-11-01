@@ -58,18 +58,17 @@ int get_current_levle();
 void set_current_level(int cur_level);
 
 
-
 void deal_key_set_short_press();
-
 
 void deal_key_back_short_press();
 
-
 void deal_key_up_short_press();
-
 
 void deal_key_down_short_press();
 
 
+void set_ready_press_state(bool state ) ;
+
+bool get_ready_press_state();
 
 #endif

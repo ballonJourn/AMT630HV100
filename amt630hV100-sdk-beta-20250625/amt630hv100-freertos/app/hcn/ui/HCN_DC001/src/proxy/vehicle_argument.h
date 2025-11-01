@@ -6,6 +6,13 @@
 #include <stdbool.h>
 #include "storage_param1/hcn_usr_param.h"
 
+/**
+ * @brief  读取usr param准备状态
+ * @param  none
+ * @return false:参数未准备好 true:已准备好
+ */
+bool vehicle_get_param_recovery();
+
 //语言
 uint8_t vehicle_get_param_language() ;
 

@@ -8,6 +8,7 @@
 #include "view_manager.h"
 #include "link_view/link_page_key.h"
 #include "proxy/vehicle_time.h"
+#include "logic/hcn_selfcheck.h"
 
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
@@ -17,6 +18,8 @@ static dock_view_e current_dock = ICON_INFO ;
 
 //初始状态为0级别 进去music 、setting为一级  setting进入选项为二级 时间调整为三级
 static menu_level_e current_level = MENU_LEVEL_0 ;   
+
+static bool ready_press = true ;
 
 const char* window_name_str[WINDOWS_NUM_MAX] = {
     "pages" , "dock_slider_view" 
@@ -74,11 +77,15 @@ static ret_t on_key_event(void* ctx, event_t* e)
     return RET_OK;
 }
 
-
 #if !ON_PC_CACLE
-static void hcn_key_cb(uint8_t id) 
+static void hcn_key_handle(uint8_t id) 
 {
+
     printf( "set_key_cb key = %d \n", id) ;
+
+    if (!ready_press || checkself_get_state() != CHECK_STATE_FINISHED )
+        return ;
+
     switch (id)
     {
         case  SET_KEY_LONG_PR   :
@@ -104,9 +111,28 @@ static void hcn_key_cb(uint8_t id)
                 break;
     }
 
+    return ;
+}
+
+ret_t on_idle_queue(const idle_info_t* idle)
+{
+    printf("on_idle_queue \n") ;
+    if (NULL == idle)
+        return RET_REMOVE;
+    
+    uint8_t key = (uint8_t)(uintptr_t)idle->ctx ;
+    hcn_key_handle(key) ;
+
+    return RET_REMOVE;
+}
+
+static void hcn_key_cb(uint8_t id) 
+{
+    idle_queue(on_idle_queue ,(void*)id) ;
+    printf("idle_add \n") ;
+    return ;
 }
 #endif
-
 
 ret_t view_manager_init(widget_t* parent)
 {
@@ -125,7 +151,7 @@ ret_t view_manager_init(widget_t* parent)
     return RET_OK ;
 }
 
-void update_gage_info() 
+void update_page_info() 
 {
     int min = vehicle_get_time_min();
     int sec = vehicle_get_time_sec();
@@ -157,7 +183,7 @@ ret_t set_window_page(window_page_e type)
 
         if(page->active != type )
         {
-            update_gage_info() ;
+            update_page_info() ;
             pages_set_active(window_page[MAIN_PAGE] , type);
 
         }
@@ -218,6 +244,15 @@ void deal_key_down_short_press()
 }
 
 
+void set_ready_press_state(bool state )
+{
+    ready_press = state ;
+    return ;
+}
 
+bool get_ready_press_state()
+{
+    return ready_press ;
+}
 
 

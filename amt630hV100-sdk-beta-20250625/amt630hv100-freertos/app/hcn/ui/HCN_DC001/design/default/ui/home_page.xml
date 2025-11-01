@@ -52,7 +52,7 @@
         <image_value name="speed_value" x="56" y="57" w="212" h="212" image="speed_" format="%d" value="0" min="0" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=180)" max="200"/>
         <progress_circle max="360" name="progress_circle" x="0" y="0" w="326" h="326" visible="true" style:normal:fg_color="#FFFFFF" style:normal:fg_image="dashboard_progress_0" line_width="60" show_text="false" line_cap="butt" style:normal:icon="" start_angle="135" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=270)" value="0"/>
         <gauge_pointer name="dashboard_pointer" x="159" y="0" w="8" h="163" image="pointer_0" anchor_y="1.0" angle="-135" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=-135,to=135)"/>
-        <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="default" image="unit_km_h"/>
+        <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="center" image="unit_km_h"/>
         <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="drv_mode_0"/>
         <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
           <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>

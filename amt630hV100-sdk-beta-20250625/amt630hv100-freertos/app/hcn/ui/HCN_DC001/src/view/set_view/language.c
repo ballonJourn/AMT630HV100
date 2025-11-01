@@ -1,6 +1,7 @@
 #include "language.h"
 #include <stdio.h>
 #include "proxy/vehicle_argument.h"
+#include "logic/hcn_global.h"
 
 const char* set_language_widget_name[LANGUAGE_NUM_MAX] = {
     "chinese_option" , "english_option" 
@@ -23,17 +24,9 @@ ret_t set_language_view_init(widget_t* parent)
 static void setting_menu_view_deal_set()
 {
     printf("language setting_menu_view_deal_set \n") ;
-    if (option == LANGUAGE_CHINESE_OPTION){
-        // change_locale_language("zh_CN");
-        // locale_info_change(locale_info(), "zh", "CN") ;
-        printf("Chinese\n") ;
-    }else if (option == LANGUAGE_ENGLISH_OPTION){
-        // change_locale_language("en_US");
-        // locale_info_change(locale_info(), "en", "US") ;
-        printf("English\n") ;
-    }
 
     vehicle_set_param_language(option);
+    global_refresh_language(option);
     return  ;
 }
 
@@ -123,17 +116,4 @@ void language_view_clean_state()
     }
 
     return ;
-}
-
-ret_t change_locale_language(const char* str) 
-{
-    if(str == NULL) return RET_FAIL;
-
-    char country[3] = {0};
-    char language[3] = {0};
-    strncpy(language, str, 2);
-    strncpy(country, str + 3, 2);
-    locale_info_change(locale_info(), language, country) ;
-    return RET_OK ;
-
 }

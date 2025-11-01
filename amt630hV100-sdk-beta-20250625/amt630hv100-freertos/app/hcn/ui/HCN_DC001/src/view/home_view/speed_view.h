@@ -32,4 +32,8 @@ ret_t home_refresh_drv_mode(drv_mode_e mode) ;
 //设置档位
 ret_t home_refresh_gear(gear_e gear);
 
+
+//设置单位
+ret_t home_refresh_unit(unit_e unit);
+
 #endif

@@ -4629,6 +4629,9 @@
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_data.c</name>
                             </file>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_mile.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_time.c</name>
                             </file>
                         </group>

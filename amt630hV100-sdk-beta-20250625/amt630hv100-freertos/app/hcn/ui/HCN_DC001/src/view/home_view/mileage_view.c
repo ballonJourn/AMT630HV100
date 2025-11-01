@@ -31,7 +31,7 @@ ret_t home_refresh_trip(double trip)
 ret_t home_refresh_odo(double odo) 
 {
     char mileage_value_str[16] = " " ;
-    tk_snprintf(mileage_value_str, sizeof(mileage_value_str) , "%d" ,  (int)(odo / 1000) );
+    tk_snprintf(mileage_value_str, sizeof(mileage_value_str) , "%d" ,  (int)(odo / 1000) );     
     
     if (home_mileage_widget[ODO_LABEL])
     {

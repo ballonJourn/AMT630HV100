@@ -6,14 +6,15 @@
 #include "hcn_selfcheck.h"
 #include "speed_view_logic.h"
 #include "signal_view_logic.h"
+#include "navigation_view_logic.h"
+#include "hcn_global.h"
 #include "view/set_view/set_view_interface.h"
 #include "view/home_view/home_view_interface.h"
 #include "proxy/vehicle_data.h"
-#include "navigation_view_logic.h"
 #include "proxy/vehicle_time.h"
 
-#define REFRESH_INTERVAL_33_MS   (33)
 #define REFRESH_INTERVAL_50_MS   (50)
+#define REFRESH_INTERVAL_100_MS  (200)
 #define REFRESH_INTERVAL_500_MS  (500)
 #define REFRESH_INTERVAL_1000_MS (1000)
 
@@ -58,14 +59,6 @@ ret_t home_view_init(widget_t * win)
     home_phone_view_init  (win) ;
     home_info_view_init   (win) ;
 
-    // 设置语言
-
-    // 设置时间 
-
-    // 设置亮度
-
-    // 设置里程程息 、 剩余里程 、 档位 、驾驶模式
-
     // 自检
     selfcheck_init();
 
@@ -80,7 +73,7 @@ ret_t home_view_init(widget_t * win)
     home_refresh_phone_num("0737 1548254");
 
     //手机通话页面
-    //home_refresh_phone_view(PHONE_CONNECT)  ;
+    home_refresh_phone_view(PHONE_NO_CONNECT)  ;
 
     time_start =  time_now_s() ;
     return RET_OK ;
@@ -89,6 +82,7 @@ ret_t home_view_init(widget_t * win)
 ret_t home_timer_init()
 {
     timer_array[REFRESH_TIMER_50_MS]  = timer_add( timer_refresh_50_ms ,  NULL , REFRESH_INTERVAL_50_MS ) ;
+    timer_array[REFRESH_TIMER_100_MS] = timer_add( global_data_init    ,  NULL , REFRESH_INTERVAL_100_MS) ;
     timer_array[REFRESH_TIMER_500_MS] = timer_add( timer_refresh_500_ms , NULL , REFRESH_INTERVAL_500_MS) ;
 
     return RET_OK ;
