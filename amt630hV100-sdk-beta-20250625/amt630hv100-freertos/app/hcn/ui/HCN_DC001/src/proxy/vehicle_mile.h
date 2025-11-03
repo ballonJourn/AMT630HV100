@@ -1,10 +1,9 @@
 
-#ifndef VEHICLE_ARGUMENT__H
-#define VEHICLE_ARGUMENT__H
+#ifndef VEHICLE_MILE__H
+#define VEHICLE_MILE__H
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "storage_param2/hcn_mile_param.h"
 
 /**
  * @brief  读取usr mile准备状态
@@ -26,6 +25,8 @@ void vehicle_set_mile_tripA(double value) ;
 uint32_t vehicle_get_mile_tripB();
 void vehicle_set_mile_tripB(double value) ;
 
-
+//单次里程
+uint32_t vehicle_get_mile_once();
+void vehicle_set_mile_once(double value) ;
 
 #endif

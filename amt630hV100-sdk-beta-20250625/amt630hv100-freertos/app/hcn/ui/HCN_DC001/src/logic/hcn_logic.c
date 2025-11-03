@@ -12,6 +12,7 @@
 #include "view/home_view/home_view_interface.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/vehicle_time.h"
+#include "proxy/vehicle_mile.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
 #define REFRESH_INTERVAL_100_MS  (200)
@@ -43,6 +44,10 @@ ret_t home_view_init(widget_t * win)
 {
     if(win == NULL) return RET_FAIL ;
 
+    vehicle_set_mile_odo(3000);
+    vehicle_set_mile_tripA(3000);
+
+
     home_animation_init   (win) ; 
     home_clock_view_init  (win) ;  
     home_dock_view_init   (win) ; 
@@ -64,6 +69,7 @@ ret_t home_view_init(widget_t * win)
 
     //添加定时器
     home_timer_init();
+
 
 
     home_refresh_phone_state(CALL_INCOMMING);
@@ -118,12 +124,9 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     //导航
     navigation_view_update();
 
-    // home_refresh_phone_tips(CALL_INCOMMING);
-
-
+    //小窗口时间
     uint64_t interval  = time_now_s() - time_start;
     home_refresh_info_time(interval) ;
-    home_refresh_info_distance(interval) ;
 
     return RET_REPEAT ;
 }
@@ -145,4 +148,26 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
     // electrical_view_update()
 
     return RET_REPEAT ;
+}
+
+
+uint32_t get_timer_ID(timer_type_e timerID)
+{
+    if(timerID < REFRESH_TIMER_NUM_MAX)
+        return timer_array[timerID] ;
+    
+    return RET_OK ;
+}
+
+void clean_timer_ID(timer_type_e timerID)
+{
+    if(timerID < REFRESH_TIMER_NUM_MAX)
+    {
+        if (timer_array[timerID] != 0 && timer_find(timer_array[timerID]) )
+        {
+           timer_remove(timer_array[timerID]) ;
+        }
+    }
+
+    return ;
 }

@@ -9,7 +9,7 @@
 #include "link_view/link_page_key.h"
 #include "proxy/vehicle_time.h"
 #include "logic/hcn_selfcheck.h"
-
+#include "logic/mileage_calc.h"
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
 #endif
@@ -129,6 +129,23 @@ ret_t on_idle_queue(const idle_info_t* idle)
 static void hcn_key_cb(uint8_t id) 
 {
     idle_queue(on_idle_queue ,(void*)id) ;
+
+    //测试 里程开始按钮
+    #if 1
+    static bool odo_cale = false ;
+    if (odo_cale == false)
+    {
+        mileage_calc_init();
+        odo_cale = true ;
+    }
+    if (id == SET_KEY_LONG_PR)
+    {
+        mileage_clear_odo();
+        printf("clean odo\n");
+        /* code */
+    }
+    #endif
+
     printf("idle_add \n") ;
     return ;
 }

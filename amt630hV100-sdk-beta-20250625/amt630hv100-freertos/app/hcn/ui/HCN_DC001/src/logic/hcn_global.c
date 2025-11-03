@@ -4,6 +4,7 @@
 #include "proxy/vehicle_argument.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/vehicle_mile.h"
+#include "hcn_logic.h"
 
 static const char* country_language_str[LANGUAGE_OPTION_MAX] = {
     "zh_CN" , "en_US" 
@@ -19,17 +20,8 @@ ret_t global_refresh_unit(uint8_t unit)
     home_refresh_speed(value) ;
     home_refresh_unit(unit);
 
-
     // 里程
-    uint32_t u32_odo   = vehicle_get_mile_odo();
-    uint32_t u32_tripA = vehicle_get_mile_tripA();
-    if (MPH == vehicle_get_param_unit())
-    {
-        u32_odo   *= KM_CONVERT_MILE ; 
-        u32_tripA *= KM_CONVERT_MILE ;
-    }
-    home_refresh_odo ((double)u32_odo) ;
-    home_refresh_trip((double)u32_tripA) ;
+    global_refresh_mileage();
     home_refresh_mileage_unit(unit) ;
 
     //电量
@@ -37,7 +29,10 @@ ret_t global_refresh_unit(uint8_t unit)
     home_refresh_electrical_unit(unit);
 
     //info窗口 参数需改
-    home_refresh_info_distance(0);
+    // uint32_t u32_vlaue =  vehicle_get_mile_once();
+    // if (MPH == vehicle_get_param_unit())
+    //         u32_vlaue *= KM_CONVERT_MILE ; 
+    // home_refresh_info_distance(u32_vlaue);
 
 
     return RET_OK ;
@@ -85,25 +80,50 @@ ret_t global_data_init(const timer_info_t *info)
         
         is_init_usr_param = true ; 
 
-        printf("vehicle_get_param_recovery successed %s : %d\n" ,__FILE__ , __LINE__);
+        printf("vehicle_get_param_recovery successed %s : %d\n" ,__FUNCTION__ , __LINE__);
     }
 
-    
-    if (!is_init_mile_param  && (true == vehicle_get_mile_recovery()))
+
+    if (!is_init_mile_param  && (true == vehicle_get_mile_recovery()) )
     {
+        // 里程
+        global_refresh_mileage();
 
         is_init_mile_param = true ;
 
-        printf("vehicle_get_mile_recovery successed %s : %d\n" ,__FILE__ , __LINE__);
+        printf("vehicle_get_mile_recovery successed %s : %d\n" ,__FUNCTION__ , __LINE__);
     }
 
 
     if (is_init_usr_param && is_init_mile_param)
     {
         // info->ctx = 0 ;  //(timerID)
+        // clean_timer_ID(REFRESH_TIMER_100_MS);
         return RET_REMOVE ;
     }
     
     return RET_REPEAT ;
 
+}
+
+
+void global_refresh_mileage()
+{
+    // 里程
+    uint32_t u32_odo   = vehicle_get_mile_odo()  ;
+    uint32_t u32_tripA = vehicle_get_mile_tripA();
+    uint32_t u32_tripB = vehicle_get_mile_tripB();
+    uint32_t u32_once = vehicle_get_mile_once() ;
+    if (MPH == vehicle_get_param_unit())
+    {
+        u32_odo   *= KM_CONVERT_MILE ; 
+        u32_tripA *= KM_CONVERT_MILE ;
+        u32_tripB *= KM_CONVERT_MILE ;
+        u32_once  *= KM_CONVERT_MILE ;
+    }
+    home_refresh_odo ((double)u32_odo) ;
+    home_refresh_trip((double)u32_tripA) ;
+    home_refresh_info_distance(u32_once) ;
+
+    return ;
 }

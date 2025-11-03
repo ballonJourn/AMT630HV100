@@ -14,5 +14,6 @@ ret_t global_refresh_unit(uint8_t value) ;
 
 ret_t global_refresh_language(uint8_t value) ;
 
-// assets_set_global_theme()
+void global_refresh_mileage();
+
 #endif

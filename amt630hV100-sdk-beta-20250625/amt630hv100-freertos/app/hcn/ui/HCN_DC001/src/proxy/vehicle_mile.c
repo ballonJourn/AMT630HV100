@@ -28,7 +28,7 @@ void vehicle_set_mile_odo(double value)
 {
     uint32_t __value = (uint32_t)value ;
 #if !ON_PC_CACLE
-    if (set_hcn_mile_param(HCN_MILE_PARAM_ODO, &__value) )
+    set_hcn_mile_param(HCN_MILE_PARAM_ODO, &__value) ;
 #endif
     return ;
 }
@@ -49,7 +49,7 @@ void vehicle_set_mile_tripA(double value)
 {
     uint32_t __value = (uint32_t)value ;
 #if !ON_PC_CACLE
-    if (set_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &__value) )
+    set_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &__value) ;
 #endif
     return ;
 }
@@ -70,8 +70,20 @@ void vehicle_set_mile_tripB(double value)
 {
     uint32_t __value = (uint32_t)value ;
 #if !ON_PC_CACLE
-    if (set_hcn_mile_param(HCN_MILE_PARAM_TRIP_B, &__value) )
+    set_hcn_mile_param(HCN_MILE_PARAM_TRIP_B, &__value) ;
 #endif
     return ;
 }
 
+//单次里程
+static double mile_once = 0.0 ;
+uint32_t vehicle_get_mile_once()
+{
+    return (uint32_t)mile_once;
+}
+
+void vehicle_set_mile_once(double value) 
+{
+    mile_once = value ;
+    return ;
+}

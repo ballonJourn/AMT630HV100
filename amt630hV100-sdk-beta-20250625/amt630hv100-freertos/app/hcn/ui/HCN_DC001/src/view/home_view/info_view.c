@@ -27,7 +27,7 @@ ret_t home_refresh_info_time(uint64_t total_seconds)
 
     char buff[64]  = { 0 };
 
-    tk_snprintf(buff , sizeof(buff) - 1, "%dH %dmin %ds" , hours , minutes , seconds) ;
+    tk_snprintf(buff , sizeof(buff) - 1, "%dh %dmin %ds" , hours , minutes , seconds) ;
     if (home_info_widget[INFO_TIME])
         widget_set_text_utf8(home_info_widget[INFO_TIME] , buff);
     
@@ -38,7 +38,7 @@ ret_t home_refresh_info_distance(uint32_t distance)
 {
     char buff[16] = {0} ;
 
-    tk_snprintf(buff , sizeof(buff) - 1, "%d %s" , distance , vehicle_get_param_unit() ? "mile" : "km" ) ;
+    tk_snprintf(buff , sizeof(buff) - 1, "%d %s" , (distance / 1000 ) , vehicle_get_param_unit() ? "mile" : "km" ) ;
     if (home_info_widget[INFO_DISTANCE])
         widget_set_text_utf8(home_info_widget[INFO_DISTANCE] , buff);
 
