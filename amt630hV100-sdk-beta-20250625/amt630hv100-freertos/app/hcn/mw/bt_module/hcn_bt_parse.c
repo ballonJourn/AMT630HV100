@@ -184,7 +184,7 @@ static void clean_bt_phone_book(void) {
         }
 
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_COUNT, 
+            get_hcn_callback()->onHcnBtChange(BT_BOOK_COUNT, 
                                     (uint32_t)g_bt_data.btBookCount);
         }
     }
@@ -234,7 +234,7 @@ static void on_bt_dev_state_change(const char *state_str) {
     g_bt_data.btDevState = dev_state;
 
     if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_DEV_STATE, 
+            get_hcn_callback()->onHcnBtChange(BT_DEVICE_STATE, 
                                     g_bt_data.btDevState);
     }
 
@@ -274,7 +274,7 @@ static void on_phone_book_proc(char (*data)[TEXT_PARAM_LEN], int param_count) {
     if (param_count > 1 && g_bt_data.btConnected) {
         if (strcmp(data[0], "E") == 0) {
             if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_COUNT, 
+                get_hcn_callback()->onHcnBtChange(BT_BOOK_COUNT, 
                                         (uint32_t)g_bt_data.btBookCount);
             }
             hcn_log_info("\r\n bt phone book num:%d\r\n", g_bt_data.btBookCount);
@@ -308,7 +308,7 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
         g_bt_data.btConnected = bt_connect;
 
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_CONNECTED_STATUS, 
+            get_hcn_callback()->onHcnBtChange(BT_CONNHCNTED_CHANGE, 
                                     (uint32_t)g_bt_data.btConnected);
         }
 
@@ -342,7 +342,7 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
         }
 
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_CALL_STATE, 
+            get_hcn_callback()->onHcnBtChange(BT_CALL_STATE, 
                                     g_bt_call.btHfpState);
         }
     }
@@ -443,7 +443,7 @@ static void on_bt_str_parse(char *at_str) {
         hcn_log_info("\r\nbt switch state:%d\r\n", g_bt_data.btSwitchState);
 
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_SWITCH_STATUS, 
+            get_hcn_callback()->onHcnBtChange(BT_SWTICH_CHANGE, 
                                     (uint32_t) g_bt_data.btSwitchState);
         }
     } else if (strstr(cmd_str, "+DEVSTAT")) {
@@ -460,7 +460,7 @@ static void on_bt_str_parse(char *at_str) {
         if (signal >= 0 && signal <= 5 && g_bt_data.btSignal != signal) {
             g_bt_data.btSignal = signal;
             if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONE_SIGNAL, 
+                get_hcn_callback()->onHcnBtChange(BT_SIGNAL_CHANGE, 
                                         (uint8_t)g_bt_data.btSignal);
             }       
         }
@@ -471,7 +471,7 @@ static void on_bt_str_parse(char *at_str) {
             g_bt_data.btBatteryLevel = battery; 
 
             if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONE_BATTERY, 
+                get_hcn_callback()->onHcnBtChange(BT_BATTERY_CHANGE, 
                                         (uint8_t)g_bt_data.btBatteryLevel);
             }          
         }
@@ -484,7 +484,7 @@ static void on_bt_str_parse(char *at_str) {
     } else if (strstr(cmd_str, "+PBSTAT")) {
         g_bt_data.btPbState = (uint8_t)atoi(prama_data);
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_STATE, 
+            get_hcn_callback()->onHcnBtChange(BT_BOOK_STATE, 
                                     (uint8_t) g_bt_data.btPbState);
         }  
     } else if (strstr(cmd_str, "+PLAYSTAT")) {
