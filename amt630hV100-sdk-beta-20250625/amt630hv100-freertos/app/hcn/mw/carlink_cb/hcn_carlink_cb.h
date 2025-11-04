@@ -136,8 +136,8 @@ typedef struct {
     bt_music_play_state_e play_state;       ///< 音乐播放模式
     bt_music_play_mode_e play_mode;         ///< 音乐播放模式
     bt_music_play_info_t music;              ///< 音乐信息
-    char title[TEXT_PARAM_LEN];             ///< 歌曲标题
-    char artist[TEXT_PARAM_LEN];            ///< 艺术家
+    char lyrics[TEXT_PARAM_LEN];             ///< 歌曲歌词
+    char artist[TEXT_PARAM_LEN];            ///< 艺术家/歌曲名
     char album[TEXT_PARAM_LEN];             ///< 专辑名
 } bt_music_info_t;
 
