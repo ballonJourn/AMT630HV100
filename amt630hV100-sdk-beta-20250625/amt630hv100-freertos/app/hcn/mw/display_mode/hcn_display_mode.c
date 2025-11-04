@@ -18,6 +18,7 @@
 #include "storage_param1/hcn_usr_param.h"
 #include "vehicle_param/vehicle_param.h"
 #include "light_sensor/hcn_light_sensor.h"
+#include "backlight/hcn_backlight.h"
 #include "log/hcn_log.h"
 
 #ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
@@ -40,11 +41,32 @@ static uint16_t lg_value[LIGHT_SENSOR_ARR_SIZE];
 
 static void light_sensor_ref_init(void) {
     lg_ref[0] = 4060;
-    lg_ref[1] = 3900;
-    lg_ref[2] = 3000;
-    lg_ref[3] = 2000;
-    lg_ref[4] = 1500;
-    lg_ref[5] = 300;
+    lg_ref[1] = 2400;
+    lg_ref[2] = 1500;
+    lg_ref[3] = 700;
+    lg_ref[4] = 100;
+    lg_ref[5] = 0;
+}
+
+static void check_auto_backlight_level(void) {
+    static uint8_t cur_level = 0;
+    
+    if (!get_recovery_usr_param()) {
+        return;
+    }
+
+    if (!get_hcn_usr_param(HCN_PARAM_BRIGHTNESS_LEVEL, &cur_level)) {
+        hcn_log_error("Get usr param backlight failed!\r\n");
+        return;
+    }
+
+    if (cur_level == BACKLIGHT_LEVEL_AUTO) {
+        if (display.sensor_level > 1 && cur_level != BACKLIGHT_LEVEL_4) {
+            set_backlight_level(BACKLIGHT_LEVEL_4);
+        } else if (display.sensor_level <= 1 && cur_level != BACKLIGHT_LEVEL_1) {
+            set_backlight_level(BACKLIGHT_LEVEL_1);
+        }
+    }
 }
 
 static void check_display_mode(void) {
@@ -114,8 +136,8 @@ static void check_sensor_level(void) {
             }
         }
     }
-
     check_display_mode();
+    check_auto_backlight_level();
 }
 
 static void check_light_sensor(void) {
