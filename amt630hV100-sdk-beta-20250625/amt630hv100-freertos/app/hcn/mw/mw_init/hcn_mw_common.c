@@ -20,6 +20,9 @@
 #include "mw_init/hcn_mw_init.h"    
 #include "log/hcn_log.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
+#include "dashboard_state/hcn_dev_state.h"
+#include "backlight/hcn_backlight.h"
+#include "storage_param1/hcn_usr_param.h"
 
 #define VEHICLE_THREAD_PERIOD  pdMS_TO_TICKS(100)
 
@@ -53,6 +56,42 @@ SystemTime_t get_os_date_time(void) {
     return sys_time;
 #endif
 }
+
+#if 0
+static void test_backlight(void) {
+    if (get_check_self_state() >= CHECK_SELF_STATE_SUCCESS) {
+        static uint8_t backlight_level = 5;
+        static bool is_end = false;
+        if (backlight_level >= 2 && (!is_end)) {
+            backlight_level--;
+            if (backlight_level == 1) {
+                is_end = true;
+            }
+            set_backlight_level(backlight_level);
+            return;
+        }
+
+        if (backlight_level <= 4 && is_end) { 
+            backlight_level++;
+            if (backlight_level == 5) {
+                is_end = false;
+            }
+        }
+        set_backlight_level(backlight_level);
+    }
+}
+
+static void test_display_mode(void) {
+    if (get_check_self_state() >= CHECK_SELF_STATE_SUCCESS) {
+        static bool is_first_set = true;
+        uint8_t display_mode = 2;
+        if (is_first_set) {
+            is_first_set = false;
+            set_hcn_usr_param(HCN_PARAM_THEME, &display_mode);
+        }
+    }
+}
+#endif
 
 static void common_io_thread(void *param) {
     light_gpio_init(VEHICLE_THREAD_PERIOD);

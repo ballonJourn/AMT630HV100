@@ -23,6 +23,9 @@
 #include "log/hcn_log.h"
 #include "config/hcn_config.h"
 #include "carlink_cb/hcn_carlink_cb.h"
+#include "carlink_cb/hcn_carlink_provide.h"
+#include "vehicle_param/vehicle_param.h"
+#include "board.h"
 
 //#define BT_STR_DEBUG 
 #define DOWNLOAD_TIMER_PERIOD_MS   (3000)
@@ -33,7 +36,9 @@ static bt_phone_book_t *bt_phonebook = NULL;
 
 static bt_data_t g_bt_data = {0};
 static bt_call_t g_bt_call = {0};
+static bt_music_info_t music_info = {0};
 
+static char g_bt_version[32] = {0};
 static int g_pb_count = 0;
 static uint32_t last_switch_tick = 0;
 
@@ -109,13 +114,63 @@ const bt_data_t* hcn_bt_get_data() {
     return &g_bt_data;
 }
 
+const bt_music_info_t* hcn_bt_get_music_data() {
+    return &music_info;
+}
+
+void hcn_send_music_cmd(bt_music_cmd_e cmd) {
+    if (g_bt_data.btConnected == 0) {
+        return;
+    }
+
+    switch (cmd) {
+        case BT_MUSIC_CMD_PLAYPAUSE:
+            bt_send_cmd("AT+PLAYPAUSE");
+            break;
+        case BT_MUSIC_CMD_PLAY:
+            bt_send_cmd("AT+PLAY");
+            break;
+
+        case BT_MUSIC_CMD_PAUSE:
+            bt_send_cmd("AT+PAUSE");
+            break;
+
+        case BT_MUSIC_CMD_STOP:
+            bt_send_cmd("AT+STOP");
+            break;
+
+        case BT_MUSIC_CMD_FORWARD:
+            bt_send_cmd("AT+FORWARD");
+            break;
+
+        case BT_MUSIC_CMD_BACKWARD:
+            bt_send_cmd("AT+BACKWARD");
+            break;
+
+        case BT_MUSIC_CMD_REPEAT:
+            bt_send_cmd("AT+REPEAT");
+            break;
+
+        default:
+            break;
+    }
+  
+}
+
 const char* hcn_bt_get_name() {
+    static char name[32] = {0};
+
     extern bool carlink_ble_mac_addr_is_ready();
     if (carlink_ble_mac_addr_is_ready()) {
         return g_bt_data.btDevName;
     } else {
-        return "HCN-NONE";
+        snprintf(name, sizeof(name), "%s-NONE", HCN_CUSTOMER_NAME);
+        return name;
     }
+}
+
+const char *hcn_get_bt_version(void) {
+    return g_bt_version;
 }
 
 static void clean_bt_phone_book(void) {
@@ -126,6 +181,11 @@ static void clean_bt_phone_book(void) {
         if (bt_phonebook) {
             vPortFree(bt_phonebook);
             bt_phonebook = NULL;
+        }
+
+        if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_COUNT, 
+                                    (uint32_t)g_bt_data.btBookCount);
         }
     }
 }
@@ -172,6 +232,12 @@ static void on_bt_dev_state_change(const char *state_str) {
 
     int dev_state = atoi(state_str);
     g_bt_data.btDevState = dev_state;
+
+    if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_DEV_STATE, 
+                                    g_bt_data.btDevState);
+    }
+
     hcn_log_info("bt device state change:%d\r\n", dev_state);
 }
 
@@ -195,9 +261,8 @@ static void on_phone_book_num(int count) {
         bt_phonebook = pvPortMalloc(sizeof(bt_phone_book_t)*g_pb_count);
         if (bt_phonebook == NULL) {
             hcn_log_error("\r\npvPortMalloc phone book num failed!\r\n");
+            return;
         }
-
-        return;
     }
 
     if (bt_phonebook) {
@@ -208,6 +273,10 @@ static void on_phone_book_num(int count) {
 static void on_phone_book_proc(char (*data)[TEXT_PARAM_LEN], int param_count) {
     if (param_count > 1 && g_bt_data.btConnected) {
         if (strcmp(data[0], "E") == 0) {
+            if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_COUNT, 
+                                        (uint32_t)g_bt_data.btBookCount);
+            }
             hcn_log_info("\r\n bt phone book num:%d\r\n", g_bt_data.btBookCount);
             return;
         }
@@ -229,16 +298,19 @@ static void on_phone_book_proc(char (*data)[TEXT_PARAM_LEN], int param_count) {
 
 static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN], 
                                 uint16_t param_count) {
-    ///< +HFPSTAT= 4,10086
-    hfp_state_e hfp_state =  UNSUPPORTED;
-    if (param_count > 0) {
-        hfp_state = (hfp_state_e)atoi(state[0]);
-        hcn_log_info("\r\nhfp state is = %d\r\n", hfp_state);
-    } 
+    ///< +HFPSTAT= 设备地址,4,10086
+    hfp_state_e hfp_state =  param_count > 1 ? atoi(state[1]) : atoi(state[0]);
+
+    hcn_log_info("\r\nhfp state is = %d\r\n", hfp_state);
 
     uint8_t bt_connect = hfp_state >= CONNECTED ? 1 : 0;
     if (bt_connect != g_bt_data.btConnected) {
         g_bt_data.btConnected = bt_connect;
+
+        if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_CONNECTED_STATUS, 
+                                    (uint32_t)g_bt_data.btConnected);
+        }
 
         if (bt_connect) {
             ///< 蓝牙连接成功以后，开始下载电话本
@@ -258,18 +330,78 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
         }
 
         ///< 过滤掉微信电话状态，防止电话信息显示在主界面
-        if (!strstr(state[1], "000000")) {
+        if (!strstr(state[2], "000000")) {
             g_bt_call.btHfpState = hfp_state;
-            if (param_count > 2) {
+            if (param_count > 3) {
                 ///< 三方通话，解析电话号码
                 find_name_contact(state[1], state[2]);
-            } else if (param_count > 1) {
+            } else if (param_count > 2) {
                 ///< 通话，解析号码
-                find_name_contact(state[1], NULL);
+                find_name_contact(state[2], NULL);
             }
+        }
+
+        if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_CALL_STATE, 
+                                    g_bt_call.btHfpState);
         }
     }
 } 
+
+static void on_cur_music_play_state(char *param_str) {
+    if (param_str) {
+        char* token;
+        int numbers[3] = {0};
+        int count = 0;
+        
+        ///< 使用strtok分割字符串
+        token = strtok(param_str, ",");
+        while (token != NULL && count < 3) {
+            numbers[count++] = atoi(token);
+            token = strtok(NULL, ",");
+        }
+
+        music_info.music.cur_track_state = numbers[0];
+        music_info.music.cur_time_music_play = (uint16_t)numbers[1];
+        music_info.music.music_total_time = (uint16_t)numbers[2];
+        hcn_log_info("cur music info, state:%d, cur times = %d, total time = %d\r\n", music_info.music.cur_track_state,
+        music_info.music.cur_time_music_play, music_info.music.music_total_time);
+    }
+}
+
+static void on_music_play_mode(char *param_str) {
+    if (param_str) {
+        char* token;
+        int numbers[2] = {0};
+        int count = 0;
+        
+        ///< 使用strtok分割字符串
+        token = strtok(param_str, ",");
+        while (token != NULL && count < 2) {
+            numbers[count++] = atoi(token);
+            token = strtok(NULL, ",");
+        }
+
+        hcn_log_info("repeat_mode:%d; single_repeat_mode:%d\r\n", numbers[0], numbers[1]);
+    }
+}
+
+static void on_music_tracks_info(char (*state)[TEXT_PARAM_LEN], 
+                                uint16_t param_count) {
+    
+     if (state && param_count > 2) {
+        memset(music_info.title, 0, sizeof(music_info.title));
+        memset(music_info.artist, 0, sizeof(music_info.artist));
+        memset(music_info.album, 0, sizeof(music_info.album));
+
+        snprintf(music_info.title, 
+                sizeof(music_info.title), "%s", state[0]);
+        snprintf(music_info.artist, 
+                sizeof(music_info.artist), "%s", state[1]);    
+        snprintf(music_info.album, 
+                sizeof(music_info.album), "%s", state[2]);     
+     }                               
+}
 
 static void on_bt_str_parse(char *at_str) {
     if (at_str == NULL) {
@@ -299,18 +431,18 @@ static void on_bt_str_parse(char *at_str) {
         return;
     }
 
-    //printf("\r\npos:%d, cmd_str:%s, prama_data:%s\r\n", pos, cmd_str, prama_data);
+#if 0
+    printf("\r\npos:%d, cmd_str:%s, prama_data:%s\r\n", pos, cmd_str, prama_data);
+#endif
 
-    if (strstr(cmd_str, "+IND_PAGE")) {
+    if (strstr(cmd_str, "+PAGE")) {
         g_bt_data.btSwitchState = (uint8_t)atoi(prama_data);
-        static bool is_first = true;
         hcn_log_info("\r\nbt switch state:%d\r\n", g_bt_data.btSwitchState);
-        ///< 默认开启蓝牙，进行测试
-        if (is_first) {
-            is_first = false;
-            hcn_log_info("Switch bt open!\r\n");
-            bt_send_cmd("AT+PAGE=1");
-        } 
+
+        if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_SWITCH_STATUS, 
+                                    (uint32_t) g_bt_data.btSwitchState);
+        }
     } else if (strstr(cmd_str, "+DEVSTAT")) {
         on_bt_dev_state_change(prama_data);
     } else if (strstr(cmd_str, "+PBCNT")) {
@@ -324,12 +456,21 @@ static void on_bt_str_parse(char *at_str) {
         int signal =  atoi(prama_data);
         if (signal >= 0 && signal <= 5 && g_bt_data.btSignal != signal) {
             g_bt_data.btSignal = signal;
+            if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONE_SIGNAL, 
+                                        (uint8_t)g_bt_data.btSignal);
+            }       
         }
     } else if (strstr(cmd_str, "+HFPBATT")) {
         int battery = atoi(prama_data);
         if (battery >= 0 && battery <= 5 && 
             g_bt_data.btBatteryLevel != battery) {
-            g_bt_data.btBatteryLevel = battery;    
+            g_bt_data.btBatteryLevel = battery; 
+
+            if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+                get_hcn_callback()->onHcnBtChange(VEH_BT_PHONE_BATTERY, 
+                                        (uint8_t)g_bt_data.btBatteryLevel);
+            }          
         }
     } else if (strstr(cmd_str, "+HFPIBR")) {
         g_bt_data.btHfpIBR = (uint8_t)atoi(prama_data);
@@ -339,6 +480,27 @@ static void on_bt_str_parse(char *at_str) {
         g_bt_data.btA2dpState = (uint8_t)atoi(prama_data);
     } else if (strstr(cmd_str, "+PBSTAT")) {
         g_bt_data.btPbState = (uint8_t)atoi(prama_data);
+        if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+            get_hcn_callback()->onHcnBtChange(VEH_BT_PHONEBOOK_STATE, 
+                                    (uint8_t) g_bt_data.btPbState);
+        }  
+    } else if (strstr(cmd_str, "+PLAYSTAT")) {
+        music_info.play_state = atoi(prama_data);
+        hcn_log_info("\r\naudio paly state:%d\r\n", music_info.play_state);
+        if (music_info.play_state == BT_MUSIC_PLAY_STATE_PLAYING) {
+            hcn_log_info("Music start play....\r\n");
+            vTaskDelay(pdMS_TO_TICKS(5));
+            aw_pa_start();
+        } else if (music_info.play_state == \
+                    BT_MUSIC_PLAY_STATE_PAUSED) {
+            vTaskDelay(pdMS_TO_TICKS(5));
+            hcn_log_info("Music stop play....\r\n");
+            aw_pa_stop();
+        }
+    }  else if (strstr(cmd_str, "+TRACKSTAT")) {
+        on_cur_music_play_state(prama_data);
+    } else if (strstr(cmd_str, "+PLAYMODE")) {
+        on_music_play_mode(prama_data);
     } else {
         char param_array[UART_BT_PARAM_NUMBER][TEXT_PARAM_LEN] = {0};
         char delimit[2] = {0xFF, '\0'};
@@ -348,6 +510,10 @@ static void on_bt_str_parse(char *at_str) {
         if (strstr(cmd_str, "+HFPSTAT")) {
             on_bt_hfp_state_proc(param_array, param_count);
         } else if (strstr(cmd_str, "+VER")) {
+            if (param_count == 1) {
+                memset(g_bt_version, 0, sizeof(g_bt_version));
+                snprintf(g_bt_version, sizeof(g_bt_version), "%s", param_array[0]);
+            }
             bt_send_cmd("AT+ADDR");
         } else if (strstr(cmd_str, "+NAME")) {
             static bool is_firsend = true;
@@ -373,8 +539,10 @@ static void on_bt_str_parse(char *at_str) {
             memcpy(g_bt_data.btConnectDevName, param_array[1], \
                 strlen(param_array[1]) < BT_CONNECT_DEV_NAME_LEN ? \
                 strlen(param_array[1]) : BT_CONNECT_DEV_NAME_LEN);
-        }
-    }
+        } else if (strstr(cmd_str, "+TRACKINFO")) {
+            on_music_tracks_info(param_array, param_count);
+        } 
+     }
 }
 
 static void bt_msg_parse_task(void *param) {

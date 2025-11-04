@@ -205,6 +205,58 @@ static void onHcnPhoneModel(const char * phoneInfo) {
     }
 }
 
+static void onHcnBtChange(bt_device_id_e id, uint32_t value) {
+    switch (id) {
+        case BT_BATTERY_CHANGE:
+            vehicle_set_data(VEH_BT_PHONE_BATTERY, (int)value);
+            break;
+
+        case BT_SIGNAL_CHANGE:
+            vehicle_set_data(VEH_BT_PHONE_SIGNAL, (int)value);
+            break;     
+
+        case BT_CONNHCNTED_CHANGE:
+            vehicle_set_data(VEH_BT_CONNECTED_STATUS, (int)value);
+            break;
+
+        case BT_SWTICH_CHANGE:{
+                static bool is_first_switch = true;
+                if (is_first_switch) {
+                    uint8_t bt_swith = 0;
+                    get_hcn_usr_param(HCN_PARAM_BT_SWITCH, &bt_swith);
+                    if ((uint8_t)value != bt_swith) {
+                        hcn_bt_switch_state((bool)bt_swith);
+                        hcn_log_info("Fisrt switch bt state:%d\r\n", bt_swith);
+                    }
+                    is_first_switch = false;
+                }
+                uint8_t data_tmp = (uint8_t)value;
+                vehicle_set_data(VEH_BT_SWITCH_STATUS, (int)value);
+                set_hcn_usr_param(HCN_PARAM_BT_SWITCH, &data_tmp);
+            }
+            break;
+
+        case BT_BOOK_COUNT: 
+            vehicle_set_data(VEH_BT_PHONEBOOK_COUNT, (int)value);
+            break;
+
+        case BT_BOOK_STATE:
+            vehicle_set_data(VEH_BT_PHONEBOOK_STATE, (int)value);
+            break;
+
+        case BT_CALL_STATE:
+            vehicle_set_data(VEH_BT_CALL_STATE, (int)value);
+            break;
+
+        case BT_DEVICE_STATE:
+            vehicle_set_data(VEH_BT_DEV_STATE, (int)value);
+            break;    
+
+        default:
+            break;    
+    }
+}
+
 static IhcnCallBack *register_hcn_callback(void) {
     IhcnCallBack *callback = (IhcnCallBack*)malloc(sizeof(IhcnCallBack));
     memset(callback, 0, sizeof(IhcnCallBack));
@@ -219,7 +271,8 @@ static IhcnCallBack *register_hcn_callback(void) {
     callback->onHcnPhoneAppHUDRoadJunctionPicture = \
                 onHcnPhoneAppHUDRoadJunctionPicture;
     callback->onHcnPhoneModel = onHcnPhoneModel;
-    
+    callback->onHcnBtChange = onHcnBtChange;
+
     return callback;
 }
 

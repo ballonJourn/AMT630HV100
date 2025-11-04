@@ -661,6 +661,7 @@ static void ec_ble_data_read(void* ctx, const void* buf, int len)
 void* initECTiny(void* param)
 {
     char uuid[32] = {0};
+    char real_uuid[32] = {0};
 	const char *bt_mac = carlink_get_bt_mac();
 
 	if (NULL == bt_mac) {
@@ -686,14 +687,17 @@ void* initECTiny(void* param)
 	sprintf(qr_info.pwd, "%s", carlink_get_wifi_passwd());
 	sprintf(qr_info.auth, "WPA-PSK");
 
+    memset(real_uuid, 0, sizeof(real_uuid));
+    snprintf(real_uuid, sizeof(real_uuid), "%s%s", HCN_CUSTOMER_NAME, bt_mac);
 #ifdef HCN_CARLINK_PROTOTYPE_MODE
     memset(uuid, 0, sizeof(uuid));
     hcn_log_info("use prototype mode uuid:%s\r\n", HCN_CHINESE_UUID);
     snprintf(uuid, sizeof(uuid), "%s", HCN_CHINESE_UUID);
 #else
-    sprintf(uuid, "%s%s", HCN_CUSTOMER_NAME, bt_mac);
+    memcpy(uuid, real_uuid, strlen(real_uuid));
 	printf("carbit  uuid :%s\r\n", uuid);
 #endif
+    hcn_update_carlink_uuid(real_uuid);
 
 	//EC_setBaseConfig(mECTinyCfg, uuid, "V0.0.1", "B:/");  //"CARBIT00000001"
     EC_setBaseConfig(mECTinyCfg, uuid, ECSDK_VERSION, "B:/");
@@ -783,8 +787,8 @@ void* initECTiny(void* param)
     
 
     printf("------ initECTiny end ------\n");
-    printf("carbit  uuid :%s\r\n", uuid);
-    printf("carbit  uuid :%s\r\n", uuid);
+    printf("carbit  real uuid :%s\r\n", real_uuid);
+    printf("carbit  use uuid :%s\r\n", uuid);
 	const char *UrlData = EC_generateQRCodeUrl(&qr_info);
 	printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
 
@@ -795,6 +799,7 @@ void* initECTiny(void* param)
 #ifdef AWTK
 	set_qr_text_buf(UrlData);
 #endif
+    hcn_update_carlink_uuid(UrlData);     
 
     return NULL;
 }

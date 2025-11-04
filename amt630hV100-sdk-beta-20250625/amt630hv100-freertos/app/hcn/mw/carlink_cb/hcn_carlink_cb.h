@@ -27,7 +27,7 @@ extern "C" {
 
 #define BT_PHONE_BOOK_MAX_NUM   (1000)  ///< 电话本最大下载数目
 #define BT_SCAN_DEVICE_COUNT    (10)    ///< 蓝牙设备最大扫描数目
-#define TEXT_PARAM_LEN      	(31)    ///< 字符串数据最大长度
+#define TEXT_PARAM_LEN      	(128)    ///< 字符串数据最大长度
 #define BT_CONNECT_DEV_NAME_LEN (64)    ///< 蓝牙连接的设备名称长度
 
 typedef enum {
@@ -86,6 +86,61 @@ typedef enum {
     STATE_STREAMING
 } bt_state_e;
 
+/**
+ * @brief 音乐播放状态枚举
+ */
+enum bt_music_play_state_e {
+    BT_MUSIC_PLAY_STATE_STOPED,         ///< 停止状态
+    BT_MUSIC_PLAY_STATE_PLAYING,        ///< 播放中
+    BT_MUSIC_PLAY_STATE_PAUSED,         ///< 暂停状态
+    BT_MUSIC_PLAY_STATE_FAST_FORWARDING, ///< 快进中
+    BT_MUSIC_PLAY_STATE_FAST_REWINDING   ///< 快退中
+};
+
+typedef enum bt_music_play_state_e bt_music_play_state_e;
+
+/**
+ * @brief 音乐播放模式枚举
+ */
+typedef enum {
+    BT_MUSIC_PLAY_MODE_OFF,          ///< 关闭重复
+    BT_MUSIC_PLAY_MODE_SINGLE_TRACK,  ///< 单曲循环
+    BT_MUSIC_PLAY_MODE_PAUSED,        ///< 暂停状态
+    BT_MUSIC_PLAY_MODE_ALL_TRACKS,    ///< 全部循环
+    BT_MUSIC_PLAY_MODE_GROUP          ///< 分组循环
+} bt_music_play_mode_e;
+
+/**
+ * @brief 蓝牙音乐控制命令枚举
+ */
+typedef enum {
+  BT_MUSIC_CMD_PLAYPAUSE,  ///< 播放/暂停
+  BT_MUSIC_CMD_PLAY,       ///< 播放
+  BT_MUSIC_CMD_PAUSE,      ///< 暂停
+  BT_MUSIC_CMD_STOP,       ///< 停止
+  BT_MUSIC_CMD_FORWARD,    ///< 下一曲
+  BT_MUSIC_CMD_BACKWARD,   ///< 上一曲
+  BT_MUSIC_CMD_REPEAT      ///< 重复模式
+} bt_music_cmd_e;
+
+typedef struct {
+    bt_music_play_state_e cur_track_state; ///< 当前曲目状态
+    uint16_t cur_time_music_play;          ///< 当前音乐播放的时间 （秒）
+    uint16_t music_total_time;             ///< 当前音乐总时间   （秒）
+} bt_music_play_info_t;
+
+/**
+ * @brief 蓝牙音乐信息结构体
+ */
+typedef struct {
+    bt_music_play_state_e play_state;       ///< 音乐播放模式
+    bt_music_play_mode_e play_mode;         ///< 音乐播放模式
+    bt_music_play_info_t music;              ///< 音乐信息
+    char title[TEXT_PARAM_LEN];             ///< 歌曲标题
+    char artist[TEXT_PARAM_LEN];            ///< 艺术家
+    char album[TEXT_PARAM_LEN];             ///< 专辑名
+} bt_music_info_t;
+
 typedef struct {
     hfp_state_e btHfpState;    ///< 判断设备是否连接 >=3 代表已经连接
     char btCallNumber1[TEXT_PARAM_LEN];      ///< 通话号码
@@ -108,8 +163,8 @@ typedef struct {
     uint16_t btBookCount;           ///< 通讯录数量
     char btDevName[TEXT_PARAM_LEN]; ///< 蓝牙设备名称
     char btDevPin[TEXT_PARAM_LEN];  ///< 设备配对密码
-    char btHfpAddr[TEXT_PARAM_LEN];
-    char btConnectDevName[BT_CONNECT_DEV_NAME_LEN]; ///< 蓝牙连接设备的名称
+    char btHfpAddr[TEXT_PARAM_LEN]; ///< 连接设备的蓝牙MAC地址，去除了:分割
+    char btConnectDevName[BT_CONNECT_DEV_NAME_LEN]; ///< 蓝牙连接设备的名称,
 } bt_data_t;
 
 typedef struct {
@@ -361,9 +416,7 @@ typedef struct {
 
 	void (*onHcnLinkConnect)(void);
 
-	void (*onHcnBt121Change)(bt_device_id_e id, uint32_t value);
-
-	void (*onHcnBtCallStatus)(bt_call_t * btCall);
+	void (*onHcnBtChange)(bt_device_id_e id, uint32_t value);
 
     void (*onHcnWeatherReceived)(const char *weather_json);
 
@@ -405,9 +458,9 @@ typedef struct {
 int32_t hcn_ec_loadNightModeStatus(uint32_t isNightModeOn); ///< 切换亿联的白天黑夜模式
 int32_t hcn_ec_startMirror();                       ///< 开始镜像
 void    hcn_ec_stopMirror();                        ///< 停止镜像
-const char* hcn_ec_get_Version();                   ///< 获取亿联SDK版本
-const char* hcn_ec_getQRCodeUrl();                  ///< 获取亿联连接的二维码
-const char* hcn_ec_getUuid();	                    ///< 获取UUID
+const char* hcn_ec_get_version();                   ///< 获取亿联SDK版本
+const char* hcn_ec_get_qr_code_url();                  ///< 获取亿联连接的二维码
+const char* hcn_ec_get_uuid();	                    ///< 获取UUID
 
 ///< 蓝牙api
 void hcn_bt_switch_state(bool on);     				///< 打开或关闭手机蓝牙  
@@ -418,10 +471,15 @@ bool hcn_bt_is_Call();                   		    ///< 当前是否在通话
 
 const bt_call_t* hcn_bt_get_call();           ///< 获取通话数据
 const bt_data_t* hcn_bt_get_data();           ///< 获取数据
+const char *hcn_get_bt_version(void);         ///< 获取蓝牙库版本
 const char* hcn_bt_get_name();                 ///< 获取蓝牙名称
 const char* hcn_bt_get_mac_addr();
 const char* hcn_bt_get_ble_name();
 const char* hcn_bt_get_ble_mac_addr();
+
+///< 蓝牙音乐
+const bt_music_info_t* hcn_bt_get_music_data();   ///< 获取蓝牙音乐相关信息
+void hcn_send_music_cmd(bt_music_cmd_e cmd);
 
 void carlink_cb_init(void);
 

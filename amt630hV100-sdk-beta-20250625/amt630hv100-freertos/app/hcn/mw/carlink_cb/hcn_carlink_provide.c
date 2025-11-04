@@ -13,12 +13,14 @@
 */
 
 #include <string.h>
+#include "ECTiny.h"
 #include "carlink_cb/hcn_carlink_provide.h"
 #include "log/hcn_log.h"
 
 static IhcnCallBack* mHcnCallback = NULL;
 static HcnLibConfig mHcnLibCfg = {0};
-static char g_carlink_uuid[64] = {0};
+static char g_carlink_uuid[32] = {0};
+static char g_carlink_url[256] = {0};
 
 void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback) {
     if (HcnCfg) {
@@ -32,14 +34,6 @@ void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback) {
     hcn_log_info("hcn_initialize done.\n");
 }
 
-void update_carlink_uuid(const char *bt_mac) {
-
-}
-
-const char *get_carlink_uuid() {
-    return g_carlink_uuid;
-}
-
 IhcnCallBack *get_hcn_callback(void) {
     return mHcnCallback;
 }
@@ -48,3 +42,26 @@ HcnLibConfig *get_hcn_lib_config(void) {
     return &mHcnLibCfg;
 }
 
+void hcn_update_carlink_uuid(const char *uuid) {
+    if (uuid) {
+        snprintf(g_carlink_uuid, sizeof(g_carlink_uuid), "%s", uuid);
+    }
+}    
+
+void hcn_update_carlink_url(const char *url) {
+    if (url) {
+        snprintf(g_carlink_url, sizeof(g_carlink_url), "%s", url);
+    }
+}
+
+const char* hcn_ec_get_uuid() {
+    return g_carlink_uuid;
+}
+
+const char* hcn_ec_get_qr_code_url() {
+    return g_carlink_url;
+}
+
+const char* hcn_ec_get_version() {
+    return EC_getVersion();
+}

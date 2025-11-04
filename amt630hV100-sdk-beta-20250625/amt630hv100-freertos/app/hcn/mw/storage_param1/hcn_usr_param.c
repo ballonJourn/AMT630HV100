@@ -389,24 +389,28 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
         case HCN_PARAM_MAINTAIN_COUNTS:
             if (usr_param.maintain_info.maintain_mile.maintain_count != *((uint16_t *)param)) {
                 usr_param.maintain_info.maintain_mile.maintain_count = *((uint16_t *)param);
+                is_save = true;
             }
             break;
         
         case HCN_PARAM_CUR_MAINTAIN_MILEAGE:
             if (usr_param.maintain_info.maintain_mile.cur_maintain_mileage != *((uint16_t *)param)) {
                 usr_param.maintain_info.maintain_mile.cur_maintain_mileage = *((uint16_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_LAST_MAINTAIN_MILEAGE:
             if (usr_param.maintain_info.maintain_mile.last_maintain_total_mileage != *((uint16_t *)param)) {
                 usr_param.maintain_info.maintain_mile.last_maintain_total_mileage = *((uint16_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_MAINTAIN_DAYS:
             if (usr_param.maintain_info.maintain_time.maintain_days != *((uint16_t *)param)) {
                 usr_param.maintain_info.maintain_time.maintain_days = *((uint16_t *)param);
+                is_save = true;
             }
             break;
 
@@ -415,108 +419,126 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
                        sizeof(maintain_date_t)) != 0) {
                 memcpy(&usr_param.maintain_info.maintain_time.last_maintain_date, 
                         param, sizeof(maintain_date_t));
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_MAINTAIN_IS_SYNC_TIME:
             if (usr_param.maintain_info.maintain_time.is_sync_time != *((uint8_t *)param)) {
-                usr_param.maintain_info.maintain_time.is_sync_time = *((uint8_t *)param);  
+                usr_param.maintain_info.maintain_time.is_sync_time = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_MILE_FORMAT:
             if (usr_param.usr_set.mile_format != *((uint8_t *)param)) {
-                usr_param.usr_set.mile_format = *((uint8_t *)param);  
+                usr_param.usr_set.mile_format = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_MILE_DISPLAY:
             if (usr_param.usr_set.mile_display != *((uint8_t *)param)) {
-                usr_param.usr_set.mile_display = *((uint8_t *)param);  
+                usr_param.usr_set.mile_display = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_THEME:
             if (usr_param.usr_set.theme != *((uint8_t *)param)) {
                 usr_param.usr_set.theme = *((uint8_t *)param);  
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_BRIGHTNESS_LEVEL:
             if (usr_param.usr_set.brightness != *((uint8_t *)param)) {
-                usr_param.usr_set.brightness = *((uint8_t *)param);  
+                usr_param.usr_set.brightness = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_LANGUAGE:
             if (usr_param.usr_set.language != *((uint8_t *)param)) {
-                usr_param.usr_set.language = *((uint8_t *)param);  
+                usr_param.usr_set.language = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_BT_SWITCH:
             if (usr_param.usr_set.bt_switch != *((uint8_t *)param)) {
-                usr_param.usr_set.bt_switch = *((uint8_t *)param);  
+                usr_param.usr_set.bt_switch = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_UUID_REGISTER:
             if (usr_param.usr_set.uuid_active_staus != *((uint8_t *)param)) {
-                usr_param.usr_set.uuid_active_staus = *((uint8_t *)param); 
+                usr_param.usr_set.uuid_active_staus = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_METER_START_SRC:
             if (usr_param.usr_set.start_src != *((uint8_t *)param)) {
-                usr_param.usr_set.start_src = *((uint8_t *)param);  
+                usr_param.usr_set.start_src = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_TCS_SWITCH:
             if (usr_param.usr_set.tcs_switch != *((uint8_t *)param)) {
-                usr_param.usr_set.tcs_switch = *((uint8_t *)param);  
+                usr_param.usr_set.tcs_switch = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_TEMP_UNIT:
             if (usr_param.usr_set.temp_unit != *((uint8_t *)param)) {
                 usr_param.usr_set.temp_unit = *((uint8_t *)param);  
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_TIME_FORMAT:
             if (usr_param.usr_set.time_format != *((uint8_t *)param)) {
-                usr_param.usr_set.time_format = *((uint8_t *)param);  
+                usr_param.usr_set.time_format = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_TPMS_PRESSURE_UNIT:
             if (usr_param.usr_set.tpms_unit != *((uint8_t *)param)) {
-                usr_param.usr_set.tpms_unit = *((uint8_t *)param);  
+                usr_param.usr_set.tpms_unit = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
             
         case HCN_PARAM_AUTO_HEAD_LIGHT:
             if (usr_param.usr_set.auto_headlight != *((uint8_t *)param)) {
-                usr_param.usr_set.auto_headlight = *((uint8_t *)param);  
+                usr_param.usr_set.auto_headlight = *((uint8_t *)param);
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_PHONE_TYPE:
             if (usr_param.usr_set.phone_type != *((uint8_t *)param)) {
-                usr_param.usr_set.phone_type = *((uint8_t *)param);  
+                usr_param.usr_set.phone_type = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_SYS_LOG:
             if (usr_param.usr_set.sys_log != *((uint8_t *)param)) {
-                usr_param.usr_set.sys_log = *((uint8_t *)param);  
+                usr_param.usr_set.sys_log = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
 
         case HCN_PARAM_DRIVE_MODE:
             if (usr_param.usr_set.drive_mode != *((uint8_t *)param)) {
-                usr_param.usr_set.drive_mode = *((uint8_t *)param);  
+                usr_param.usr_set.drive_mode = *((uint8_t *)param); 
+                is_save = true;
             }
             break;
 
@@ -524,6 +546,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             if (strncmp((const char *)usr_param.carlink_uuid, ((const char *)param),
                         strlen(((const char *)param))) != 0) {
                 memcpy(usr_param.carlink_uuid, param, strlen(((const char *)param)));
+                is_save = true;
             }
             break;
 
@@ -721,6 +744,7 @@ static void read_usr_param(void) {
     }
     
     usr_param = meter_info->usr;
+    usr_param_pre = usr_param;
     
     ///< 打印Flash使用统计
     print_flash_usage_stats();
