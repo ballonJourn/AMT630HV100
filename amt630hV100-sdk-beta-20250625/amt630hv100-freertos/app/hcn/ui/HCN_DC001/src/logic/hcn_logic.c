@@ -59,10 +59,11 @@ ret_t home_view_init(widget_t * win)
     view_manager_init     (win) ;  
     
     //slide view
-    home_dock_music_ex_view_init(win);
-    home_nav_view_init    (win) ;
-    home_phone_view_init  (win) ;
-    home_info_view_init   (win) ;
+    home_dock_music_ex_view_init(win) ;
+    home_nav_view_init          (win) ;
+    home_dock_music_view_init   (win) ;
+    home_phone_view_init        (win) ;
+    home_info_view_init         (win) ;
 
     // 自检
     selfcheck_init();
@@ -140,6 +141,7 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
         return RET_REPEAT ;
     
 
+    music_view_update() ;
     //数据刷新
     speed_view_update() ;
 

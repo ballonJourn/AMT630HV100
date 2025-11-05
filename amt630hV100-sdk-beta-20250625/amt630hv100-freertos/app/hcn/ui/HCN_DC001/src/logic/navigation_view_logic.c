@@ -7,6 +7,8 @@
 #include "view/home_view/navigation_view.h"
 #include "carlink_cb/hcn_easy_navi.h"
 #include "proxy/vehicle_data.h"
+#include "proxy/bluetooth_data.h"
+#include "view/set_view/bt_connect.h"
 
 static hcnNavigationHudInfo g_navigation_info = { 0 };
 static bool g_mirror_state      = false ;  
@@ -26,7 +28,10 @@ void navigation_view_update()
         g_mirror_state = _mirror_state ;
 
         if (false == _mirror_state)
+        {
             home_refresh_nav_view( QR_VIEW )  ;
+            // g_mirror_navigation = false       ;
+        }
         
         // printf("mirror_state      changed = %s \n" , _mirror_state ? "open" : "close");
     }
@@ -77,6 +82,8 @@ void update_qr()
                 if (tk_strlen(buff))
                     home_refresh_qr(buff);
             #endif
+
+            refresh_bt_name(vehicle_get_bluetooth_name());
             printf("vehicle_get_mirror_url successed to refresh  qr\n") ;
         }
         

@@ -21,6 +21,8 @@
 #define SETTING_PAGE "setting_page"
 #define DEVICE_PAGE  "device_page"
 
+#define BLUETOOTH_MUSIC_IMAGE "buletooth_music_image"
+
 typedef enum {
     KM_H     ,
     MPH      ,

@@ -4590,6 +4590,9 @@
                         <group>
                             <name>logic</name>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\bluetooth_logic.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\logic\hcn_global.c</name>
                             </file>
                             <file>
@@ -4622,6 +4625,9 @@
                         </group>
                         <group>
                             <name>proxy</name>
+                            <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\bluetooth_data.c</name>
+                            </file>
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\mirror_data.c</name>
                             </file>

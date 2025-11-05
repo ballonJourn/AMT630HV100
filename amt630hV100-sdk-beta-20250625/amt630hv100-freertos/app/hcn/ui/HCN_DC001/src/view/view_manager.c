@@ -116,7 +116,6 @@ static void hcn_key_handle(uint8_t id)
 
 ret_t on_idle_queue(const idle_info_t* idle)
 {
-    printf("on_idle_queue \n") ;
     if (NULL == idle)
         return RET_REMOVE;
     
@@ -146,7 +145,6 @@ static void hcn_key_cb(uint8_t id)
     }
     #endif
 
-    printf("idle_add \n") ;
     return ;
 }
 #endif

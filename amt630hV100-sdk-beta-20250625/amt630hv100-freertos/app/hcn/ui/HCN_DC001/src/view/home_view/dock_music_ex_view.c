@@ -3,10 +3,9 @@
 extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
                      bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565);
 
-#define BLUETOOTH_MUSIC_IMAGE "buletooth_music_image"
 
 const char* home_dock_music_ex_widget_name[MUSIC_DOCK_NUM_MAX] = {
-    "music_image_ex" , "music_title_ex" , "music_clyric_ex" , "music_bar" , 
+    "music_image_ex" , "music_title_ex" , "music_lyric_ex" , "music_bar" , 
     "music_prev", "music_state" , "music_next"
 } ;
 
