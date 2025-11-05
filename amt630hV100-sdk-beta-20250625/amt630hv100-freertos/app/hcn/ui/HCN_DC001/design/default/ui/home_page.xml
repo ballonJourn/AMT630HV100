@@ -85,9 +85,9 @@
             </view>
           </view>
           <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <image name="image2" x="100" y="66" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
-            <label name="music_title" x="50" y="161" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="Title"/>
-            <label name="musiclyric" x="50" y="199" w="160" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
+            <image name="music_image" x="100" y="66" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
+            <label name="music_title" x="50" y="157" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="no_music"/>
+            <label name="music_clyric" x="50" y="195" w="160" h="59" style:normal:text_color="#9E9E9E" style:normal:font_size="22" line_wrap="true" word_wrap="true"/>
           </view>
           <view name="phone_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="bt_connected" x="53" y="38" w="201" h="214" visible="true">
@@ -102,9 +102,9 @@
           <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
           <view name="music_expand_page" x="0" y="0" w="506" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
             <image name="music_image_ex" x="214" y="21" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
-            <label name="music_title_ex" x="164" y="100" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" text="Title"/>
-            <label name="music_lyric_ex" x="111" y="138" w="267" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22" text="sing a song"/>
-            <progress_bar name="music_bar" x="94" y="176" w="300" h="12" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="80"/>
+            <label name="music_title_ex" x="164" y="100" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="no_music"/>
+            <label name="music_lyric_ex" x="111" y="138" w="267" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22"/>
+            <progress_bar name="music_bar" x="94" y="176" w="300" h="12" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="100"/>
             <image name="music_prev" x="104" y="205" w="50" h="50" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
             <image name="music_state" x="219" y="205" w="50" h="50" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>
             <image name="music_next" x="319" y="205" w="50" h="50" draw_type="default" style:normal:icon="icon_next_n" style:selected:icon="icon_next_p"/>
@@ -177,8 +177,10 @@
           <label name="label3" x="27" y="34" w="89" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="bt"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <label name="bt_on_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="bt_open"/>
-          <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="bt_close"/>
+          <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" style:normal:text_align_h="center" tr_text="bt_close"/>
           <image name="bt_state" x="394" y="30" w="80" h="40" draw_type="default" image="setting_bluebooth_open"/>
+          <label name="bt_name" x="132" y="36" w="219" h="28" style:normal:font_size="25" style:normal:text_color="#757070"/>
+          <label name="bt_phone_info" x="94" y="251" w="360" h="39" style:normal:text_color="#A5A5A5" style:normal:font_size="25"/>
         </view>
         <view name="language" x="0" y="0" w="100%" h="100%">
           <label name="label3" x="204" y="34" w="140" h="33" style:normal:text_color="#FFFFFF" style:normal:font_size="26" tr_text="language"/>
