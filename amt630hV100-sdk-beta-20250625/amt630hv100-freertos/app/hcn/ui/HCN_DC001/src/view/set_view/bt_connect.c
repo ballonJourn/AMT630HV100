@@ -3,7 +3,7 @@
 #include "proxy/vehicle_argument.h"
 
 const char* set_bt_conn_widget_name[BT_CONNECT_NUM_MAX] = {
-    "bt_on_option" , "bt_off_option" , "bt_state" 
+    "bt_on_option" , "bt_off_option" , "bt_state" ,"bt_name" , "bt_phone_info"
 } ;
 
 const char* set_bt_conn_state_str[BT_CONNECT_OPTION_MAX] = {
@@ -134,5 +134,24 @@ void refresh_bt_connect_state(bt_option_e state)
         image_set_image(set_bt_conn_widget[BT_CONNECT_STATE] , set_bt_conn_state_str[state]) ;
     }
     
+    return ;
+}
+
+void refresh_bt_name(const char* name)
+{
+    if (set_bt_conn_widget[BT_CONNECT_BT_NAME])
+    {
+        widget_set_text_utf8(set_bt_conn_widget[BT_CONNECT_BT_NAME] , name);
+    }
+    
+    return ;
+}
+
+void refresh_bt_phone_info(const char* phoneName)
+{
+    if (set_bt_conn_widget[BT_CONNECT_PHONE_INFO])
+    {
+        widget_set_text_utf8(set_bt_conn_widget[BT_CONNECT_PHONE_INFO] , phoneName);
+    }
     return ;
 }

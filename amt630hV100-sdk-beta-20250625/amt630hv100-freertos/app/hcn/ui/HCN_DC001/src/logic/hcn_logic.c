@@ -44,8 +44,8 @@ ret_t home_view_init(widget_t * win)
 {
     if(win == NULL) return RET_FAIL ;
 
-    vehicle_set_mile_odo(3000);
-    vehicle_set_mile_tripA(3000);
+    // vehicle_set_mile_odo(0);
+    // vehicle_set_mile_tripA(0);
 
 
     home_animation_init   (win) ; 

@@ -8,6 +8,9 @@ enum set_bt_connect_com{
     BT_CONNECT_ON         ,
     BT_CONNECT_OFF        ,
     BT_CONNECT_STATE      ,
+
+    BT_CONNECT_BT_NAME    ,
+    BT_CONNECT_PHONE_INFO ,
     BT_CONNECT_NUM_MAX    ,
 };
 
@@ -22,6 +25,10 @@ typedef enum {
 ret_t set_bt_connect_view_init(widget_t* parent) ;
 
 void refresh_bt_connect_state(bt_option_e state) ;
+
+void refresh_bt_name(const char* name);
+
+void refresh_bt_phone_info(const char* phoneName);
 
 void bt_connect_init() ;
 

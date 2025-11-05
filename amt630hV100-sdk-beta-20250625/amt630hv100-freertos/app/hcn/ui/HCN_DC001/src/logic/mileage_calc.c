@@ -15,6 +15,7 @@
 
 #define MAX_SPEEDS         ((CALC_INTERVAL_MS / SPEED_INTERVAL_MS) | 1)
 #define TRIP_MILEAGE_MAX   1000000.0f
+#define ODO_MILEAGE_MAX    (999999009.0f)
 #define SAVE_ODO_THRESHOLD 100.0f
 
 typedef struct {
@@ -50,6 +51,9 @@ static void check_and_reset_trip(void) {
   if (mileage_data.trip_mileage >= TRIP_MILEAGE_MAX) {
     mileage_data.trip_mileage = 0.0;
   }
+  if (mileage_data.odo_mileage >= ODO_MILEAGE_MAX) {
+    mileage_data.odo_mileage = ODO_MILEAGE_MAX;
+  }
 }
 
 static void save_unsaved_mileage(void) {
@@ -72,7 +76,7 @@ static void process_full_speed_array(void) {
   vehicle_set_mile_once(mileage_data.odo_once);
   check_and_reset_trip();
   save_unsaved_mileage();  //保存数据
-  printf("mileage_data = %.2f \n" ,mileage_data.odo_mileage);
+  // printf("mileage_data = %.2f \n" ,mileage_data.odo_mileage);
 }
 
 static void calc_task(void *param) {
