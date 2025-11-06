@@ -25,6 +25,7 @@
 #include "carlink_cb/hcn_carlink_cb.h"
 #include "carlink_cb/hcn_carlink_provide.h"
 #include "vehicle_param/vehicle_param.h"
+#include "bt_module/hcn_bt_song_art_cover.h"
 #include "board.h"
 
 //#define BT_STR_DEBUG 
@@ -500,7 +501,11 @@ static void on_bt_str_parse(char *at_str) {
             hcn_log_info("Music stop play....\r\n");
             aw_pa_stop();
         }
-    }  else if (strstr(cmd_str, "+TRACKSTAT")) {
+    }  else if (strstr(cmd_str, "+COVERART")) {
+        int cover_state = atoi(prama_data);
+        hcn_log_info("+COVERART state:%d\r\n", cover_state);
+        hcn_parse_avrcp_abulm_cover(&music_info.song_art_cover, cover_state);
+    } else if (strstr(cmd_str, "+TRACKSTAT")) {
         on_cur_music_play_state(prama_data);
     } else if (strstr(cmd_str, "+PLAYMODE")) {
         on_music_play_mode(prama_data);
