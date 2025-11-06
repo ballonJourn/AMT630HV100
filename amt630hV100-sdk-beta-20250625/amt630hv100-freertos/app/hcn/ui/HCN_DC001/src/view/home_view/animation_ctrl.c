@@ -165,3 +165,36 @@ bool get_demonstration_state()
 {
     return is_demo_state ;
 }
+
+
+bool is_call_start = false ;
+
+ret_t calling_animation_start()
+{
+    if (false ==  is_call_start )
+    {
+        widget_t *widget =  widget_lookup( window_manager_get_top_window(window_manager()), "call_aniamtor", TRUE);
+        if (widget)
+            widget_set_visible(widget , true);
+        widget_start_animator(NULL , "call_animation");
+        widget_start_animator(NULL , "calling_tips");
+
+        is_call_start = true ;
+    }
+    
+}
+
+ret_t calling_animation_stop()
+{
+    if (is_call_start)
+    {
+        widget_stop_animator(NULL , "calling_tips");
+        widget_t *widget =  widget_lookup( window_manager_get_top_window(window_manager()), "call_aniamtor", TRUE);
+        if (widget)
+            widget_set_visible(widget , false);
+
+        is_call_start = false ;
+    }
+    
+
+}

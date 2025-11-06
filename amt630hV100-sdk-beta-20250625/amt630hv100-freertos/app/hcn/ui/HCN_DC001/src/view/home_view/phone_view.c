@@ -9,7 +9,7 @@ const char* home_phone_view_name[PHONE_VIEW_MAX] = {
 } ;
 
 const char* call_state_image_str[CALL_STATE_MAX] = {
-    "icon_incoming_call" , "icon_incoming_call" , "icon_answer"
+    "icon_incoming_call" , "icon_outgoing_call" , "icon_answer"
 } ;
 
 static widget_t* home_phone_widget[PHONE_NUM_MAX] = { NULL };
@@ -39,13 +39,13 @@ ret_t home_refresh_phone_state(call_state_e state)
        image_set_image(home_phone_widget[PHONE_STATE_IMG], call_state_image_str[state]);
     }
 
+    home_refresh_phone_tips(state) ;
+
     return RET_OK ;
 }
 
 ret_t home_refresh_phone_tips(call_state_e state)
 {
-    state = tk_min(state , CALL_STATE_MAX);
-    
     const char *format = NULL ;
     
     switch (state)
@@ -73,7 +73,7 @@ ret_t home_refresh_phone_tips(call_state_e state)
     return RET_OK ;
 }
 
-ret_t home_refresh_phone_num(char *value)
+ret_t home_refresh_phone_numName(const char *value)
 {
     if (home_phone_widget[PHONE_NUMBER])
     {

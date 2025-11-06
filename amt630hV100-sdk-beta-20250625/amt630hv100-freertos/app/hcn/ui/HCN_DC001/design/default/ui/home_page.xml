@@ -92,13 +92,13 @@
             <hscroll_label name="music_clyric" x="50" y="197" w="167" h="40" style:normal:text_color="#9E9E9E" style:normal:font_size="22" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false"/>
           </view>
           <view name="phone_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <view name="bt_connected" x="53" y="38" w="201" h="214" visible="true">
+            <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
               <image name="phone_state_img" x="36" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
               <rich_text name="phone_tips" x="0" y="0" w="179" h="57" style:normal:font_size="24" style:normal:text_color="#FFFFFF" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
               <label name="phone_num" x="0" y="175" w="179" h="39" style:normal:font_size="28" style:normal:text_color="#FFFFFF" text="137 9611 2548"/>
             </view>
-            <view name="bt_no_connected" x="53" y="38" w="201" h="214" visible="false" disg:lock="true">
-              <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_answer" disg:lock="true"/>
+            <view name="bt_no_connected" x="53" y="38" w="201" h="214" visible="true">
+              <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_call"/>
             </view>
           </view>
           <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
@@ -236,4 +236,9 @@
       </slide_view>
     </view>
   </pages>
+  <view name="call_aniamtor" x="178" y="-51" w="453" h="51" animation="opacity(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,from=0,to=255);move(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,x_from=178,x_to=178,y_from=-51,y_to=47);move(name=calling_tips,delay=800,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,x_from=178,x_to=178,y_from=47,y_to=40)">
+    <image name="image2" x="38" y="7" w="40" h="40" draw_type="scale" image="call_huang"/>
+    <image name="image7" x="367" y="8" w="40" h="40" draw_type="scale" image="call_pick"/>
+    <label name="label8" x="106" y="0" w="251" h="28" style:normal:text_color="#FFFFFF" tr_text="Enter the call page to view details"/>
+  </view>
 </window>

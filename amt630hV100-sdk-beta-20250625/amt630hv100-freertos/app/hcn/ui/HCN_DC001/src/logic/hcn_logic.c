@@ -7,6 +7,7 @@
 #include "speed_view_logic.h"
 #include "signal_view_logic.h"
 #include "navigation_view_logic.h"
+#include "buletooth_logic.h"
 #include "hcn_global.h"
 #include "view/set_view/set_view_interface.h"
 #include "view/home_view/home_view_interface.h"
@@ -68,19 +69,10 @@ ret_t home_view_init(widget_t * win)
     // 自检
     selfcheck_init();
 
+    home_refresh_signal_visible(TRUE);  //暂时打开
+
     //添加定时器
     home_timer_init();
-
-
-
-    home_refresh_phone_state(CALL_INCOMMING);
-
-    home_refresh_phone_tips(CALL_INCOMMING);
-
-    home_refresh_phone_num("0737 1548254");
-
-    //手机通话页面
-    home_refresh_phone_view(PHONE_NO_CONNECT)  ;
 
     time_start =  time_now_s() ;
     return RET_OK ;
@@ -129,7 +121,7 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     uint64_t interval  = time_now_s() - time_start;
     home_refresh_info_time(interval) ;
 
-    return RET_REPEAT ;
+        return RET_REPEAT ;
 }
 
 
@@ -140,8 +132,9 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
     if (checkself_get_state() != CHECK_STATE_FINISHED || get_demonstration_state() ) 
         return RET_REPEAT ;
     
+    
+    bluetooth_view_update();
 
-    music_view_update() ;
     //数据刷新
     speed_view_update() ;
 

@@ -32,7 +32,7 @@ ret_t home_refresh_phone_state(call_state_e state);
 
 ret_t home_refresh_phone_tips(call_state_e state);
 
-ret_t home_refresh_phone_num(char *value);
+ret_t home_refresh_phone_numName(const char *value);
 
 //手机通话页面
 ret_t home_refresh_phone_view(home_phone_view_e view)  ;

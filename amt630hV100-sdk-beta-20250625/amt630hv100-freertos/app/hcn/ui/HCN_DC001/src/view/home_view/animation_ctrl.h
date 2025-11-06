@@ -34,4 +34,9 @@ ret_t demonstration_stop();
 
 bool get_demonstration_state() ; 
 
+
+ret_t calling_animation_start() ;
+
+ret_t calling_animation_stop() ;
+
 #endif

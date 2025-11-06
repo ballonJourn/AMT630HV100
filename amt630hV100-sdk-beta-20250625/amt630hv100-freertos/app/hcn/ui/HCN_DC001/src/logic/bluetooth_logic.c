@@ -8,9 +8,15 @@
 #include "carlink_cb/hcn_easy_navi.h"
 #include "proxy/bluetooth_data.h"
 #include "view/set_view/bt_connect.h"
+#include "hcn_global.h"
 
 static bt_music_info_t g_music_info = { 0 };
+static bt_call_t g_call_info        = { 0 };
+static bt_data_t g_data_info        = { 0 };
+static bt_data_t g_bt_info          = { 0 };
 static bool  g_bluetooth_state = false ;
+static bool  g_is_calling      = false ;
+
 
 void music_view_update() 
 {
@@ -27,23 +33,6 @@ void music_view_update()
         
     }
     
-    bool bt_state = vehicle_buluetooth_is_connected();
-    if (bt_state != g_bluetooth_state)
-    {
-        if(false == bt_state )
-        {
-            memset(&g_music_info , 0x00 , sizeof(bt_music_info_t));
-            home_clean_music_data() ;
-            refresh_bt_phone_info(" "); 
-        }
-        else
-        {
-            refresh_bt_phone_info(vehicle_get_phone_name()) ;
-        }
-
-        g_bluetooth_state = bt_state ;
-    }
-    
 }
 
 
@@ -52,37 +41,40 @@ ret_t parse_music_data(const bt_music_info_t *_music_info)
     if (NULL == _music_info)
         return RET_FAIL ;
     
-    char format_buff[128] = {0};
+    char format_buff[TEXT_PARAM_LEN] = {0};
 
     if (g_music_info.play_state != _music_info->play_state)
     {
         home_refresh_music_state(_music_info->play_state == BT_MUSIC_PLAY_STATE_PLAYING);
-        printf("music state = %d \n" , _music_info->play_state);
+        printf("music state changed = %d \n" , _music_info->play_state);
     }
 
     if (strcmp(g_music_info.artist, _music_info->artist))
     {
+        
         memset(format_buff , 0x0 , sizeof(format_buff));
-        tk_snprintf(format_buff , sizeof(format_buff) - 1  , "%s",_music_info->artist);
+        tk_snprintf(format_buff , sizeof(format_buff)   , "%s",_music_info->artist);
+
         home_refresh_music_ex_title(format_buff);
         home_refresh_music_title(format_buff);
-        printf("g_music_info  artist = %s\n" ,_music_info->artist);
+        printf("g_music_info  artist changed = %s\n" ,format_buff);
     }
 
     if (strcmp(g_music_info.lyrics, _music_info->lyrics))
     {
         memset(format_buff , 0x0 , sizeof(format_buff));
-        tk_snprintf(format_buff , sizeof(format_buff) - 1  , "%s",_music_info->lyrics);
+        tk_snprintf(format_buff , sizeof(format_buff)   , "%s",_music_info->lyrics);
+
         home_refresh_music_ex_lyric(format_buff);
         home_refresh_music_lyric(format_buff);
-        printf("g_music_info  lyrics = %s\n" ,_music_info->lyrics);
+        printf("g_music_info  lyrics changed = %s\n" ,format_buff);
     }
 
 
     if (memcmp(&g_music_info.music , &_music_info->music  , sizeof(g_music_info.music)) )
     {
         home_refresh_music_bar( _music_info->music.cur_time_music_play , _music_info->music.music_total_time);
-        printf("music music_total_time = %d  current time = %d \n" ,_music_info->music.music_total_time , _music_info->music.cur_time_music_play);
+        printf("music music_total_time = %d  current time changed = %d \n" ,_music_info->music.music_total_time , _music_info->music.cur_time_music_play);
     }
     
     return RET_OK ;
@@ -102,4 +94,143 @@ void home_clean_music_data()
     home_refresh_music_lyric(" ");
 
     home_refresh_music_state(false);
+}
+
+
+void calling_view_update()
+{
+    if (g_bluetooth_state)
+    {
+        bool _is_calling = vehicle_buluetooth_is_calling();
+        if (g_is_calling != _is_calling)
+        {
+            g_is_calling = _is_calling ;
+            home_refresh_phone_view(g_is_calling ? PHONE_CONNECT : PHONE_NO_CONNECT) ;
+        }
+        
+        const bt_call_t *_call_info = vehicle_get_calling_data();
+        if (memcmp(_call_info , &g_call_info , sizeof(bt_call_t)))
+        {
+            if (RET_OK == parse_calling_data(_call_info))
+            {
+                memcpy(&g_call_info , _call_info ,sizeof(bt_call_t));
+            }    
+        }
+        
+    }
+}
+
+
+ret_t parse_calling_data(const bt_call_t *_call_info)
+{
+    if (NULL == _call_info)
+        return RET_FAIL ;
+    
+
+    if(g_call_info.btHfpState != _call_info->btHfpState)
+    {
+        if (_call_info->btHfpState == OUTGOING_CALL)
+        {
+            home_refresh_phone_state(CALL_OUTGOING);
+            calling_animation_start();
+
+        }else if (_call_info->btHfpState == INCOMING_CALL)
+        {
+            home_refresh_phone_state(CALL_INCOMMING);
+            calling_animation_start();
+
+        }else if (_call_info->btHfpState == ACTIVE_CALL)
+        {
+            home_refresh_phone_state(CALL_CALLING);
+            calling_animation_stop();
+        }
+        
+        if (_call_info->btHfpState == CONNECTED)
+        {
+            calling_animation_stop();
+        }
+        
+    }
+
+    if (strcmp(g_call_info.btCallNumber1, _call_info->btCallNumber1))
+    {
+        if (_call_info->btCallPerson1[0])
+        {
+            printf("has personnal info = %s \n ", _call_info->btCallPerson1) ;
+            home_refresh_phone_numName(_call_info->btCallPerson1);
+        }
+        else 
+        {
+            printf("No personnal info number = %s \n ", _call_info->btCallNumber1) ;
+            home_refresh_phone_numName(_call_info->btCallNumber1);
+        }
+        
+    }
+
+    return RET_OK ;
+}
+
+
+ret_t parse_buletooth_data(const bt_data_t *bt_info)
+{
+    if (NULL == bt_info)
+        return RET_FAIL ;
+
+    if (g_bt_info.btSwitchState != bt_info->btSwitchState)
+    {
+        refresh_bt_connect_state( bt_info->btSwitchState ? BT_CONNECT_ON_OPTION : BT_CONNECT_OFF_OPTION);
+    }
+    
+    return RET_OK ;
+}
+
+void bluetooth_data_update()
+{
+    const bt_data_t *bt_info = vehicle_get_bluetooth_data();
+    if (memcmp(bt_info , &g_bt_info , sizeof(bt_data_t)))
+    {
+        if (RET_OK == parse_buletooth_data(bt_info))
+        {
+            memcpy(&g_bt_info , bt_info ,sizeof(bt_data_t));
+        }    
+    }
+
+    
+}
+
+
+void bluetooth_view_update()
+{
+
+    music_view_update() ;
+
+    calling_view_update();
+
+    bluetooth_data_update(); 
+
+    bool bt_state = vehicle_buluetooth_is_connected();
+    if (bt_state != g_bluetooth_state)
+    {
+        if(false == bt_state )
+        {
+            //断开连接
+            memset(&g_music_info , 0x00 , sizeof(bt_music_info_t));
+            home_clean_music_data() ;
+            
+            //通话
+            memset(&g_call_info , 0x00 , sizeof(bt_call_t));
+            home_refresh_phone_view(PHONE_NO_CONNECT);
+            
+
+            refresh_bt_phone_info("");
+        }
+        else
+        {
+            refresh_bt_phone_info(vehicle_get_phone_name()) ;
+
+        }
+
+        g_bluetooth_state = bt_state ;
+    }
+
 }

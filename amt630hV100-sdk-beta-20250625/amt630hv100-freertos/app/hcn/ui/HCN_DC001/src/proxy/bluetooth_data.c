@@ -78,3 +78,37 @@ const char* vehicle_get_phone_name()
 
     return " ";
 }
+/// ================================= ////////////////////////
+
+bool vehicle_buluetooth_is_calling()
+{
+    return hcn_bt_is_Call();
+}
+
+const bt_call_t* vehicle_get_calling_data() 
+{
+    return hcn_bt_get_call();   
+}
+
+const bt_data_t* vehicle_get_bluetooth_data() 
+{
+    return hcn_bt_get_data();   
+}
+
+void  vehicle_set_bluetooth_state(bool on_off)
+{
+    hcn_bt_switch_state(on_off) ;
+    return ;
+} 
+
+void  vehicle_calling_hung_up()
+{
+    hcn_bt_hung_up();
+    return ;
+}
+
+void  vehicle_calling_pick_up()
+{
+    hcn_bt_pick_up();
+    return ;
+} 

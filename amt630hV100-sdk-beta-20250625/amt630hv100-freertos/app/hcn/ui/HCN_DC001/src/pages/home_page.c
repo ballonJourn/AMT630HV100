@@ -14,8 +14,6 @@ ret_t refesh_ui(const timer_info_t* timer){
 
   home_refresh_gear(count % 3) ;
 
-  home_refresh_signal_visible((count % 2 == 0)) ;
-
   return RET_REPEAT;
 }
 
