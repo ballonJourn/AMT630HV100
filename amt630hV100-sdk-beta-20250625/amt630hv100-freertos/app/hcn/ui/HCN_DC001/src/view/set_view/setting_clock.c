@@ -228,9 +228,7 @@ static void setting_option_view_deal_set()
     //to do  set systerm time
     int32_t min = 0, sec = 0 ;
     get_label_clock(&min , &sec);
-    vehicle_set_time_min(min);
-    vehicle_set_time_sec(sec);
-
+    vehicle_set_time(min, sec);
     return ;
 }
 

@@ -8,10 +8,8 @@
 
 int32_t vehicle_get_time_min();
 
-int32_t vehicle_get_time_sec();
+int32_t vehicle_get_time_hour();
 
-void vehicle_set_time_min(int32_t min);
-
-void vehicle_set_time_sec(int32_t sec);
+void vehicle_set_time(int hour, int32_t min);
 
 #endif

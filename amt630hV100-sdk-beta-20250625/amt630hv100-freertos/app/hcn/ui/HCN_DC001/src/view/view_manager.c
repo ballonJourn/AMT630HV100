@@ -168,8 +168,8 @@ ret_t view_manager_init(widget_t* parent)
 
 void update_page_info() 
 {
-    int min = vehicle_get_time_min();
-    int sec = vehicle_get_time_sec();
+    int min = vehicle_get_time_hour();
+    int sec = vehicle_get_time_min();
     refresh_clock(min , sec);
 }
 

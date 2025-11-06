@@ -105,14 +105,14 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     static int  clock_sec   = 0 ;
     static bool clock_colon = TRUE ;
 
-    int min = vehicle_get_time_min();
+    int min = vehicle_get_time_hour();
     if (clock_min != min)
     {
         clock_min = min;
         home_refresh_clock_min(min) ;
     }
     
-    int sec = vehicle_get_time_sec();
+    int sec = vehicle_get_time_min();
     if (clock_sec != sec)
     {
         clock_sec = sec ;
