@@ -14,8 +14,8 @@
 
 #include <string.h>
 #include "ECTiny.h"
-#include "carlink_cb/hcn_carlink_provide.h"
 #include "log/hcn_log.h"
+#include "carlink_cb/hcn_carlink_provide.h"
 
 static IhcnCallBack* mHcnCallback = NULL;
 static HcnLibConfig mHcnLibCfg = {0};
@@ -65,3 +65,16 @@ const char* hcn_ec_get_qr_code_url() {
 const char* hcn_ec_get_version() {
     return EC_getVersion();
 }
+
+int32_t hcn_ec_loadNightModeStatus(uint32_t isNightModeOn) {
+    return EC_uploadNightModeStatus(isNightModeOn);
+}
+
+int32_t hcn_ec_startMirror() {
+    return EC_startMirror();
+}
+
+void hcn_ec_stopMirror() {
+    EC_stopMirror();
+}
+

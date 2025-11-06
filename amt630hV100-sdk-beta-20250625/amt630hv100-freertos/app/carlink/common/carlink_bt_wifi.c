@@ -460,7 +460,7 @@ static void carlink_bt_callback(char * cAtStr)
 		sprintf(cmd_str, "AT+NAME=%s_%s\r\n", DEV_NAME_PREFIX, (cAtStr + 6 + 8));
 #endif
 
-		printf("ADDR:%s\r\n", cAtStr + 6);
+		printf("Bt mac ADDR:%s\r\n", cAtStr + 6);
 		printf("set bt name:%s\r\n", cmd_str);
 
 		console_send_atcmd(cmd_str, strlen(cmd_str));//get mac addr
@@ -472,7 +472,9 @@ static void carlink_bt_callback(char * cAtStr)
 #endif
 
 		memcpy(g_cp_bt_mac, (cAtStr + 6), 12);
+#if CARLINK_CP
 		carlink_carplay_ie_replace_bt_mac(cAtStr + 6, 12);
+#endif
 		g_cp_bt_mac_ready = true;
 	} 
 

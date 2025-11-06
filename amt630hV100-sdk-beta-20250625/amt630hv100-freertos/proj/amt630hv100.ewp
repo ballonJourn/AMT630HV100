@@ -4429,6 +4429,9 @@
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\bt_module\hcn_bt_parse.c</name>
                     </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\bt_module\hcn_bt_song_art_cover.c</name>
+                    </file>
                 </group>
                 <group>
                     <name>can_module</name>

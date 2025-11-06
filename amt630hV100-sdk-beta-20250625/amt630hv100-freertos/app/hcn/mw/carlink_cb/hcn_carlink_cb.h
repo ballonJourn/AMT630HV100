@@ -129,16 +129,25 @@ typedef struct {
     uint16_t music_total_time;             ///< 当前音乐总时间   （秒）
 } bt_music_play_info_t;
 
+typedef struct {
+    int img_index;          ///< 专辑封面图片序号，如 100086.jpg,为0代表无图片，每个专辑图片序号都不一样
+    uint16_t img_height;     ///< 图片高度，默认是200像素
+    uint16_t img_width;      ///< 图片宽度，默认是200像素
+    int image_len;          ///< 图片长度
+    char *image_buffer;     ///< 图片资源指针
+} bt_music_song_art_cover_t;
+
 /**
  * @brief 蓝牙音乐信息结构体
  */
 typedef struct {
-    bt_music_play_state_e play_state;       ///< 音乐播放模式
-    bt_music_play_mode_e play_mode;         ///< 音乐播放模式
-    bt_music_play_info_t music;              ///< 音乐信息
-    char lyrics[TEXT_PARAM_LEN];             ///< 歌曲歌词
-    char artist[TEXT_PARAM_LEN];            ///< 艺术家/歌曲名
-    char album[TEXT_PARAM_LEN];             ///< 专辑名
+    bt_music_play_state_e play_state;            ///< 音乐播放状态
+    bt_music_play_mode_e play_mode;              ///< 音乐播放模式
+    bt_music_play_info_t music;                  ///< 音乐信息
+    bt_music_song_art_cover_t song_art_cover;    ///< 专辑图片信息
+    char lyrics[TEXT_PARAM_LEN];                ///< 歌曲歌词
+    char artist[TEXT_PARAM_LEN];                ///< 艺术家/歌曲名
+    char album[TEXT_PARAM_LEN];                 ///< 专辑名
 } bt_music_info_t;
 
 typedef struct {
@@ -457,9 +466,9 @@ typedef struct {
 ///< 亿联
 int32_t hcn_ec_loadNightModeStatus(uint32_t isNightModeOn); ///< 切换亿联的白天黑夜模式
 int32_t hcn_ec_startMirror();                       ///< 开始镜像
-void    hcn_ec_stopMirror();                        ///< 停止镜像
+void hcn_ec_stopMirror();                           ///< 停止镜像
 const char* hcn_ec_get_version();                   ///< 获取亿联SDK版本
-const char* hcn_ec_get_qr_code_url();                  ///< 获取亿联连接的二维码
+const char* hcn_ec_get_qr_code_url();               ///< 获取亿联连接的二维码
 const char* hcn_ec_get_uuid();	                    ///< 获取UUID
 
 ///< 蓝牙api

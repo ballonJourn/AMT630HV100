@@ -114,9 +114,6 @@ static void parse_weather_json(const char *data) {
 
 static void onHcnLinkConnect(void) {
     hcn_log_info("\r\nonHcnLinkConnect\r\n");
-
-    ///< 通知EC夜间模式状态
-    //EC_uploadNightModeStatus(gDayNight);
     sync_carlink_data_time();
 }
 
