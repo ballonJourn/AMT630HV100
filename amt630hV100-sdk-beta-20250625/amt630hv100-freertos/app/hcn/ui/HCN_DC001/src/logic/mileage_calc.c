@@ -3,6 +3,7 @@
 #include "proxy/vehicle_data.h"
 #include "hcn_global.h"
 
+#if !ON_PC_CACLE
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
@@ -121,3 +122,4 @@ void mileage_clear_odo() {
   mileage_clear_trip();
   return ;
 }
+#endif 

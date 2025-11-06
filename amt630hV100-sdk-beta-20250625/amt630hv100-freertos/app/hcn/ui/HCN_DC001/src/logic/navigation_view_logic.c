@@ -122,13 +122,13 @@ ret_t parse_navigation_data(const hcnNavigationHudInfo *_navigation_info)
         // printf("roadRemainingDistance  changed = %d\n" , _navigation_info->roadRemainingDistance);
     }
     
-    if (strcmp(g_navigation_info.currentRoad, _navigation_info->currentRoad))
+    if (strcmp(g_navigation_info.nextRoad, _navigation_info->nextRoad))
     {
         memset(format_buff , 0x0 , sizeof(format_buff));
-        tk_snprintf(format_buff , sizeof(format_buff) , "%s", _navigation_info->currentRoad);
+        tk_snprintf(format_buff , sizeof(format_buff) , "%s", _navigation_info->nextRoad);
         home_refresh_nav_road(format_buff);
 
-        // printf("currentRoad  changed = %s\n" ,_navigation_info->currentRoad);
+        // printf("nextRoad  changed = %s\n" ,_navigation_info->nextRoad);
     }
 
     return RET_OK ;

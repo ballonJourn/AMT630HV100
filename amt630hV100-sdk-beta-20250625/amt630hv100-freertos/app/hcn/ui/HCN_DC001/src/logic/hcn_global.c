@@ -127,3 +127,67 @@ void global_refresh_mileage()
 
     return ;
 }
+
+
+// 判断一个字节是否是 UTF-8 编码的首字节
+static int is_utf8_head(char c) 
+{
+    return ((c & 0xE0) == 0xC0) || ((c & 0xF0) == 0xE0) || ((c & 0xF8) == 0xF0);
+}
+
+// 返回 UTF-8 编码的一个字符所占用的字节数
+static int utf8_char_len(char c)
+{
+    if ((c & 0xE0) == 0xC0) 
+    {
+        return 2;
+    } 
+    else if ((c & 0xF0) == 0xE0) 
+    {
+        return 3;
+    } 
+    else if ((c & 0xF8) == 0xF0) 
+    {
+        return 4;
+    } 
+    else 
+    {
+        return 1;
+    }
+}
+
+// 截取一个 UTF-8 编码字符串的前限定个字节，保证不截断任何一个完整字符
+bool truncate_utf8_string(char* str , int intercept_length) 
+{
+    int len = strlen(str);
+    int i;
+    int byte_count = 0;
+
+    if((len > intercept_length) 
+        && (len < APP_MESSAGE_CONTENT_INFO_LEN))
+    {       
+        for (i = 0; i < len && byte_count < intercept_length; i += utf8_char_len(str[i])) 
+        {
+            // 如果下一个字符会使得字节数超过限定，则直接退出循环
+            if ((is_utf8_head(str[i]))
+                && (byte_count + utf8_char_len(str[i]) > intercept_length))
+            {
+                break;  
+            }
+            byte_count += utf8_char_len(str[i]);
+        }
+        // 确保截取后的字符串以 '\0' 结尾
+        str[byte_count ]    = '.';  
+        str[byte_count + 1] = '.';  
+        str[byte_count + 2] = '.';  
+        str[byte_count + 3] = '\0';  
+        return true;
+    }
+    else if(len <= intercept_length)
+    {
+        return true;
+    }
+
+    return false;
+}
+
