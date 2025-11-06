@@ -218,8 +218,8 @@ int save_hcn_usr_param(void) {
     param->usr = usr_param;
 
     if (memcmp(&usr_param_pre, &usr_param, sizeof(usr_param_t)) == 0) {
-        hcn_log_error("param is same, do not save!\n");
-        return -1;
+        hcn_log_warn("param is same, do not save!\n");
+        return 0;
     }
 
     memcpy(&usr_param_pre, &usr_param, sizeof(usr_param_t));

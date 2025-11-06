@@ -19,6 +19,7 @@
 #include "log/hcn_log.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
 
+#ifdef HCN_SHUTDOWN_ANIM_ENABLE
 #define POWER_OFF_TIME  (4000)
 
 static TimerHandle_t power_off_timer = NULL;
@@ -60,4 +61,4 @@ void stop_power_off_timer(void) {
         xTimerStop(power_off_timer, 0);
     }      
 }   
-
+#endif

@@ -22,9 +22,11 @@ extern "C" {
 #include <stdbool.h>
 #include "config/hcn_config.h"
 
+#ifdef HCN_SHUTDOWN_ANIM_ENABLE
 void hcn_shutdown_init(void);
 void start_power_off_timer(void);
 void stop_power_off_timer(void);
+#endif
 
 #ifdef __cplusplus
 }

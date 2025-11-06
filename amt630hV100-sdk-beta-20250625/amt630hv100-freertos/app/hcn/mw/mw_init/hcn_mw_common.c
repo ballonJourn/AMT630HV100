@@ -91,6 +91,11 @@ static void test_display_mode(void) {
         }
     }
 }
+
+static void test_shake_hand(void) {
+    send_mcu_heartbeat();
+}
+
 #endif
 
 static void common_io_thread(void *param) {

@@ -52,6 +52,13 @@ uint8_t get_mcu_status(void);
  */
 bool get_mcu_ign_state(void);
 
+/**
+ * @brief  获取mcu软件版本信息
+ * @param  none 
+ * @return mcu软件版本信息指针
+ */
+const char *get_mcu_version(void);
+
 #endif
 
 #ifdef __cplusplus

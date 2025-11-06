@@ -24,6 +24,8 @@
 #include "vehicle_param/vehicle_param.h"
 #include "storage_param1/hcn_usr_param.h"
 #include "maintence/hcn_mileage_maintence.h"
+#include "shutdown_manage/hcn_shutdown.h"
+#include "shutdown_manage/hcn_shutdown_anim.h"
 #include "utils/hcn_utils.h"
 #include "log/hcn_log.h"
 
@@ -68,6 +70,10 @@ void start_handshake_timer(void) {
     }
 }
 
+const char *get_mcu_version(void) {
+    return mcu_ver_full;
+}
+ 
 bool get_mcu_ign_state(void) {
     return is_acc_on;
 }
@@ -169,17 +175,22 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
 
         case UART_MCU_CMD_ACC_STATE: {
             uint8_t state = data[data_start];
+            hcn_log_info("acc state:%d\r\n", state);
             if (state) {
                 is_acc_on = true;
                 if (is_acc_off) {
-                    //stop_power_off_timer();
-                    //hcn_acc_on();
+#ifdef HCN_SHUTDOWN_ANIM_ENABLE
+                    stop_power_off_timer();
+#endif
+                    hcn_ign_on();
                 }
             } else {
                 is_acc_off = true;
                 is_acc_on = false;
-                //start_power_off_timer();
-                //hcn_acc_off();
+#ifdef HCN_SHUTDOWN_ANIM_ENABLE
+                start_power_off_timer();
+#endif
+                hcn_ign_off();
             }
         } break;
 
@@ -327,11 +338,13 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
 
         case UART_MCU_CMD_START_SRC: {
             uint8_t start_src = data[8];
+            uint8_t mcu = data[9];
+
             if (start_src_timer) {
                 xTimerStop(start_src_timer, 0);
             }
 
-            set_mcu_status(data[8]);
+            set_mcu_status(mcu);
             check_start_source(start_src);
         } break;
 
@@ -430,6 +443,10 @@ int uart_mcu_parse_task_init(void) {
         hcn_log_error("Create uart mcu parse task fail.\n");
         return -1;
     }
+
+#ifdef HCN_SHUTDOWN_ANIM_ENABLE
+    hcn_shutdown_init();
+#endif
 
     return 0;
 }

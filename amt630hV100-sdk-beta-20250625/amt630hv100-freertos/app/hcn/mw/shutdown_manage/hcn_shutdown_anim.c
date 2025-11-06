@@ -18,6 +18,8 @@
 #include "animation.h"
 #include "shutdown_manage/hcn_shutdown_anim.h"
 #include "dashboard_state/hcn_dev_state.h"
+#include "storage_param1/hcn_usr_param.h"
+#include "uart_communicate/hcn_uart_send_cmd.h"
 #include "hal_gpio/hal_gpio.h"
 #include "log/hcn_log.h"
 
@@ -49,8 +51,6 @@ static void start_mirror_thread(void *param) {
 #endif
 
 void hcn_ign_on(void) {
-    is_ign_on = true;
-
 #ifdef HCN_SHUTDOWN_ANIM_ENABLE
     animation_stop();
 
@@ -90,7 +90,14 @@ void hcn_ign_off(void) {
         animation_start();
     }
 
-#endif
+#else
+    ///< 关背光   
+    hal_gpio_set_output(HCN_LCD_BL_EN_GPIO, 0);
 
-    hcn_log_info("hcn ign off\n");
+    if (save_hcn_usr_param() == 0) {
+        hcn_log_info("Before acc save usr param success!\r\n");
+    } 
+    send_mcu_shut_down();
+
+#endif
 }
