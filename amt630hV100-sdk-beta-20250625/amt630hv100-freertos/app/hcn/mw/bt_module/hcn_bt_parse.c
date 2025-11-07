@@ -170,6 +170,10 @@ const char* hcn_bt_get_name() {
     }
 }
 
+static void disconnect_all_remote_bt_dev(void) {
+    bt_send_cmd("AT+DSCA");
+}
+
 const char *hcn_get_bt_version(void) {
     return g_bt_version;
 }
@@ -401,9 +405,11 @@ static void on_music_tracks_info(char (*state)[TEXT_PARAM_LEN],
                 sizeof(music_info.artist), "%s", state[1]);    
         snprintf(music_info.album, 
                 sizeof(music_info.album), "%s", state[2]);     
+#if 0
         hcn_log_info("music_info.lyrics:%s\r\n", music_info.lyrics);
         hcn_log_info("music_info.artist:%s\r\n", music_info.artist);
         hcn_log_info("music_info.album:%s\r\n", music_info.album);    
+#endif
      }                               
 }
 
@@ -446,6 +452,20 @@ static void on_bt_str_parse(char *at_str) {
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
             get_hcn_callback()->onHcnBtChange(BT_SWTICH_CHANGE, 
                                     (uint32_t) g_bt_data.btSwitchState);
+        }
+
+        if (g_bt_data.btSwitchState == 0) {
+            if (g_bt_data.btConnected == 1) {
+                disconnect_all_remote_bt_dev();
+                hcn_log_info("disconnect remote bt dev!\r\n");
+                ///< 断开所以蓝牙连接
+                memset(music_info.lyrics, 0, sizeof(music_info.lyrics));
+                memset(music_info.artist, 0, sizeof(music_info.artist));
+                memset(music_info.album, 0, sizeof(music_info.album));
+                if (strlen(g_bt_data.btConnectDevName) > 0) {
+                    memset(g_bt_data.btConnectDevName, 0, sizeof(g_bt_data.btConnectDevName));
+                }
+            }
         }
     } else if (strstr(cmd_str, "+DEVSTAT")) {
         on_bt_dev_state_change(prama_data);
@@ -492,12 +512,24 @@ static void on_bt_str_parse(char *at_str) {
         music_info.play_state = atoi(prama_data);
         hcn_log_info("\r\naudio paly state:%d\r\n", music_info.play_state);
         if (music_info.play_state == BT_MUSIC_PLAY_STATE_PLAYING) {
-            hcn_log_info("Music start play....\r\n");
-            vTaskDelay(pdMS_TO_TICKS(5));
-            aw_pa_start();
+            int ret = -1;
+            uint8_t try_times = 2;
+            do {
+                vTaskDelay(pdMS_TO_TICKS(200));
+                aw_pa_stop();
+                hcn_log_info("Music start play....\r\n");
+                vTaskDelay(pdMS_TO_TICKS(100));
+                ret = aw_pa_start();
+                if (ret == 0) {
+                    hcn_log_info("Open audio dirver success!\r\n");
+                } else {
+                    hcn_log_error("Open audio driver failed, try times = %d\r\n", try_times);
+                }
+                try_times--;
+            } while ((try_times > 0 ) && (ret != 0));
         } else if (music_info.play_state == \
                     BT_MUSIC_PLAY_STATE_PAUSED) {
-            vTaskDelay(pdMS_TO_TICKS(5));
+            vTaskDelay(pdMS_TO_TICKS(20));
             hcn_log_info("Music stop play....\r\n");
             aw_pa_stop();
         }
@@ -541,12 +573,13 @@ static void on_bt_str_parse(char *at_str) {
         } else if (strstr(cmd_str, "+PBDATA")) {
             on_phone_book_proc(param_array, param_count);
         } else if (strstr(cmd_str, "+HFPDEV")) {
-            memcpy(g_bt_data.btHfpAddr, param_array[1], \
+            memcpy(g_bt_data.btHfpAddr, param_array[0], \
                 strlen(param_array[0]) < TEXT_PARAM_LEN ? \
                 strlen(param_array[0]) : TEXT_PARAM_LEN);
             memcpy(g_bt_data.btConnectDevName, param_array[1], \
                 strlen(param_array[1]) < BT_CONNECT_DEV_NAME_LEN ? \
                 strlen(param_array[1]) : BT_CONNECT_DEV_NAME_LEN);
+            hcn_log_info("connect dev name:%s\r\n", g_bt_data.btConnectDevName);    
         } else if (strstr(cmd_str, "+TRACKINFO")) {
             on_music_tracks_info(param_array, param_count);
         } 

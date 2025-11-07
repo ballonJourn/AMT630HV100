@@ -46,6 +46,7 @@ void hal_audio_init() {
     /*2.内部codec的基本初始化操作
     * I2S0为输出：设置采样率、通道、采样位数等音频参数信息 
     */
+#if 0
     audio = audio_dev_open(AUDIO_FLAG_REPLAY);
 	if (!audio)
 	{
@@ -62,6 +63,7 @@ void hal_audio_init() {
     audio_dev_configure(audio, &caps);
 
     aw_set_volume(0x0F);
+#endif
 }
 
 
