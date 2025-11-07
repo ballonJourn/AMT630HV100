@@ -212,8 +212,15 @@ static void onHcnBtChange(bt_device_id_e id, uint32_t value) {
             vehicle_set_data(VEH_BT_PHONE_SIGNAL, (int)value);
             break;     
 
-        case BT_CONNHCNTED_CHANGE:
+        case BT_CONNECTED_CHANGE:
             vehicle_set_data(VEH_BT_CONNECTED_STATUS, (int)value);
+            if (value == 0) {
+                vehicle_set_data(VEH_BT_CONECTED_REMOTE_DEV, 0);
+            }
+            break;
+
+        case BT_CONNECTED_REMOTE_DEV:
+            vehicle_set_data(VEH_BT_CONECTED_REMOTE_DEV, (int)value);
             break;
 
         case BT_SWTICH_CHANGE:{
@@ -287,8 +294,8 @@ void carlink_cb_init(void) {
         hcn_log_info("carlink callback has inited!\n");
         return;
     }
-
     if (!inited) {  
+
         HcnLibConfig hcn_cfg;
         memset(&hcn_cfg, 0, sizeof(HcnLibConfig));
 

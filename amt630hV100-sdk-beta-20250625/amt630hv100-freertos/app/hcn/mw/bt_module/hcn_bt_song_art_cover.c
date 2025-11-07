@@ -103,13 +103,13 @@ void hcn_parse_avrcp_abulm_cover(bt_music_song_art_cover_t * art_cover,
                 char *image = NULL;
                 fscbt_get_coverart_data(&image, &pic_len);
                 if (image) {
+                    memcpy(photo_buff, image, pic_len);
                     art_cover->img_index = last_phone_index;
                     art_cover->img_height = 200;
                     art_cover->img_width = 200;
                     art_cover->image_len = (int)pic_len;
                     art_cover->image_buffer = photo_buff;
-                    memcpy(photo_buff, image, pic_len);
-
+                    
                     #ifdef SAVE_SONG_ART_COVER_ENABLE
                     save_song_art_cover(photo_buff, last_phone_index, pic_len);
                     #endif

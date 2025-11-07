@@ -33,7 +33,8 @@ extern "C" {
 typedef enum {
     BT_BATTERY_CHANGE = 0,       ///< 手机电量
     BT_SIGNAL_CHANGE,            ///< 手机信号
-    BT_CONNHCNTED_CHANGE,         ///< 手机连接状态
+    BT_CONNECTED_CHANGE,         ///< 手机连接状态
+    BT_CONNECTED_REMOTE_DEV,     ///< 蓝牙连接远程设备状态
     BT_SWTICH_CHANGE,            ///< 手机蓝牙开关状态
     BT_BOOK_COUNT,               ///< 手机电话本下载个数
     BT_BOOK_STATE,               ///< 电话本下载状态

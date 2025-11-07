@@ -195,18 +195,40 @@ static void clean_bt_phone_book(void) {
     }
 }
 
+static void clean_bt_data_info(void) {
+    if (strlen(g_bt_data.btDevPin) > 0) {
+        memset(g_bt_data.btDevPin, 0, sizeof(g_bt_data.btDevPin));
+    }
+
+    if (strlen(g_bt_data.btHfpAddr) > 0) {
+        memset(g_bt_data.btHfpAddr, 0, sizeof(g_bt_data.btHfpAddr));
+    }
+
+    if (strlen(g_bt_data.btConnectDevName) > 0) {
+        memset(g_bt_data.btConnectDevName, 0, sizeof(g_bt_data.btConnectDevName));
+    }
+
+    memset(music_info.lyrics, 0, sizeof(music_info.lyrics));
+    memset(music_info.artist, 0, sizeof(music_info.artist));
+    memset(music_info.album, 0, sizeof(music_info.album));  
+}
+
 static void find_name_contact(char *call1, char *call2) {
     if (call1 && (strcmp(g_bt_call.btCallNumber1, call1) != 0)) {
         ///< 如果号码有变化，遍历电话本，查看是否有匹配的号码，查找到联系人
         if (bt_phonebook && (g_bt_data.btPbState != PB_STATE_DOWNDING)) {
             for (int i = 0; i < g_bt_data.btBookCount; i++) {
                 if (strcmp(bt_phonebook[i].number, call1) == 0) {
+                    memset(g_bt_call.btCallPerson1, 0, \
+                            sizeof(g_bt_call.btCallPerson1));
                     strcpy(g_bt_call.btCallPerson1, bt_phonebook[i].name);
                     break;
                 }
             }
         }
 
+        memset(g_bt_call.btCallNumber1, 0, \
+                            sizeof(g_bt_call.btCallNumber1));
         strncpy(g_bt_call.btCallNumber1, call1, 
                 strlen(call1) < TEXT_PARAM_LEN ? \
                 strlen(call1) : TEXT_PARAM_LEN - 1);
@@ -217,13 +239,17 @@ static void find_name_contact(char *call1, char *call2) {
         if (bt_phonebook && (g_bt_data.btPbState != PB_STATE_DOWNDING)) {
             for (int i = 0; i < g_bt_data.btBookCount; i++) {
                 if (strcmp(bt_phonebook[i].number, call2) == 0) {
+                    memset(g_bt_call.btCallPerson2, 0, \
+                            sizeof(g_bt_call.btCallPerson2));
                     strcpy(g_bt_call.btCallPerson2, bt_phonebook[i].name);
                     break;
                 }
             }
         }
 
-         strncpy(g_bt_call.btCallNumber2, call2, 
+        memset(g_bt_call.btCallNumber2, 0, \
+                sizeof(g_bt_call.btCallNumber2));
+        strncpy(g_bt_call.btCallNumber2, call2, 
                 strlen(call2) < TEXT_PARAM_LEN ? \
                 strlen(call2) : TEXT_PARAM_LEN - 1);
     }
@@ -313,7 +339,7 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
         g_bt_data.btConnected = bt_connect;
 
         if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
-            get_hcn_callback()->onHcnBtChange(BT_CONNHCNTED_CHANGE, 
+            get_hcn_callback()->onHcnBtChange(BT_CONNECTED_CHANGE, 
                                     (uint32_t)g_bt_data.btConnected);
         }
 
@@ -324,6 +350,8 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
             if (g_bt_data.btBookCount > 0) {
                 clean_bt_phone_book();
             }
+            
+            clean_bt_data_info();
         }
     }
     
@@ -465,6 +493,10 @@ static void on_bt_str_parse(char *at_str) {
                 if (strlen(g_bt_data.btConnectDevName) > 0) {
                     memset(g_bt_data.btConnectDevName, 0, sizeof(g_bt_data.btConnectDevName));
                 }
+
+                if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+                    get_hcn_callback()->onHcnBtChange(BT_CONNECTED_REMOTE_DEV, 0);
+                }
             }
         }
     } else if (strstr(cmd_str, "+DEVSTAT")) {
@@ -559,6 +591,7 @@ static void on_bt_str_parse(char *at_str) {
             static bool is_firsend = true;
             hcn_log_info("\r\n bt name;%s\r\n ", param_array[0]);
             if (strstr(param_array[0], HCN_CUSTOMER_NAME)) {
+                memset(g_bt_data.btDevName, 0, sizeof(g_bt_data.btDevName));
                 memcpy(g_bt_data.btDevName, param_array[0], \
                 strlen(param_array[0]) < TEXT_PARAM_LEN ? \
                 strlen(param_array[0]) : TEXT_PARAM_LEN);
@@ -573,13 +606,22 @@ static void on_bt_str_parse(char *at_str) {
         } else if (strstr(cmd_str, "+PBDATA")) {
             on_phone_book_proc(param_array, param_count);
         } else if (strstr(cmd_str, "+HFPDEV")) {
+            memset(g_bt_data.btHfpAddr, 0, sizeof(g_bt_data.btHfpAddr));
+            memset(g_bt_data.btConnectDevName, 0, \
+                    sizeof(g_bt_data.btConnectDevName));
+
             memcpy(g_bt_data.btHfpAddr, param_array[0], \
                 strlen(param_array[0]) < TEXT_PARAM_LEN ? \
                 strlen(param_array[0]) : TEXT_PARAM_LEN);
             memcpy(g_bt_data.btConnectDevName, param_array[1], \
                 strlen(param_array[1]) < BT_CONNECT_DEV_NAME_LEN ? \
                 strlen(param_array[1]) : BT_CONNECT_DEV_NAME_LEN);
-            hcn_log_info("connect dev name:%s\r\n", g_bt_data.btConnectDevName);    
+            hcn_log_info("connect dev name:%s\r\n", g_bt_data.btConnectDevName); 
+            if (strlen(g_bt_data.btConnectDevName) > 0) {
+                if (get_hcn_callback() && get_hcn_callback()->onHcnBtChange) {
+                    get_hcn_callback()->onHcnBtChange(BT_CONNECTED_REMOTE_DEV, 1);
+                }
+            } 
         } else if (strstr(cmd_str, "+TRACKINFO")) {
             on_music_tracks_info(param_array, param_count);
         } 

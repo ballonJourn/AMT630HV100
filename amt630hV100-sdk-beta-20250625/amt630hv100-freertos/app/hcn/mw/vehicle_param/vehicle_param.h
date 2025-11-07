@@ -89,6 +89,7 @@ typedef enum {
     VEH_BT_SWITCH_STATUS,     ///< Bluetooth switch status, 0: off, 1: on
     VEH_BT_CONNECTED_STATUS,  ///< Bluetooth connection status, 0: disconnected,
                               ///< 1: connected
+    VEH_BT_CONECTED_REMOTE_DEV, ///< Bluetooth connection remote bt dev: 0: disconnected, 1: connected
     VEH_BT_PHONEBOOK_STATE,  ///< Phonebook state, 0: not downloaded, 1:
                              ///< downloading, 2: completed
     VEH_BT_PHONEBOOK_COUNT,  ///< Phonebook contact count
