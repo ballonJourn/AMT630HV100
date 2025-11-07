@@ -199,7 +199,7 @@ void check_start_source(uint8_t start_src) {
         hcn_log_info("\r\nStart by bat\n");
         usr_param.usr_set.mile_format = 0;
         usr_param.usr_set.mile_display = 0,
-        usr_param.usr_set.language = 1;
+        usr_param.usr_set.language = 0;
         usr_param.usr_set.theme = 0;
         usr_param.usr_set.bt_switch = 1;
         usr_param.usr_set.tpms_unit = 0;
@@ -753,7 +753,7 @@ static void read_usr_param(void) {
     
     usr_param = meter_info->usr;
     usr_param_pre = usr_param;
-    
+
 #if 0
     ///< 打印Flash使用统计
     print_flash_usage_stats();

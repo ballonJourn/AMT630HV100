@@ -153,8 +153,8 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
         case UART_MCU_CMD_TORQUE_INFO:
         case UART_MCU_CMD_GEAR_INFO:
         case UART_MCU_CMD_START_SRC: {
-            uint16_t data_len = ((data[6] << 8) + data[7]);
 #if 0
+            uint16_t data_len = ((data[6] << 8) + data[7]);
             hcn_hex_config_data_print("Soc analysis", ":Recv(0x)", data,
                                      data_len + UART_MCU_MSG_MIN_LEN);
 #endif

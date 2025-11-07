@@ -21,7 +21,7 @@
 #include "log/hcn_log.h"
 #include "carlink_cb/hcn_easy_navi.h"
 #include "vehicle_param/vehicle_param.h"
-#include  "msg_manage/hcn_msg_manage.h"
+#include "msg_manage/hcn_msg_manage.h"
 
 #define LANE_GUIDANCE_PIC_LENGTH        (50*1024)
 
@@ -88,7 +88,7 @@ void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
             "%s", info->currentRoad);
     snprintf(easy_navi_info.nextRoad, sizeof(easy_navi_info.nextRoad), 
             "%s", info->nextRoad);
-
+#if 0
     hcn_log_info("parse_easy_navi_info status:%d, naviIcon:%d, destRemainDist:%d, roadRemainDist:%d, signalIntensity:%d, currentRoad:%s, nextRoad:%s\n",
         easy_navi_info.status,
         easy_navi_info.naviIcon,
@@ -97,6 +97,7 @@ void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
         easy_navi_info.signalIntensity,
         easy_navi_info.currentRoad,
         easy_navi_info.nextRoad);        
+#endif
     vehicle_set_data(VEH_EASY_NAV_STATUS, navi_status);		
 }
 
@@ -142,10 +143,12 @@ void parse_road_junction_pic_info(const road_junction_pic_t *info) {
     }
 
     ///< 路口放大图片太大了，最大需要2MB内存，亿连如果不做优化，后期不建议在简易导航中使用
+#if 0
     hcn_log_info("\r\nparse_road_junction_pic_info status:%d, format:%d, picDataLen:%d\r\n",
         info->status,
         info->format,
         info->pictureLength); 
+#endif
     if (info->status) {
         hcn_log_info("\r\nshow road junction pic data\r\n");
     } else {
