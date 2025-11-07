@@ -121,9 +121,10 @@ void init_auto_backlight(uint8_t level) {
     }
 }
 
-void init_lcd_bl_pwm(void) {
+void init_backlight_pwm(void) {
     hal_pwm_config(HCN_LCD_PWM_CH, PWM_BACKLIGHT_PERION, PWM_BACKLIGHT_PERION);
     hal_pwm_enable(HCN_LCD_PWM_CH);
+    hcn_log_info("init pwm value:1000000\r\n");
 }
 
 void update_breath_backlight_level(uint8_t level) {

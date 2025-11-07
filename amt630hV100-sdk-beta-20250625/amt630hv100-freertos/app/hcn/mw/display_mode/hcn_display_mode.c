@@ -18,6 +18,7 @@
 #include "storage_param1/hcn_usr_param.h"
 #include "vehicle_param/vehicle_param.h"
 #include "light_sensor/hcn_light_sensor.h"
+#include "dashboard_state/hcn_dev_state.h"
 #include "backlight/hcn_backlight.h"
 #include "log/hcn_log.h"
 
@@ -51,7 +52,8 @@ static void light_sensor_ref_init(void) {
 static void check_auto_backlight_level(void) {
     static uint8_t cur_level = 0;
     
-    if (!get_recovery_usr_param()) {
+    if (!get_recovery_usr_param() || 
+        get_check_self_state() < CHECK_SELF_STATE_SUCCESS) {
         return;
     }
 

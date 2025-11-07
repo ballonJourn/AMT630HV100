@@ -22,6 +22,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "vehicle_param/vehicle_param.h"
+#include "backlight/hcn_backlight.h"
 
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE
 
@@ -181,6 +182,13 @@ static void check_usr_param(void) {
 #endif
 
     vehicle_set_data(VEH_LICENSE_AUTH_STATUS, (int)usr_param.usr_set.uuid_active_staus);
+#if 1
+    if (usr_param.usr_set.brightness != 0) {
+        set_backlight_level(usr_param.usr_set.brightness);
+    } else {
+        init_auto_backlight(3);
+    }
+#endif
 }
 
 void check_start_source(uint8_t start_src) {
@@ -746,16 +754,28 @@ static void read_usr_param(void) {
     usr_param = meter_info->usr;
     usr_param_pre = usr_param;
     
+#if 0
     ///< 打印Flash使用统计
     print_flash_usage_stats();
-    
+#endif
+
     hcn_log_info("User param init success!\n");
 
 #endif
 }
 
-int usr_param_init(void) {
+static void read_usr_param_thread(void *param) {
     read_usr_param();
+    vTaskDelete(NULL);
+}
+
+int usr_param_init(void) {
+    if (xTaskCreate(read_usr_param_thread, "read_usr_param", configMINIMAL_STACK_SIZE,\
+            NULL,29, NULL) != pdPASS) {
+        hcn_log_info("create read_usr_param task fail.\n");
+        return -1;
+    }
+
     return 0;
 }
 

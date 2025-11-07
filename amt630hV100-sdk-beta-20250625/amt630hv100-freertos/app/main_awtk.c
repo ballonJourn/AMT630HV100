@@ -920,7 +920,6 @@ void awtk_thread(void *data)
 	hcn_wifi_init();
 	#endif
 #endif
-
 #if CARLINK_CP
 	carlink_cp_init();
 #endif
@@ -931,6 +930,8 @@ void awtk_thread(void *data)
 #endif
 #endif
 
+	hcn_mw_init();
+
 	/* read romfile */
 	ReadRomFile();
 
@@ -938,8 +939,6 @@ void awtk_thread(void *data)
 	extern int tp_init(void);
 	tp_init();
 #endif
-
-	hcn_mw_init();
 
 #ifdef VG_DRIVER
 	xm_vg_init((unsigned int)vgHeap, VG_HEAP_SIZE);

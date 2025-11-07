@@ -31,7 +31,7 @@
 
 #ifdef HCN_UART_COMM_ENABLE
 
-#define START_SRC_TIMEOUT_PERIOD pdMS_TO_TICKS(3000)
+#define START_SRC_TIMEOUT_PERIOD pdMS_TO_TICKS(1500)
 #define HANDSHAKE_TIMEOUT_PERIOD pdMS_TO_TICKS(100)
 
 static QueueHandle_t recv_msg_queue = NULL;
@@ -154,8 +154,10 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
         case UART_MCU_CMD_GEAR_INFO:
         case UART_MCU_CMD_START_SRC: {
             uint16_t data_len = ((data[6] << 8) + data[7]);
+#if 0
             hcn_hex_config_data_print("Soc analysis", ":Recv(0x)", data,
                                      data_len + UART_MCU_MSG_MIN_LEN);
+#endif
         } break;
 
         default:
@@ -198,14 +200,14 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
             uint8_t data_tmp = 0;
 
             int battery = (data[data_start] << 8) + data[data_start + 1];
-            vehicle_set_data(VEH_VOLTAGE_BATTERY, battery);
+                        vehicle_set_data(VEH_VOLTAGE_BATTERY, battery);
 
             data_tmp = data[data_start + 2];
-            hcn_log_info("turn left light:%d\n", data_tmp);
+            //hcn_log_info("turn left light:%d\n", data_tmp);
             vehicle_set_data(VEH_INDICATOR_TURN_RIGHT, (int)data_tmp);
 
             data_tmp = data[data_start + 3];
-            hcn_log_info("turn right light:%d\n", data_tmp);
+            //hcn_log_info("turn right light:%d\n", data_tmp);
             vehicle_set_data(VEH_INDICATOR_TURN_LEFT, (int)data_tmp);
         } break;
 

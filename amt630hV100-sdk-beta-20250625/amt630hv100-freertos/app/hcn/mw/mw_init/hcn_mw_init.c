@@ -16,6 +16,7 @@
 #include <stdbool.h>
 #include "mw_init/hcn_mw_init.h"
 #include "config/hcn_config.h"
+#include "backlight/hcn_backlight.h"
 #include "log/hcn_log.h"
 #include "amt630hv100.h"
 #include "board.h"
@@ -29,12 +30,18 @@ static void hcn_power_io_init(void) {
 void hcn_mw_init(void) {
     hcn_power_io_init();
 
-    bt_module_init();
-    
+    init_backlight_pwm();
+
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE    
     usr_param_init();
 #endif
 
+#ifdef HCN_UART_COMM_ENABLE
+    uart_mcu_init();
+#endif
+
+    bt_module_init();
+    
     mw_common_init();
 
 #ifdef CAN_MODULE_ENABLE
@@ -49,16 +56,9 @@ void hcn_mw_init(void) {
     gpio_key_init();
 #endif
 
-#ifdef HCN_UART_COMM_ENABLE
-    uart_mcu_init();
-#endif
-
 #ifdef HCN_ADC_LIGHT_SENSOR_ENABLE
     display_mode_init();
 #endif
-
-    ///< 开启亮度
-    set_backlight_level(5);
 
     hal_audio_init();
 
