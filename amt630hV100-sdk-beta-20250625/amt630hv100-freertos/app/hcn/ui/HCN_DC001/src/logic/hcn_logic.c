@@ -45,10 +45,6 @@ ret_t home_view_init(widget_t * win)
 {
     if(win == NULL) return RET_FAIL ;
 
-    // vehicle_set_mile_odo(0);
-    // vehicle_set_mile_tripA(0);
-
-
     home_animation_init   (win) ; 
     home_clock_view_init  (win) ;  
     home_dock_view_init   (win) ; 
@@ -59,7 +55,6 @@ ret_t home_view_init(widget_t * win)
     home_signal_view_init (win) ;       
     view_manager_init     (win) ;  
     
-    //slide view
     home_dock_music_ex_view_init(win) ;
     home_nav_view_init          (win) ;
     home_dock_music_view_init   (win) ;
@@ -68,8 +63,6 @@ ret_t home_view_init(widget_t * win)
 
     // 自检
     selfcheck_init();
-
-    home_refresh_signal_visible(TRUE);  //暂时打开
 
     //添加定时器
     home_timer_init();

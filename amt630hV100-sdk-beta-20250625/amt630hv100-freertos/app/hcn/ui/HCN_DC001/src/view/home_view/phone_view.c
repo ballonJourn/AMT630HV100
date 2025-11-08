@@ -32,7 +32,7 @@ ret_t home_phone_view_init(widget_t* parent)
 
 ret_t home_refresh_phone_state(call_state_e state)
 {
-    state = tk_min(state , CALL_STATE_MAX);
+    state = tk_min(state , CALL_CALLING);
 
     if (home_phone_widget[PHONE_STATE_IMG])
     {

@@ -72,7 +72,7 @@ static void handle_state_finished() {
         manager.timer_id = 0;
     }
 
-    home_refresh_signal_visible(FALSE);
+    // home_refresh_signal_visible(FALSE);   //先打开
 
     set_check_self_state(CHECK_SELF_STATE_SUCCESS) ;
 

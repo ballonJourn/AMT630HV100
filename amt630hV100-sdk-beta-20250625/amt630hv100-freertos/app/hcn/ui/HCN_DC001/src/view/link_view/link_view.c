@@ -47,7 +47,7 @@ ret_t link_refresh_speed(uint32_t speed)
 
 ret_t link_refresh_unit(unit_e unit)
 {
-    unit = tk_min(unit , UNIT_MAX) ;
+    unit = tk_min(unit , MPH) ;
 
     if(link_view_widget[LINK_VIEW_UNIT] ){
         widget_set_text_utf8(link_view_widget[LINK_VIEW_UNIT] , unit_str[unit]) ;
@@ -60,7 +60,7 @@ ret_t link_refresh_unit(unit_e unit)
 ret_t link_refresh_drv_mode(drv_mode_e mode)
 {
     char format_buff[64] = { 0 };
-    mode = tk_min(mode , DRV_MODE_MAX) ;
+    mode = tk_min(mode , DRV_MODE_S) ;
     tk_snprintf(format_buff , sizeof(format_buff) , "drv_mode_%d", (int)mode);
 
     if(link_view_widget[LINK_VIEW_RIDE_MODE] ){

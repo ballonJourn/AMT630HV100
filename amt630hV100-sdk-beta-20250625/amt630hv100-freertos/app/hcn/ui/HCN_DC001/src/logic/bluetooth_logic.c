@@ -12,7 +12,6 @@
 
 static bt_music_info_t g_music_info = { 0 };
 static bt_call_t g_call_info        = { 0 };
-static bt_data_t g_data_info        = { 0 };
 static bt_data_t g_bt_info          = { 0 };
 static bool  g_bluetooth_state = false ;
 static bool  g_is_calling      = false ;
@@ -181,8 +180,14 @@ ret_t parse_buletooth_data(const bt_data_t *bt_info)
         refresh_bt_connect_state( bt_info->btSwitchState ? BT_CONNECT_ON_OPTION : BT_CONNECT_OFF_OPTION);
     }
     
+    if (g_bt_info.btSignal != bt_info->btSignal)
+    {
+        home_refresh_GMS_level( (int)(0.6 * bt_info->btSignal));
+    }
+
     return RET_OK ;
 }
+
 
 void bluetooth_data_update()
 {
@@ -195,7 +200,7 @@ void bluetooth_data_update()
         }    
     }
 
-    
+
 }
 
 

@@ -32,6 +32,7 @@ ret_t home_refresh_signal(signal_e icon , bool_t visible)
 ret_t home_refresh_GMS_level(gms_level_e level )
 {
     char format[64] ;
+    level = tk_min_int(level , GMS_LEVEL_3) ;
     tk_snprintf(format , sizeof(format) , "top_signal_%d_n" , (int)level);
 
     if (home_signal_widget[ICON_GMS])
