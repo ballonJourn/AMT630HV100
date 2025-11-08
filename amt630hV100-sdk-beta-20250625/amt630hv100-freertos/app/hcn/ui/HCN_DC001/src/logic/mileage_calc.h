@@ -8,6 +8,8 @@
 void mileage_calc_init();
 void mileage_clear_trip();
 void mileage_clear_odo();
+bool get_mileage_state();
+void set_mileage_state(bool state);
 
 #endif
 

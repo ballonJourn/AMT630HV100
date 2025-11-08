@@ -181,7 +181,7 @@ ret_t calling_animation_start()
 
         is_call_start = true ;
     }
-    
+    return RET_OK ;
 }
 
 ret_t calling_animation_stop()
@@ -195,6 +195,6 @@ ret_t calling_animation_stop()
 
         is_call_start = false ;
     }
-    
+    return RET_OK ;
 
 }

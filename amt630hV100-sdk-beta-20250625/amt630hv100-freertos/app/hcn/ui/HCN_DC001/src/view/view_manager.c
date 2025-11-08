@@ -120,15 +120,6 @@ ret_t on_idle_queue(const idle_info_t* idle)
         return RET_REMOVE;
     
     uint8_t key = (uint8_t)(uintptr_t)idle->ctx ;
-    hcn_key_handle(key) ;
-
-    return RET_REMOVE;
-}
-
-static void hcn_key_cb(uint8_t id) 
-{
-    idle_queue(on_idle_queue ,(void*)id) ;
-
     //测试 里程开始按钮
     #if 1
     static bool odo_cale = false ;
@@ -137,14 +128,21 @@ static void hcn_key_cb(uint8_t id)
         mileage_calc_init();
         odo_cale = true ;
     }
-    if (id == SET_KEY_LONG_PR)
+    if ((key == BACK_KEY_LONG_PR ) && get_current_win() == ICON_INFO)
     {
         mileage_clear_odo();
         printf("clean odo\n");
-        /* code */
     }
     #endif
 
+    hcn_key_handle(key) ;
+
+    return RET_REMOVE;
+}
+
+static void hcn_key_cb(uint8_t id) 
+{
+    idle_queue(on_idle_queue ,(void*)id) ;
     return ;
 }
 #endif

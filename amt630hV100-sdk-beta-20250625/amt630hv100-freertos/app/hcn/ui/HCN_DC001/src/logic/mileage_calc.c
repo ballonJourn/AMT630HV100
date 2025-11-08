@@ -31,6 +31,8 @@ typedef struct {
 
 static MileageData mileage_data = {0};
 
+bool refresh_mileage = false ;
+
 static double get_speed() {
   double speed = 100 ;//vehicle_get_data_speed();
   return (speed < 0.0) ? 0.0 : speed / 3.6;
@@ -59,7 +61,7 @@ static void check_and_reset_trip(void) {
 
 static void save_unsaved_mileage(void) {
   if (mileage_data.unsaved_odo_distance >= SAVE_ODO_THRESHOLD) {
-    global_refresh_mileage();
+    set_mileage_state(true) ;
     // vehicle_save_odo_mileage();
     mileage_data.unsaved_odo_distance -= SAVE_ODO_THRESHOLD;
   }
@@ -121,5 +123,15 @@ void mileage_clear_odo() {
 
   mileage_clear_trip();
   return ;
+}
+
+bool get_mileage_state()
+{
+  return refresh_mileage ;
+}
+
+void set_mileage_state(bool state)
+{
+  refresh_mileage = state ;
 }
 #endif 

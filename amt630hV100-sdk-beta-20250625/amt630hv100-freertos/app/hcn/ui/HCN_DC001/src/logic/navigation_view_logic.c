@@ -84,7 +84,7 @@ void update_qr()
             #endif
 
             refresh_bt_name(vehicle_get_bluetooth_name());
-            printf("vehicle_get_mirror_url successed to refresh  qr\n") ;
+            printf("vehicle_get_mirror_url successed to refresh qr\n") ;
         }
         
     }

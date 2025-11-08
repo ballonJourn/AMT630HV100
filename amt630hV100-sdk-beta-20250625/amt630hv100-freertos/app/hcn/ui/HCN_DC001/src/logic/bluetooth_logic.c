@@ -76,6 +76,12 @@ ret_t parse_music_data(const bt_music_info_t *_music_info)
         printf("music music_total_time = %d  current time changed = %d \n" ,_music_info->music.music_total_time , _music_info->music.cur_time_music_play);
     }
     
+
+    if(memcmp(&g_music_info.song_art_cover , &_music_info->song_art_cover  , sizeof(g_music_info.song_art_cover)))
+    {
+        home_refresh_music_ex_image(_music_info->song_art_cover.image_buffer , _music_info->song_art_cover.image_len);
+        home_refresh_music_image(BLUETOOTH_MUSIC_IMAGE);
+    }
     return RET_OK ;
 }
 
@@ -214,8 +220,10 @@ void bluetooth_view_update()
     bluetooth_data_update(); 
 
     bool bt_state = vehicle_buluetooth_is_connected();
+    home_refresh_signal(ICON_BT , bt_state);   
     if (bt_state != g_bluetooth_state)
     {
+
         if(false == bt_state )
         {
             //断开连接
@@ -231,8 +239,9 @@ void bluetooth_view_update()
         }
         else
         {
-            refresh_bt_phone_info(vehicle_get_phone_name()) ;
-
+            const char* name =  vehicle_get_phone_name();
+            if (name[0]) refresh_bt_phone_info(name) ;
+            else return ;
         }
 
         g_bluetooth_state = bt_state ;

@@ -62,7 +62,7 @@
       </view>
       <view name="power_view" x="524" y="46" w="276" h="235" style:normal:bg_image="power_bg" animation="move(name=move_power_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=524,x_to=800,y_from=123,y_to=123);move(name=move_power_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=800,x_to=524,y_from=123,y_to=123)">
         <image name="power_bg" x="29" y="196" w="200" h="26" draw_type="default" image="power_progress"/>
-        <image_value name="power_value" x="64" y="72" w="141" h="78" image="power_" format="%d" value="100" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
+        <image_value name="power_value" x="66" y="72" w="141" h="78" image="power_" format="%d" value="0" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
         <slider min="0" name="power_progress" x="40" y="200" w="181" h="21" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="2" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" style="default"/>
       </view>
       <view name="dock_selec_view" x="0" y="18" w="506" h="290">
@@ -85,7 +85,7 @@
             </view>
           </view>
           <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <image name="music_image" x="100" y="66" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
+            <image name="music_image" x="100" y="66" w="60" h="60" draw_type="scale" image="icon_media_cover_n"/>
             <hscroll_label name="music_title" x="50" y="157" w="160" h="28" loop="true" style:normal:text_align_h="center" style:normal:font_size="26" style:normal:text_color="#FFFFFF" only_focus="true" ellipses="true" tr_text="no_music"/>
             <label name="music_title-bak" x="50" y="157" w="160" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" visible="false"/>
             <label name="music_clyric-bak" x="50" y="192" w="160" h="59" style:normal:text_color="#9E9E9E" style:normal:font_size="22" line_wrap="true" word_wrap="true" visible="false"/>
@@ -103,7 +103,7 @@
           </view>
           <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
           <view name="music_expand_page" x="0" y="0" w="506" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
-            <image name="music_image_ex" x="214" y="21" w="60" h="60" draw_type="center" image="icon_media_cover_n"/>
+            <image name="music_image_ex" x="214" y="21" w="60" h="60" draw_type="scale" image="icon_media_cover_n"/>
             <label name="music_title_ex-bak" x="94" y="100" w="300" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" visible="false" tr_text="no_music"/>
             <hscroll_label name="music_title_ex" x="94" y="100" w="300" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:text_align_h="center" tr_text="no_music"/>
             <label name="music_lyric_ex-bak" x="80" y="138" w="329" h="28" style:normal:text_color="#9E9E9E" style:normal:font_size="22"/>

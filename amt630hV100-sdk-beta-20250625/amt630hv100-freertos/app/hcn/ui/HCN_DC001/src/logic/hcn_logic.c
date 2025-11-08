@@ -14,6 +14,7 @@
 #include "proxy/vehicle_data.h"
 #include "proxy/vehicle_time.h"
 #include "proxy/vehicle_mile.h"
+#include "mileage_calc.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
 #define REFRESH_INTERVAL_100_MS  (200)
@@ -126,6 +127,12 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
         return RET_REPEAT ;
     
     
+    if(get_mileage_state())
+    {
+        global_refresh_mileage();
+        set_mileage_state(false);
+    }
+
     bluetooth_view_update();
 
     //数据刷新

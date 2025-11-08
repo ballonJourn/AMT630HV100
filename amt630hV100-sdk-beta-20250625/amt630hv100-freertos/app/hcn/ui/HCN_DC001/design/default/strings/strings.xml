@@ -131,5 +131,6 @@ Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
   <language name="en_US">No Tracks</language>
 </string>
 <string name="Enter the call page to view details">
-  <language name="en_US">Enter the call view to view details</language>
+  <language name="en_US">Enter the call page to view details</language>
+  <language name="zh_CN">电话页面查看详情</language>
 </string>
