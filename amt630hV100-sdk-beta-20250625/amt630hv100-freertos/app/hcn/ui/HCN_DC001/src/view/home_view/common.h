@@ -21,7 +21,8 @@
 #define SETTING_PAGE "setting_page"
 #define DEVICE_PAGE  "device_page"
 
-#define BLUETOOTH_MUSIC_IMAGE "buletooth_music_image"
+#define BLUETOOTH_MUSIC_IMAGE   "buletooth_music_image"
+#define BLUETOOTH_DEFAULT_IMAGE "icon_media_cover_n"
 
 typedef enum {
     KM_H     ,

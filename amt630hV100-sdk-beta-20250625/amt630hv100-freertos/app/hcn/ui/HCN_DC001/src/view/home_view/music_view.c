@@ -25,7 +25,7 @@ ret_t home_refresh_music_image(char *blueMusicImg )
 
     // 设置图片控件的图片
     if (home_dock_music_widget[MUSIC_IMAGE]){
-        image_set_image(home_dock_music_widget[MUSIC_IMAGE] , BLUETOOTH_MUSIC_IMAGE ) ;
+        image_set_image(home_dock_music_widget[MUSIC_IMAGE] , blueMusicImg ) ;
         widget_invalidate_force(home_dock_music_widget[MUSIC_IMAGE], NULL  ) ;
     }
     

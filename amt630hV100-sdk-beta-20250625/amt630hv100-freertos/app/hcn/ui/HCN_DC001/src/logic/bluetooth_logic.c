@@ -79,8 +79,16 @@ ret_t parse_music_data(const bt_music_info_t *_music_info)
 
     if(memcmp(&g_music_info.song_art_cover , &_music_info->song_art_cover  , sizeof(g_music_info.song_art_cover)))
     {
-        home_refresh_music_ex_image(_music_info->song_art_cover.image_buffer , _music_info->song_art_cover.image_len);
-        home_refresh_music_image(BLUETOOTH_MUSIC_IMAGE);
+
+        if (RET_OK == gloabl_load_image((uint8_t *)_music_info->song_art_cover.image_buffer , _music_info->song_art_cover.image_len))
+        {
+            home_refresh_music_ex_image(BLUETOOTH_MUSIC_IMAGE) ;
+            home_refresh_music_image(BLUETOOTH_MUSIC_IMAGE);
+        }else{
+            home_refresh_music_ex_image(BLUETOOTH_DEFAULT_IMAGE) ;
+            home_refresh_music_image(BLUETOOTH_DEFAULT_IMAGE);
+        }
+        printf("g_music_info image changed = %d\n" ,_music_info->song_art_cover.img_index);
     }
     return RET_OK ;
 }
@@ -99,6 +107,11 @@ void home_clean_music_data()
     home_refresh_music_lyric(" ");
 
     home_refresh_music_state(false);
+
+    home_refresh_music_bar(0,100);
+
+    home_refresh_music_ex_image(BLUETOOTH_DEFAULT_IMAGE) ;
+    home_refresh_music_image(BLUETOOTH_DEFAULT_IMAGE);
 }
 
 
@@ -205,7 +218,6 @@ void bluetooth_data_update()
             memcpy(&g_bt_info , bt_info ,sizeof(bt_data_t));
         }    
     }
-
 
 }
 

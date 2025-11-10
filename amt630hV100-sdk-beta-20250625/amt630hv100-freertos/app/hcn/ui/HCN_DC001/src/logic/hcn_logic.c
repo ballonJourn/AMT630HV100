@@ -69,6 +69,7 @@ ret_t home_view_init(widget_t * win)
     home_timer_init();
 
     time_start =  time_now_s() ;
+
     return RET_OK ;
 }
 
@@ -115,7 +116,7 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     uint64_t interval  = time_now_s() - time_start;
     home_refresh_info_time(interval) ;
 
-        return RET_REPEAT ;
+    return RET_REPEAT ;
 }
 
 

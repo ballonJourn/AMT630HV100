@@ -191,3 +191,39 @@ bool truncate_utf8_string(char* str , int intercept_length)
     return false;
 }
 
+extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
+                            bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565         ) ;
+
+ret_t gloabl_load_image(uint8_t *buff ,  uint32_t length)
+{
+    if (NULL == buff)
+        return RET_FAIL ;
+    
+    // 将图片数据添加到资源管理器
+    // 验证资源是否存在
+    // const asset_info_t* asset = assets_manager_ref(assets_manager(), ASSET_TYPE_IMAGE, BLUETOOTH_MUSIC_IMAGE );
+    // if (asset != NULL) {
+    //     printf("asset_info_t successed! size: %d\n", asset->size);
+    //     assets_manager_unref(assets_manager(), asset);
+    // } else {
+    //     assets_manager_add_data(assets_manager(), BLUETOOTH_MUSIC_IMAGE , ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, (uint8_t*)buff, length);
+    // }
+
+    bitmap_t bmp , tmps;
+    // 解码对应的图片
+    if (RET_OK == stb_load_image(ASSET_TYPE_IMAGE_PNG, (uint8_t*)buff , length , &bmp, 0, 0, 0)) {
+        // 释放旧的图片缓存
+        if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) {
+            image_manager_unload_bitmap(image_manager(), &tmps);
+        }
+        image_manager_add(image_manager(), BLUETOOTH_MUSIC_IMAGE, &bmp);
+
+        printf("image_manager add bitmap = %s\n",BLUETOOTH_MUSIC_IMAGE);
+    }else{
+        printf("BlueMusicPicData decode error************* \r\n");
+        return RET_FAIL ;
+    }
+
+
+    return RET_OK ;
+}

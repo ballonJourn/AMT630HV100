@@ -23,4 +23,6 @@ void global_refresh_mileage();
 
 bool truncate_utf8_string(char* str , int intercept_length) ;
 
+ret_t gloabl_load_image(uint8_t *buff , uint32_t length) ;
+
 #endif

@@ -3,6 +3,8 @@
 #include "proxy/vehicle_data.h"
 #include "hcn_global.h"
 
+bool refresh_mileage = false ;
+
 #if !ON_PC_CACLE
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -31,7 +33,6 @@ typedef struct {
 
 static MileageData mileage_data = {0};
 
-bool refresh_mileage = false ;
 
 static double get_speed() {
   double speed = 100 ;//vehicle_get_data_speed();
@@ -125,6 +126,9 @@ void mileage_clear_odo() {
   return ;
 }
 
+
+#endif 
+
 bool get_mileage_state()
 {
   return refresh_mileage ;
@@ -134,4 +138,3 @@ void set_mileage_state(bool state)
 {
   refresh_mileage = state ;
 }
-#endif 
