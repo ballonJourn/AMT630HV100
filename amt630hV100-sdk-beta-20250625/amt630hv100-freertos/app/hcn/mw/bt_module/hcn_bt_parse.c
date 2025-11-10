@@ -421,8 +421,7 @@ static void on_music_play_mode(char *param_str) {
 
 static void on_music_tracks_info(char (*state)[TEXT_PARAM_LEN], 
                                 uint16_t param_count) {
-    
-     if (state && param_count > 2) {
+     if (state && param_count > 1) {
         memset(music_info.lyrics, 0, sizeof(music_info.lyrics));
         memset(music_info.artist, 0, sizeof(music_info.artist));
         memset(music_info.album, 0, sizeof(music_info.album));
@@ -430,10 +429,12 @@ static void on_music_tracks_info(char (*state)[TEXT_PARAM_LEN],
         snprintf(music_info.lyrics, 
                 sizeof(music_info.lyrics), "%s", state[0]);
         snprintf(music_info.artist, 
-                sizeof(music_info.artist), "%s", state[1]);    
-        snprintf(music_info.album, 
-                sizeof(music_info.album), "%s", state[2]);     
-#if 0
+                sizeof(music_info.artist), "%s", state[1]); 
+        if (param_count > 2) {
+            snprintf(music_info.album, 
+                sizeof(music_info.album), "%s", state[2]); 
+        }
+#if 1
         hcn_log_info("music_info.lyrics:%s\r\n", music_info.lyrics);
         hcn_log_info("music_info.artist:%s\r\n", music_info.artist);
         hcn_log_info("music_info.album:%s\r\n", music_info.album);    
