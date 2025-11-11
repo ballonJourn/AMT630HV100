@@ -65,9 +65,12 @@ typedef enum {
     VEH_LIGHT_ABS,              ///< 0: off, no show , 1: ABS on
     VEH_LIGHT_WIFI,             ///< 0: off, 1: on
     VEH_AUTO_HEADLIGH,          ///< 0：off, 1:on
+    VEH_LIGHT_BRAKE,            ///< 0：off, 1:on
+    VEH_LIGHT_READY,            ///< 0：off, 1:on
+    VEH_LIGHT_GPS,             ///< 0：off, 1:on
 
     ///< Gear and Oil Data
-    VEH_GEAR_POSITION,  ///< Gear position, 0: neutral 0x01-0x06: 1-6 gears,  7:Invalid gear
+    VEH_GEAR_POSITION,  ///< Gear position, 0: neutral 1:D gear 2:R gear
     VEH_OIL_LEVEL,      ///< Oil level, scale value: 0-5
     VEH_OIL_RESISTANCE,  ///< Oil resistance 0x0:short circuit  0xFFF:open circuit;
 
@@ -123,7 +126,7 @@ typedef enum {
     ///< ABS
     VEH_ABS_MODE,       ///< 0:3 levels 0x01:2 levles 0x02：1 level 0x03：0FF
     VEH_ABS_ENALE,      ///< abs allow status, 0: not allowed, 1: allowed
-    VEH_DRIVE_MODE,     ///< drive mode:0x0:Newbie 0x01:Street  0x02：Sport
+    VEH_DRIVE_MODE,     ///< drive mode:0x0:normal 0x01:eco 0x02:sport 
 
     ///< Launch Control
     VEH_LAUNCH_CONTROL_STATUS,  ///< Launch control status, 0: OFF, 1: ON

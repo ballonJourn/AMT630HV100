@@ -22,7 +22,9 @@
 #include "utils/hcn_utils.h"
 #include "log/hcn_log.h"
 
-#define HCN_CAN_TX_ENABLE
+//#define HCN_CAN_TX_ENABLE
+
+#ifdef HCN_CAN_TX_ENABLE
 
 typedef void (*tx_fun_handle)(CanPort_t *cap, void *param);
 
@@ -86,6 +88,8 @@ static void can_txdemo_thread(void *param) {
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
+
+#endif
 
 int can_msg_tx_msg_init(CanPort_t *cap) {
     if (!cap) {

@@ -27,8 +27,9 @@
 #include "utils/hcn_utils.h"
 #include "vehicle_param/vehicle_param.h"
 
-//#define CAN_RX_DEBUG
+#define CAN_RX_DEBUG
 #define CAN_RX_TIMEOUT_INTERVAL    (1000)
+#define GET_DATA_BITS(data,offset,mask) ((data >> offset) & mask)  
 
 static bool is_can_com = false;
 static can_rx_timeout rx_timeout;
@@ -37,20 +38,54 @@ static void timeout_clear_can_data(void) {
     TickType_t current_time = xTaskGetTickCount();
 
     if (current_time - rx_timeout.ecu_110_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
-        if (vehicle_get_data(VEH_SPEED_CURRENT) > 0) {
-            vehicle_set_data(VEH_SPEED_CURRENT, 0);
-        }
-    }
-
-    if (current_time - rx_timeout.ecu_402_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
         if (vehicle_get_data(VEH_SPEED_ENGINE) > 0) {
             vehicle_set_data(VEH_SPEED_ENGINE, 0);
         }
     }
 
-    if (current_time - rx_timeout.ecu_12b_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+    if (current_time - rx_timeout.ecu_111_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+        if (vehicle_get_data(VEH_DRIVE_MODE) > 0) {
+            vehicle_set_data(VEH_DRIVE_MODE, 0);
+        }
+
+        if (vehicle_get_data(VEH_LIGHT_ENGINE_FAULT) > 0) {
+            vehicle_set_data(VEH_LIGHT_ENGINE_FAULT, 0);
+        }
+    }
+
+    if (current_time - rx_timeout.ecu_112_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+        if (vehicle_get_data(VEH_LIGHT_BRAKE) > 0) {
+            vehicle_set_data(VEH_LIGHT_BRAKE, 0);
+        }
+
+        if (vehicle_get_data(VEH_LIGHT_READY) > 0) {
+            vehicle_set_data(VEH_LIGHT_READY, 0);
+        }
+
+        if (vehicle_get_data(VEH_LIGHT_GPS) > 0) {
+            vehicle_set_data(VEH_LIGHT_GPS, 0);
+        }
+
         if (vehicle_get_data(VEH_TRAM_POWR) > 0) {
             vehicle_set_data(VEH_TRAM_POWR, 0);
+        }
+    }
+
+    if (current_time - rx_timeout.ecu_120_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+        if (vehicle_get_data(VEH_TCS_WARNING) > 0) {
+            vehicle_set_data(VEH_TCS_WARNING, 0);
+        }
+    }
+
+    if (current_time - rx_timeout.ecu_122_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+        if (vehicle_get_data(VEH_SPEED_CURRENT) > 0) {
+            vehicle_set_data(VEH_SPEED_CURRENT, 0);
+        }
+    }
+
+    if (current_time - rx_timeout.ecu_12b_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
+        if (vehicle_get_data(VEH_LIGHT_ABS) == 0) {
+            vehicle_set_data(VEH_LIGHT_ABS, 1);
         }
     }
 }
@@ -63,40 +98,111 @@ static int parse_can_msg_110_msg(uint8_t *buf, uint8_t size) {
 
     rx_timeout.ecu_110_rx_timeout = xTaskGetTickCount();
 
-    uint16_t data = ((buf[1] << 8) + (buf[0]));
+    int data = ((buf[2] << 8) + (buf[3]));
     if (data == 0xffff) {
         data = 0;
     }
 
-    float speed_tmp = data * 0.01;
-    if (speed_tmp > 199) {
-        speed_tmp = 199;
+    float engine_speed_tmp = data * 0.25;
+    data = (int)engine_speed_tmp;
+    if (data > 0 && data <= 1700) {
+        data = 1700;
     }
 
-    vehicle_set_data(VEH_SPEED_CURRENT, (int)speed_tmp);
+    vehicle_set_data(VEH_SPEED_ENGINE, data);
 
     return 0;
 }
 
-static int parse_can_msg_402_msg(uint8_t *buf, uint8_t size) {
+static int parse_can_msg_111_msg(uint8_t *buf, uint8_t size) {
     if ((buf == NULL) || (size < 8)) {
-        hcn_log_error("can_ecu_402 dlc[%d] or msg buff err!\r\n",size);
+        hcn_log_error("can_ecu_111 dlc[%d] or msg buff err!\r\n",size);
         return -1;
     }
 
-    rx_timeout.ecu_402_rx_timeout = xTaskGetTickCount();
+    rx_timeout.ecu_111_rx_timeout = xTaskGetTickCount();
 
-    int data = ((buf[3] << 24) + (buf[2] << 16) + (buf[1] << 8) + buf[0]);
-    if (data == 0xffffffff) {
+    int data = GET_DATA_BITS(buf[0], 1, 0x01);
+    vehicle_set_data(VEH_LIGHT_ENGINE_FAULT, data);
+
+    data = GET_DATA_BITS(buf[0], 2, 0x07);
+    vehicle_set_data(VEH_DRIVE_MODE, data);
+
+    return 0;
+}
+
+static int parse_can_msg_112_msg(uint8_t *buf, uint8_t size) {
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_112 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+
+    rx_timeout.ecu_112_rx_timeout = xTaskGetTickCount();
+
+    int data = GET_DATA_BITS(buf[0], 0, 0x01);
+    vehicle_set_data(VEH_LIGHT_BRAKE, data);
+
+    data = GET_DATA_BITS(buf[0], 1, 0x1);
+    vehicle_set_data(VEH_LIGHT_READY, data);
+
+    data = GET_DATA_BITS(buf[0], 2, 0x1);
+    vehicle_set_data(VEH_LIGHT_GPS, data);
+
+    data = GET_DATA_BITS(buf[2], 0, 0x07);
+    vehicle_set_data(VEH_GEAR_POSITION, data);
+
+    float power = 0;
+    data = ((buf[5] << 8) + buf[6]);
+    if (data == 0xFFFF) {
         data = 0;
     }
 
-    float rpm_tmp = data * 0.01;
-    if (rpm_tmp > 12000) {
-        rpm_tmp = 12000;
+    power = data * 0.01;
+    data = (int)power;
+    if (data > 100) {
+        data = 100;
+    }
+    vehicle_set_data(VEH_TRAM_POWR, data);
+
+    return 0;
+}
+
+static int parse_can_msg_120_msg(uint8_t *buf, uint8_t size) {
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_120 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
     }
 
-    vehicle_set_data(VEH_SPEED_ENGINE, (int)rpm_tmp);
+    rx_timeout.ecu_120_rx_timeout = xTaskGetTickCount();
+
+    int data = GET_DATA_BITS(buf[3], 2, 0x01);
+    vehicle_set_data(VEH_TCS_WARNING, data);
+
+    return 0;
+}
+
+static int parse_can_msg_122_msg(uint8_t *buf, uint8_t size) {
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_122 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+
+    rx_timeout.ecu_122_rx_timeout = xTaskGetTickCount();
+    int data = 0;
+    float speed_tmp = 0;
+
+    data = ((buf[2] << 8) + buf[3]);
+    if (data == 0xFFFF) {
+        data = 0;
+    }
+
+    speed_tmp = data * 0.01;
+    data = (int)speed_tmp;
+    if (data > 199) {
+        data = 199;
+    }
+
+    vehicle_set_data(VEH_SPEED_CURRENT, data);
 
     return 0;
 }
@@ -109,17 +215,8 @@ static int parse_can_msg_12b_msg(uint8_t *buf, uint8_t size) {
 
     rx_timeout.ecu_12b_rx_timeout = xTaskGetTickCount();
 
-    uint16_t data = ((buf[1] << 8) + (buf[0]));
-    if (data == 0xffff) {
-        data = 0;
-    }
-
-    float power_tmp = data * 0.01;
-    if (power_tmp > 1000) {
-        power_tmp = 1000;
-    }
-
-    vehicle_set_data(VEH_TRAM_POWR, (int)power_tmp);
+    int data = GET_DATA_BITS(buf[5], 0, 0x01);
+    vehicle_set_data(VEH_LIGHT_ABS, data);
 
     return 0;
 }
@@ -142,9 +239,20 @@ static void can_recv_msg_process(CanMsg *pMsg) {
             parse_can_msg_110_msg(pMsg->Data, pMsg->DLC);
             break;
 
-        case 0x402:
-            parse_can_msg_402_msg(pMsg->Data, pMsg->DLC);
+        case 0x111:
+            parse_can_msg_111_msg(pMsg->Data, pMsg->DLC);
             break;
+
+        case 0x112:
+            parse_can_msg_112_msg(pMsg->Data, pMsg->DLC);
+            break;
+
+        case 0x120:
+            parse_can_msg_120_msg(pMsg->Data, pMsg->DLC);
+            break;
+
+        case 0x122:
+            parse_can_msg_122_msg(pMsg->Data, pMsg->DLC);
 
         case 0x12b:
             parse_can_msg_12b_msg(pMsg->Data, pMsg->DLC);
@@ -192,6 +300,7 @@ int can_module_init(void) {
     hal_gpio_set_output(CAN_STB_GPIO, 0);
     vCanInit(cap, CAN500kBaud, CAN_MODE_NORMAL);
 
+    vehicle_set_data(VEH_LIGHT_ABS, 1);
 #if 0
 	CAN_FilterInitTypeDef canfilter = {0};
 	/* 只接收ID的第0位为1的帧 */
@@ -208,7 +317,8 @@ int can_module_init(void) {
     }
 
     can_msg_tx_msg_init(cap);
-    printf("can moudle init ok!\r\n");
+
+    hcn_log_info("can moudle init ok!\r\n");
 
     return 0;
 }

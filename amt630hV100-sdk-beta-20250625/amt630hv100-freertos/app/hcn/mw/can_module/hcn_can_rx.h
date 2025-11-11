@@ -23,7 +23,10 @@ extern "C" {
 
 typedef struct {
     uint32_t ecu_110_rx_timeout;
-    uint32_t ecu_402_rx_timeout;
+    uint32_t ecu_111_rx_timeout;
+    uint32_t ecu_112_rx_timeout;
+    uint32_t ecu_120_rx_timeout;
+    uint32_t ecu_122_rx_timeout;
     uint32_t ecu_12b_rx_timeout;
 } can_rx_timeout;
 
