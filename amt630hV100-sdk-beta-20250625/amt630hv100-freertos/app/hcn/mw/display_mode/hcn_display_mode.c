@@ -71,6 +71,17 @@ static void check_auto_backlight_level(void) {
     }
 }
 
+static void check_auto_healight(void) {
+    static uint8_t last_headlight = 0;
+    if (display.sensor_level <= 1 && last_headlight != 1){
+        vehicle_set_data(VEH_AUTO_HEADLIGH, 1);
+        last_headlight = 1;
+    } else if (display.sensor_level > 1 && last_headlight != 2) {
+        vehicle_set_data(VEH_AUTO_HEADLIGH, 0);
+        last_headlight = 2;
+    }       
+}
+
 static void check_display_mode(void) {
     uint8_t display_mode = 0;
     int cur_display = 0;
@@ -138,8 +149,10 @@ static void check_sensor_level(void) {
             }
         }
     }
+    
     check_display_mode();
     check_auto_backlight_level();
+    check_auto_healight();
 }
 
 static void check_light_sensor(void) {
