@@ -738,12 +738,7 @@ static void usb_read_thread(void *para)
 			}
 			vPortFree(filebuf);
 #else
-			FF_FILE *fp = ff_fopen("/usb/update.bin", "rb");
-			if (fp) {
-				ff_fclose(fp);
-				update_from_media("/usb", UPFILE_TYPE_WHOLE);
-			}
-
+			FF_FILE *fp;
 #if DEVICE_TYPE_SELECT == EMMC_FLASH
 			fp = ff_fopen("/usb/emmcldr.bin", "rb");
 #else
@@ -758,6 +753,12 @@ static void usb_read_thread(void *para)
 			if (fp) {
 				ff_fclose(fp);
 				update_from_media("/usb", UPFILE_TYPE_STEPLDR);
+			}
+
+			fp = ff_fopen("/usb/update.bin", "rb");
+			if (fp) {
+				ff_fclose(fp);
+				update_from_media("/usb", UPFILE_TYPE_WHOLE);
 			}
 
 			fp = ff_fopen("/usb/lnchemmc.bin", "rb");

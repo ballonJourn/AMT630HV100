@@ -670,7 +670,14 @@ int update_from_media(char *mpath, int filetype)
 		ff_fclose(fp);
 		vPortFree(buf);
 		printf("burn %s ok.\n", update_file);
-		return 0;
+
+		if (filetype == UPFILE_TYPE_WHOLE) {
+			extern void wdt_cpu_reboot(void);
+			printf("Ota update bin success, cpu will reboot...\r\n");
+			vTaskDelay(500);
+			wdt_cpu_reboot();
+		}
+		return 0; 
 	} else {
 		printf("checksum after burn fail.\n");
 	}
