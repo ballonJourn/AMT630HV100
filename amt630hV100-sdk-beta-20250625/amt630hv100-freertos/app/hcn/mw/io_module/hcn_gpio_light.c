@@ -13,10 +13,10 @@
 */
 
 #include "io_module/hcn_gpio_light.h"
+#include "hal_gpio/hal_gpio.h"
 #include "dashboard_state/hcn_dev_state.h"
 #include "vehicle_param/vehicle_param.h"
 #include "log/hcn_log.h"
-#include "gpio.h"
 
 ///< gpio刷新周期为100ms,需要防止在100ms任务中
 #define VEH_IO_CHECK_PERIOD (500)
@@ -85,7 +85,7 @@ static void set_frame_light(int gpio_id, int value) {
  * @return none
  */
 static void check_frame_light(int gpio_id, int io_index, bool is_filter) {
-    int value = gpio_get_value(gpio_id);
+    int value = hal_gpio_get_input_value(gpio_id);
 
     if (is_filter) {
         if (gpio_last_value[io_index] == value) {
@@ -122,80 +122,80 @@ void scan_frame_light(void) {
 }
 
 void ctrl_frame_light_start_state(led_state_e state) {
-    gpio_direction_output(VEH_LEFT_TURN_GPIO, state);
-    gpio_direction_output(VEH_RIGHT_TURN_GPIO, state);
-    gpio_direction_output(VEH_HIGH_BEAM_GPIO, state);
-    gpio_direction_output(VEH_POSITION_GPIO, state);
-    gpio_direction_output(VEH_OIL_PRESSURE_GPIO, state);
-    gpio_direction_output(VEH_ABS_GPIO, state);
-    gpio_direction_output(VEH_OBD_GPIO, state);
-    gpio_direction_output(VEH_N_GEAR_GPIO, state);
-    gpio_direction_output(VEH_WATER_TEMP_GPIO, state);
+    hal_gpio_set_output(VEH_LEFT_TURN_GPIO, state);
+    hal_gpio_set_output(VEH_RIGHT_TURN_GPIO, state);
+    hal_gpio_set_output(VEH_HIGH_BEAM_GPIO, state);
+    hal_gpio_set_output(VEH_POSITION_GPIO, state);
+    hal_gpio_set_output(VEH_OIL_PRESSURE_GPIO, state);
+    hal_gpio_set_output(VEH_ABS_GPIO, state);
+    hal_gpio_set_output(VEH_OBD_GPIO, state);
+    hal_gpio_set_output(VEH_N_GEAR_GPIO, state);
+    hal_gpio_set_output(VEH_WATER_TEMP_GPIO, state);
 }
 
 void ctrl_frame_light(void) {
     float temp = 0;
     if (vehicle_get_data(VEH_INDICATOR_TURN_LEFT)) {
-        gpio_direction_output(VEH_LEFT_TURN_GPIO, 1);
+        hal_gpio_set_output(VEH_LEFT_TURN_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_LEFT_TURN_GPIO, 0);
+        hal_gpio_set_output(VEH_LEFT_TURN_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_INDICATOR_TURN_RIGHT)) {
-        gpio_direction_output(VEH_RIGHT_TURN_GPIO, 1);
+        hal_gpio_set_output(VEH_RIGHT_TURN_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_RIGHT_TURN_GPIO, 0);
+        hal_gpio_set_output(VEH_RIGHT_TURN_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_LIGHT_HIGH_BEAM)) {
-        gpio_direction_output(VEH_HIGH_BEAM_GPIO, 1);
+        hal_gpio_set_output(VEH_HIGH_BEAM_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_HIGH_BEAM_GPIO, 0);
+        hal_gpio_set_output(VEH_HIGH_BEAM_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_LIGHT_LOCATION)) {
-        gpio_direction_output(VEH_POSITION_GPIO, 1);
+        hal_gpio_set_output(VEH_POSITION_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_POSITION_GPIO, 0);
+        hal_gpio_set_output(VEH_POSITION_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_LIGHT_OIL_PRESSURE)) {
-        gpio_direction_output(VEH_OIL_PRESSURE_GPIO, 1);
+        hal_gpio_set_output(VEH_OIL_PRESSURE_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_OIL_PRESSURE_GPIO, 0);
+        hal_gpio_set_output(VEH_OIL_PRESSURE_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_LIGHT_ABS)) {
-        gpio_direction_output(VEH_ABS_GPIO, 1);
+        hal_gpio_set_output(VEH_ABS_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_ABS_GPIO, 0);
+        hal_gpio_set_output(VEH_ABS_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_LIGHT_ENGINE_FAULT)) {
-        gpio_direction_output(VEH_OBD_GPIO, 1);
+        hal_gpio_set_output(VEH_OBD_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_OBD_GPIO, 0);
+        hal_gpio_set_output(VEH_OBD_GPIO, 0);
     }
 
     if (vehicle_get_data(VEH_GEAR_POSITION) == 0) {
-        gpio_direction_output(VEH_N_GEAR_GPIO, 1);
+        hal_gpio_set_output(VEH_N_GEAR_GPIO, 1);
     } else {
-        gpio_direction_output(VEH_N_GEAR_GPIO, 0);
+        hal_gpio_set_output(VEH_N_GEAR_GPIO, 0);
     }
 
     temp = vehicle_get_data(VEH_TEMP_WATER) / 10.0;
     if (temp >= 120.0) {
-        gpio_direction_output(VEH_WATER_TEMP_GPIO, 1);
+        hal_gpio_set_output(VEH_WATER_TEMP_GPIO, 1);
     } else if (temp < 118.0) {
-        gpio_direction_output(VEH_WATER_TEMP_GPIO, 0);
+        hal_gpio_set_output(VEH_WATER_TEMP_GPIO, 0);
     }
 }
 
 void light_gpio_init(int period) {
-    gpio_direction_input(VEH_LEFT_TURN_DET_GPIO);
-    gpio_direction_input(VEH_RIGHT_TURN_DET_GPIO);
-    gpio_direction_input(VEH_HIGH_BEAM_DET_GPIO);
-    gpio_direction_input(VEH_LOW_BEAM_DET_GPIO);
+    hal_gpio_set_input(VEH_LEFT_TURN_DET_GPIO);
+    hal_gpio_set_input(VEH_RIGHT_TURN_DET_GPIO);
+    hal_gpio_set_input(VEH_HIGH_BEAM_DET_GPIO);
+    hal_gpio_set_input(VEH_LOW_BEAM_DET_GPIO);
 
     if (period > VEH_IO_CHECK_PERIOD) {
         hcn_log_error("Thread cycle too slow!\n");
