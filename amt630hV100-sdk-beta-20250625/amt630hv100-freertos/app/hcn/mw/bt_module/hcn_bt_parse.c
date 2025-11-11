@@ -472,8 +472,7 @@ static void on_bt_str_parse(char *at_str) {
 
 #if 0
     printf("\r\npos:%d, cmd_str:%s, prama_data:%s\r\n", pos, cmd_str, prama_data);
-#endif
-
+#endif    
     if (strstr(cmd_str, "+PAGE")) {
         g_bt_data.btSwitchState = (uint8_t)atoi(prama_data);
         hcn_log_info("\r\nbt switch state:%d\r\n", g_bt_data.btSwitchState);
@@ -624,7 +623,12 @@ static void on_bt_str_parse(char *at_str) {
                 }
             } 
         } else if (strstr(cmd_str, "+TRACKINFO")) {
-            on_music_tracks_info(param_array, param_count);
+            if (param_count >= 1) {
+                if (strstr(param_array[0], "Not Provided")) {
+                    hcn_log_info("Exit music App or not open APP!\r\n");
+                }
+                on_music_tracks_info(param_array, param_count);
+            }
         } 
      }
 }
