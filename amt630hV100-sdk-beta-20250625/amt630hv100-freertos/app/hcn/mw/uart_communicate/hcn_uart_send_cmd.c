@@ -196,4 +196,109 @@ int send_mcu_clear_subtotal_mileage(uint8_t type) {
     return -1;
 }
 
+int send_mcu_set_odo(uint32_t odo) {
+    if (odo > 0) {
+        hcn_mcu_msg_t *msg = uart_alloc_msg();
+        if (msg != NULL) {
+            msg->buffer[2] = 0x00;
+            msg->buffer[3] = 0x01;
+            msg->buffer[4] = (UART_MCU_CMD_SET_ODO_DATA >> 8) & 0xff;
+            msg->buffer[5] = (UART_MCU_CMD_SET_ODO_DATA & 0xff);
+            msg->buffer[6] = 0x00;
+            msg->buffer[7] = 0x04;
+            msg->buffer[8] = (uint8_t)((odo >> 24) & 0xff);
+            msg->buffer[9] = (uint8_t)((odo >> 16) & 0xff);
+            msg->buffer[10] = (uint8_t)((odo >> 8) & 0xff);
+            msg->buffer[11] = (uint8_t)(odo & 0xff);
+            msg->buffer[12] = uart_mcu_calc_crc(msg->buffer);
+            msg->buffer[13] = UART_MCU_MSG_TAIL;
+            return send_mcu_msg(msg);
+        }
+    }
+
+    return -1;
+}
+
+int send_mcu_request_odo(void) {
+    hcn_mcu_msg_t *msg = uart_alloc_msg();
+    if (msg != NULL) {
+        msg->buffer[2] = 0x00;
+        msg->buffer[3] = 0x01;
+        msg->buffer[4] = (UART_MCU_CMD_REQUEST_ODO_DATA >> 8) & 0xff;
+        msg->buffer[5] = (UART_MCU_CMD_REQUEST_ODO_DATA & 0xff);
+        msg->buffer[6] = 0x00;
+        msg->buffer[7] = 0x01;
+        msg->buffer[8] = 0x00;
+        msg->buffer[9] = uart_mcu_calc_crc(msg->buffer);
+        msg->buffer[10] = UART_MCU_MSG_TAIL;
+        return send_mcu_msg(msg);
+    }
+
+    return -1;
+}
+
+int send_mcu_set_trip_a(uint32_t trip_a) {
+    if (trip_a > 0) {
+        hcn_mcu_msg_t *msg = uart_alloc_msg();
+        if (msg != NULL) {
+            msg->buffer[2] = 0x00;
+            msg->buffer[3] = 0x01;
+            msg->buffer[4] = (UART_MCU_CMD_SET_TRIP_A_DATA >> 8) & 0xff;
+            msg->buffer[5] = (UART_MCU_CMD_SET_TRIP_A_DATA & 0xff);
+            msg->buffer[6] = 0x00;
+            msg->buffer[7] = 0x04;
+            msg->buffer[8] = (uint8_t)((trip_a >> 24) & 0xff);
+            msg->buffer[9] = (uint8_t)((trip_a >> 16) & 0xff);
+            msg->buffer[10] = (uint8_t)((trip_a >> 8) & 0xff);
+            msg->buffer[11] = (uint8_t)(trip_a & 0xff);
+            msg->buffer[12] = uart_mcu_calc_crc(msg->buffer);
+            msg->buffer[13] = UART_MCU_MSG_TAIL;
+            return send_mcu_msg(msg);
+        }
+    }
+    
+    return -1;
+}
+
+int send_mcu_set_trip_b(uint32_t trip_b) {
+    if (trip_b > 0) {
+        hcn_mcu_msg_t *msg = uart_alloc_msg();
+        if (msg != NULL) {
+            msg->buffer[2] = 0x00;
+            msg->buffer[3] = 0x01;
+            msg->buffer[4] = (UART_MCU_CMD_SET_TRIP_B_DATA >> 8) & 0xff;
+            msg->buffer[5] = (UART_MCU_CMD_SET_TRIP_B_DATA & 0xff);
+            msg->buffer[6] = 0x00;
+            msg->buffer[7] = 0x04;
+            msg->buffer[8] = (uint8_t)((trip_b >> 24) & 0xff);
+            msg->buffer[9] = (uint8_t)((trip_b >> 16) & 0xff);
+            msg->buffer[10] = (uint8_t)((trip_b >> 8) & 0xff);
+            msg->buffer[11] = (uint8_t)(trip_b & 0xff);
+            msg->buffer[12] = uart_mcu_calc_crc(msg->buffer);
+            msg->buffer[13] = UART_MCU_MSG_TAIL;
+            return send_mcu_msg(msg);
+        }
+    }
+    
+    return -1;
+}
+
+int send_mcu_request_trip(uint8_t type) {
+    hcn_mcu_msg_t *msg = uart_alloc_msg();
+    if (msg != NULL) {
+        msg->buffer[2] = 0x00;
+        msg->buffer[3] = 0x01;
+        msg->buffer[4] = (UART_MCU_CMD_REQUEST_TRIP_DATA >> 8) & 0xff;
+        msg->buffer[5] = (UART_MCU_CMD_REQUEST_TRIP_DATA & 0xff);
+        msg->buffer[6] = 0x00;
+        msg->buffer[7] = 0x01;
+        msg->buffer[8] = type;
+        msg->buffer[9] = uart_mcu_calc_crc(msg->buffer);
+        msg->buffer[10] = UART_MCU_MSG_TAIL;
+        return send_mcu_msg(msg);
+    }
+    
+    return -1;
+}
+
 #endif

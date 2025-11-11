@@ -100,6 +100,41 @@ SystemTime_t get_mcu_time(void);
  */
 int send_mcu_clear_subtotal_mileage(uint8_t type);
 
+/**
+ * @brief  设置ODO数据
+ * @param  odo total mileage data,uint(m)
+ * @return 0:success -1:failed
+ */
+int send_mcu_set_odo(uint32_t odo);
+
+/**
+ * @brief  请求ODO数据
+ * @param  无
+ * @return 0:success -1:failed
+ */
+int send_mcu_request_odo(void);
+
+/**
+ * @brief  设置tripA
+ * @param  trip_a sub A mileage data,uint(m)
+ * @return 0:success -1:failed
+ */
+int send_mcu_set_trip_a(uint32_t trip_a);
+
+/**
+ * @brief  设置tripB
+ * @param  trip_a sub B mileage data,uint(m)
+ * @return 0:success -1:failed
+ */
+int send_mcu_set_trip_b(uint32_t trip_b);
+
+/**
+ * @brief  请求trip数据
+ * @param  type 0x00:trip A  0x01:tripB
+ * @return 0:success -1:failed
+ */
+int send_mcu_request_trip(uint8_t type);
+
 #endif
 
 #ifdef __cplusplus

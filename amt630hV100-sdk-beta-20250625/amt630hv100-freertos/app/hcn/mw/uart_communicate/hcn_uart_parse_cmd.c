@@ -153,7 +153,7 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
         case UART_MCU_CMD_TORQUE_INFO:
         case UART_MCU_CMD_GEAR_INFO:
         case UART_MCU_CMD_START_SRC: {
-#if 0
+#if 1
             uint16_t data_len = ((data[6] << 8) + data[7]);
             hcn_hex_config_data_print("Soc analysis", ":Recv(0x)", data,
                                      data_len + UART_MCU_MSG_MIN_LEN);
@@ -201,7 +201,7 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
 
             int battery = (data[data_start] << 8) + data[data_start + 1];
                         vehicle_set_data(VEH_VOLTAGE_BATTERY, battery);
-
+            battery = (int)(battery / 10);
             data_tmp = data[data_start + 2];
             //hcn_log_info("turn left light:%d\n", data_tmp);
             vehicle_set_data(VEH_INDICATOR_TURN_RIGHT, (int)data_tmp);
