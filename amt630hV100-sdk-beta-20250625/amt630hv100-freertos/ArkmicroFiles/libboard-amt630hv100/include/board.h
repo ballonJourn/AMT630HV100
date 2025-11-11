@@ -358,7 +358,7 @@
 
 #ifdef AUDIO_RECORD
 #define AUDIO_RECORD_I2S		I2S_ID1					/* Select i2s id */
-#define AUDIO_CODEC_ADC_IC		AUDIO_CODEC_ADC_ES7243E	/* Select your codec adc type */
+#define AUDIO_CODEC_ADC_IC		AUDIO_CODEC_ADC_NONE	/* Select your codec adc type */
 #endif
 
 #ifndef AUDIO_CODEC_DAC_IC

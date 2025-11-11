@@ -17,8 +17,10 @@
 #include "hal_audio/hal_audio.h"
 
 
-
+#if 0
 static  struct audio_caps caps = {0};
+#endif
+
 static	struct audio_device *audio;
 
 int hal_audio_set_volume(uint32_t v) {
