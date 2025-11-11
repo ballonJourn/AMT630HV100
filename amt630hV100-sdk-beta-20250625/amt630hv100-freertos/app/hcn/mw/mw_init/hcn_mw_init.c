@@ -17,6 +17,7 @@
 #include "mw_init/hcn_mw_init.h"
 #include "config/hcn_config.h"
 #include "backlight/hcn_backlight.h"
+#include "version/hcn_version.h"
 #include "log/hcn_log.h"
 #include "amt630hv100.h"
 #include "board.h"
@@ -28,6 +29,8 @@ static void hcn_power_io_init(void) {
 }
 
 void hcn_mw_init(void) {
+    soc_version_init();
+    
     hcn_power_io_init();
 
     init_backlight_pwm();

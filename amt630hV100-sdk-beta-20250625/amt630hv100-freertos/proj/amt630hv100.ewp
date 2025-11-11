@@ -4388,6 +4388,12 @@
                         <name>$PROJ_DIR$\..\app\hcn\common\utils\hcn_utils.c</name>
                     </file>
                 </group>
+                <group>
+                    <name>version</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\common\version\hcn_version.c</name>
+                    </file>
+                </group>
             </group>
             <group>
                 <name>hal</name>

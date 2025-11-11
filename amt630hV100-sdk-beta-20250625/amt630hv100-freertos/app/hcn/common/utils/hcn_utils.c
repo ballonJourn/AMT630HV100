@@ -16,6 +16,9 @@
 #include <string.h>
 #include <ctype.h>
 #include "utils/hcn_utils.h"
+#include "log/hcn_log.h"
+
+static char build_date_time[32] = {0};
 
 void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data,
                               uint8_t length) {
@@ -111,4 +114,43 @@ uint16_t string_split(char *dest_str, char *token,
     }
     
     return i;
+}
+
+const char *get_build_date_time(void) {
+	return build_date_time;
+}
+
+void set_build_date_time(void) {
+    const char *pMonth[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", \
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    
+    ///< 取编译日期
+    const char Date[12] = __DATE__;  
+
+#ifdef GET_BUILD_TIME_ENABLE
+	char Time[10] = __TIME__;
+#endif
+
+    uint8_t i;
+	int month = 1;
+    for (i = 0; i < 12; i++) {
+		if (memcmp(Date, pMonth[i], 3) == 0)
+			month = i + 1;
+	}
+
+    ///<Date[9]为2位年份，Date[7]为完整年份
+    int year = (uint16_t)atoi(Date + 7); 
+    int day = (uint8_t)atoi(Date + 4);
+
+#ifdef GET_BUILD_TIME_ENABLE
+	char *hour = strtok(Time, ":");
+    char *min = strtok(NULL, ":");
+    char *sec = strtok(NULL, ":");
+    snprintf(build_date_time, sizeof(build_date_time), "%04d%02d%02d_%s%s%s", \
+         year, month, day, hour, min, sec);
+#endif
+ 	snprintf(build_date_time, sizeof(build_date_time), \
+        "%04d%02d%02d", year, month, day);
+
+	printf("Soc build version time: %s\r\n", build_date_time);
 }

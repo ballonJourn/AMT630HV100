@@ -82,6 +82,20 @@ uint16_t string_split(char *dest_str, char *token,
                 char out_str[][TEXT_PARAM_LEN], 
                 int out_str_len);
 
+/**
+ * @brief  获取软件版本编译日期时间
+ * @param  无
+ * @return 编译日期时间指针
+ */
+const char *get_build_date_time(void);
+
+/**
+ * @brief  设置软件版本编译日期时间
+ * @param  无
+ * @return 无
+ */
+void set_build_date_time(void);
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus
