@@ -423,7 +423,7 @@ void main(void)
 	timer_init();		
 	InitUart(115200);
 	SendUartString("\nARK AMT630Hv100 AMTLDR 0906_600M\n");
-	SendUartString("\nARK AMT630Hv100 sys all drive io 3ma\n");
+	SendUartString("\nARK AMT630Hv100 sys all drive io 2ma,20251110\n");
 
 /*
 	val = rSYS_ANA1_CFG;
