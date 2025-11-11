@@ -688,7 +688,7 @@ void* initECTiny(void* param)
 	sprintf(qr_info.auth, "WPA-PSK");
 
     memset(real_uuid, 0, sizeof(real_uuid));
-    snprintf(real_uuid, sizeof(real_uuid), "%s%s", HCN_CUSTOMER_NAME, bt_mac);
+    snprintf(real_uuid, sizeof(real_uuid), "%s%s", HCN_MANUFACTURER_NAME, bt_mac);
 #ifdef HCN_CARLINK_PROTOTYPE_MODE
     memset(uuid, 0, sizeof(uuid));
     hcn_log_info("use prototype mode uuid:%s\r\n", HCN_CHINESE_UUID);
