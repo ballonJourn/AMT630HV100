@@ -37,10 +37,10 @@
     <label name="odo_unit" x="716" y="7" w="34" h="28" style:normal:font_name="default" style:normal:text_align_h="left" style:normal:font_size="28" style:normal:text_align_v="bottom" text="km"/>
   </view>
   <view name="electrical_view" x="178" y="440" w="444" h="40" style:normal:bg_image="power_level_bg">
-    <progress_bar name="electrical_bar" x="150" y="17" w="145" h="10" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00000000" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" style:normal:fg_image="power_level_p" style:normal:fg_image_draw_type="repeat9" style:normal:icon="" style:normal:icon_at="right" animation="value(name=animation_demo,duration=2000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" value="50"/>
-    <label name="electrical_percentage" x="74" y="8" w="30" h="28" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="99"/>
+    <progress_bar name="electrical_bar" x="150" y="17" w="145" h="10" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00000000" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" style:normal:fg_image="power_level_p" style:normal:fg_image_draw_type="repeat9" style:normal:icon="" style:normal:icon_at="right" animation="value(name=animation_demo,duration=2000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" value="100"/>
+    <label name="electrical_percentage" x="74" y="8" w="30" h="28" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
     <label name="label1" x="103" y="8" w="24" h="28" style:normal:text_color="#4A93BB" style:normal:font_size="26" style:normal:text_align_v="bottom" text="%"/>
-    <label name="electrical_value" x="296" y="8" w="48" h="28" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999"/>
+    <label name="electrical_value" x="296" y="8" w="48" h="28" style:normal:font_size="28" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
     <label name="electrical_unit" x="348" y="8" w="41" h="28" style:normal:text_color="#4A93BB" style:normal:font_size="28" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
   </view>
   <pages name="pages" x="0" y="77" w="800" h="326" style:normal:border_color="#00000000" value="0">
@@ -55,8 +55,8 @@
         <image name="speed_unit" x="132" y="226" w="63" h="23" draw_type="center" image="unit_km_h"/>
         <image name="driving_mode" x="153" y="73" w="21" h="17" draw_type="default" image="drv_mode_0"/>
         <slide_menu name="gear_view" x="68" y="276" w="190" h="44" min_scale="1" align_v="top" value="1">
-          <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>
           <image name="gear_N" draw_type="center" style:normal:icon="gear_n_n" style:selected:icon="gear_n_p"/>
+          <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>
           <image name="gear_R" draw_type="center" style:normal:icon="gear_r_n" style:selected:icon="gear_r_p"/>
         </slide_menu>
       </view>
@@ -224,10 +224,12 @@
         <view name="device_view" x="0" y="0" w="100%" h="100%">
           <label name="label3" x="204" y="34" w="140" h="33" style:normal:font_size="26" tr_text="device"/>
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
-          <label name="label3" x="19" y="105" w="140" h="33" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="sn"/>
-          <label name="device_sn" x="19" y="148" w="420" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="WDW454A56WD4A56"/>
-          <label name="label3" x="19" y="203" w="140" h="33" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="version"/>
-          <label name="device_ver" x="19" y="246" w="420" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="v1.0.0"/>
+          <label name="label3" x="19" y="84" w="140" h="33" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="sn"/>
+          <label name="device_sn" x="19" y="114" w="420" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="WDW454A56WD4A56"/>
+          <label name="label3" x="19" y="157" w="140" h="33" style:normal:font_size="26" style:normal:text_align_h="left" tr_text="version"/>
+          <label name="device_ver" x="19" y="187" w="420" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="v1.0.0"/>
+          <label name="label3" x="19" y="230" w="140" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="MCU"/>
+          <label name="device_mcu" x="20" y="263" w="420" h="33" style:normal:font_size="26" style:normal:text_align_h="left" text="1.010"/>
         </view>
       </slide_view>
     </view>
