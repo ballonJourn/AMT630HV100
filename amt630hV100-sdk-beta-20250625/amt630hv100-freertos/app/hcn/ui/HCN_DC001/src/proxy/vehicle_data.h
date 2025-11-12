@@ -34,6 +34,8 @@ int32_t vehicle_get_data_drv_mode() ;
 
 int32_t vehicle_get_data_remain_battary();
 
+int32_t vehicle_get_data_current_display() ;
+
 const char* veicle_get_data_version();
 
 const char* veicle_get_data_mcu_ver();

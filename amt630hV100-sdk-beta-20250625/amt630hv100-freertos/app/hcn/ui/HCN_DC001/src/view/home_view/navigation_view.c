@@ -77,8 +77,9 @@ ret_t home_refresh_nav_distance(char *value)
     return RET_OK ;
 }
 
+
 //简易导航页面
-ret_t home_refresh_nav_view(home_navigate_view_e view)  
+ret_t home_refresh_nav_view(home_navigate_view_e view)
 {
     if (view >= NVAI_VIEW_MAX  || (NULL == nav_slide_view) )
         return RET_FAIL;

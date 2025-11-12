@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "vehicle_data.h"
 #include "view/home_view/common.h"
+#include "view/set_view/display.h"
 #include "vehicle_param/vehicle_param.h"
 #include "common/version/hcn_version.h"
 #include "uart_communicate/hcn_uart_parse_cmd.h"
@@ -32,6 +33,8 @@ static const int drvModeMaps[] = {
     [1] = DRV_MODE_E ,
     [2] = DRV_MODE_S ,
 };
+
+
 
 int32_t vehicle_get_data_signal_lamp(veh_signal_e lamp)
 {
@@ -107,6 +110,17 @@ int32_t vehicle_get_data_remain_battary()
 #if !ON_PC_CACLE
     int32_t remain_battary = vehicle_get_data(VEH_TRAM_REMAIN_BATTARY);
     return remain_battary;
+#endif
+
+    return 0 ; 
+}
+
+//mode  0：day 1:night
+int32_t vehicle_get_data_current_display() 
+{
+#if !ON_PC_CACLE
+    int32_t value = vehicle_get_data(VEH_CUR_DISPALY_MODE);
+    return ( value == 0 ) ? DIAPLAY_DAY_OPTION : DIAPLAY_NIGHT_OPTION ;
 #endif
 
     return 0 ; 

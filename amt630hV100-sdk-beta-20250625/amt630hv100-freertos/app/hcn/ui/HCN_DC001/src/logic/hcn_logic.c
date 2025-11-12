@@ -114,6 +114,13 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     //导航
     navigation_view_update();
 
+
+    //自动模式切主题 0 白天 1黑夜
+    if ( 2 == vehicle_get_param_display())  
+    {
+        global_refresh_display(vehicle_get_data_current_display()) ;
+    }
+    
     //小窗口时间
     uint64_t interval  = time_now_s() - time_start;
     home_refresh_info_time(interval) ;
@@ -142,8 +149,6 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
     speed_view_update() ;
 
     signal_view_update();
-
-    // electrical_view_update()
 
     return RET_REPEAT ;
 }
