@@ -36,7 +36,8 @@ typedef enum {
     VEH_SPEED_ENGINE,   ///< Engine speed （rpm）
 
     ///< Power
-    VEH_TRAM_POWR,      /// Tram powr, unit:KW
+    VEH_TRAM_POWR,              ///< Tram powr, unit:KW
+    VEH_TRAM_REMAIN_BATTARY,    ///< Tram remain,percentage(0-100)
 
     ///< Mileage Data
     VEH_MILEAGE_ENDURANCE_A,    ///< Endurance mileage A, precision 0.1
@@ -120,7 +121,7 @@ typedef enum {
     VEH_TCS_ENABLED,  ///< TCS allow status, 0: not allowed, 1: allowed
     VEH_TCS_MODE,     ///< TCS mode, 0:3 levels 0x01:2 levles 0x02：1 level 0x03：0FF
     VEH_TCS_SLASH_WARING, ///< TCS slash warning lamp 0x00:off 1:on
-    VEH_TCS_WARNING,   ///< TCS warning lamp, 0: Sigh at TCS 1: tcs warn lamp on 2:tcs slash on
+    VEH_TCS_WARNING,   ///< TCS warning lamp, 0: OFF, 1: ON
     VEH_TCS_SYS_STATE,  ///< TCS system state 0x0:init 0x01:Normal 0x02:Fault 0x03：Diagnostic
 
     ///< ABS
