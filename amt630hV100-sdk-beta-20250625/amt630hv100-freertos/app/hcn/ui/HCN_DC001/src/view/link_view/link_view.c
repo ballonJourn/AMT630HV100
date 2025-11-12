@@ -113,7 +113,8 @@ ret_t link_refresh_power(int power)
 
 ret_t link_refresh_electrical(uint32_t mileage) 
 {
-    // static bar_color = 
+    mileage = tk_min(mileage , ELECTRI_MAX) ;
+    
     float step = 100.0f / ELECTRI_MAX  ;
     int perent = (int)(step * mileage) ;
 

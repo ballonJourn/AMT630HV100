@@ -19,6 +19,8 @@ ret_t home_elec_view_init(widget_t* parent)
 
 ret_t home_refresh_electrical(uint32_t mileage) 
 {
+    mileage = tk_min(mileage , ELECTRI_MAX) ;
+
     float step = 100.0f / ELECTRI_MAX  ;
     int perent = (int)(step * mileage) ;
     char format[8] = " " ;

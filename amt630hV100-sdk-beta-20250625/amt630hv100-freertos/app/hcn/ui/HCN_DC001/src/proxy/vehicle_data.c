@@ -94,10 +94,19 @@ int32_t vehicle_get_data_power()
 
 int32_t vehicle_get_data_drv_mode() 
 {
-
 #if !ON_PC_CACLE
     int32_t drv_mode = vehicle_get_data(VEH_DRIVE_MODE);
     return drv_mode > DRV_MODE_S ? VEH_INVALID_VALUE : drvModeMaps[drv_mode] ;
+#endif
+
+    return 0 ; 
+}
+
+int32_t vehicle_get_data_remain_battary() 
+{
+#if !ON_PC_CACLE
+    int32_t remain_battary = vehicle_get_data(VEH_TRAM_REMAIN_BATTARY);
+    return remain_battary;
 #endif
 
     return 0 ; 
