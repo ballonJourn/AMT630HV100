@@ -69,6 +69,10 @@ static void timeout_clear_can_data(void) {
         if (vehicle_get_data(VEH_TRAM_POWR) > 0) {
             vehicle_set_data(VEH_TRAM_POWR, 0);
         }
+
+        if (vehicle_get_data(VEH_TRAM_REMAIN_BATTARY) > 0) {
+            vehicle_set_data(VEH_TRAM_REMAIN_BATTARY, 0);
+        }
     }
 
     if (current_time - rx_timeout.ecu_120_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
@@ -163,6 +167,12 @@ static int parse_can_msg_112_msg(uint8_t *buf, uint8_t size) {
         data = 100;
     }
     vehicle_set_data(VEH_TRAM_POWR, data);
+
+    data = buf[7];
+    if (data == 0xFF) {
+        data = 0;
+    }
+    vehicle_set_data(VEH_TRAM_REMAIN_BATTARY, data);
 
     return 0;
 }
