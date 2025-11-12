@@ -799,7 +799,6 @@ void* initECTiny(void* param)
 #ifdef AWTK
 	set_qr_text_buf(UrlData);
 #endif
-    hcn_update_carlink_uuid(UrlData);     
 
     return NULL;
 }
