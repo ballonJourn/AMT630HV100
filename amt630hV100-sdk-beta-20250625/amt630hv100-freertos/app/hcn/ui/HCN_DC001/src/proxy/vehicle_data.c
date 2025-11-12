@@ -3,7 +3,8 @@
 #include "vehicle_data.h"
 #include "view/home_view/common.h"
 #include "vehicle_param/vehicle_param.h"
-
+#include "common/version/hcn_version.h"
+#include "uart_communicate/hcn_uart_parse_cmd.h"
 
 typedef struct {
   veh_signal_e signal_lamp;
@@ -13,19 +14,23 @@ typedef struct {
 #define VEH_INVALID_VALUE INT32_MIN
 
 static const Signal_Lamp_Mapping_t signalMaps[] = {
+    { VEH_GPS       , VEH_LIGHT_GPS           } ,
     { VEH_HIGH_BEAM , VEH_LIGHT_HIGH_BEAM     } ,
     { VEH_LEFT      , VEH_INDICATOR_TURN_LEFT } ,
+    { VEH_READY     , VEH_LIGHT_READY         } ,
     { VEH_RIGHT     , VEH_INDICATOR_TURN_RIGHT} ,
-    { VEH_HIGH_BEAM , VEH_LIGHT_HIGH_BEAM     } ,
+    { VEH_AUTO_BEAM , VEH_AUTO_HEADLIGH       } ,
+    { VEH_ECU       , VEH_LIGHT_ENGINE_FAULT  } ,
+    { VEH_TCS       , VEH_TCS_WARNING         } ,               
     { VEH_ABS       , VEH_LIGHT_ABS           } ,
-    { VEH_ENGINE    , VEH_LIGHT_HIGH_BEAM     } ,
-    { VEH_ENGINE    , VEH_LIGHT_ENGINE_FAULT  } ,
+    { VEH_BRAKE     , VEH_LIGHT_BRAKE         } ,
+
 };
 
-static const int gearMaps[] = {
-    [0] = GEAR_N ,
-    [1] = GEAR_D ,
-    [2] = GEAR_R ,
+static const int drvModeMaps[] = {
+    [0] = DRV_MODE_N ,
+    [1] = DRV_MODE_E ,
+    [2] = DRV_MODE_S ,
 };
 
 int32_t vehicle_get_data_signal_lamp(veh_signal_e lamp)
@@ -68,7 +73,7 @@ int32_t vehicle_get_data_gear()
 {
 #if !ON_PC_CACLE
     int32_t gear_id = vehicle_get_data(VEH_GEAR_POSITION);
-    return (gear_id > GEAR_R) ?  VEH_INVALID_VALUE : gearMaps[gear_id] ;
+    return (gear_id > GEAR_MAX) ?  GEAR_N : gear_id ;
 #endif 
 
     return 0 ; 
@@ -87,3 +92,23 @@ int32_t vehicle_get_data_power()
     return 0 ; 
 }
 
+int32_t vehicle_get_data_drv_mode() 
+{
+
+#if !ON_PC_CACLE
+    int32_t drv_mode = vehicle_get_data(VEH_DRIVE_MODE);
+    return drv_mode > DRV_MODE_S ? VEH_INVALID_VALUE : drvModeMaps[drv_mode] ;
+#endif
+
+    return 0 ; 
+}
+
+const char* veicle_get_data_version()
+{
+    return get_soc_version();
+}
+
+const char* veicle_get_data_mcu_ver()
+{
+    return get_mcu_version();
+}

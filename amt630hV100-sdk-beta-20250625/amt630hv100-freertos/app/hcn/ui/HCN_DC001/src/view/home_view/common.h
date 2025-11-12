@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SPEED_MAX (180)        //最大速度
-#define RPM_MAX (180)          //最大转速
+#define SPEED_MAX (199)        //最大速度
+#define RPM_MAX (199)          //最大转速
 #define POWER_MAX (100)        //最大功率
 #define ANGLE_MAX (270)        //最大角度
 #define ELECTRI_MAX (188)      //最大续航里程 km
@@ -38,8 +38,8 @@ typedef enum {
 }drv_mode_e;
 
 typedef enum {
-    GEAR_D   ,
     GEAR_N   ,
+    GEAR_D   ,
     GEAR_R   ,
     GEAR_MAX ,
 }gear_e;

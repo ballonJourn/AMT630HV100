@@ -7,16 +7,6 @@
  */
 
 
-ret_t refesh_ui(const timer_info_t* timer){
-  static int count = 0 ;
-  count++;
-  home_refresh_drv_mode(count % 3) ;
-
-  home_refresh_gear(count % 3) ;
-
-  return RET_REPEAT;
-}
-
 static ret_t visit_init_child(void* ctx, const void* iter) {
   widget_t* widget = WIDGET(iter);
   (void)ctx;
@@ -43,7 +33,6 @@ ret_t home_page_init(widget_t* win, void* ctx) {
   home_view_init(win) ;
   set_view_init(win) ;
 
-  timer_add(refesh_ui,NULL , 2000);
 
   return RET_OK;
 }

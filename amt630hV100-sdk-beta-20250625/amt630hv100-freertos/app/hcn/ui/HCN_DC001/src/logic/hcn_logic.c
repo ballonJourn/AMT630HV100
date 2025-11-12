@@ -38,7 +38,7 @@ ret_t set_view_init(widget_t * win)
     set_unit_view_init          (win) ;
     set_display_view_init       (win) ;
     set_brightness_view_init    (win) ;
-    
+    set_device_view_init        (win) ;
     return RET_OK ;
 }
 
@@ -141,7 +141,7 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
     //数据刷新
     speed_view_update() ;
 
-    // signal_view_update();
+    signal_view_update();
 
     // electrical_view_update()
 

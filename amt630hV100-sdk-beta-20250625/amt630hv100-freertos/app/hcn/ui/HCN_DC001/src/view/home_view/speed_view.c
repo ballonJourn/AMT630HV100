@@ -56,6 +56,8 @@ ret_t home_refresh_rpm(uint32_t rpm)
 
 ret_t home_refresh_drv_mode(drv_mode_e mode)
 {
+   mode = tk_min(mode , DRV_MODE_S);
+   
    char format_buff[64] = { 0 };
    tk_snprintf(format_buff , sizeof(format_buff) , "bg_halo_%d", (int)mode);
 
@@ -105,7 +107,7 @@ ret_t home_refresh_unit(unit_e unit)
 
 ret_t home_refresh_gear(gear_e gear)
 {
-   if (home_speed_widget[GEAR_VIEW] == NULL)
+   if (home_speed_widget[GEAR_VIEW] == NULL || (gear > GEAR_R))
       return RET_FAIL ;
 
    widget_t *gearWid = home_speed_widget[GEAR_VIEW] ;

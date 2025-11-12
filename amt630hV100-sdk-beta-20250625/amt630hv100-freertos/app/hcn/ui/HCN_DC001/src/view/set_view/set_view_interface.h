@@ -10,4 +10,6 @@
 #include "view/set_view/unit.h"
 #include "view/set_view/display.h" 
 #include "view/set_view/brightness.h" 
+#include "view/set_view/device.h"
+
 #endif
