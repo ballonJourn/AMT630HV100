@@ -121,7 +121,7 @@ ret_t on_idle_queue(const idle_info_t* idle)
     
     uint8_t key = (uint8_t)(uintptr_t)idle->ctx ;
     //测试 里程开始按钮
-    #if 1
+    #if 0
     static bool odo_cale = false ;
     if (odo_cale == false)
     {

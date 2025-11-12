@@ -17,4 +17,5 @@
   <progress_bar name="elec_bar" x="705" y="176" w="71" h="24" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="26" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="3" style:normal:border_color="#FFFFFF" style:normal:round_radius="5" format="%d" value="5"/>
   <label name="label1" x="754" y="138" w="26" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_h="left" text="w"/>
   <image name="image3" x="775" y="182" w="7" h="12" draw_type="default" image="link_elecRect_head"/>
+  <?include filename="component.xml" ?>
 </window>

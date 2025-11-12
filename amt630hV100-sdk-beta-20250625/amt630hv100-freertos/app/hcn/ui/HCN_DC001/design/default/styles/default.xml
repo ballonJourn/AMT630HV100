@@ -198,9 +198,12 @@
   </style>
 </group_box>
 <hscroll_label>
-  <style name="default">
-    <normal text_color="#444444"/>
-    <disable text_color="#44444466"/>
+  <style name="default" text_color="#FFFFFF">
+    <normal/>
+    <disable/>
+  </style>
+  <style name="music_lyrics">
+    <normal text_color="#9E9E9E"/>
   </style>
 </hscroll_label>
 <image>
@@ -214,9 +217,9 @@
   </style>
 </keyboard>
 <label>
-  <style name="default">
-    <normal text_color="#444444"/>
-    <disable text_color="#44444466"/>
+  <style name="default" text_color="#FFFFFF">
+    <normal/>
+    <disable/>
   </style>
   <style name="clock_option" font_size="80" text_color="#FFFFFF">
     <normal/>
@@ -244,6 +247,9 @@
 <line_series>
   <style name="default">
     <normal area_color="#338FFF66" line_border_color="#338FFF" line_border_width="1" symbol_bg_color="#FFFFFF" symbol_border_color="#338FFF" symbol_round_radius="4"/>
+  </style>
+  <style name="series_line">
+    <normal area_color="#29D1FF32" line_border_color="#59E9FF" line_border_width="2" symbol_bg_color="#D9E2F2" symbol_border_color="#338FFF" symbol_round_radius="3"/>
   </style>
 </line_series>
 <line_series_colorful>
@@ -303,7 +309,7 @@
 </popup>
 <progress_bar>
   <style name="default" round_radius="5">
-    <normal bg_color="#D8D8D8" border_color="#D8D8D8" fg_color="#338FFF" text_color="#444444"/>
+    <normal bg_color="#FFFFFF19" border_color="#D8D8D8" fg_color="#FFFFFF" text_color="#444444"/>
     <disable bg_color="#D8D8D866" border_color="#D8D8D866" fg_color="#338FFF66" text_color="#44444466"/>
   </style>
 </progress_bar>
@@ -335,7 +341,7 @@
 </radio_button>
 <rich_text>
   <style name="default">
-    <normal text_color="#444444"/>
+    <normal text_color="#FFFFFF"/>
   </style>
 </rich_text>
 <scroll_bar_d>
@@ -475,9 +481,15 @@
   <style name="default">
     <normal fg_color="#C2C2C2" font_size="16" split_line_color="#C2C2C2" text_color="#444444" tick_color="#C2C2C2"/>
   </style>
+  <style name="axis_x">
+    <normal fg_color="#00000000" font_size="16" split_line_color="#00000000" text_color="#FFFFFF" tick_color="#00000000"/>
+  </style>
 </x_axis>
 <y_axis>
   <style name="default">
     <normal fg_color="#C2C2C2" font_size="16" split_line_color="#C2C2C2" text_color="#444444" tick_color="#C2C2C2"/>
+  </style>
+  <style name="axis_y">
+    <normal fg_color="#00000000" font_size="18" grid_color="#00000000" odd_bg_color="#00000000" selected_bg_color="#00000000" split_line_color="#757070" text_color="#FFFFFF" tick_color="#00000000"/>
   </style>
 </y_axis>

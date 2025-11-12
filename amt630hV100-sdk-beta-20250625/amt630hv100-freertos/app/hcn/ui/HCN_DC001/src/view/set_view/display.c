@@ -22,8 +22,8 @@ ret_t set_display_view_init(widget_t* parent)
 
 static void setting_menu_view_deal_set()
 {
-    printf("display setting_menu_view_deal_set \n") ;
-    // 显示主题 0：白天 1:黑夜 2:自动
+    printf("display setting_menu_view_deal_set = %d\n" , option) ;
+    // 设置主题参数 0：白天 1:黑夜 2:自动
     if (option == DIAPLAY_AUTO_OPTION)
         vehicle_get_param_display(2);
     else if(option == DIAPLAY_DAY_OPTION)
@@ -31,6 +31,8 @@ static void setting_menu_view_deal_set()
     else if (option == DIAPLAY_DAY_OPTION)
         vehicle_get_param_display(1);
     
+    global_refresh_display(option);
+
     return  ;
 }
 

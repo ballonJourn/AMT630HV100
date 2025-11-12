@@ -65,6 +65,8 @@ ret_t home_view_init(widget_t * win)
     // 自检
     selfcheck_init();
 
+    mileage_calc_init();
+
     //添加定时器
     home_timer_init();
 

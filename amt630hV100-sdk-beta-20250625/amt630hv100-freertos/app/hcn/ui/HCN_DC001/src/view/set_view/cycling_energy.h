@@ -11,6 +11,8 @@ enum set_cycling_energy_com{
     RIDE_CURRENT_ELEC   ,
     RIDE_AVG_ELEC       ,
 
+    RIDE_LINE_SERIES    ,
+    
     RIDE_NUM_MAX        ,
 };
 

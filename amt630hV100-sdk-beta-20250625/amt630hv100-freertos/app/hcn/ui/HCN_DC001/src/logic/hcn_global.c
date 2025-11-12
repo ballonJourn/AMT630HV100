@@ -6,6 +6,11 @@
 #include "proxy/vehicle_mile.h"
 #include "hcn_logic.h"
 
+extern ret_t assets_set_global_theme(const char* name); 
+
+extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
+                            bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565         ) ;
+
 static const char* country_language_str[LANGUAGE_OPTION_MAX] = {
     "zh_CN" , "en_US" 
 };
@@ -53,6 +58,27 @@ ret_t global_refresh_language(uint8_t value)
     return RET_OK ;
 }
 
+ret_t global_refresh_display(uint8_t value) 
+{
+    if (DIAPLAY_AUTO_OPTION == value)
+        return RET_OK ;
+    
+    uint8_t temp = 0 ;
+    assets_manager_t *am = assets_manager();
+    if (tk_str_eq(am->theme, "default"))
+        temp = DIAPLAY_NIGHT_OPTION ;
+    else if (tk_str_eq(am->theme, "day"))
+        temp = DIAPLAY_DAY_OPTION ;
+    else {};
+
+    if (value != temp)
+        assets_set_global_theme(value == DIAPLAY_NIGHT_OPTION ? "default" : "day");
+    else
+        printf("The current theme and settings are the same");
+    
+    return RET_OK;
+}
+
 ret_t global_data_init(const timer_info_t *info)
 {
     // printf("===================");
@@ -72,6 +98,13 @@ ret_t global_data_init(const timer_info_t *info)
         value = vehicle_get_param_unit() ;
         global_refresh_unit(value);
         
+        //显示主题 0：白天 1:黑夜 2:自动
+        value = vehicle_get_param_display();
+        if (0 == value)
+            global_refresh_display(DIAPLAY_DAY_OPTION);
+        else if(1 == value)
+            global_refresh_display(DIAPLAY_NIGHT_OPTION);
+
         // 档位 
         home_refresh_gear(GEAR_N) ;
         
@@ -190,9 +223,6 @@ bool truncate_utf8_string(char* str , int intercept_length)
 
     return false;
 }
-
-extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
-                            bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565         ) ;
 
 ret_t gloabl_load_image(uint8_t *buff ,  uint32_t length)
 {

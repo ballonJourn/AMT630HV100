@@ -19,6 +19,8 @@ ret_t global_refresh_unit(uint8_t value) ;
 
 ret_t global_refresh_language(uint8_t value) ;
 
+ret_t global_refresh_display(uint8_t value) ;
+
 void global_refresh_mileage();
 
 bool truncate_utf8_string(char* str , int intercept_length) ;
