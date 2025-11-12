@@ -49,3 +49,7 @@ const hcnNavigationHudInfo *vehicle_get_mirror_navi_info()
    return  get_easy_navi_info();
 }
 
+const char* vehicle_get_uuid()
+{
+    return hcn_ec_get_uuid() ;
+}

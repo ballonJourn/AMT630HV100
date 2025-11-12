@@ -160,10 +160,10 @@ ret_t parse_calling_data(const bt_call_t *_call_info)
         }else if (_call_info->btHfpState == ACTIVE_CALL)
         {
             home_refresh_phone_state(CALL_CALLING);
-            calling_animation_stop();
+            // calling_animation_stop();
         }
         
-        if (_call_info->btHfpState == CONNECTED)
+        if (_call_info->btHfpState <= CONNECTED)
         {
             calling_animation_stop();
         }
@@ -245,7 +245,7 @@ void bluetooth_view_update()
             //通话
             memset(&g_call_info , 0x00 , sizeof(bt_call_t));
             home_refresh_phone_view(PHONE_NO_CONNECT);
-            
+            calling_animation_stop();
 
             refresh_bt_phone_info("");
         }

@@ -74,15 +74,20 @@
             <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:font_size="24" text="0 km"/>
           </view>
           <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <view name="qr_view" x="51" y="40" w="189" h="206" visible="true">
-              <qr name="navi_qr" x="15" y="10" w="130" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000"/>
-              <label name="label2" x="9" y="157" w="143" h="28" style:normal:font_size="24" tr_text="scan_qr"/>
-            </view>
-            <view name="navigate_view" x="51" y="40" w="189" h="206" visible="false">
-              <image name="navi_image" x="45" y="3" w="90" h="90" draw_type="default" image="icon_nav_1"/>
-              <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:text_color="#FFFFFF" style:normal:font_size="45"/>
-              <label name="label_road" x="14" y="151" w="160" h="42" style:normal:font_size="25" style:normal:text_align_h="center"/>
-            </view>
+            <slide_view name="nav_slide_view" x="51" y="40" w="189" h="206">
+              <view name="qr_view" x="0" y="0" w="189" h="206" visible="true">
+                <qr name="navi_qr" x="15" y="10" w="130" h="130" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000"/>
+                <label name="label2" x="9" y="157" w="143" h="28" style:normal:font_size="24" tr_text="scan_qr"/>
+              </view>
+              <view name="view" x="0" y="0" w="100%" h="100%">
+                <label name="label8" x="16" y="35" w="145" h="141" line_wrap="true" style:normal:font_name="default" style:normal:font_size="28" word_wrap="true" tr_text="navi_connect"/>
+              </view>
+              <view name="navigate_view" x="0" y="0" w="189" h="206" visible="true">
+                <image name="navi_image" x="45" y="3" w="90" h="90" draw_type="default" image="icon_nav_1"/>
+                <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:text_color="#FFFFFF" style:normal:font_size="45"/>
+                <label name="label_road" x="14" y="151" w="160" h="42" style:normal:font_size="25" style:normal:text_align_h="center"/>
+              </view>
+            </slide_view>
           </view>
           <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="music_image" x="100" y="66" w="60" h="60" draw_type="scale" image="icon_media_cover_n"/>

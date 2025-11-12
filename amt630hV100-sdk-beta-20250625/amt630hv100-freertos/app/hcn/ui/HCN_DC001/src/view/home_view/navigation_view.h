@@ -15,6 +15,7 @@ enum home_navigation_com{
 
 typedef enum {
     QR_VIEW       ,
+    TIPS_VIEW     ,
     NAVI_VIEW     ,
 
     NVAI_VIEW_MAX ,

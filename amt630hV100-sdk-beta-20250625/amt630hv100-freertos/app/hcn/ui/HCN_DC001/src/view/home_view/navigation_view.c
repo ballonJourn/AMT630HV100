@@ -7,13 +7,9 @@ const char* home_navi_widget_name[NAVI_NUM_MAX] = {
     "navi_qr" , "label_road" , "navi_image" , "label_distance"
 } ;
 
-const char* home_navi_view_name[NVAI_VIEW_MAX] = {
-    "qr_view" , "navigate_view"
-} ;
-
 static widget_t* home_navi_widget[NAVI_NUM_MAX] = { NULL };
 
-static widget_t* home_navi_view[NVAI_VIEW_MAX] = { NULL };
+static widget_t* nav_slide_view =  NULL ;
 
 //static home_navigate_view_e navigate_view = QR_VIEW ;
 
@@ -24,10 +20,13 @@ ret_t home_nav_view_init(widget_t* parent)
         home_navi_widget[i] = widget_lookup(parent, home_navi_widget_name[i], TRUE);
     }
 
-    for (size_t i = 0; i < NVAI_VIEW_MAX; i++){
-        home_navi_view[i] = widget_lookup(parent, home_navi_view_name[i], TRUE);
+    nav_slide_view = widget_lookup(parent,"nav_slide_view", TRUE);
+    if (nav_slide_view)
+    {
+       printf("widget_lookup(parent,\"nav_slide_view\", TRUE);");
     }
-
+    else
+        printf("nav_slide_view fail\n");
     return RET_OK ;
 }
 
@@ -81,17 +80,10 @@ ret_t home_refresh_nav_distance(char *value)
 //简易导航页面
 ret_t home_refresh_nav_view(home_navigate_view_e view)  
 {
-    for (size_t i = 0; i < NVAI_VIEW_MAX ; i++)
-    {
-        if (home_navi_view[i])
-        {
-            if (view == i)
-                widget_set_visible(home_navi_view[i] , true) ;
-            else
-                widget_set_visible(home_navi_view[i] , false) ;
-        }
-
-    }
+    if (view >= NVAI_VIEW_MAX  || (NULL == nav_slide_view) )
+        return RET_FAIL;
+    
+    slide_view_set_active_ex(nav_slide_view , view , false);
     
     return RET_OK ; 
 }

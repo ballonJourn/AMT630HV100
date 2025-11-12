@@ -5,6 +5,7 @@
 #include "navigation_view_logic.h"
 #include "proxy/mirror_data.h"
 #include "view/home_view/navigation_view.h"
+#include "view/set_view/device.h"
 #include "carlink_cb/hcn_easy_navi.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/bluetooth_data.h"
@@ -32,6 +33,10 @@ void navigation_view_update()
             home_refresh_nav_view( QR_VIEW )  ;
             // g_mirror_navigation = false       ;
         }
+        else
+        {
+            home_refresh_nav_view( TIPS_VIEW )  ;
+        }
         
         // printf("mirror_state      changed = %s \n" , _mirror_state ? "open" : "close");
     }
@@ -41,7 +46,11 @@ void navigation_view_update()
         bool  _mirror_navigation = vehicle_get_mirror_navigation();
         if (g_mirror_navigation != _mirror_navigation)
         {
-            home_refresh_nav_view(_mirror_navigation ?  NAVI_VIEW : QR_VIEW)  ;
+            if ( false == _mirror_navigation)
+                home_refresh_nav_view(TIPS_VIEW)  ;
+            else
+                home_refresh_nav_view(QR_VIEW)  ;
+
             g_mirror_navigation = _mirror_navigation ;
 
             // printf("mirror_navigation  changed = %s \n" , _mirror_state ? "open" : "close");
@@ -84,6 +93,8 @@ void update_qr()
             #endif
 
             refresh_bt_name(vehicle_get_bluetooth_name());
+            refresh_sn(vehicle_get_uuid());
+            refresh_mcu(veicle_get_data_mcu_ver());
             printf("vehicle_get_mirror_url successed to refresh qr\n") ;
         }
         
