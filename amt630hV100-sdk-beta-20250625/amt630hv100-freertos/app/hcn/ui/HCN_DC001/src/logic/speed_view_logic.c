@@ -5,6 +5,7 @@
 static int32_t speed         = 0 ;
 static int32_t rpm           = 0 ;
 static int32_t power         = 0 ;
+static int32_t remain_battary = 100 ;
 static drv_mode_e drv_mode   = DRV_MODE_MAX ;
 static gear_e  gear          = GEAR_MAX ;
 
@@ -67,6 +68,16 @@ void update_power()
     }
 }
 
+void update_remain_battary()
+{
+    int32_t value = vehicle_get_data_remain_battary() ;
+    if (value != remain_battary)
+    {
+        home_refresh_electrical(value);
+        remain_battary = value ;
+    }
+}
+
 void speed_view_update()
 {
     update_gear() ;
@@ -75,5 +86,6 @@ void speed_view_update()
     update_speed() ;
 
     update_power();
+    update_remain_battary();
     return ;
 }

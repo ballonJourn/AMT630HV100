@@ -10,7 +10,7 @@
 #define RPM_MAX (199)          //最大转速
 #define POWER_MAX (100)        //最大功率
 #define ANGLE_MAX (270)        //最大角度
-#define ELECTRI_MAX (188)      //最大续航里程 km
+#define ELECTRI_MAX (100)      //最大续航里程 km
 
 
 #define STATE_NORMAL  "normal"

@@ -22,8 +22,8 @@ void home_page_deal_key_set()
             music_ex_view_init();
             break;
         case ICON_PHONE:
-            if (vehicle_buluetooth_is_calling())
-                vehicle_calling_pick_up();
+            // if (vehicle_buluetooth_is_calling())
+            //     vehicle_calling_pick_up();
             break;
         case ICON_SETTING:
             set_current_level(MENU_LEVEL_1);
@@ -48,11 +48,11 @@ void home_page_deal_key_back()
         
         break;
     case ICON_PHONE:
-        if (vehicle_buluetooth_is_calling())
-        {
-            vehicle_calling_hung_up();
-            calling_animation_stop();
-        }
+        // if (vehicle_buluetooth_is_calling())
+        // {
+        //     vehicle_calling_hung_up();
+        //     calling_animation_stop();
+        // }
         
         break;
     case ICON_SETTING:

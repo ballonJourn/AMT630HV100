@@ -114,7 +114,7 @@ ret_t global_data_init(const timer_info_t *info)
         home_refresh_drv_mode(value) ;
         
         refresh_ver(veicle_get_data_version());
-        
+
         is_init_usr_param = true ; 
 
         printf("vehicle_get_param_recovery successed %s : %d\n" ,__FUNCTION__ , __LINE__);

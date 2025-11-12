@@ -11,7 +11,7 @@
   </slide_menu>
   <label name="power_lab" x="599" y="139" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="right" text="0"/>
   <slider name="power_bar" x="599" y="182" w="84" h="18" style:normal:icon="box_power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" style:normal:bg_color="#848484" style:normal:fg_color="#FFFFFF" style:normal:round_radius="0" bar_size="4" dragger_size="0" value="0"/>
-  <qr name="link_qr" x="22" y="22" w="187" h="188" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" visible="true"/>
+  <qr name="link_qr" x="9" y="15" w="187" h="188" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" visible="true"/>
   <label name="label1" x="655" y="138" w="26" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_h="left" text="w"/>
   <label name="elec_lab" x="698" y="139" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="right" text="0"/>
   <progress_bar name="elec_bar" x="705" y="176" w="71" h="24" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="26" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="3" style:normal:border_color="#FFFFFF" style:normal:round_radius="5" format="%d" value="0"/>

@@ -8,6 +8,7 @@
 #include "view_manager.h"
 #include "link_view/link_page_key.h"
 #include "proxy/vehicle_time.h"
+#include "proxy/bluetooth_data.h"
 #include "logic/hcn_selfcheck.h"
 #include "logic/mileage_calc.h"
 #if !ON_PC_CACLE
@@ -231,14 +232,23 @@ void set_current_level(int cur_level){
 
 void deal_key_set_short_press()
 {
-    HCN_KEY_DISPATCH(set);
+    if (vehicle_buluetooth_is_calling())
+        vehicle_calling_pick_up();
+    else
+        HCN_KEY_DISPATCH(set);  
+
     return ;
 }
 
 
 void deal_key_back_short_press()
 {
-    HCN_KEY_DISPATCH(back);
+
+    if (vehicle_buluetooth_is_calling())
+        vehicle_calling_hung_up();
+    else
+        HCN_KEY_DISPATCH(back);
+        
     return ;
 }
     
