@@ -106,10 +106,14 @@ ret_t global_data_init(const timer_info_t *info)
             global_refresh_display(DIAPLAY_NIGHT_OPTION);
 
         // 档位 
-        home_refresh_gear(GEAR_N) ;
+        value =  vehicle_get_data_gear() ;
+        home_refresh_gear(value) ;
         
-        // 驾驶模式
-        home_refresh_drv_mode(DRV_MODE_E) ;
+        // // 驾驶模式
+        value = vehicle_get_data_drv_mode() ;
+        home_refresh_drv_mode(value) ;
+        
+        refresh_ver(veicle_get_data_version());
         
         is_init_usr_param = true ; 
 

@@ -15,8 +15,8 @@ static ret_t timer_refresh_50_ms(const timer_info_t *info) ;
 
 static int32_t speed         = 0 ;
 static int32_t poewr         = 0 ;
-//static drv_mode_e drv_mode   = DRV_MODE_E ;
-static gear_e  gear          = GEAR_N ;
+static drv_mode_e drv_mode   = DRV_MODE_MAX ;
+static gear_e  gear          = GEAR_MAX ;
 
 #if ON_PC_CACLE == 0
 extern void clear_rect(float x, float y, float w, float h, float a, float r, float g, float b);
@@ -72,13 +72,12 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         }
         speed         = 0 ;
         poewr         = 0 ;
-        // drv_mode      = DRV_MODE_E ;
-        gear          = GEAR_N ;
+        drv_mode      = DRV_MODE_E ;
+        gear          = GEAR_MAX ;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
     {
         printf("on_link_page_changed EVT_WINDOW_WILL_OPEN\n") ;
-        link_refresh_gear(GEAR_N);
         timer_refresh_50_ms(NULL);
 
     #if ON_PC_CACLE == 0
@@ -125,17 +124,12 @@ static ret_t timer_refresh_50_ms(const timer_info_t *info)
         poewr = _poewr ;
     }
 
-    // int32_t drv_mode = vehicle_get_data_drv_mode();
-    // if(drv_mode != _drv_mode)
-    // {
-    //     link_refresh_power(_drv_mode);
-    //     drv_mode = _drv_mode ;
-    // }
-
-
-
-
-
+    int32_t _drv_mode = vehicle_get_data_drv_mode();
+    if(drv_mode != _drv_mode)
+    {
+        link_refresh_drv_mode(_drv_mode);
+        drv_mode = _drv_mode ;
+    }
 
     return RET_REPEAT ;
 }

@@ -10,11 +10,11 @@ typedef enum home_signal_com{
     ICON_LEFT           , 
     ICON_READY          , 
     ICON_RIGHT          ,
-    ICON_NEAR_BEAM      ,   
+    ICON_AUTO_BEAM      ,   
     ICON_ABS            ,
     ICON_ECU            ,
     ICON_TCS            , 
-    ICON_ENGINE         ,     
+    ICON_BRAKE          ,     
 
     ICON_SIGNAL_NUM_MAX ,
 }signal_e;

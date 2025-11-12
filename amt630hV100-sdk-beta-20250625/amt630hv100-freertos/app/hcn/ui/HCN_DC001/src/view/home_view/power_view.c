@@ -20,12 +20,16 @@ ret_t home_power_view_init(widget_t* parent)
 
 ret_t home_refresh_power(int power) 
 {
+    power = tk_min(power , POWER_MAX) ;
+
+    float step = (float)100.0f / POWER_MAX ;
+
     if(home_power_widget[POWER_VALUE]){
         image_value_set_value(home_power_widget[POWER_VALUE] , power) ;
     }
 
     if(home_power_widget[POWER_BAR]){
-        slider_set_value(home_power_widget[POWER_BAR] , power) ;
+        slider_set_value(home_power_widget[POWER_BAR] , (power * step)) ;
     }
     
     return RET_OK ;

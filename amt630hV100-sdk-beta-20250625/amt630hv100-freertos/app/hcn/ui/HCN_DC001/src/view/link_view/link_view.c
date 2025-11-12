@@ -72,7 +72,8 @@ ret_t link_refresh_drv_mode(drv_mode_e mode)
 
 ret_t link_refresh_gear(gear_e gear)
 {
-   if (link_view_widget[LINK_VIEW_GEAR_VIEW] == NULL) return RET_FAIL ;
+   if (link_view_widget[LINK_VIEW_GEAR_VIEW] == NULL || (gear > GEAR_R)) 
+        return RET_FAIL ;
 
    widget_t *gearWid = link_view_widget[LINK_VIEW_GEAR_VIEW] ;
 

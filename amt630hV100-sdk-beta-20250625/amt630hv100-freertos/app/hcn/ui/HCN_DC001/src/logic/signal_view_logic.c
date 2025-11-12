@@ -4,43 +4,78 @@
 
 void signal_view_update()
 {
-    // for (size_t i = VEH_HIGH_BEAM; i < VEH_SIGNAL_MAX ; i++)
-    // {
-    //     bool visiable =  vehicle_get_data_signal_lamp(i);
-    // }
-     
     signal_turn_left();
     signal_turn_right();
+    signal_turn_right();
+    signal_turn_left();
+    signal_GPS();
+    signal_high_beam();
+    signal_ready();
+    signal_auto_beam();
+    signal_ecu();
+    signal_tcs();
+    signal_abs();
+    signal_brake();
+
+    return ; 
 }
-
-
-void signal_bt()
-{
-    return ;
-}
-
-void signal_GMS()
-{
-    return ;
-}
-
 
 void signal_turn_right()
 {
-    static bool_t visiable = FALSE ; 
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_RIGHT);
-    if (visiable != value)
-    {
-        home_refresh_signal(ICON_RIGHT , visiable) ;
-        visiable = value ;
-    }
-    return ;
+    home_refresh_signal(ICON_RIGHT , value) ;
 }
 
 void signal_turn_left()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_LEFT);
     home_refresh_signal(ICON_LEFT , value) ;
+}
 
-    return ;
+void signal_GPS()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_GPS);
+    home_refresh_signal(ICON_GPS , value) ;
+}
+
+void signal_high_beam()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_HIGH_BEAM);
+    home_refresh_signal(ICON_HIGH_BEAM , value) ;
+}
+
+void signal_ready()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_READY);
+    home_refresh_signal(ICON_READY , value) ;
+}
+
+void signal_auto_beam()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_AUTO_BEAM);
+    home_refresh_signal(ICON_AUTO_BEAM , value) ;
+}
+
+void signal_ecu()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_ECU);
+    home_refresh_signal(ICON_ECU , value) ;
+}
+
+void signal_tcs()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_TCS);
+    home_refresh_signal(ICON_TCS , value) ;
+}
+
+void signal_abs()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_ABS);
+    home_refresh_signal(ICON_ABS , value) ;
+}
+
+void signal_brake()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_BRAKE);
+    home_refresh_signal(ICON_BRAKE , value) ;
 }

@@ -2,8 +2,6 @@
 #define HOME_POWER_VIEW_H
 #include "common.h"
 
-#define POWER_MAX (100)
-
 enum home_power_com{
     POWER_VALUE ,
     POWER_BAR   ,

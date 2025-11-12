@@ -5,18 +5,16 @@
 #define ON_PC_CACLE   0
 
 typedef enum signal{
-    VEH_GMS            ,   
     VEH_GPS            ,    
-    VEH_BT             ,
     VEH_HIGH_BEAM      ,     
     VEH_LEFT           , 
     VEH_READY          , 
     VEH_RIGHT          ,
-    VEH_NEAR_BEAM      ,   
+    VEH_AUTO_BEAM      ,   
     VEH_ABS            ,
     VEH_ECU            ,
     VEH_TCS            , 
-    VEH_ENGINE         ,     
+    VEH_BRAKE          ,     
 
     VEH_SIGNAL_MAX     ,
 }veh_signal_e;
@@ -31,5 +29,11 @@ int32_t vehicle_get_data_rpm();
 int32_t vehicle_get_data_gear();
 
 int32_t vehicle_get_data_power();
+
+int32_t vehicle_get_data_drv_mode() ;
+
+const char* veicle_get_data_version();
+
+const char* veicle_get_data_mcu_ver();
 
 #endif
