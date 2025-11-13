@@ -140,3 +140,7 @@ Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
   <language name="en_US">Click confirm  
 Enter the map without navigation</language>
 </string>
+<string name="call_pop">
+  <language name="zh_CN">确认接听 返回挂断</language>
+  <language name="en_US">Enter Answer    Back Hang up</language>
+</string>
