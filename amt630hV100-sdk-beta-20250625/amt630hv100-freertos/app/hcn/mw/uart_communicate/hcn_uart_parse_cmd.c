@@ -203,12 +203,16 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
                         vehicle_set_data(VEH_VOLTAGE_BATTERY, battery);
             battery = (int)(battery / 10);
             data_tmp = data[data_start + 2];
-            //hcn_log_info("turn left light:%d\n", data_tmp);
+#if 0
+            hcn_log_info("turn left light:%d\n", data_tmp);
             vehicle_set_data(VEH_INDICATOR_TURN_RIGHT, (int)data_tmp);
+#endif
 
             data_tmp = data[data_start + 3];
-            //hcn_log_info("turn right light:%d\n", data_tmp);
+#if 0
+            hcn_log_info("turn right light:%d\n", data_tmp);
             vehicle_set_data(VEH_INDICATOR_TURN_LEFT, (int)data_tmp);
+#endif
         } break;
 
         case UART_MCU_CMD_VER_INFO: {
