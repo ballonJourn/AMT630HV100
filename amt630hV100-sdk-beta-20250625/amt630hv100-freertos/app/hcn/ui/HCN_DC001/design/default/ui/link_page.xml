@@ -5,9 +5,9 @@
   </view>
   <image name="ride_mode_img" x="612" y="94" w="21" h="17" draw_type="default" image="drv_mode_0"/>
   <slide_menu name="gear_view" x="671" y="83" w="114" h="38" min_scale="1" align_v="top" value="1">
-    <image name="gear_N" draw_type="center" style:normal:icon="gear_n_n" style:selected:icon="gear_n_p"/>
-    <image name="gear_D" draw_type="center" style:selected:icon="gear_d_p" style:normal:icon="gear_d_n"/>
-    <image name="gear_R" draw_type="center" style:normal:icon="gear_r_n" style:selected:icon="gear_r_p"/>
+    <image name="gear_N" draw_type="center" style:normal:icon="linkgear_n_n" style:selected:icon="linkgear_n_p"/>
+    <image name="gear_D" draw_type="center" style:selected:icon="linkgear_d_p" style:normal:icon="linkgear_d_n"/>
+    <image name="gear_R" draw_type="center" style:normal:icon="linkgear_r_n" style:selected:icon="linkgear_r_p"/>
   </slide_menu>
   <label name="power_lab" x="599" y="139" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="right" text="0"/>
   <slider name="power_bar" x="599" y="182" w="84" h="18" style:normal:icon="box_power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" style:normal:bg_color="#848484" style:normal:fg_color="#FFFFFF" style:normal:round_radius="0" bar_size="4" dragger_size="0" value="0"/>

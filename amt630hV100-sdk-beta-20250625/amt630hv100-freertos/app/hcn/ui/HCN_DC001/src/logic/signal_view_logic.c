@@ -4,7 +4,7 @@
 
 void signal_view_update()
 {
-    signal_phone_GMS();
+    // signal_phone_GMS();
     signal_bluetooth();
     signal_turn_left();
     signal_turn_right();
@@ -23,13 +23,14 @@ void signal_view_update()
 void signal_phone_GMS()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_GMS);
-    home_refresh_signal(ICON_GMS , value) ;
+    //home_refresh_GMS_level(ICON_GMS , 0.6 * value) ;
 }
 
 void signal_bluetooth()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_BT);
     home_refresh_signal(ICON_BT , value) ;
+    home_refresh_signal(ICON_GMS , value) ;
 }
 
 void signal_GPS()

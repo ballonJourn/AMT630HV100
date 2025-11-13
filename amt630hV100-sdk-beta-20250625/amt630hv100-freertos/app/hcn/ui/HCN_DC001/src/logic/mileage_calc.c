@@ -35,7 +35,7 @@ static MileageData mileage_data = {0};
 
 
 static double get_speed() {
-  double speed = 100 ;//vehicle_get_data_speed();
+  double speed = vehicle_get_data_speed();
   return (speed < 0.0) ? 0.0 : speed / 3.6;
 }
 
