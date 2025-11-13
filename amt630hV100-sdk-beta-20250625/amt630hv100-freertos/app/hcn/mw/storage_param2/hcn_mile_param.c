@@ -39,9 +39,11 @@ bool get_recovery_mile_param(void) {
 }
 
 bool set_hcn_mile_param(mile_param_handle_e id, void *param) {
+#if 0
     if (!get_recovery_mile_param()) {
         return false;
     }
+#endif
 
     if (!param) {
         hcn_log_error("Set mile param id:%d, param pointer null!\n", id);
@@ -131,10 +133,11 @@ bool set_hcn_mile_param(mile_param_handle_e id, void *param) {
 }
 
 bool get_hcn_mile_param(mile_param_handle_e id, void *param) {
+#if 0
     if (!get_recovery_mile_param()) {
         return false;
     }
-
+#endif
     if (!param) {
         hcn_log_error("Get mile param id:%d, param pointer null!\n", id);
         return false;
