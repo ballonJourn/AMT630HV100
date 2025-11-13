@@ -104,7 +104,9 @@ ret_t global_data_init(const timer_info_t *info)
             global_refresh_display(DIAPLAY_DAY_OPTION);
         else if(1 == value)
             global_refresh_display(DIAPLAY_NIGHT_OPTION);
-
+        else 
+            global_refresh_display(vehicle_get_data_current_display()) ;
+        
         // 档位 
         value =  vehicle_get_data_gear() ;
         home_refresh_gear(value) ;
@@ -150,7 +152,7 @@ void global_refresh_mileage()
     uint32_t u32_odo   = vehicle_get_mile_odo()  ;
     uint32_t u32_tripA = vehicle_get_mile_tripA();
     uint32_t u32_tripB = vehicle_get_mile_tripB();
-    uint32_t u32_once = vehicle_get_mile_once() ;
+    uint32_t u32_once  = vehicle_get_mile_once() ;
     if (MPH == vehicle_get_param_unit())
     {
         u32_odo   *= KM_CONVERT_MILE ; 

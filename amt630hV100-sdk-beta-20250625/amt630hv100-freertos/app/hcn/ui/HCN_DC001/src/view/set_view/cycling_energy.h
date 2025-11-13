@@ -12,7 +12,7 @@ enum set_cycling_energy_com{
     RIDE_AVG_ELEC       ,
 
     RIDE_LINE_SERIES    ,
-    
+
     RIDE_NUM_MAX        ,
 };
 
@@ -33,5 +33,7 @@ void on_cycling_engrgy_deal_short_key(key_id_e key) ;
 void cycling_engergy_view_clean_state() ;
 
 void cycling_engergy_view_set_focused_item(cycling_engrgy_option_e focusedIndex) ;
+
+ret_t series_push(widget_t* widget, const void* data, uint32_t nr);
 
 #endif

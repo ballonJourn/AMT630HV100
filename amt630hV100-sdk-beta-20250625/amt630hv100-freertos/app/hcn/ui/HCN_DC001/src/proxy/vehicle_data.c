@@ -15,6 +15,8 @@ typedef struct {
 #define VEH_INVALID_VALUE INT32_MIN
 
 static const Signal_Lamp_Mapping_t signalMaps[] = {
+    { VEH_GMS       , VEH_BT_PHONE_SIGNAL     } ,
+    { VEH_BT        , VEH_BT_CONNECTED_STATUS } ,
     { VEH_GPS       , VEH_LIGHT_GPS           } ,
     { VEH_HIGH_BEAM , VEH_LIGHT_HIGH_BEAM     } ,
     { VEH_LEFT      , VEH_INDICATOR_TURN_LEFT } ,
@@ -25,7 +27,6 @@ static const Signal_Lamp_Mapping_t signalMaps[] = {
     { VEH_TCS       , VEH_TCS_WARNING         } ,               
     { VEH_ABS       , VEH_LIGHT_ABS           } ,
     { VEH_BRAKE     , VEH_LIGHT_BRAKE         } ,
-
 };
 
 static const int drvModeMaps[] = {

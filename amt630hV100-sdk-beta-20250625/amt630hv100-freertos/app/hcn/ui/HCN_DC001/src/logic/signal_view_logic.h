@@ -3,13 +3,13 @@
 
 void signal_view_update();
 
+void signal_phone_GMS();
+
+void signal_bluetooth();
+
 void signal_turn_left();
 
 void signal_turn_right();
-
-void signal_turn_right();
-
-void signal_turn_left();
 
 void signal_GPS();
 

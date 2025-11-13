@@ -4,10 +4,10 @@
 
 void signal_view_update()
 {
+    signal_phone_GMS();
+    signal_bluetooth();
     signal_turn_left();
     signal_turn_right();
-    signal_turn_right();
-    signal_turn_left();
     signal_GPS();
     signal_high_beam();
     signal_ready();
@@ -20,6 +20,24 @@ void signal_view_update()
     return ; 
 }
 
+void signal_phone_GMS()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_GMS);
+    home_refresh_signal(ICON_GMS , value) ;
+}
+
+void signal_bluetooth()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_BT);
+    home_refresh_signal(ICON_BT , value) ;
+}
+
+void signal_GPS()
+{
+    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_GPS);
+    home_refresh_signal(ICON_GPS , value) ;
+}
+
 void signal_turn_right()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_RIGHT);
@@ -30,12 +48,6 @@ void signal_turn_left()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_LEFT);
     home_refresh_signal(ICON_LEFT , value) ;
-}
-
-void signal_GPS()
-{
-    bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_GPS);
-    home_refresh_signal(ICON_GPS , value) ;
 }
 
 void signal_high_beam()

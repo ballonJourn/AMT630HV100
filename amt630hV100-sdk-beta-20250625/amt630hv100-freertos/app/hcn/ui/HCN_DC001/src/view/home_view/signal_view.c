@@ -47,8 +47,8 @@ ret_t home_refresh_GMS_level(gms_level_e level )
 ret_t home_refresh_signal_visible(bool_t visible )
 {
     for (size_t i = 0; i < ICON_SIGNAL_NUM_MAX; i++){
-        if (i == ICON_GMS || i == ICON_GPS )   //不参与自检图表
-            continue;
+        // if (i == ICON_GMS || i == ICON_GPS )   //不参与自检图表
+        //     continue;
         
         if (home_signal_widget[i])
             widget_set_visible(home_signal_widget[i] , visible ? TRUE : FALSE) ;

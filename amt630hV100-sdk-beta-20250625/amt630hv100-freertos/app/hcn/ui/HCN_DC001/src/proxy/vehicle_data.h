@@ -5,6 +5,8 @@
 #define ON_PC_CACLE   0
 
 typedef enum signal{
+    VEH_GMS            ,
+    VEH_BT             ,
     VEH_GPS            ,    
     VEH_HIGH_BEAM      ,     
     VEH_LEFT           , 

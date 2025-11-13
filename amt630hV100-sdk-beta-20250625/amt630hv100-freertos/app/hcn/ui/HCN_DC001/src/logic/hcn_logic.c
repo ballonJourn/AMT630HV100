@@ -14,6 +14,7 @@
 #include "proxy/vehicle_data.h"
 #include "proxy/vehicle_time.h"
 #include "proxy/vehicle_mile.h"
+#include "proxy/vehicle_argument.h"
 #include "mileage_calc.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -93,7 +94,7 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     static int  clock_min   = 0 ;
     static int  clock_sec   = 0 ;
     static bool clock_colon = TRUE ;
-
+    static uint8_t display_value  = 0xFF ;
     int min = vehicle_get_time_hour();
     if (clock_min != min)
     {
@@ -114,11 +115,15 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     //导航
     navigation_view_update();
 
-
     //自动模式切主题 0 白天 1黑夜
     if ( 2 == vehicle_get_param_display())  
     {
-        global_refresh_display(vehicle_get_data_current_display()) ;
+        uint8_t _value =  vehicle_get_data_current_display();
+        if (_value != display_value)
+        {
+            global_refresh_display(_value) ;
+            display_value = _value ;
+        }
     }
     
     //小窗口时间
@@ -145,7 +150,6 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
 
     bluetooth_view_update();
 
-    //数据刷新
     speed_view_update() ;
 
     signal_view_update();

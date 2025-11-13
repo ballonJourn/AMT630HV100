@@ -232,7 +232,7 @@ void bluetooth_view_update()
     bluetooth_data_update(); 
 
     bool bt_state = vehicle_buluetooth_is_connected();
-    home_refresh_signal(ICON_BT , bt_state);   
+    // home_refresh_signal(ICON_BT , bt_state);   
     if (bt_state != g_bluetooth_state)
     {
 

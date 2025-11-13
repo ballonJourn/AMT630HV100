@@ -1,6 +1,7 @@
 #include "display.h"
 #include <stdio.h>
 #include "proxy/vehicle_argument.h"
+#include "logic/hcn_global.h"
 
 const char* set_display_widget_name[DISPLAY_NUM_MAX] = {
     "display_auto_option" , "display_day_option" , "display_night_option"
@@ -25,11 +26,11 @@ static void setting_menu_view_deal_set()
     printf("display setting_menu_view_deal_set = %d\n" , option) ;
     // 设置主题参数 0：白天 1:黑夜 2:自动
     if (option == DIAPLAY_AUTO_OPTION)
-        vehicle_get_param_display(2);
+        vehicle_set_param_display(2);
     else if(option == DIAPLAY_DAY_OPTION)
-        vehicle_get_param_display(0);
+        vehicle_set_param_display(0);
     else if (option == DIAPLAY_DAY_OPTION)
-        vehicle_get_param_display(1);
+        vehicle_set_param_display(1);
     
     global_refresh_display(option);
 
