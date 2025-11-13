@@ -49,7 +49,7 @@ void navigation_view_update()
             if ( false == _mirror_navigation)
                 home_refresh_nav_view(TIPS_VIEW)  ;
             else
-                home_refresh_nav_view(QR_VIEW)  ;
+                home_refresh_nav_view(NAVI_VIEW)  ;
 
             g_mirror_navigation = _mirror_navigation ;
 

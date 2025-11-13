@@ -84,7 +84,7 @@
               </view>
               <view name="navigate_view" x="0" y="0" w="189" h="206" visible="true">
                 <image name="navi_image" x="45" y="3" w="90" h="90" draw_type="default" image="icon_nav_1"/>
-                <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:text_color="#FFFFFF" style:normal:font_size="45"/>
+                <label name="label_distance" x="22" y="104" w="137" h="47" style:normal:font_size="45"/>
                 <label name="label_road" x="14" y="151" w="160" h="42" style:normal:font_size="25" style:normal:text_align_h="center"/>
               </view>
             </slide_view>
