@@ -444,7 +444,7 @@ int uart_mcu_parse_task_init(void) {
     xTimerStart(start_src_timer, 0);
 
     if (xTaskCreate(uart_mcu_parse_msg_thread, "uart mcu parse thread",
-                    configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES / 3,
+                    configMINIMAL_STACK_SIZE *2, NULL, configMAX_PRIORITIES / 3,
                     NULL) != pdPASS) {
         hcn_log_error("Create uart mcu parse task fail.\n");
         return -1;
