@@ -90,6 +90,11 @@ static BaseType_t prvParameterStartIwprivCommand( char *pcWriteBuffer, size_t xW
 static BaseType_t prvParameterIperfCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
 /*
+ * open or close system log command.
+ */
+static BaseType_t prvParameterSysLogCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+
+/*
  * Implements the "query heap" command.
  */
 #if( configINCLUDE_QUERY_HEAP_COMMAND == 1 )
@@ -202,11 +207,19 @@ static const CLI_Command_Definition_t xParameterEcho =
 	};
 #endif
 	static const CLI_Command_Definition_t xIperfCmd =
-	{//´ËiperfÖ»ÓÃÀ´×ö·ÉÒ×Í¨wifi¶¨Æµ²âÊÔ
+	{//ï¿½ï¿½iperfÖ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨wifiï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½
 		"iperf",
 		"\r\n iperf [ip] [port]:\r\n Starts iperf client\r\n",
 		prvParameterIperfCommand, /* The function to run. */
-		0 /* One parameter is expected.  Valid values are "start" and "stop". */
+		1 /* One parameter is expected.  Valid values are "start" and "stop". */
+	};
+
+	static const CLI_Command_Definition_t xSysLogCmd =
+	{
+		"sysLog",
+		"\r\n syslog [0|1], open or close syslog\r\n",
+		prvParameterSysLogCommand, /* The function to run. */
+		1 /* One parameter is expected.*/
 	};
 /*-----------------------------------------------------------*/
 
@@ -216,7 +229,7 @@ void vRegisterSampleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xTaskStats );	
 	FreeRTOS_CLIRegisterCommand( &xThreeParameterEcho );
 	FreeRTOS_CLIRegisterCommand( &xParameterEcho );
-
+	
 	#if( configGENERATE_RUN_TIME_STATS == 1 )
 	{
 		FreeRTOS_CLIRegisterCommand( &xRunTimeStats );
@@ -241,6 +254,7 @@ void vRegisterSampleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xStartIwprivCmd);
 #endif
 	FreeRTOS_CLIRegisterCommand( &xIperfCmd);
+	FreeRTOS_CLIRegisterCommand( &xSysLogCmd );
 }
 /*-----------------------------------------------------------*/
 
@@ -654,7 +668,7 @@ static BaseType_t prvParameterStartBtcoLogCommand( char *pcWriteBuffer, size_t x
     return pdFALSE;
 }
 
-void cmd_test(const char* temp_uart_buf);//for wifi iwpriv2a¨º?
+void cmd_test(const char* temp_uart_buf);//for wifi iwpriv2aï¿½ï¿½?
 static BaseType_t prvParameterStartIwprivCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
     //const char *pcParameter;
@@ -779,6 +793,54 @@ static BaseType_t prvParameterIperfCommand( char *pcWriteBuffer, size_t xWriteBu
     {
         printf("\r\ninvalid parameters\r\n");
     }
+    /* There is no more data to return after this single string, so return
+    pdFALSE. */
+    return pdFALSE;
+}
+
+static BaseType_t prvParameterSysLogCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t lParameterStringLength;
+
+    /* Remove compile time warnings about unused parameters, and check the
+    write buffer is not NULL.  NOTE - for simplicity, this example assumes the
+    write buffer length is adequate, so does not check for buffer overflows. */
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* Obtain the parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter
+    				(
+    				pcCommandString,		/* The command string itself. */
+    				1,						/* Return the first parameter. */
+    				&lParameterStringLength	/* Store the parameter string length. */
+    				);
+
+
+    /* Sanity check something was returned. */
+    configASSERT( pcParameter );
+	pcWriteBuffer[ 0 ] = 0x00;  //clear out buffer
+	/* There are only two valid parameter values. */
+
+	extern void set_system_log(uint8_t status);
+
+	if (strncmp(pcParameter, "0", strlen("0")) == 0)
+	{
+		printf("\r\ncmd system log close\r\n");
+		set_system_log(0);
+	}
+	else if (strncmp(pcParameter, "1", strlen("1")) == 0)
+	{
+		set_system_log(1);
+		printf("\r\ncmd system log open\r\n");
+	}
+    else 	 
+    {
+		printf("Invalid cmd:%s\n", pcCommandString);
+    }
+
     /* There is no more data to return after this single string, so return
     pdFALSE. */
     return pdFALSE;

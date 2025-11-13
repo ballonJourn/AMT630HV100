@@ -186,6 +186,10 @@ int usr_param_init(void);
 
 bool is_acc_start(void);
 
+void set_system_log(uint8_t status);
+
+uint8_t get_system_log(void);
+
 #endif //HCN_NOR_FLASH_PARAM_ENABLE
 
 #ifdef __cplusplus

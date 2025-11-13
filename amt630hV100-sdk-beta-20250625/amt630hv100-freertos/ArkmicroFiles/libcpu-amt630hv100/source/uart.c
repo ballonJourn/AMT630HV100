@@ -9,6 +9,8 @@
 #include "sysinfo.h"
 #include "sfud.h"
 #include "source/crc32.h"
+#include "storage_param1/hcn_usr_param.h"
+
 #ifdef DELTA_UPDATE_SUPPORT
 #include "delta_update.h"
 #endif
@@ -768,10 +770,14 @@ void vDebugConsoleInitialise(void)
 /* retarget printf function */
 int32_t putchar(int32_t ch)
 {
-	while (readl(REGS_UART0_BASE + UART_FR) & UART_FR_TXFF);
-	writel(ch, REGS_UART0_BASE + UART_DR);
-	
-	return ch;
+	if (get_system_log() >= 1) {
+		while (readl(REGS_UART0_BASE + UART_FR) & UART_FR_TXFF);
+			writel(ch, REGS_UART0_BASE + UART_DR);
+		
+		return ch;
+	} else {
+		return 0;
+	}
 }
 
 xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )

@@ -24,6 +24,8 @@
 #include "vehicle_param/vehicle_param.h"
 #include "backlight/hcn_backlight.h"
 
+//#define DEFAULT_START_UI_THEME
+
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE
 
 #define USE_PARAM_PRINTF (1)
@@ -181,6 +183,10 @@ static void check_usr_param(void) {
     printf_usr_param(&usr_param);
 #endif
 
+#ifdef DEFAULT_START_UI_THEME
+    usr_param.usr_set.theme = 1;
+#endif
+
     vehicle_set_data(VEH_LICENSE_AUTH_STATUS, (int)usr_param.usr_set.uuid_active_staus);
 #if 1
     if (usr_param.usr_set.brightness != 0) {
@@ -209,6 +215,7 @@ void check_start_source(uint8_t start_src) {
 
     check_usr_param();
     is_recovery_usr_param = true;
+    hcn_log_info("get sys log:%d\r\n", get_system_log());
 }
 
 int save_hcn_usr_param(void) {
@@ -455,7 +462,11 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
         case HCN_PARAM_THEME:
             if (usr_param.usr_set.theme != *((uint8_t *)param)) {
                 usr_param.usr_set.theme = *((uint8_t *)param);  
+                #ifdef DEFAULT_START_UI_THEME
+                is_save = false;
+                #else
                 is_save = true;
+                #endif
             }
             break;
 
@@ -785,6 +796,21 @@ bool get_recovery_usr_param(void) {
 
 bool is_acc_start(void) {
   return start_by_acc;
+}
+
+void set_system_log(uint8_t status) {
+    uint8_t sys_log = status;
+    set_hcn_usr_param(HCN_PARAM_SYS_LOG, &sys_log);
+}
+
+uint8_t get_system_log(void) {
+    uint8_t sys_log = 0;
+    if (!is_recovery_usr_param) {
+        return 1;
+    } else {
+        get_hcn_usr_param(HCN_PARAM_SYS_LOG, &sys_log);
+        return sys_log;
+    }
 }
 
 #endif //HCN_NOR_FLASH_PARAM_ENABLE

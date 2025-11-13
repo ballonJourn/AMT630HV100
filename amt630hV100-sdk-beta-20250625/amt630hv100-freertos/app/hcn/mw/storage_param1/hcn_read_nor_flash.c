@@ -63,7 +63,9 @@ static bool is_record_header_valid(record_header_t *header) {
         hcn_log_error("\r\ncal sum error, calc_checksum = 0x%08x, header->checksum = 0x%08x\r\n", calc_checksum, header->checksum);
     } else {
         times++;
+#if 0
         hcn_log_info("Head crc success, time = %d\r\n", times);
+#endif
         if (times >= 255) {
             times = 0;
         }
@@ -128,9 +130,10 @@ static int find_latest_record(meter_info_t *data) {
             current_record_offset = offset;
             total_write_count = max_write_count;
             found_valid = true;
-            
+#if 0           
             hcn_log_info("Found newer record: count=%lu, offset=0x%lx\n", 
                          header.write_count, offset);
+#endif
         }
     }
     
