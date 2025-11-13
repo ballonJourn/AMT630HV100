@@ -208,6 +208,9 @@ static void clean_bt_data_info(void) {
         memset(g_bt_data.btConnectDevName, 0, sizeof(g_bt_data.btConnectDevName));
     }
 
+    g_bt_data.btBatteryLevel = 0;
+    g_bt_data.btSignal = 0;
+
     memset(music_info.lyrics, 0, sizeof(music_info.lyrics));
     memset(music_info.artist, 0, sizeof(music_info.artist));
     memset(music_info.album, 0, sizeof(music_info.album));  

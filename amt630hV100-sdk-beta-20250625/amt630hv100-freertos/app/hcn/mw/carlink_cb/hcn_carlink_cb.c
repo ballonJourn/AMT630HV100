@@ -216,6 +216,8 @@ static void onHcnBtChange(bt_device_id_e id, uint32_t value) {
             vehicle_set_data(VEH_BT_CONNECTED_STATUS, (int)value);
             if (value == 0) {
                 vehicle_set_data(VEH_BT_CONECTED_REMOTE_DEV, 0);
+                vehicle_set_data(VEH_BT_PHONE_SIGNAL, 0);
+                vehicle_set_data(VEH_BT_PHONE_BATTERY, 0);
             }
             break;
 
