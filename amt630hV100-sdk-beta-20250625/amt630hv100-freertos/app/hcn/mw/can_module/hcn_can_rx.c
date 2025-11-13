@@ -27,7 +27,7 @@
 #include "utils/hcn_utils.h"
 #include "vehicle_param/vehicle_param.h"
 
-#define CAN_RX_DEBUG
+//#define CAN_RX_DEBUG
 #define CAN_RX_TIMEOUT_INTERVAL    (1000)
 #define GET_DATA_BITS(data,offset,mask) ((data >> offset) & mask)  
 
