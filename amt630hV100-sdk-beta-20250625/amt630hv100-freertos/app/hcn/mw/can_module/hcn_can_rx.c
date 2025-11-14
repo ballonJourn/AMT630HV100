@@ -26,6 +26,7 @@
 #include "can_module/hcn_can_tx.h"
 #include "utils/hcn_utils.h"
 #include "vehicle_param/vehicle_param.h"
+#include "dashboard_state/hcn_dev_state.h"
 
 //#define CAN_RX_DEBUG
 #define CAN_RX_TIMEOUT_INTERVAL    (1000)
@@ -95,6 +96,10 @@ static void timeout_clear_can_data(void) {
 }
 
 static int parse_can_msg_110_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_110 dlc[%d] or msg buff err!\r\n",size);
         return -1;
@@ -119,6 +124,10 @@ static int parse_can_msg_110_msg(uint8_t *buf, uint8_t size) {
 }
 
 static int parse_can_msg_111_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_111 dlc[%d] or msg buff err!\r\n",size);
         return -1;
@@ -136,6 +145,10 @@ static int parse_can_msg_111_msg(uint8_t *buf, uint8_t size) {
 }
 
 static int parse_can_msg_112_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_112 dlc[%d] or msg buff err!\r\n",size);
         return -1;
@@ -178,6 +191,10 @@ static int parse_can_msg_112_msg(uint8_t *buf, uint8_t size) {
 }
 
 static int parse_can_msg_120_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_120 dlc[%d] or msg buff err!\r\n",size);
         return -1;
@@ -192,6 +209,10 @@ static int parse_can_msg_120_msg(uint8_t *buf, uint8_t size) {
 }
 
 static int parse_can_msg_122_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_122 dlc[%d] or msg buff err!\r\n",size);
         return -1;
@@ -218,6 +239,10 @@ static int parse_can_msg_122_msg(uint8_t *buf, uint8_t size) {
 }
 
 static int parse_can_msg_12b_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+    
     if ((buf == NULL) || (size < 8)) {
         hcn_log_error("can_ecu_12b dlc[%d] or msg buff err!\r\n",size);
         return -1;
