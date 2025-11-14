@@ -17,9 +17,13 @@ bool vehicle_get_mile_recovery();
 uint32_t vehicle_get_mile_odo();
 void vehicle_set_mile_odo(double value) ;
 
+// send mcu odo
+void vehicle_save_odo_mileage(void);
+
 //tripA
 uint32_t vehicle_get_mile_tripA();
 void vehicle_set_mile_tripA(double value) ;
+void vehicle_save_mile_tripA(void);
 
 //tripB
 uint32_t vehicle_get_mile_tripB();
@@ -28,5 +32,6 @@ void vehicle_set_mile_tripB(double value) ;
 //单次里程
 uint32_t vehicle_get_mile_once();
 void vehicle_set_mile_once(double value) ;
+
 
 #endif

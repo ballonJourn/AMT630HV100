@@ -63,7 +63,8 @@ static void check_and_reset_trip(void) {
 static void save_unsaved_mileage(void) {
   if (mileage_data.unsaved_odo_distance >= SAVE_ODO_THRESHOLD) {
     set_mileage_state(true) ;
-    // vehicle_save_odo_mileage();
+    vehicle_save_odo_mileage();
+    vehicle_save_mile_tripA(); 
     mileage_data.unsaved_odo_distance -= SAVE_ODO_THRESHOLD;
   }
 }
@@ -114,6 +115,8 @@ void mileage_clear_trip() {
   mileage_data.trip_mileage = 0.0;
   vehicle_set_mile_tripA(mileage_data.trip_mileage);
   global_refresh_mileage();
+  vehicle_save_mile_tripA(); 
+
   return ;
 }
 
@@ -121,7 +124,7 @@ void mileage_clear_odo() {
 
   mileage_data.odo_mileage  = 0.0;
   vehicle_set_mile_odo(mileage_data.odo_mileage);
-
+  
   mileage_clear_trip();
   return ;
 }

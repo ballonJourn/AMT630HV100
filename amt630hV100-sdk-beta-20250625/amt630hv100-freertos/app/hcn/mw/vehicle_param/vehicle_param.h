@@ -44,7 +44,7 @@ typedef enum {
     VEH_MILEAGE_ENDURANCE_B,    ///< Endurance mileage A, precision 0.1
     VEG_AVG_FUEL_CONSUMPTION_A, ///< Average fuel consumption A, precision 0.1
     VEG_AVG_FUEL_CONSUMPTION_B, ///<Average fuel consumption B, precision 0.1
-    VEH_MILEAGE_TOTAL,          ///< Total mileage (km), precision 0.1
+    VEH_MILEAGE_TOTAL,          ///< Total mileage (m),precision 1
     VEH_MILEAGE_SUB_A,          ///< Subtotal mileage A (km), precision 0.1
     VEH_MILEAGE_SUB_B,          ///< Subtotal mileage B (km), precision 0.1
 

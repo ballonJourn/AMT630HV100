@@ -14,6 +14,7 @@
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
 #endif
+#include "uart_communicate/hcn_uart_send_cmd.h"
 
 static dock_view_e current_dock = ICON_INFO ;     
 
@@ -96,6 +97,9 @@ static void hcn_key_handle(uint8_t id)
         case  BACK_KEY_SHORT_PR :
                 deal_key_back_short_press() ;
                 break;
+                
+        case    BACK_KEY_LONG_PR:
+                deal_key_back_long_press();
 
         case  SET_KEY_SHORT_PR  :
                 deal_key_set_short_press()  ;
@@ -252,6 +256,10 @@ void deal_key_back_short_press()
     return ;
 }
     
+void deal_key_back_long_press()
+{
+    mileage_clear_trip();
+}
 
 void deal_key_up_short_press()
 {
