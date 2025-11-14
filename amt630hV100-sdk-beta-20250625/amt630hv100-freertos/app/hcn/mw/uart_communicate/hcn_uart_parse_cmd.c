@@ -23,6 +23,7 @@
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #include "vehicle_param/vehicle_param.h"
 #include "storage_param1/hcn_usr_param.h"
+#include "storage_param2/hcn_mile_param.h"
 #include "maintence/hcn_mileage_maintence.h"
 #include "shutdown_manage/hcn_shutdown.h"
 #include "shutdown_manage/hcn_shutdown_anim.h"
@@ -137,6 +138,9 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
         return;
     }
 
+    static bool is_first_set_odo = true; 
+    static bool is_first_set_trip = true;
+
     uint16_t cmd = ((data[4] << 8) + data[5]);
     uint8_t data_start = 8;
     switch (cmd) {
@@ -172,6 +176,8 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
                 is_hande_shake = true;
                 send_req_mcu_version();
                 send_checkself_state(0);
+                send_mcu_request_odo();
+                send_mcu_request_trip(0);
             }
             break;
 
@@ -224,10 +230,14 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
         } break;
 
         case UART_MCU_CMD_ODO_INFO: {
-            int odo = ((data[data_start] << 24) + (data[data_start + 1] << 16) +
+            uint32_t odo = ((data[data_start] << 24) + (data[data_start + 1] << 16) +
                        (data[data_start + 2] << 8) + data[data_start + 3]);
-            vehicle_set_data(VEH_MILEAGE_TOTAL, odo);
-            odo /= 10;
+            vehicle_set_data(VEH_MILEAGE_TOTAL, (int)odo);
+            hcn_log_info("ODO data = %dm\r\n", odo);
+            if (is_first_set_odo) {
+                is_first_set_odo = false;
+                set_hcn_mile_param(HCN_MILE_PARAM_ODO, &odo);
+            }
             #ifdef HCN_MILEAGE_MAINTENCE_ENABLE
             update_maintence_mileage(odo);
             #endif
@@ -238,6 +248,13 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
                 ((data[data_start] << 24) + (data[data_start + 1] << 16) +
                  (data[data_start + 2] << 8) + data[data_start + 3]);
             vehicle_set_data(VEH_MILEAGE_SUB_A, data_tmp);
+            hcn_log_info("trip a = %dm\r\b", data_tmp);
+
+            uint32_t trip_data = (uint32_t)data_tmp;
+            if (is_first_set_trip) {
+                is_first_set_trip = false;
+                set_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &trip_data);
+            }
 
             data_tmp =
                 ((data[data_start + 4] << 24) + (data[data_start + 5] << 16) +

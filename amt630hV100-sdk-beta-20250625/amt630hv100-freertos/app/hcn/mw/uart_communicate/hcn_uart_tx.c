@@ -69,8 +69,14 @@ static void uart_mcu_tx_thread(void *param) {
         }
 
         uint16_t data_len = ((msg->buffer[6] << 8) + msg->buffer[7]);
-        hcn_hex_config_data_print("Soc", ":send(0x)", msg->buffer,
-                                 data_len + UART_MCU_MSG_MIN_LEN);
+        uint16_t cmd =  ((msg->buffer[4] << 8) + msg->buffer[5]);
+        
+        if ((cmd != UART_MCU_CMD_SET_ODO_DATA) 
+            && (cmd != UART_MCU_CMD_SET_TRIP_A_DATA)
+            && (cmd != UART_MCU_CMD_SET_TRIP_B_DATA)) {
+            hcn_hex_config_data_print("Soc", ":send(0x)", msg->buffer,
+                                data_len + UART_MCU_MSG_MIN_LEN);   
+        }
 
         rtn = iUartWrite(uap, msg->buffer, data_len + UART_MCU_MSG_MIN_LEN,
                          pdMS_TO_TICKS(100));

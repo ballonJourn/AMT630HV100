@@ -33,7 +33,7 @@ static mcu_update_t mcu_update;
 static QueueHandle_t mcu_update_queue = NULL;
 static TaskHandle_t mcu_update_task = NULL;
 static md5_context g_md5_ctx;
-static char hcn_mcu_full_ver[MCU_VER_MAX_LEN] = {"MCU-HJ-20241113.1"};
+static char hcn_mcu_full_ver[MCU_VER_MAX_LEN] = {"DC001-GD_24.11.13V0"};
 
 h_bool stop_mcu_update(void);
 h_bool start_mcu_update(void);
