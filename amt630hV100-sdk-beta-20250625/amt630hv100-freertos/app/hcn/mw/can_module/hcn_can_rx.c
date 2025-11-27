@@ -256,6 +256,47 @@ static int parse_can_msg_12b_msg(uint8_t *buf, uint8_t size) {
     return 0;
 }
 
+static int parse_can_msg_777_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+    
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_777 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int parse_can_msg_778_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+    
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_778 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+
+    return 0;
+}
+
+static int parse_can_msg_779_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+        return 0;
+    }
+    
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_778 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+    
+    hcn_log_info("can_ecu_779 data recv ok!\r\n");
+
+    return 0;
+}
+
 bool can_get_communication_status(void) {
     return is_can_com;
 }
@@ -291,6 +332,18 @@ static void can_recv_msg_process(CanMsg *pMsg) {
 
         case 0x12b:
             parse_can_msg_12b_msg(pMsg->Data, pMsg->DLC);
+            break;
+
+        case 0x777:
+            parse_can_msg_777_msg(pMsg->Data, pMsg->DLC);
+            break;
+
+        case 0x778:
+            parse_can_msg_778_msg(pMsg->Data, pMsg->DLC);
+            break;
+
+        case 0x779:
+            parse_can_msg_779_msg(pMsg->Data, pMsg->DLC);
             break;
 
         default:
