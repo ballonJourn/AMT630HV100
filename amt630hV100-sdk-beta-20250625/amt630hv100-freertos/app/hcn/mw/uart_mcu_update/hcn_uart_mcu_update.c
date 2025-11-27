@@ -16,6 +16,7 @@
 #include "task.h"
 #include "uart_mcu_update/hcn_uart_mcu_update.h"
 #include "uart_communicate/hcn_uart_common.h"
+#include "uart_communicate/hcn_uart_parse_cmd.h"
 #include "uart_communicate/hcn_uart_tx.h"
 #include "storage_param1/hcn_read_nor_flash.h"
 #include "utils/hcn_utils.h"
@@ -33,7 +34,7 @@ static mcu_update_t mcu_update;
 static QueueHandle_t mcu_update_queue = NULL;
 static TaskHandle_t mcu_update_task = NULL;
 static md5_context g_md5_ctx;
-static char hcn_mcu_full_ver[MCU_VER_MAX_LEN] = {"DC001-GD_24.11.13V0"};
+static char hcn_mcu_full_ver[MCU_VER_MAX_LEN] = {"MCU-DC001-GD_24.11.13V0"};
 
 h_bool stop_mcu_update(void);
 h_bool start_mcu_update(void);
@@ -321,7 +322,7 @@ static h_bool mcu_update_md5_crc(void) {
     }
 
     uint8_t out_digest[MCU_MD5_CRC_LEN] = {0};
-
+    printf("Hcn mcu update file len:%d\r\n", file_len_tmp);
     memset(&g_md5_ctx, 0, sizeof(g_md5_ctx));
     md5_starts(&g_md5_ctx);
     md5_update(&g_md5_ctx, mcu_update.file_info.update_buff,
@@ -351,7 +352,7 @@ static h_bool is_mcu_ver_same(char *mcu_ver) {
     if (!mcu_ver) {
         return h_true;
     }
-
+    
     int remain_size = mcu_update.file_info.file_len - strlen(mcu_ver);
     if (remain_size > 0) {
         for (int i = 0; i < mcu_update.file_info.file_len; i++) {
@@ -363,6 +364,7 @@ static h_bool is_mcu_ver_same(char *mcu_ver) {
                 memcpy(mcu_ver_str,
                        (void *)&mcu_update.file_info.update_buff[i],
                        strlen(mcu_ver));
+                hcn_log_info("Hcn mcu file update ver:%s\r\n", mcu_ver_str);
                 if (strcmp(mcu_ver_str, mcu_ver) == 0) {
                     hcn_log_info("Hcn mcu is same=> mcu_ver_str:%s , mcu_ver:%s\r\n", mcu_ver_str, mcu_ver);
                     return h_true;
@@ -383,6 +385,10 @@ void mcu_updatet_init(uint8_t method, FF_FILE *mcu_file) {
         return;
     }
 
+    if (get_mcu_version()) {
+        snprintf(hcn_mcu_full_ver, MCU_VER_MAX_LEN, "%s", get_mcu_version());
+    }
+
     if (mcu_update.file_info.update_type == 0) {
         mcu_update.file_info.update_type = method;
         if (mcu_update.file_info.update_type == USB_UPDATE_MCU) {
@@ -401,7 +407,7 @@ void mcu_updatet_init(uint8_t method, FF_FILE *mcu_file) {
                         read_total_len += len;
                     } else {
                         ff_fclose(mcu_file);
-                        printf("Hb read mcu update file finish\r\n");
+                        hcn_log_info("Hcn read mcu update file finish\r\n");
                         goto md5_crc;
                     }
                 }

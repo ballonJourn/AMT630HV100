@@ -49,6 +49,7 @@ extern int ulog_console_backend_init(void);
 #include "config/hcn_config.h"
 #include "mw_init/hcn_mw_init.h"
 #include "msg_manage/hcn_msg_manage.h"
+#include "uart_mcu_update/hcn_uart_mcu_update.h"
 
 #ifdef HCN_ADC_KEY_ENABLE
 #include "key_module/hcn_adc_key.h"
@@ -755,10 +756,13 @@ static void usb_read_thread(void *para)
 				update_from_media("/usb", UPFILE_TYPE_STEPLDR);
 			}
 
+			int ret = -1;
+			bool is_same_app = false;
+
 			fp = ff_fopen("/usb/update.bin", "rb");
 			if (fp) {
 				ff_fclose(fp);
-				update_from_media("/usb", UPFILE_TYPE_WHOLE);
+				ret = update_from_media("/usb", UPFILE_TYPE_WHOLE);
 			}
 
 			fp = ff_fopen("/usb/lnchemmc.bin", "rb");
@@ -766,6 +770,23 @@ static void usb_read_thread(void *para)
 				ff_fclose(fp);
 				update_from_media("/usb", UPFILE_TYPE_LNCHEMMC);
 			}
+
+			if (ret == 1) {
+				is_same_app = true;
+			}
+			
+#ifdef HCN_OTA_UPDATE_ENABLE
+			if  (is_same_app) {
+				FF_FILE *mcu_fp = ff_fopen("/usb/CMS32.bin", "rb");
+				if (mcu_fp) {
+					printf("open CMS32.bin success.\r\n");
+					mcu_updatet_init(1, mcu_fp);
+				} else {
+					printf("open CMS32.bin fail.\n");
+				}
+			}
+#endif
+
 #endif
 #else
 			FF_FILE *fp = ff_fopen("/usb/update.bin", "rb");
