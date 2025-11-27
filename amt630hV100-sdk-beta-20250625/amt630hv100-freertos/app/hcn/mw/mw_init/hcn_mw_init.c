@@ -66,4 +66,6 @@ void hcn_mw_init(void) {
     hal_audio_init();
 
     carlink_cb_init();
+
+    mw_msg_manage_init();
 }

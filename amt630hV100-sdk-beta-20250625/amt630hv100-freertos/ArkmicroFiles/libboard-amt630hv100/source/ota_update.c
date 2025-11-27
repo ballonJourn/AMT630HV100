@@ -13,6 +13,7 @@
 #include "mmcsd_core.h"
 #include "ff_stdio.h"
 #include "source/crc32.h"
+#include "ota_manage/hcn_ota.h"
 
 
 #if DEVICE_TYPE_SELECT != EMMC_FLASH
@@ -557,7 +558,7 @@ int update_from_media(char *mpath, int filetype)
 	if (checksum == get_upfile_checksum(filetype, 0, 0, 0)) {
 		if (!(filetype == UPFILE_TYPE_WHOLE && sysinfo->app_checksum == 0)) {
 			printf("checksum is the same as now, don't update.\n");
-			return 0;
+			return 1;
 		}
 	}
 
@@ -635,8 +636,20 @@ int update_from_media(char *mpath, int filetype)
 			if (sfud_erase_write(sflash, rwoffset, rwsize, buf) != SFUD_SUCCESS)
 #endif
 			{
+				if (filetype == UPFILE_TYPE_WHOLE) {
+					send_update_status(HCN_MSG_USB_UPDATE_STATUS, filesize, \
+									rwoffset - file_offset, UPDATE_ERROR_FLASH);
+				}
+			
 				printf("burn %s data fail.\n", update_file);
 				goto end;
+			} 
+			else 
+			{
+				if (filetype == UPFILE_TYPE_WHOLE) {
+					send_update_status(HCN_MSG_USB_UPDATE_STATUS, filesize, \
+									rwoffset - file_offset, UPDATE_ERROR_NONE);
+				}
 			}
 #if DEVICE_TYPE_SELECT == EMMC_FLASH
 		}
@@ -672,14 +685,16 @@ int update_from_media(char *mpath, int filetype)
 		printf("burn %s ok.\n", update_file);
 
 		if (filetype == UPFILE_TYPE_WHOLE) {
-			extern void wdt_cpu_reboot(void);
-			printf("Ota update bin success, cpu will reboot...\r\n");
-			vTaskDelay(500);
-			wdt_cpu_reboot();
+			send_update_status(HCN_MSG_USB_UPDATE_STATUS, filesize, \
+							rwoffset - file_offset, UPDATE_ERROR_NONE);
 		}
 		return 0; 
 	} else {
 		printf("checksum after burn fail.\n");
+		if (filetype == UPFILE_TYPE_WHOLE) {
+			send_update_status(HCN_MSG_USB_UPDATE_STATUS, filesize, \
+							rwoffset - file_offset, UPDATE_ERROR_CRC);
+		}
 	}
 
 end:

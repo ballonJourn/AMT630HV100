@@ -4524,6 +4524,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>ota_manage</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>shutdown_manage</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\shutdown_manage\hcn_ign.c</name>

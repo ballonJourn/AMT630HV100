@@ -98,22 +98,12 @@ static void test_shake_hand(void) {
 
 static void test_odo_data(void) {
     static uint32_t time_cnt = 0;
-    static uint16_t write_cnt = 0;
-    static uint32_t data = 0;
     if (get_check_self_state() >= CHECK_SELF_STATE_SUCCESS) {
         if ((time_cnt % 10) == 0) {
-            //send_mcu_request_odo();
+            send_mcu_request_odo();
             //send_mcu_request_trip(0);
-            write_cnt++;
-            if (write_cnt <= 500) {
-                data += 500;
-                send_mcu_set_trip_a(data);
-            }
         } 
         time_cnt++;
-        if ((time_cnt % 12) == 0) {
-            send_mcu_request_trip(0);
-        }
     }
 }
 
