@@ -33,6 +33,8 @@
 #include "spi.h"
 #include "errno.h"
 #include "os_adapt.h"
+#include "timer.h"
+
 
 #define SFUD_SPI_MAX_HZ 35000000
 #define SFUD_QSPI_MAX_HZ SFUD_SPI_MAX_HZ
@@ -198,7 +200,11 @@ static void spi_unlock(const sfud_spi *spi)
 
 static void retry_delay_100us(void) {
 	/* 100 microsecond delay */
-	vTaskDelay((configTICK_RATE_HZ * 1 + 9999) / 10000);
+	//vTaskDelay((configTICK_RATE_HZ * 1 + 9999) / 10000);
+	int time = get_timer(0);
+	while (get_timer(0) - time < 100) {
+         taskYIELD();
+	}
 }
 
 sfud_err sfud_spi_port_init(sfud_flash *flash) {

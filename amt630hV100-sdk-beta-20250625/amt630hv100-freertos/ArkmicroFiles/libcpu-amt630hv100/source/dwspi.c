@@ -890,8 +890,10 @@ void dwspi_jedec252_reset(void)
 static void dw_spi_dma_complete_callback(void *param, unsigned int mask)
 {
 	struct dw_spi *dws = param;
+	BaseType_t xHigherPrioritylaskoken = pdFALSE;
 
-	xQueueSendFromISR(dws->xfer_done, NULL, 0);
+	xQueueSendFromISR(dws->xfer_done, NULL, &xHigherPrioritylaskoken);
+	portYIELD_FROM_ISR(xHigherPrioritylaskoken);
 }
 
 static int dw_spi_dma_init(struct dw_spi *dws)

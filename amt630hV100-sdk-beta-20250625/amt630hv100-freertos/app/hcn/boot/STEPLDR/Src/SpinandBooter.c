@@ -223,19 +223,22 @@ static const snf_priv_info SNF_PrivInfo[] = {
 	[1] = {PLANE_SEL(1), 0, 0},		/* DS35Q2GA: [plane select(6,12,12,6)][No crbsyBit][No eccErrMask] */
 	[2] = {PLANE_NULL, 6, 0},		/* MX35LF1G: [No plane select][crbsyBit in bit6][No eccErrMask] */
 	[3] = {PLANE_NULL, 7, 0}, 		/* MX35LF2G: [No plane select][crbsyBit in bit7][No eccErrMask] */
-	[4] = {PLANE_NULL, 7, 0}, 		/* MX35LF4G: [No plane select][crbsyBit in bit7][No eccErrMask] */
 };
 
 static const spi_nand_cfg SNF_ChipCfgArray[] = {
 	// name,			MID, DID0, DID1, BBM,	BytePerPage, 	PagePerBlk,	TotalBlkCnt,	SpareSize	PrivateInfo
 	{ "DS35Q1GA",		0xE5, 0x71, 0x00, 2, 	2048, 			64,			1024,			64,			PINFO_NULL},
 	{ "DS35Q2GA",		0xE5, 0x72, 0x00, 2, 	2048, 			64,			2048,			64,			PINFO_SEL(1)},
-	{ "GD5F2GM7",		0xc8, 0x92, 0x00, 1, 	2048, 			64,			2048,			64,			PINFO_NULL},
+	{ "GD5F2GM7UE",		0xc8, 0x92, 0x00, 1, 	2048, 			64,			2048,			64,			PINFO_NULL},
+	{ "GD5F1GM7RE", 	0xc8, 0x81, 0x00, 1,	2048,			64, 		1024,			64, 		PINFO_NULL},
+	{ "GD5F2GM7UE", 	0xc8, 0x92, 0x00, 1,	2048,			64, 		2048,			64, 		PINFO_NULL},
+	{ "GD5F2GM7RE", 	0xc8, 0x82, 0x00, 1,	2048,			64, 		2048,			64, 		PINFO_NULL},
 	{ "W25N01GV",		0xef, 0xaa, 0x21, 1, 	2048, 			64,			1024,			64,			PINFO_NULL},
 	{ "W25N02KV",		0xef, 0xaa, 0x22, 1, 	2048, 			64,			2048,			64,			PINFO_NULL},
 	{ "MX35LF1G",		0xc2, 0x12, 0x00, 1, 	2048,			64,			1024,			64,			PINFO_SEL(2)},
 	{ "MX35LF2G",		0xc2, 0x26, 0x03, 1, 	2048,			64,			2048,			64,			PINFO_SEL(3)},
-	{ "MX35LF4G",		0xc2, 0x37, 0x03, 1, 	4096,			64,			2048,			128,		PINFO_SEL(4)},
+	{ "MX35LF4G",		0xc2, 0x37, 0x03, 1, 	4096,			64,			2048,			128,		PINFO_SEL(3)},
+	{ "IS37SML01G",		0xc8, 0x21, 0x00, 1,	2048,			64, 		1024,			64, 		PINFO_NULL},
 };
 
 static u8 pageReadBuf[SNF_MAX_PAGE_SIZE];
@@ -260,7 +263,6 @@ static void SpiWaitIdle(void)
 	udelay(1);
 }
 
-#if 0
 static void SpiEmptyRxFIFO(void)
 {
 	int data = 0;
@@ -269,7 +271,6 @@ static void SpiEmptyRxFIFO(void)
 	while (rSPI_SR & SPI_RXFIFO_NOTEMPTY)
 		data = rSPI_DR;
 }
-#endif
 
 static void SetSpiDataMode(u32 bitMode)
 {
@@ -426,7 +427,7 @@ static void SpiNandWriteDisable(void)
 
 static int SpiNandWaitTillReady(void)
 {
-	int timeout = 100;
+	int timeout = 200;
 	u8 status;
 
 	while (timeout--)
@@ -442,7 +443,7 @@ static int SpiNandWaitTillReady(void)
 
 static int SpiNandWaitReadTillReady(void)
 {
-	int timeout = 100;
+	int timeout = 200;
 	int crbsyBit = g_snf.PrivInfo->CrbsyBit;
 	int status;
 
@@ -569,6 +570,8 @@ static int SpiNandReadCache(u32 page, u32 offset, int len, u8 *buf)
 	int block = page / g_snf.PagePerBlk;
 	u32 addr;
 	int i;
+
+	SpiEmptyRxFIFO();
 
 #ifdef SPI0_QSPI_MODE
 	//Quad mode.
@@ -1423,7 +1426,7 @@ static int SpiNandSetAttribute(snf_chip_info *chip)
 		chip->SprSize				= cfg[i].SprSize;
 		chip->FtlSprSize			= 24;
 		chip->Capacity				= chip->BytePerBlk * chip->TotalBlk;
-		chip->ReplaceBlks			= chip->TotalBlk * SNF_REPLACE_BLK_PERCENT / 100;
+		chip->ReplaceBlks			= chip->TotalBlk / 100 * SNF_REPLACE_BLK_PERCENT;
 		chip->AvailableBlks			= chip->TotalBlk - chip->ReplaceBlks - SNF_BBT_BLK_COUNT;
 		chip->AvailableCapacity		= chip->AvailableBlks * chip->BytePerBlk;
 		chip->BbtBlkOffset			= chip->TotalBlk - SNF_BBT_BLK_COUNT;

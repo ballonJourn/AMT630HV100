@@ -19,7 +19,7 @@ static ret_t onShowQrCode(const timer_info_t* t) {
 	}*/
 	//printf("strQrText:%s +++++\r\n", strQrText);
 #ifdef CARLINK_ENABLE
-	char strQrText[100] = {0};
+	char strQrText[200] = {0};
 	get_qr_text_buf(strQrText, sizeof(strQrText));
 	if (strQrText[0] != '\0') { 
 		qr_set_value(qr_ec, strQrText);

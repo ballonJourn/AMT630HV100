@@ -598,15 +598,20 @@ int pthread_setschedparam( pthread_t thread,
     return iStatus;
 }
 
+#if ENABLE_TLS
 static _pthread_key_data_t _thread_keys[PTHREAD_KEY_MAX];
+#endif
 
 void pthread_key_system_init()
 {
+#if ENABLE_TLS
    memset(&_thread_keys[0], 0, sizeof(_thread_keys));
+#endif
 }
 
 void *pthread_getspecific(pthread_key_t key)
 {
+#if ENABLE_TLS
    struct pthread_internal* ptd;
 
    if (pthread_self() == NULL) return NULL;
@@ -619,12 +624,15 @@ void *pthread_getspecific(pthread_key_t key)
 
    if ((key < PTHREAD_KEY_MAX) && (_thread_keys[key].is_used))
 	   return ptd->tls[key];
-
+#else
+	(void)key;
+#endif
    return NULL;
 }
 
 int pthread_setspecific(pthread_key_t key, const void *value)
 {
+#if ENABLE_TLS
    struct pthread_internal* ptd;
 
    if (pthread_self() == NULL) return EINVAL;
@@ -641,13 +649,17 @@ int pthread_setspecific(pthread_key_t key, const void *value)
 	   ptd->tls[key] = (void *)value;
 	   return 0;
    }
-
+#else
+	(void)key;
+	(void)value;
+#endif
    return EINVAL;
 }
 
 
 int pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
 {
+#if ENABLE_TLS
    uint32_t index;
 
    taskENTER_CRITICAL();
@@ -661,12 +673,16 @@ int pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
 	   }
    }
    taskEXIT_CRITICAL();
-
+#else
+	(void)key;
+	(void)destructor;
+#endif
    return -EAGAIN;
 }
 
 int pthread_key_delete(pthread_key_t key)
 {
+#if ENABLE_TLS
    if (key >= PTHREAD_KEY_MAX)
 	   return EINVAL;
 
@@ -674,7 +690,9 @@ int pthread_key_delete(pthread_key_t key)
    _thread_keys[key].is_used = 0;
    _thread_keys[key].destructor = 0;
    taskEXIT_CRITICAL();
-
+#else
+	(void)key;
+#endif
    return 0;
 }
 

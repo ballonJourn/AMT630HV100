@@ -575,8 +575,22 @@ void vUartInit(UartPort_t *uap, uint32_t baud, uint32_t flags)
 		writel(lcr_h, uap->regbase + UART_LCRH);
 		writel(cr | UART_CR_UARTEN, uap->regbase + UART_CR);
 	} else {
+		uap->hwFlowCtl = 0;
+#ifdef UART1_FLOW_CTL
+		if (uap->id == UART_ID1)
+			uap->hwFlowCtl = 1;
+#endif
+#ifdef UART3_FLOW_CTL
+		if (uap->id == UART_ID3)
+			uap->hwFlowCtl = 1;
+#endif
 		//set modem
-		writel(0, uap->regbase + UART485_MCR);
+		if (uap->hwFlowCtl) {
+			//bit5:auto flow control enable; bit1:CTS active; RTS auto active.
+			writel((1 << 5) | (1 << 1), uap->regbase + UART485_MCR);
+		} else {
+			writel(0, uap->regbase + UART485_MCR);
+		}
 
 		// baud = clk/(16*U_DLL)
 		//set baud rate
@@ -659,8 +673,8 @@ void vUartClose(UartPort_t *uap)
 	uap->rxbuf.tail = uap->rxbuf.head =  0;
 	vPortFree(uap->txbuf.buf);
 	uap->rxbuf.tail = uap->rxbuf.head =  0;
-	vPortFree(uap);
 	pxUartPort[uap->id] = NULL;
+	vPortFree(uap);
 }
 
 int iUartWrite(UartPort_t *uap, uint8_t *buf, size_t len, TickType_t xBlockTime)

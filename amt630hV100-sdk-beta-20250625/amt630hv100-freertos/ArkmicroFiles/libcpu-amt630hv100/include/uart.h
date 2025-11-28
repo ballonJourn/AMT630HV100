@@ -26,6 +26,7 @@ typedef struct {
 	SemaphoreHandle_t xMutex;
 	SemaphoreHandle_t xRev;
 	SemaphoreHandle_t xSend;
+	uint32_t hwFlowCtl;
 }UartPort_t;
 
 extern void vDebugConsoleInitialise(void);

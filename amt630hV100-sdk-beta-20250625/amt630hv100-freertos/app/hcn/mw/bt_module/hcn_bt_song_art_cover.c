@@ -101,7 +101,9 @@ void hcn_parse_avrcp_abulm_cover(bt_music_song_art_cover_t * art_cover,
                 last_phone_index = photo_index;
                 memset(photo_buff, 0, SONG_ART_COVER_MAX_LEN);
                 char *image = NULL;
+                hcn_log_info("get song art start...\r\n");
                 fscbt_get_coverart_data(&image, &pic_len);
+                hcn_log_info("get song art end...\r\n");
                 if (image) {
                     memcpy(photo_buff, image, pic_len);
                     art_cover->img_index = last_phone_index;
@@ -113,6 +115,7 @@ void hcn_parse_avrcp_abulm_cover(bt_music_song_art_cover_t * art_cover,
                     #ifdef SAVE_SONG_ART_COVER_ENABLE
                     save_song_art_cover(photo_buff, last_phone_index, pic_len);
                     #endif
+                    hcn_log_info("get song art cover success! len:%d\r\n", pic_len);
                 }
             }
         } else {

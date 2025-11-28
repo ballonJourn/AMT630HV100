@@ -453,6 +453,9 @@ static int i2c_dw_init_master(struct dw_i2c_dev *dev)
 	/* Disable the adapter */
 	__i2c_dw_disable(dev);
 
+	/* Clear interrupts */
+	dw_readl(dev, DW_IC_CLR_INTR);
+
 	/* Write standard speed timing parameters */
 	dw_writel(dev, dev->ss_hcnt, DW_IC_SS_SCL_HCNT);
 	dw_writel(dev, dev->ss_lcnt, DW_IC_SS_SCL_LCNT);
@@ -985,8 +988,10 @@ static void i2c_dw_isr(void *dev_id)
 	enabled = dw_readl(dev, DW_IC_ENABLE);
 	stat = dw_readl(dev, DW_IC_RAW_INTR_STAT);
 	TRACE_DEBUG("enabled=%#x stat=%#x\n", enabled, stat);
-	if (!enabled || !(stat & ~DW_IC_INTR_ACTIVITY))
+	if (!enabled || !(stat & ~DW_IC_INTR_ACTIVITY)) {
+		dw_readl(dev, DW_IC_CLR_INTR);
 		return;
+	}
 
 	i2c_dw_irq_handler_master(dev);
 }

@@ -166,12 +166,22 @@ static xPinGroup_t pin_groups[] = {
 		.pins = {{74, 1}, {75, 1}, {76, 1}, {77, 1}, {78, 1}, {79, 1}, {80, 1}, {81, 1},}},	/* d0-d7 */
 	/* 由于uart0有些平台rx没有接上拉电阻，需要将rx脚配置成gpio，防止收到随机数据导致异常 */
 	{.groupid = PGRP_UART0, .pins_num = 2, .pins = {{38, 1}, {39, 1}}},
-													/* rx      tx */
+#ifdef UART1_FLOW_CTL
+													/* rx	   tx		cts		rts */
+	{.groupid = PGRP_UART1, .pins_num = 4, .pins = {{40, 1}, {41, 1}, {100, 1}, {101, 1}}},
+#else
+													/* rx	   tx */
 	{.groupid = PGRP_UART1, .pins_num = 2, .pins = {{40, 1}, {41, 1}}},
+#endif
 													/* rx      tx */
 	{.groupid = PGRP_UART2, .pins_num = 2, .pins = {{42, 1}, {43, 1}}},
+#ifdef UART3_FLOW_CTL
+													/* rx	   tx		cts		rts */
+	{.groupid = PGRP_UART3, .pins_num = 4, .pins = {{44, 1}, {45, 1}, {46, 1}, {47, 1}}},
+#else
 													/* rx      tx */
 	{.groupid = PGRP_UART3, .pins_num = 2, .pins = {{44, 1}, {45, 1}}},
+#endif
 													/* cs        clk	d0		d1		d2		d3 */      
 	{.groupid = PGRP_SPI0, .pins_num = 5, .pins = {/*{32, 1},*/ {33, 1}, {34, 1}, {35, 1}, {36, 1}, {37, 1}}},
 													/* cs		clk		txd		rxd */

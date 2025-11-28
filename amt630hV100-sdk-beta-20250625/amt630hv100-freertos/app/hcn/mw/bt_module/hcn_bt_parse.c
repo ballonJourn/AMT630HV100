@@ -691,7 +691,7 @@ int bt_module_init(void) {
     }
 
     if (xTaskCreate(bt_msg_parse_task, "bt_msg_parse_task", 
-                    configMINIMAL_STACK_SIZE * 4, NULL, 
+                    configMINIMAL_STACK_SIZE * 6, NULL, 
                     configMAX_PRIORITIES / 2, NULL) != pdPASS) {
         vQueueDelete(bt_task_queue);
         bt_task_queue = NULL;

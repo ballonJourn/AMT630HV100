@@ -370,7 +370,8 @@ void    vp_start(int32_t width, int32_t height)
     //gts = get_timer(0);
     set_carlink_display_state(1);
 #else
-	gECVideoHandle = h264_video_player_init();
+	if (gECVideoHandle == NULL)
+		gECVideoHandle = h264_video_player_init();
 #endif
     if (get_hcn_callback() && get_hcn_callback()->onHcnVideoStatus) {
         get_hcn_callback()->onHcnVideoStatus(1);
@@ -385,6 +386,8 @@ void    vp_stop()
     set_carlink_display_state(0);
 #else
 	h264_video_player_uninit(gECVideoHandle);
+	gECVideoHandle = NULL;
+
 #endif
     if (get_hcn_callback() && get_hcn_callback()->onHcnVideoStatus) {
         get_hcn_callback()->onHcnVideoStatus(0);
@@ -412,7 +415,8 @@ get_retry:
 
     notify_h264_frame_ready(&frame);
 #else
-	h264_video_player_proc(gECVideoHandle, data, read_len);
+	if (gECVideoHandle)
+		h264_video_player_proc(gECVideoHandle, data, read_len);
 #endif
 }
 

@@ -240,6 +240,8 @@
 
 /*********** uart configuration ************/
 #define UART_MCU_PORT		3
+//#define UART1_FLOW_CTL		//高速串口1流控使能
+//#define UART3_FLOW_CTL		//高速串口3流控使能
 /*******************************************/
 
 /************ rtc configuration ************/

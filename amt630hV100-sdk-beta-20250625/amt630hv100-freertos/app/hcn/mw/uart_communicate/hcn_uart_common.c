@@ -245,7 +245,7 @@ int uart_mcu_init(void) {
     uart_mcu_parse_task_init();
 
     if (xTaskCreate(uart_mcu_rx_thread, "uart_rx_thead",
-                    configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES / 3,
+                    configMINIMAL_STACK_SIZE * 2, NULL, configMAX_PRIORITIES / 3,
                     NULL) != pdPASS) {
         hcn_log_error("Create uart mcu rx thread failed!\n");
         return -1;

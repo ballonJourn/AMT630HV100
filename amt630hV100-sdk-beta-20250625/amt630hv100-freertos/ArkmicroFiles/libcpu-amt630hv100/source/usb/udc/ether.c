@@ -362,6 +362,7 @@ int usb_data_rx_proc(struct eth_dev* dev, struct usb_request *req)
 			while(header != NULL) {
 		        struct pbuf *current = header;
 		        header = header->next;
+				current->next = NULL;
 		        ncm_ethernetif_input(ncm_netif, current);
 	    	}
 			dev->rx_frames.next = NULL;

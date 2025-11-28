@@ -218,15 +218,30 @@ void itu_start(void)
 void itu_stop(void)
 {
 	uint32_t val;
-	
+	uint8_t timeout = 100;
+
+	if (!itu_enable)
+		return;
+
 	//disable write data
 	xSemaphoreTake(itu_mutex, portMAX_DELAY);
+	itu_enable = 0;
+	portDISABLE_INTERRUPTS();
+	writel(0XFFFFFFFF, itubase + ITU656IN_ICR);
+	do {
+		val = readl(itubase + ITU656IN_ISR);
+		if (val & ITU656IN_SLICE_INT) {
+			break;
+		}
+		mdelay(1);
+	} while (timeout--);
+
 	val = readl(itubase + ITU656IN_MODULE_EN);
 	val |= (1 << 2);
 	writel(val, itubase + ITU656IN_MODULE_EN);
 	val = readl(itubase + ITU656IN_ENABLE_REG);
 	writel(val & ~1, itubase + ITU656IN_ENABLE_REG);
-	itu_enable = 0;
+	portENABLE_INTERRUPTS();
 #ifndef REVERSE_UI
 	ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
 	ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
@@ -305,7 +320,7 @@ void itu_display_thread(void *param)
 		ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 		ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
 #ifndef REVERSE_UI
-		// ark_lcd_osd_enable(LCD_OSD1, 0);
+		ark_lcd_osd_enable(LCD_OSD1, 0);
 		ark_lcd_set_osd_sync(LCD_OSD1);
 #endif
 		vVideoDisplayBufRender(dstaddr);

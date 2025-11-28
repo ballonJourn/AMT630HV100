@@ -75,7 +75,6 @@ static const snf_priv_info SNF_PrivInfo[] = {
 	[1] = {PLANE_SEL(1), 0, 0},		/* DS35Q2GA: [plane select(6,12,12,6)][No crbsyBit][No eccErrMask] */
 	[2] = {PLANE_NULL, 6, 0},		/* MX35LF1G: [No plane select][crbsyBit in bit6][No eccErrMask] */
 	[3] = {PLANE_NULL, 7, 0}, 		/* MX35LF2G: [No plane select][crbsyBit in bit7][No eccErrMask] */
-	[4] = {PLANE_NULL, 7, 0}, 		/* MX35LF4G: [No plane select][crbsyBit in bit7][No eccErrMask] */
 };
 
 /* parameter description:
@@ -96,14 +95,18 @@ static const snf_priv_info SNF_PrivInfo[] = {
 */
 static const snfud_flash_chip snf_chip_table[] = {
 	// name,			MID, DID0, DID1,	BBM,	bytePerPage,	pagePerBlk, blkCnt, spare	PrivateInfoIndex
-	{ "DS35Q1GA",		0xE5, 0x71, 0x0,	2,		2048,			64,			1024,	64,		PINFO_NULL},
-	{ "DS35Q2GA",		0xE5, 0x72, 0x0,	2,		2048,			64,			2048,	64,		PINFO_SEL(1)},
-	{ "GD5F2GM7",		0xc8, 0x92, 0x0,	1,		2048,			64,			2048,	64,		PINFO_NULL},
+	{ "DS35Q1GA",		0xE5, 0x71, 0x00,	2,		2048,			64,			1024,	64,		PINFO_NULL},
+	{ "DS35Q2GA",		0xE5, 0x72, 0x00,	2,		2048,			64,			2048,	64,		PINFO_SEL(1)},
+	{ "GD5F1GM7UE",		0xc8, 0x91, 0x00, 	1, 		2048,			64,			1024,	64,		PINFO_NULL},
+	{ "GD5F1GM7RE",		0xc8, 0x81, 0x00, 	1, 		2048,			64,			1024,	64,		PINFO_NULL},
+	{ "GD5F2GM7UE",		0xc8, 0x92, 0x00, 	1, 		2048,			64,			2048,	64,		PINFO_NULL},
+	{ "GD5F2GM7RE",		0xc8, 0x82, 0x00, 	1, 		2048,			64,			2048,	64,		PINFO_NULL},
 	{ "W25N01GV",		0xef, 0xaa, 0x21, 	1, 		2048,			64,			1024,	64,		PINFO_NULL},
 	{ "W25N02KV",		0xef, 0xaa, 0x22, 	1, 		2048,			64,			2048,	64,		PINFO_NULL},
-	{ "MX35LF1G",		0xc2, 0x12, 0x00,	1,		2048,			64, 		1024,	64, 	PINFO_SEL(2)},
-	{ "MX35LF2G",		0xc2, 0x26, 0x03,	1,		2048,			64, 		2048,	64, 	PINFO_SEL(3)},
-	{ "MX35LF4G",		0xc2, 0x37, 0x03,	1,		4096,			64, 		2048,	128,	PINFO_SEL(4)},
+	{ "MX35LF1G",		0xc2, 0x12, 0x00,	1,		2048,			64,			1024,	64,		PINFO_SEL(2)},
+	{ "MX35LF2G",		0xc2, 0x26, 0x03,	1,		2048,			64,			2048,	64,		PINFO_SEL(3)},
+	{ "MX35LF4G",		0xc2, 0x37, 0x03,	1,		4096,			64,			2048,	128,	PINFO_SEL(3)},
+	{ "IS37SML01G",    	0xc8, 0x21, 0x00, 	1, 		2048,			64,			1024,	64,		PINFO_NULL},
 };
 
 /* ../port/sfup_port.c */
@@ -306,7 +309,7 @@ static sfud_err snf_wait_read_busy(const sfud_flash *flash, uint8_t *status)
 	while (1) {
 		result = snf_reg_read(flash, SNFUD_CMD_STATUS_REG, status);
 		if (result == SFUD_SUCCESS) {
-			if (!(*status & (1<<crbsyBit))) {
+			if (!(*status & (1 << crbsyBit))) {
 				return SFUD_SUCCESS;
 			}
 		}
@@ -1791,7 +1794,7 @@ static sfud_err snf_hardware_init(sfud_flash *flash)
 	}
 
 	chip->byte_per_blk = chip->byte_per_page * chip->page_per_blk;
-	chip->replace_blks = chip->total_blk * SNFUD_REPLACE_BLK_PERCENT / 100;
+	chip->replace_blks = chip->total_blk / 100 * SNFUD_REPLACE_BLK_PERCENT;
 	chip->available_blks = chip->total_blk - chip->replace_blks - SNFUD_BBT_BLK_COUNT;
 	chip->capacity = chip->total_blk * chip->byte_per_blk;
 	chip->available_capacity = chip->available_blks * chip->byte_per_blk;
