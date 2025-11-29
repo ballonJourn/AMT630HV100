@@ -24,7 +24,7 @@
 
 //#define SAVE_SONG_ART_COVER_ENABLE
 
-#define SONG_ART_COVER_MAX_LEN  (50*1024)
+#define SONG_ART_COVER_MAX_LEN  (42*1000)  ///< 顾凯专辑图片大小最大为42000字节
 
 static char *photo_buff = NULL;
 
@@ -101,9 +101,7 @@ void hcn_parse_avrcp_abulm_cover(bt_music_song_art_cover_t * art_cover,
                 last_phone_index = photo_index;
                 memset(photo_buff, 0, SONG_ART_COVER_MAX_LEN);
                 char *image = NULL;
-                hcn_log_info("get song art start...\r\n");
                 fscbt_get_coverart_data(&image, &pic_len);
-                hcn_log_info("get song art end...\r\n");
                 if (image) {
                     memcpy(photo_buff, image, pic_len);
                     art_cover->img_index = last_phone_index;
@@ -120,6 +118,12 @@ void hcn_parse_avrcp_abulm_cover(bt_music_song_art_cover_t * art_cover,
             }
         } else {
             hcn_log_info("Song art cover is too long, do not save!\r\n");
+            memset(photo_buff, 0, SONG_ART_COVER_MAX_LEN);
+            art_cover->img_index = 0;
+            art_cover->img_height = 200;
+            art_cover->img_width = 200;
+            art_cover->image_len = 0;
+            art_cover->image_buffer = NULL;
         }
     }
 }
