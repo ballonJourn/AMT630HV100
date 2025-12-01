@@ -75,24 +75,27 @@ static ret_t timer_refresh_100_ms(const timer_info_t *info)
         if (_update_info->type != update_info.type)
         {
             update_refresh_type(_update_info->type) ;
+            update_info.type = _update_info->type ;
         }
 
         if (_update_info->status != update_info.status)
         {
             update_refresh_state(_update_info->status) ;
+            update_info.status = _update_info->status ;
         }
         
         if (_update_info->progress != update_info.progress)
         {
             update_refresh_bar(_update_info->progress) ;
+            update_info.progress =  _update_info->progress ;
         }
         
         if (_update_info->error != update_info.error)
         {
             update_refresh_error(_update_info->error) ;
+            update_info.error = _update_info->error ;
         }
 
-        memcpy(&update_info , _update_info , sizeof(update_info_t));
     }
     
     return RET_REPEAT ;

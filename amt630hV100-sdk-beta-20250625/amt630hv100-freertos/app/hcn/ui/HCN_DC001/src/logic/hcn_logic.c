@@ -140,13 +140,10 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     bool state = vehicle_get_uptate_state();
     if (state != update_state)
     {
-        if ( true == state )
-        {
+        if ( true == state ){
             navigator_switch_to("update_page", false) ;
             printf("checked update_page open\n");
-        }
-        else
-        {
+        }else{
             navigator_back();
             printf("checked update_page close\n");
         }

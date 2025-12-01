@@ -70,7 +70,7 @@
           <view name="info_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="image" x="107" y="48" w="40" h="40" draw_type="default" image="icon_riding_time"/>
             <image name="image1" x="107" y="141" w="40" h="40" draw_type="default" image="icon_riding_distance"/>
-            <label name="ride_time" x="69" y="98" w="123" h="28" style:normal:font_size="24" text="0H 0min 0s"/>
+            <label name="ride_time" x="69" y="98" w="123" h="28" style:normal:font_size="24" text="0h 0min"/>
             <label name="ride_distance" x="66" y="191" w="123" h="28" style:normal:font_size="24" text="0 km"/>
           </view>
           <view name="navi_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
