@@ -76,7 +76,7 @@
 </string>
 <string name="auto">
   <language name="zh_CN">自动</language>
-  <language name="en_US">Atuo</language>
+  <language name="en_US">AtuoUpdate successful</language>
 </string>
 <string name="kilometer">
   <language name="zh_CN">公制</language>
@@ -143,4 +143,36 @@ Enter the map without navigation</language>
 <string name="call_pop">
   <language name="zh_CN">确认接听 返回挂断</language>
   <language name="en_US">Enter Answer    Back Hang up</language>
+</string>
+<string name="updating">
+  <language name="zh_CN">升级中...</language>
+  <language name="en_US">Upgrading...</language>
+</string>
+<string name="update_success">
+  <language name="zh_CN">更新成功</language>
+  <language name="en_US">Update Successful</language>
+</string>
+<string name="update_error">
+  <language name="zh_CN">更新失败</language>
+  <language name="en_US">Update Failed</language>
+</string>
+<string name="update_timeout">
+  <language name="zh_CN">更新超时</language>
+  <language name="en_US">Update Timeout</language>
+</string>
+<string name="error_crc">
+  <language name="zh_CN">CRC校验错误</language>
+  <language name="en_US">Error : CRC check </language>
+</string>
+<string name="error_flash">
+  <language name="zh_CN">Flash写入错误</language>
+  <language name="en_US">Error : Flash write </language>
+</string>
+<string name="error_file_type">
+  <language name="zh_CN">文件类型错误</language>
+  <language name="en_US">Error : File type </language>
+</string>
+<string name="null">
+  <language name="zh_CN"> </language>
+  <language name="en_US">  </language>
 </string>

@@ -15,6 +15,7 @@
 #include "proxy/vehicle_time.h"
 #include "proxy/vehicle_mile.h"
 #include "proxy/vehicle_argument.h"
+#include "proxy/vehicle_ota.h"
 #include "mileage_calc.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -78,9 +79,9 @@ ret_t home_view_init(widget_t * win)
 
 ret_t home_timer_init()
 {
-    timer_array[REFRESH_TIMER_50_MS]  = timer_add( timer_refresh_50_ms ,  NULL , REFRESH_INTERVAL_50_MS ) ;
+    timer_array[REFRESH_TIMER_50_MS ] = timer_add( timer_refresh_50_ms ,  NULL , REFRESH_INTERVAL_50_MS ) ;
     timer_array[REFRESH_TIMER_100_MS] = timer_add( global_data_init    ,  NULL , REFRESH_INTERVAL_100_MS) ;
-    timer_array[REFRESH_TIMER_500_MS] = timer_add( timer_refresh_500_ms , NULL , REFRESH_INTERVAL_500_MS) ;
+    timer_array[REFRESH_TIMER_500_MS] = timer_add( timer_refresh_500_ms,  NULL , REFRESH_INTERVAL_500_MS) ;
 
     return RET_OK ;
 }
@@ -95,6 +96,8 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     static int  clock_sec   = 0 ;
     static bool clock_colon = TRUE ;
     static uint8_t display_value  = 0xFF ;
+    static bool update_state = false ;
+
     int min = vehicle_get_time_hour();
     if (clock_min != min)
     {
@@ -111,7 +114,10 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     
     clock_colon = !clock_colon ;
     home_refresh_clock_colon(clock_colon) ;
-    
+
+    if (checkself_get_state() != CHECK_STATE_FINISHED ) 
+        return RET_REPEAT ;
+
     //导航
     navigation_view_update();
 
@@ -129,6 +135,24 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     //小窗口时间
     uint64_t interval  = time_now_s() - time_start;
     home_refresh_info_time(interval) ;
+
+    bool state = vehicle_get_uptate_state();
+    if (state != update_state)
+    {
+        if ( true == state )
+        {
+            navigator_switch_to("update_page", false) ;
+            printf("checked update_page open\n");
+        }
+        else
+        {
+            navigator_back();
+            printf("checked update_page close\n");
+        }
+        
+        update_state = state ;
+    }
+    
 
     return RET_REPEAT ;
 }

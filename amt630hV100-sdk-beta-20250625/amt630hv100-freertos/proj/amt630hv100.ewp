@@ -4637,6 +4637,9 @@
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\link_page.c</name>
                             </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\update_page.c</name>
+                            </file>
                         </group>
                         <group>
                             <name>proxy</name>
@@ -4654,6 +4657,9 @@
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_mile.c</name>
+                            </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_ota.c</name>
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\proxy\vehicle_time.c</name>
@@ -4761,6 +4767,15 @@
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\unit.c</name>
+                                </file>
+                            </group>
+                            <group>
+                                <name>update_view</name>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\update_view\update_logic.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\update_view\update_view.c</name>
                                 </file>
                             </group>
                             <file>

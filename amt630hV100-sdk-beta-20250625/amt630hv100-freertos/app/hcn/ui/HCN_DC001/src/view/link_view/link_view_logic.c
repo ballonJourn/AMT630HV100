@@ -13,6 +13,8 @@ static uint32_t timer_array[REFRESH_TIMER_NUM_MAX] = { 0 } ;
 
 static ret_t timer_refresh_50_ms(const timer_info_t *info) ;
 
+static ret_t on_link_page_changed(void* ctx, event_t* e) ;
+
 static int32_t speed         = 0 ;
 static int32_t poewr         = 0 ;
 static drv_mode_e drv_mode   = DRV_MODE_MAX ;
