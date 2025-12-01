@@ -3,13 +3,13 @@
 #include "view/update_view/update_logic.h"
 
 static ret_t visit_init_child(void* ctx, const void* iter) {
-  widget_t* win = WIDGET(ctx);
+  (void)ctx;
   widget_t* widget = WIDGET(iter);
   const char* name = widget->name;
 
-
+  // 初始化指定名称的控件（设置属性或注册事件），请保证控件名称在窗口上唯一
   if (name != NULL && *name != '\0') {
- 
+
   }
 
   return RET_OK;
@@ -25,7 +25,7 @@ ret_t update_page_init(widget_t* win, void* ctx) {
   (void)ctx;
   return_value_if_fail(win != NULL, RET_BAD_PARAMS);
 
-  //widget_foreach(win, visit_init_child, win);
+  widget_foreach(win, visit_init_child, win);
   update_init(win) ;
 
   return RET_OK;
