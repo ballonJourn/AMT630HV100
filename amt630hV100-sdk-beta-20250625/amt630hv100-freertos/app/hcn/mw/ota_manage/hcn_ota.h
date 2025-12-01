@@ -58,10 +58,10 @@ typedef enum {
  * @brief 升级信息结构体
  */
 typedef struct {
-    update_type_e type;        ///< 更新类型
-    update_state_e status;    ///< 更新状态
-    update_error_e error;      ///< 更新错误
-    uint8_t progress;         ///< 更新进度，单位：百分比(0-100)
+    update_type_e type;          ///< 更新类型
+    update_state_e status;       ///< 更新状态
+    update_error_e error;        ///< 更新错误
+    uint8_t progress;           ///< 更新进度，单位：百分比(0-100)
 } update_info_t;
 
 typedef struct {
@@ -74,6 +74,8 @@ typedef struct {
 void send_update_status(uint8_t msg_type, uint32_t total_size, 
                         uint32_t cur_off, uint8_t error);
 void parse_update_status(mw_msg_data_t *msg);
+
+update_info_t *get_current_update_info(void);
 
 #ifdef __cplusplus
 }

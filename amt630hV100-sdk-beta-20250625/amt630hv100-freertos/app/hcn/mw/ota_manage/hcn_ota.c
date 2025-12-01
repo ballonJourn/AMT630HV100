@@ -137,3 +137,7 @@ void parse_update_status(mw_msg_data_t *msg) {
 
     on_update_process(type, update_info.error, update_info.percent);
 }
+
+update_info_t *get_current_update_info(void) {
+    return &g_update_info;
+}
