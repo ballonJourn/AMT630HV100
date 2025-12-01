@@ -142,7 +142,6 @@ void music_ex_view_init()
 
 ret_t home_refresh_music_ex_image(char *blueMusicImg )
 {
-    // 设置图片控件的图片
     if (home_dock_music_ex_widget[MUSIC_IMAGE_EX]){
         image_set_image(home_dock_music_ex_widget[MUSIC_IMAGE_EX] , blueMusicImg ) ;
         widget_invalidate_force(home_dock_music_ex_widget[MUSIC_IMAGE_EX], NULL  ) ;
@@ -158,8 +157,9 @@ ret_t home_refresh_music_ex_title(char *title)
         widget_set_text_utf8(home_dock_music_ex_widget[MUSIC_TITLE_EX] , title) ;
     }
     
-    return RET_OK ;
+    return RET_OK ;  
 }
+
 
 ret_t home_refresh_music_ex_lyric(char *lyric)
 {

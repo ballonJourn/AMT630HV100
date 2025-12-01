@@ -1,16 +1,18 @@
 ﻿#include "awtk.h"
 #include "navigator.h"
-extern ret_t link_page_init(widget_t* win, void* ctx);
 
 #ifndef WITH_MVVM
-
+extern ret_t link_page_init(widget_t* win, void* ctx);
 extern ret_t home_page_init(widget_t* win, void* ctx);
+extern ret_t update_page_init(widget_t* win, void* ctx);
 
 static ret_t navigator_window_init(const char* name, widget_t* win, void* ctx) {
     if (tk_str_eq(name, "link_page")) {
-      return link_page_init(win, ctx);
+        return link_page_init(win, ctx);
     } else if (tk_str_eq(name, "home_page")) {
-    return home_page_init(win, ctx);
+        return home_page_init(win, ctx);
+    }else if (tk_str_eq(name, "update_page")) {
+        return update_page_init(win, ctx);
   }
 
   return RET_OK;
