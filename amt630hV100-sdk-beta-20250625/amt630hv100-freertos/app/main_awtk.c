@@ -818,8 +818,8 @@ static void usb_read_thread(void *para)
 #endif
 		} else if (status == USB_DEV_UNPLUGED) {
 			hcn_usb_status_change(USB_STATUS_REMOVED);
-			extern void set_update_status_reset(void);
-			set_update_status_reset();
+			extern void set_update_state_reset(void);
+			set_update_state_reset();
 			printf("usb removed.\n");
 		}
 	}

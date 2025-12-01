@@ -85,7 +85,7 @@ extern "C" {
 #define HCN_BL_PWM_ENABLE
 
 ///< 定义32MB spi nor flash使能
-//#define HCN_SPI_NOR_FLASH_32MB_ENABLE
+#define HCN_SPI_NOR_FLASH_32MB_ENABLE
 
 ///< 胎压相关信息
 #define HCN_TPMS_NONE        (0)

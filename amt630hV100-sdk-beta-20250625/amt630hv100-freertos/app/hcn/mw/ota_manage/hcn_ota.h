@@ -75,7 +75,7 @@ void send_update_status(uint8_t msg_type, uint32_t total_size,
                         uint32_t cur_off, uint8_t error);
 void parse_update_status(mw_msg_data_t *msg);
 
-void set_update_status_reset(void);
+void set_update_state_reset(void);
 
 update_info_t *get_current_update_info(void);
 
