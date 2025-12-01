@@ -50,7 +50,6 @@ ret_t update_refresh_state(update_state_e state)
     if (update_widget[UPDATE_STATE])
     {
         widget_set_text_utf8(update_widget[UPDATE_STATE] , str);
-        printf("sss\n");
     }
 
     return RET_OK  ;

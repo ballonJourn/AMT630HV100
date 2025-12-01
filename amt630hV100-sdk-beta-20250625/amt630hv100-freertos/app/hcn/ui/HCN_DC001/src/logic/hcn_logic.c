@@ -17,6 +17,7 @@
 #include "proxy/vehicle_argument.h"
 #include "proxy/vehicle_ota.h"
 #include "mileage_calc.h"
+#include "common/navigator.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
 #define REFRESH_INTERVAL_100_MS  (200)
