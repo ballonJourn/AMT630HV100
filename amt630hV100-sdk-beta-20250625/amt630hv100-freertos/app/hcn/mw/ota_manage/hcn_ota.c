@@ -141,3 +141,10 @@ void parse_update_status(mw_msg_data_t *msg) {
 update_info_t *get_current_update_info(void) {
     return &g_update_info;
 }
+
+void set_update_state_reset(void) {
+    g_update_info.type = UPDATE_NONE;
+    g_update_info.status = UPDATE_STATUS_IDLE;
+    g_update_info.error = UPDATE_ERROR_NONE;
+    g_update_info.progress = 0;
+}
