@@ -98,7 +98,7 @@ static void hcn_key_handle(uint8_t id)
                 deal_key_back_short_press() ;
                 break;
                 
-        case    BACK_KEY_LONG_PR:
+        case  BACK_KEY_LONG_PR:
                 deal_key_back_long_press();
 
         case  SET_KEY_SHORT_PR  :
@@ -258,7 +258,12 @@ void deal_key_back_short_press()
     
 void deal_key_back_long_press()
 {
-    mileage_clear_trip();
+    if (ICON_INFO == get_current_win() 
+        && MENU_LEVEL_0 == get_current_levle())
+    {
+        mileage_clear_trip();
+    }
+    
 }
 
 void deal_key_up_short_press()
