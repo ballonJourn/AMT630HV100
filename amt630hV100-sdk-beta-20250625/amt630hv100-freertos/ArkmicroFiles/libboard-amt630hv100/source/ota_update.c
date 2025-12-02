@@ -14,7 +14,7 @@
 #include "ff_stdio.h"
 #include "source/crc32.h"
 #include "ota_manage/hcn_ota.h"
-
+#include "msg_manage/hcn_msg_manage.h"
 
 #if DEVICE_TYPE_SELECT != EMMC_FLASH
 #include "ff_sfdisk.h"
@@ -622,6 +622,10 @@ int update_from_media(char *mpath, int filetype)
 	leftsize = filesize;
 	rwoffset = file_offset;
 	while (leftsize > 0) {
+		if (hcn_get_usb_status() == USB_STATUS_REMOVED) {
+			printf("USB removed, stop update.\n");
+			goto end;
+		}
 		rwsize = leftsize > rlen ? rlen : leftsize;
 #if DEVICE_TYPE_SELECT == EMMC_FLASH
 		if (filetype == UPFILE_TYPE_LNCHEMMC) {
