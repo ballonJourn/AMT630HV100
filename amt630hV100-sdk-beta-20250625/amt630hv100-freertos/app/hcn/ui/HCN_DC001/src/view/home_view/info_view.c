@@ -23,7 +23,7 @@ ret_t home_refresh_info_time(uint64_t total_seconds)
 {
     uint32_t hours   = total_seconds / 3600 ;
     uint32_t minutes = (total_seconds % 3600) / 60 ;
-    uint32_t seconds = total_seconds % 60;
+    //uint32_t seconds = total_seconds % 60;
 
     char buff[64]  = { 0 };
 

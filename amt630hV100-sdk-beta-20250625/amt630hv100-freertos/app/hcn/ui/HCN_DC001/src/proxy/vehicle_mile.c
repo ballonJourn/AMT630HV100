@@ -1,8 +1,10 @@
 #include "vehicle_mile.h"
 #include "vehicle_data.h"
-#include "log/hcn_log.h"
 #include "storage_param2/hcn_mile_param.h"
+#if !ON_PC_CACLE
+#include "log/hcn_log.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
+#endif
 
 ///< false:参数未准备好 true:已准备好
 bool vehicle_get_mile_recovery()
@@ -59,6 +61,7 @@ void vehicle_set_mile_tripA(double value)
 void vehicle_save_mile_tripA(void) 
 {
     uint32_t trip_data = 0;
+#if !ON_PC_CACLE
     if (get_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &trip_data)) {
         if (send_mcu_set_trip_a(trip_data) != 0) {
             hcn_log_error("Save trip a data error!\r\n");
@@ -66,6 +69,7 @@ void vehicle_save_mile_tripA(void)
     } else {
         hcn_log_error("Get trip a param error!\r\n");
     }
+#endif
 }
 
 //tripB
@@ -105,6 +109,7 @@ void vehicle_set_mile_once(double value)
 void vehicle_save_odo_mileage(void) 
 {
     uint32_t odo_data = 0;
+#if !ON_PC_CACLE
     if (get_hcn_mile_param(HCN_MILE_PARAM_ODO, &odo_data)) {
         if (send_mcu_set_odo(odo_data) != 0) {
             hcn_log_error("Save odo data error!\r\n");
@@ -112,5 +117,6 @@ void vehicle_save_odo_mileage(void)
     } else {
         hcn_log_error("Get odo param error!\r\n");
     }
+#endif
 } 
 

@@ -151,7 +151,23 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
         update_state = state ;
     }
     
+    // static int num = 0 ;
+    // num++ ;
+    // static int diplay = DIAPLAY_DAY_OPTION ;
+    // if (num == 25)
+    // {
+    //     if (diplay == DIAPLAY_DAY_OPTION)
+    //     {
+    //         diplay = DIAPLAY_NIGHT_OPTION ;
+    //     }else
+    //         diplay = DIAPLAY_DAY_OPTION ;
+        
+    //     global_refresh_display(diplay) ;
 
+    //     num = 0 ;
+
+    // }
+    
     return RET_REPEAT ;
 }
 

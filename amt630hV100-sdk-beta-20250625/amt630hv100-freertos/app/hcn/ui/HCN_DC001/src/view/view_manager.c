@@ -13,8 +13,8 @@
 #include "logic/mileage_calc.h"
 #if !ON_PC_CACLE
 #include "key_module/hcn_key_common.h"
-#endif
 #include "uart_communicate/hcn_uart_send_cmd.h"
+#endif
 
 static dock_view_e current_dock = ICON_INFO ;     
 
@@ -261,7 +261,10 @@ void deal_key_back_long_press()
     if (ICON_INFO == get_current_win() 
         && MENU_LEVEL_0 == get_current_levle())
     {
+#if !ON_PC_CACLE
         mileage_clear_trip();
+#endif
+        printf("mileage_clear_trip \n");
     }
     
 }

@@ -4,8 +4,11 @@
 #include "view/home_view/common.h"
 #include "view/set_view/display.h"
 #include "vehicle_param/vehicle_param.h"
+
+#if !ON_PC_CACLE
 #include "common/version/hcn_version.h"
 #include "uart_communicate/hcn_uart_parse_cmd.h"
+#endif
 
 typedef struct {
   veh_signal_e signal_lamp;
@@ -129,10 +132,16 @@ int32_t vehicle_get_data_current_display()
 
 const char* veicle_get_data_version()
 {
+#if !ON_PC_CACLE
     return get_soc_version();
+#endif
+    return " ";
 }
 
 const char* veicle_get_data_mcu_ver()
 {
+#if !ON_PC_CACLE
     return get_mcu_version();
+#endif
+    return " ";
 }
