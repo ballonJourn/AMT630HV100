@@ -59,6 +59,9 @@ static SemaphoreHandle_t xWiFiSem;
 static bool wifi_started;
 
 /*-----------------------------------------------------------*/
+bool get_wifi_start_state(void) {
+	return wifi_started;
+}
 
 WIFIReturnCode_t WIFI_On( void )
 {
@@ -684,7 +687,16 @@ void start_ping(const char *ipaddr)
 #if !USE_LWIP
 static const uint8_t ucIPAddressAp[4] = {192, 168, 13, 1};
 #endif
-static WIFIDeviceMode_t g_current_mode = eWiFiModeNotSupported;
+WIFIDeviceMode_t g_current_mode = eWiFiModeNotSupported;
+
+WIFIDeviceMode_t get_current_wifi_mode(void) {
+	return g_current_mode;
+}
+
+void set_current_wifi_mode(WIFIDeviceMode_t mode) {
+	g_current_mode = mode;
+}
+
 int wifi_initialize(WIFIDeviceMode_t mode)
 {
 	WIFIReturnCode_t xWifiStatus;
@@ -1110,4 +1122,101 @@ eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase, uin
 }
 #endif
 
+int start_sta_proc(const char* ssid, const char* passwd, char need_passwd)
+{
+	if (ssid == NULL || strlen(ssid) == 0)
+	{
+		printf("ssid is invalid \n");
+		return -1;
+	}
 
+    WIFINetworkParams_t xNetworkParams = {0};
+    WIFIReturnCode_t xWifiStatus;
+#if !USE_LWIP
+    setDhcpClientState(1);
+    vDHCPProcess(1, eInitialWait);
+    xSendDHCPEvent();
+#endif
+    WIFI_Context_init();
+    if (g_current_mode != eWiFiModeStation) {
+	g_current_mode = eWiFiModeStation;
+	 WIFI_SetMode(eWiFiModeStation);
+	 printf("Current mode is not sta, so reboot wifi\r\n");
+        WIFI_Off();
+    	  vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+    
+    xWifiStatus = WIFI_On();
+
+    if( xWifiStatus == eWiFiSuccess ) {
+        printf("WiFi module initialized.\r\n");
+    } else {
+        printf("WiFi module failed to initialize.\r\n" );
+        // Handle module init failure
+        return -1;
+    }
+
+    /* Some boards might require additional initialization steps to use the Wi-Fi library. */
+
+    while (0) {
+        printf("Starting scan\r\n");
+        WIFIScanResult_t xScanResults[ ucNumNetworks ] = {0};
+        xWifiStatus = WIFI_Scan( xScanResults, ucNumNetworks ); // Initiate scan
+
+        printf("Scan started\r\n");
+
+        // For each scan result, print out the SSID and RSSI
+        if ( xWifiStatus == eWiFiSuccess ) {
+            printf("Scan success\r\n");
+            for ( uint8_t i=0; i<ucNumNetworks; i++ ) {
+                printf("%s : %d \r\n", xScanResults[i].ucSSID, xScanResults[i].cRSSI);
+            }
+            break;
+        } else {
+            printf("Scan failed, status code: %d\n", (int)xWifiStatus);
+            goto exit;
+            //return -1;
+        }
+
+        vTaskDelay(200);
+    }
+
+    /* Setup parameters. */
+    memset(&xNetworkParams, 0, sizeof(xNetworkParams));
+    xNetworkParams.ucSSIDLength = strlen( ssid );
+    memcpy(xNetworkParams.ucSSID, ssid, xNetworkParams.ucSSIDLength);
+    xNetworkParams.xPassword.xWPA.ucLength = strlen( passwd );
+    memcpy(xNetworkParams.xPassword.xWPA.cPassphrase, passwd, xNetworkParams.xPassword.xWPA.ucLength);
+    if (need_passwd)
+        xNetworkParams.xSecurity = eWiFiSecurityWPA2;
+    else
+        xNetworkParams.xSecurity = eWiFiSecurityOpen;
+
+retry:
+    // Connect!
+	if (g_current_mode != eWiFiModeStation) {
+		printf("wifi mode is not station");
+		return -1;
+	}
+	
+    xWifiStatus = WIFI_ConnectAP( &( xNetworkParams ) );
+
+    if( xWifiStatus == eWiFiSuccess ){
+        printf( "WiFi Connected to AP:%s.\r\n", xNetworkParams.ucSSID );
+    } else {
+        printf( "WiFi failed to connect to AP:%s.\r\n", xNetworkParams.ucSSID);
+        // Handle connection failure
+		vTaskDelay(3000);
+		goto retry;
+    }
+#if !USE_LWIP
+    vDHCPProcess(1, eWaitingSendFirstDiscover);
+    xSendDHCPEvent();
+#else
+	//vTaskDelay(pdMS_TO_TICKS(1000));
+	//dhcpd_stop("wi");
+	//dhcp_start(get_lwip_net_interface());
+#endif
+exit:
+    return 0;
+}

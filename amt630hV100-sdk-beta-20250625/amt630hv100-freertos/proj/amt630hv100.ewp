@@ -4528,6 +4528,9 @@
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota.c</name>
                     </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota_start_sta.c</name>
+                    </file>
                 </group>
                 <group>
                     <name>shutdown_manage</name>
