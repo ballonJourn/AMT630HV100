@@ -574,7 +574,7 @@ static BaseType_t prvParameterStartWifiCommand( char *pcWriteBuffer, size_t xWri
 	/* There are only two valid parameter values. */
     if( strncmp( pcParameter, "ap", strlen( "ap" ) ) == 0 )
     {
-        //printf("\r\nstart ap\r\n");
+        printf("\r\nstart ap\r\n");
         start_ap(36, "ap63011", "88888888", 1);
     }
     else if( strncmp( pcParameter, "sta", strlen( "sta" ) ) == 0 )
