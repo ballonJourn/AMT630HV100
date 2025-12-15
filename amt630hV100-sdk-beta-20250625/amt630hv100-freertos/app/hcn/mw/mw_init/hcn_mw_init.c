@@ -68,4 +68,6 @@ void hcn_mw_init(void) {
     carlink_cb_init();
 
     mw_msg_manage_init();
+
+    //start_sta_init();
 }

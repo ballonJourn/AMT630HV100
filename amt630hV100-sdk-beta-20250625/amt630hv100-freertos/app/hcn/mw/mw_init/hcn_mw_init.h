@@ -38,6 +38,7 @@ extern "C" {
 #include "bt_module/hcn_bt_parse.h"
 #include "display_mode/hcn_display_mode.h"
 #include "msg_manage/hcn_msg_manage.h"
+#include "ota_manage/hcn_ota_start_sta.h"
 
 void hcn_mw_init(void);
 
