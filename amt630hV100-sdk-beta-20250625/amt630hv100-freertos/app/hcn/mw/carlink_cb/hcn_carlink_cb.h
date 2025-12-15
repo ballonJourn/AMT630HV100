@@ -199,7 +199,7 @@ typedef struct {
 typedef enum {
     WIFI_USER_NULL= 0x00,
     WIFI_USER_OTA,
-    WIFI_USER_HCN,
+    WIFI_USER_EC,
     WIFI_USER_EY,
     WIFI_USER_TEST
 } wifi_user_e;
