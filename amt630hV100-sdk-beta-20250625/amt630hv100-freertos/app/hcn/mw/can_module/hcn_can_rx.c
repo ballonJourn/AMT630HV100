@@ -74,6 +74,10 @@ static void timeout_clear_can_data(void) {
         if (vehicle_get_data(VEH_TRAM_REMAIN_BATTARY) > 0) {
             vehicle_set_data(VEH_TRAM_REMAIN_BATTARY, 0);
         }
+
+        if (vehicle_get_data(VEH_GEAR_POSITION) > 0) {
+            vehicle_set_data(VEH_GEAR_POSITION, 0);
+        }
     }
 
     if (current_time - rx_timeout.ecu_120_rx_timeout > CAN_RX_TIMEOUT_INTERVAL) {
