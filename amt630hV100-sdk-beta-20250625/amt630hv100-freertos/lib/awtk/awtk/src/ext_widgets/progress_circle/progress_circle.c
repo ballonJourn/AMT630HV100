@@ -105,14 +105,17 @@ static ret_t progress_circle_on_paint_self(widget_t* widget, canvas_t* c) {
     float_t angle = (M_PI * 2 * progress_circle->value) / progress_circle->max;
 
     if (ccw) {
-      end_angle = start_angle - angle + M_PI * 2;
-      if (fabs(end_angle - start_angle) < 0.001f) {
-        end_angle = start_angle + 0.001f;
+      if(fabs(angle)>0.002f){
+        end_angle = start_angle - angle + M_PI * 2;
+      }else {
+        end_angle = start_angle;
       }
     } else {
       end_angle = start_angle + angle;
     }
-
+    if (fabs(end_angle - start_angle) < 0.002f &&fabs(end_angle - start_angle) != 0.0f) {
+      end_angle = start_angle + 0.002f;
+    }
     vgcanvas_save(vg);
     vgcanvas_translate(vg, c->ox, c->oy);
     vgcanvas_set_stroke_color(vg, color);
