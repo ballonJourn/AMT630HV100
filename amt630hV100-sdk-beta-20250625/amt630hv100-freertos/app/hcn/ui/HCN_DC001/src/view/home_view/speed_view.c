@@ -22,8 +22,14 @@ ret_t home_refresh_speed(uint32_t speed)
 {
    speed = tk_min(speed , SPEED_MAX) ;
    
+   uint32_t duration = 300 ;
+
+   if (checkself_get_state() == CHECK_STATE_CHECKING){
+      duration = 30 ;
+   }
+
    if(home_speed_widget[SPEED_VALUE] ){
-   image_value_set_value(home_speed_widget[SPEED_VALUE], speed);
+      widget_animate_value_to(home_speed_widget[SPEED_VALUE], speed  , duration);
    }
 
    return RET_OK ;

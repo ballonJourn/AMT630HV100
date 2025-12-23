@@ -252,7 +252,7 @@ void deal_key_back_short_press()
         vehicle_calling_hung_up();
     else
         HCN_KEY_DISPATCH(back);
-        
+    
     return ;
 }
     
@@ -265,6 +265,9 @@ void deal_key_back_long_press()
         mileage_clear_trip();
 #endif
         printf("mileage_clear_trip \n");
+
+        extern void tk_mem_dump ();
+        tk_mem_dump ();
     }
     
 }

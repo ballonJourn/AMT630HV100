@@ -22,7 +22,7 @@
 #include "utils/hcn_utils.h"
 #include "log/hcn_log.h"
 
-//#define HCN_CAN_TX_ENABLE
+#define HCN_CAN_TX_ENABLE
 
 #ifdef HCN_CAN_TX_ENABLE
 

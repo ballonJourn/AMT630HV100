@@ -242,9 +242,9 @@ ret_t gloabl_load_image(uint8_t *buff ,  uint32_t length)
         if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) {
             image_manager_unload_bitmap(image_manager(), &tmps);
             assets_manager_clear_cache_ex(assets_manager() ,ASSET_TYPE_IMAGE , BLUETOOTH_MUSIC_IMAGE );
+            assets_manager_unref(assets_manager(), asset);
             printf(" asset_info_t release success \n") ;
         }
-        // assets_manager_unref(assets_manager(), asset);
     } else {
         printf("asset_info_t not exist ,need to preload size:%d\n", length);
     }
