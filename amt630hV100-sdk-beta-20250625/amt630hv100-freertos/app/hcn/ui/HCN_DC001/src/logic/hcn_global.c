@@ -236,18 +236,33 @@ ret_t gloabl_load_image(uint8_t *buff ,  uint32_t length)
         return RET_FAIL ;
     
     bitmap_t tmps = {0};
+
+    ret_t ret = RET_FAIL;
     const asset_info_t* asset = assets_manager_ref(assets_manager(), ASSET_TYPE_IMAGE, BLUETOOTH_MUSIC_IMAGE );
-    if (asset != NULL) {
-        printf("asset_info_t successed! size: %d ", asset->size);
-        if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) {
+    if (asset != NULL) 
+    {
+        printf("asset_info_t ref successed! size: %d ", asset->size);
+        if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) 
+        {
             image_manager_unload_bitmap(image_manager(), &tmps);
-            assets_manager_clear_cache_ex(assets_manager() ,ASSET_TYPE_IMAGE , BLUETOOTH_MUSIC_IMAGE );
-            assets_manager_unref(assets_manager(), asset);
             printf(" asset_info_t release success \n") ;
         }
-    } else {
+        assets_manager_clear_cache_ex(assets_manager() ,ASSET_TYPE_IMAGE , BLUETOOTH_MUSIC_IMAGE );
+        assets_manager_unref(assets_manager(), asset);
+
+    } 
+    else 
+    {
         printf("asset_info_t not exist ,need to preload size:%d\n", length);
     }
-    return assets_manager_add_data(assets_manager(), BLUETOOTH_MUSIC_IMAGE , ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, (uint8_t*)buff, length);
+    ret = assets_manager_add_data(assets_manager(), BLUETOOTH_MUSIC_IMAGE , ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, (uint8_t*)buff, length) ;
+
+    if (ret == RET_OK)
+    {
+        printf("assets_manager_add_data successed \n") ;
+    }
+
+    return ret ;
+    
 
 }
