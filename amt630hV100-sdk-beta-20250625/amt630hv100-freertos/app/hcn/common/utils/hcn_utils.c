@@ -154,3 +154,87 @@ void set_build_date_time(void) {
 
 	printf("Soc build version time: %s\r\n", build_date_time);
 }
+
+int is_valid_date(int year, int mon, int day) {
+    if (year < 2000 || year > 2099) {
+        return 0;
+    } 
+    
+    if (mon < 1 || mon > 12) {
+        return 0;
+    } 
+    
+    int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if ((year % 400 == 0) || (year % 4 == 0 && year % 100 != 0)) {
+        days_in_month[1] = 29; ///< 闰年2月29天
+    } else {
+        days_in_month[1] = 28; ///< 平年2月28天
+    }
+    
+    ///< 检查日期
+    if (day < 1 || day > days_in_month[mon - 1]) {
+        return 0;
+    }
+
+    return 1;
+}
+
+///< MCU-DC001-GD_24.11.13V0 或者 MCU-DC001-GD_24.11.13
+int parse_mcu_ver_format_by_strtok(const char *ver, parse_info_t *info) {
+    if (ver == NULL || info == NULL) {
+        return -1;
+    }
+
+     const char *pstr = ver;
+
+    ///< 查找下划线
+    while (*pstr && *pstr != '_') {
+        pstr++;
+    }
+
+    if (!*pstr) {
+        return 0;
+    }
+
+    ///< 跳过下划线
+    pstr++; 
+
+    ///< 解析日期时间
+    if (!isdigit(*pstr) || !isdigit(*(pstr + 1)) || *(pstr + 2) != '.') {
+        return 0;
+    }
+
+    info->year = 2000 + ((pstr[0] - '0') * 10 + (pstr[1] - '0'));
+    pstr += 3;
+
+    if (!isdigit(*pstr) || !isdigit(*(pstr + 1)) || *(pstr + 2) != '.') {
+        return 0;
+    }
+
+    info->month = ((pstr[0] - '0') * 10 + (pstr[1] - '0'));
+    pstr += 3;
+
+    if (!isdigit(*pstr) || !isdigit(*(pstr + 1)) || *(pstr + 2) != '.') {
+        return 0;
+    }
+
+    info->day = ((pstr[0] - '0') * 10 + (pstr[1] - '0'));
+    pstr += 2;
+ 
+    int version_size = sizeof(info->version);
+    ///< 解析版本如有
+    if (info->version && (version_size > 0)) {
+        if (*pstr == 'V' || *pstr == 'v') {
+            pstr++;
+            int i = 0;
+            while (*pstr && i < version_size -1) {
+                info->version[i++] = *pstr++;
+            }
+            info->version[i] = '\0';
+        } else {
+            info->version[0] = '\0';
+        }
+    }
+    
+    return 1;
+}

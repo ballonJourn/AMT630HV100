@@ -21,6 +21,14 @@ extern "C" {
 #include <stdint.h>
 #include "carlink_cb/hcn_carlink_cb.h"
 
+typedef struct {
+    int year;
+    int month;
+    int day;
+    char version[20]; ///< 版本号
+} parse_info_t;
+
+
 /**
  * @brief  打印十六进制配置数据
  * @param function 函数名称
@@ -95,6 +103,16 @@ const char *get_build_date_time(void);
  * @return 无
  */
 void set_build_date_time(void);
+
+/**
+ * @brief  检查日期是否合法
+ * @param  year:年份 
+ * @param  mon:月份
+ * @param  day:天数
+ * @return 0:不合法  1:合法
+ */
+int is_valid_date(int year, int mon, int day);
+int parse_mcu_ver_format_by_strtok(const char *ver, parse_info_t *info);
 
 #ifdef __cplusplus
 }
