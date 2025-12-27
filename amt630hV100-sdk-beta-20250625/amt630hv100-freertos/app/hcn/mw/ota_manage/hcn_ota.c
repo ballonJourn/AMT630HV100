@@ -98,6 +98,23 @@ void send_update_status(uint8_t msg_type, uint32_t total_size,
     send_mw_msg(&msg);
 }
 
+void sens_ota_update_state(uint8_t msg_type, uint8_t percent, uint8_t error) {
+    if (percent > 100) {
+        percent = 100;
+    }
+
+    update_msg_info_t update_data = {
+        .msg_type = msg_type,
+        .error = error,
+        .percent = percent,
+    };
+
+    mw_msg_data_t msg = {0};
+    memcpy(&msg.data.val, &update_data, sizeof(update_msg_info_t)); 
+
+    send_mw_msg(&msg);
+ }
+
 void parse_update_status(mw_msg_data_t *msg) {
     if (msg == NULL) {
         hcn_log_error("msg is NULL.\n");

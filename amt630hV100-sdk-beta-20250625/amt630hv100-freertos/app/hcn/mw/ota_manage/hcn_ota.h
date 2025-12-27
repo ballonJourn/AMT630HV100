@@ -77,6 +77,8 @@ void parse_update_status(mw_msg_data_t *msg);
 
 void set_update_state_reset(void);
 
+void sens_ota_update_state(uint8_t msg_type, uint8_t percent, uint8_t error);
+
 update_info_t *get_current_update_info(void);
 
 #ifdef __cplusplus

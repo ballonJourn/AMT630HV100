@@ -4529,7 +4529,16 @@
                         <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota.c</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota_parse.c</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_ota_start_sta.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\hcn_tcp_client.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\ota_manage\test_tcp.c</name>
                     </file>
                 </group>
                 <group>

@@ -24,17 +24,18 @@
 #include "log/hcn_log.h"
 #include "dashboard_state/hcn_dev_state.h"
 #include "carlink_cb/hcn_carlink_cb.h"
+#include  "ota_manage/hcn_tcp_client.h"
 #include "vehicle_param/vehicle_param.h"
 
 static TaskHandle_t ota_wifi_task = NULL;
 
-int start_sta_proc(const char* ssid, const char* passwd, char need_passwd);
-#if 0
+static wifi_user_e wifi_usr = WIFI_USER_OTA;
 
+#if 0
 #define ucNumNetworks		12
 
 static WIFIDeviceMode_t wifi_cur_mode = eWiFiModeNotSupported;
-static wifi_user_e wifi_usr = WIFI_USER_OTA;
+
 
 static char g_StaSsid[33] = {0};
 static char g_StaPasswd[33] = {0};
@@ -149,24 +150,42 @@ exit:
 }
 #endif
 
+extern int start_sta_ota_proc(const char* ssid, const char* passwd, char need_passwd);
 static void ota_wifi_task_proc(void *param) {
     while (vehicle_get_data(VEH_CARLINK_URL_STATUS) == 0) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    vTaskDelay(pdMS_TO_TICKS(4000));
+    vTaskDelay(pdMS_TO_TICKS(6000));
 
-    start_sta_proc("OTA", "88888888", 0);
+	hcn_log_info("ota ssid:%s pwd:%s\r\n", hcn_get_ota_ssid(), hcn_get_ota_ap_pwd());
+	start_sta_ota_proc(hcn_get_ota_ssid(), hcn_get_ota_ap_pwd(), 1);
+	if (wifi_usr == WIFI_USER_OTA) {
+		start_tcp_client();
+	} else {
+		stop_tcp_client();
+	}
 
-    ota_wifi_task = NULL;
+	hcn_log_info("ota_wifi_task_proc exit\n");
+
 	vTaskDelete(NULL);
+	ota_wifi_task = NULL;
 }
 
 int start_sta_init(void) {
     if (xTaskCreate(ota_wifi_task_proc, "start_ota_sta", 2048, 
-                    NULL, 7, &ota_wifi_task) != pdPASS) {
-        hcn_log_error("Create uart mcu rx thread failed!\n");
+                    NULL, 4, &ota_wifi_task) != pdPASS) {
+        hcn_log_error("Create ota_wifi_task_proc failed!\n");
         return -1;
     }
 
     return 0;
+}
+
+void stop_sta_task(void) {
+	if (ota_wifi_task) {
+		vTaskDelete(ota_wifi_task);
+		ota_wifi_task = NULL;
+	}
+
+	stop_tcp_client();
 }

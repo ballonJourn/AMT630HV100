@@ -429,13 +429,26 @@
 #define UPDATEFILE_MEDIA_B_OFFSET	0x1000000   //0xc00000
 #define UPDATEFILE_MAX_SIZE			0xf00000   //0xb00000 15M
 
-#if !(1 == CARLINK_CP)
 #define OTA_MEDIA_OFFSET			0x1f00000 //0x1600000
 #define OTA_MEDIA_SIZE				0x100000 //0xa00000
-#else
-#define OTA_MEDIA_OFFSET			0xa00000 //0xa00000
-#define OTA_MEDIA_SIZE				0x500000 //0x500000
-#endif
+
+///< update.bin保存的起始地址，默认是在flash的B区域，实际ota升级时，
+///< 要根据ota_update文件头信息来决定写入A区还是B区
+#define UPDATE_OTA_FILE_OFFSET		UPDATEFILE_MEDIA_B_OFFSET  
+
+#define MCU_OTA_FILE_OFFSET			0x1f00000		///<  MCU保存的起始地址 31M  
+#define MCU_OTA_FILE_SIZE			0x40000			///<  MCU最大保存256K
+
+///< spildr保存的起始地址
+#define LOADER_OTA_FILE_OFFSET		(MCU_OTA_FILE_OFFSET + MCU_OTA_FILE_SIZE)	
+#define LOADER_OTA_FILE_SIZE		0x4000			///< spildr最大保存
+
+///< stepldr保存的起始地址
+#define STEPLDR_OTA_FILE_OFFSET		(LOADER_OTA_FILE_OFFSET + LOADER_OTA_FILE_SIZE)	
+#define STEPLDR_OTA_FILE_SIZE		0x14000			///< stepldr最大保存80K
+
+///< flash最小擦除单位 4k
+#define FLASH_PRIV_TYPE_BYTE		0x1000
 #define SPI0_QSPI_MODE
 #elif DEVICE_TYPE_SELECT == EMMC_FLASH
 #define LOADER_OFFSET				0x0
@@ -504,7 +517,9 @@
 #endif
 
 #ifdef OTA_UPDATE_SUPPORT
-//#define DELTA_UPDATE_SUPPORT
+#ifndef HCN_OTA_UPDATE_ENABLE
+#define DELTA_UPDATE_SUPPORT     ///< 差分升级分区和OTA升级分区冲突，只能选择其一，不能同时使能，这里只支持OTA升级
+#endif
 
 //#define WIFI_UPDATE_SUPPORT
 #if defined(WIFI_UPDATE_SUPPORT) && !defined(USB_SUPPORT)
