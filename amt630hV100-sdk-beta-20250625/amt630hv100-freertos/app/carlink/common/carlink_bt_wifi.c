@@ -290,6 +290,18 @@ static void dump_ip_addr(const char *msg, const ip_addr_t *server_addr)
               ip4_addr1_16(ip_2_ip4(server_addr)), ip4_addr2_16(ip_2_ip4(server_addr)), ip4_addr3_16(ip_2_ip4(server_addr)), ip4_addr4_16(ip_2_ip4(server_addr)));
 }
 
+static uint32_t g_gw_addr = 0;
+static void notify_gw_addr(uint32_t gw_addr) {
+	g_gw_addr = gw_addr;
+	printf("gw addr:%d.%d.%d.%d\r\n", (g_gw_addr >> 0) & 0xFF,
+        (g_gw_addr >> 8) & 0xFF,
+        (g_gw_addr >> 16) & 0xFF,
+        (g_gw_addr >> 24) & 0xFF);
+}
+
+uint32_t get_ota_sta_gw_addr(void) {
+	return g_gw_addr;
+}
 
 static void dhcp_client_status_callback(struct netif *netif, int status, const ip_addr_t *server_addr)
 {
@@ -298,6 +310,7 @@ static void dhcp_client_status_callback(struct netif *netif, int status, const i
 		dump_ip_addr("dhcp client ip     :", (const ip_addr_t *)&netif->ip_addr);
 		dump_ip_addr("dhcp client netmask:", (const ip_addr_t *)&netif->netmask);
 		dump_ip_addr("dhcp client gw     :", (const ip_addr_t *)&netif->gw);
+		notify_gw_addr((uint32_t)netif->gw.addr);
 	}
 }
 
@@ -326,6 +339,44 @@ int start_sta_ext(const char* ssid, const char* passwd, char need_passwd)
 		netif_set_up(&gnetif[0]);
 		dhcp_start(&gnetif[0]);
 	}
+
+	return ret;
+}
+
+int start_sta_proc(const char* ssid, const char* passwd, char need_passwd);
+int start_sta_ota_proc(const char* ssid, const char* passwd, char need_passwd) {
+	int ret = -1;
+	ip4_addr_t ip_addr;
+	ip4_addr_t netmask;
+	ip4_addr_t gw;
+
+#if 1
+	ip_addr.addr = lwip_ipv4_addr(ucIPAddress);
+	netmask.addr = lwip_ipv4_addr(ucNetMask);
+	gw.addr      = lwip_ipv4_addr(ucGatewayAddress);
+#endif
+
+	ret = start_sta_proc(ssid, passwd, need_passwd);
+	if (ret != 0) {
+		printf("start ota wifi sta failed\r\n");
+		return ret;
+	}
+
+	if (lwip_tcpip_init_done_flag) {
+		//netif_set_down(&gnetif[0]);
+		netif_remove(&gnetif[0]);
+		netif_add(&gnetif[0],
+#if LWIP_IPV4
+			&ip_addr, &netmask, &gw,
+#endif
+			NULL, wlan_ethernetif_init, tcpip_input);
+		netif_set_default(&gnetif[0]);
+		dhcp_regisger_status_callback(dhcp_client_status_callback);
+		netif_set_up(&gnetif[0]);
+		printf("start ota sta step 1!");
+		dhcp_start(&gnetif[0]);
+	}
+	printf("start ota sta step 2!");
 
 	return ret;
 }
@@ -476,6 +527,10 @@ static void carlink_bt_callback(char * cAtStr)
 		carlink_carplay_ie_replace_bt_mac(cAtStr + 6, 12);
 #endif
 		g_cp_bt_mac_ready = true;
+
+		if (bt_msg_task_add(cAtStr, strlen(cAtStr)) != 0) {
+			printf("bt_callback_ec bt mac send fail!\r\n");
+		}
 	} 
 
 #if !CARLINK_EC
