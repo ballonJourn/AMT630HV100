@@ -172,6 +172,7 @@ typedef struct {
     uint8_t btSignal;               ///< 手机信号 0-5级
     uint16_t btBookCount;           ///< 通讯录数量
     char btDevName[TEXT_PARAM_LEN]; ///< 蓝牙设备名称
+    char bleName[TEXT_PARAM_LEN];   ///< 蓝牙低功耗设备名称
     char btDevPin[TEXT_PARAM_LEN];  ///< 设备配对密码
     char btHfpAddr[TEXT_PARAM_LEN]; ///< 连接设备的蓝牙MAC地址，去除了:分割
     char btConnectDevName[BT_CONNECT_DEV_NAME_LEN]; ///< 蓝牙连接设备的名称,
@@ -490,6 +491,10 @@ const char* hcn_bt_get_ble_mac_addr();
 ///< 蓝牙音乐
 const bt_music_info_t* hcn_bt_get_music_data();   ///< 获取蓝牙音乐相关信息
 void hcn_send_music_cmd(bt_music_cmd_e cmd);
+
+///< ota 升级
+const char * hcn_get_ota_ssid(void);
+const char * hcn_get_ota_ap_pwd(void);
 
 void carlink_cb_init(void);
 

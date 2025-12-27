@@ -301,6 +301,7 @@ void carlink_cb_init(void) {
         HcnLibConfig hcn_cfg;
         memset(&hcn_cfg, 0, sizeof(HcnLibConfig));
 
+        hcn_cfg.customer_name = HCN_CUSTOMER_NAME;
         gHcnCallback = register_hcn_callback();
         hcn_initialize(&hcn_cfg, gHcnCallback);
 

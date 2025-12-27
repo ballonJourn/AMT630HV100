@@ -158,6 +158,27 @@ void hcn_send_music_cmd(bt_music_cmd_e cmd) {
   
 }
 
+const char* hcn_bt_get_mac_addr() {
+    extern const char *carlink_get_bt_mac();
+    return carlink_get_bt_mac();
+}
+
+const char* hcn_bt_get_ble_name() {
+    static char name[32] = {0};
+    extern bool carlink_ble_mac_addr_is_ready();
+     if (carlink_ble_mac_addr_is_ready()) {
+        return g_bt_data.bleName;
+    } else {
+        snprintf(name, sizeof(name), "%s-NONE", HCN_CUSTOMER_NAME);
+        return name;
+    }
+}
+
+const char* hcn_bt_get_ble_mac_addr() {
+    extern const char *carlink_get_ble_mac();
+    return carlink_get_ble_mac();
+}
+
 const char* hcn_bt_get_name() {
     static char name[32] = {0};
 
@@ -502,6 +523,8 @@ static void on_bt_str_parse(char *at_str) {
                 }
             }
         }
+    }  else if (strstr(cmd_str, "+ADDR")){
+
     } else if (strstr(cmd_str, "+DEVSTAT")) {
         on_bt_dev_state_change(prama_data);
     } else if (strstr(cmd_str, "+PBCNT")) {
@@ -605,7 +628,13 @@ static void on_bt_str_parse(char *at_str) {
                 bt_send_cmd("AT+LEADDR");
             }
         } else if (strstr(cmd_str, "+LENAME")) {
-
+            if (strstr(param_array[0], HCN_CUSTOMER_NAME)) {
+                memset(g_bt_data.bleName, 0, sizeof(g_bt_data.bleName));
+                memcpy(g_bt_data.bleName, param_array[0], \
+                strlen(param_array[0]) < TEXT_PARAM_LEN ? \
+                strlen(param_array[0]) : TEXT_PARAM_LEN);
+                hcn_log_info("\r\n bt ble name;%s\r\n ", g_bt_data.bleName);
+            }
         } else if (strstr(cmd_str, "+PBDATA")) {
             on_phone_book_proc(param_array, param_count);
         } else if (strstr(cmd_str, "+HFPDEV")) {
