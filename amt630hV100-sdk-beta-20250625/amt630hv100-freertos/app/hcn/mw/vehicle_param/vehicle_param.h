@@ -150,6 +150,9 @@ typedef enum {
     VEH_CRUISE_STATUS,      ///< Cruise status 0: OFF, 1: ON
     VEH_CRUISE_CONTROL_SPEED, ///< Cruise control speed Km/h
     
+    ///< enter ota page state
+    VEH_ENTER_OTA_PAGE_STATE,  ///< 0:not enter  1:enter ota page  2:exit ota page
+
     VEH_DATA_END,
 } veh_data_e;
 
