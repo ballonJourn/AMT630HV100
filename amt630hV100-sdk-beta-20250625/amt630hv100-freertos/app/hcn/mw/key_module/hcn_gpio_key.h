@@ -44,7 +44,8 @@ extern "C" {
  */
 typedef enum {
     SHORT_PRESS,
-    LONG_PRESSS,
+    LONG_PRESS,
+    SUPER_LONG_PRESS,
 } key_press_mode_e;
 
 /**

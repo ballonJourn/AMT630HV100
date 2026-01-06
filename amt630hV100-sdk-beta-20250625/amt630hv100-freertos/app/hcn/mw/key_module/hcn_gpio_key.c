@@ -30,10 +30,16 @@
 ///< more than 2500 ms 
 #define GPIO_KEY_LONG_PRESS_TIME (2500)
 
+///< super long press time 10000ms(10s)
+#define GPIO_KEY_SUPER_LONG_PRESS_TIME (10000)
+
 #define SCAN_KEY_DEFIBRATE_INDEX \
     (SCAN_KEY_DEFIBRATE_TIME / SCAN_KEY_THREAD_INTERVAL_PERIOD)
 #define GPIO_KEY_LONG_PRESS_INDEX \
     (GPIO_KEY_LONG_PRESS_TIME / SCAN_KEY_THREAD_INTERVAL_PERIOD)
+
+#define GPIO_KEY_SUPER_LONG_PRESS_INDEX \
+    (GPIO_KEY_SUPER_LONG_PRESS_TIME / SCAN_KEY_THREAD_INTERVAL_PERIOD)
 
 #define SYS_TIME_GET() xTaskGetTickCount()
 
@@ -66,9 +72,16 @@ static void check_key_status(uint8_t key_status, uint8_t mode) {
             break;
 
         case ENTER_KEY_PRESS:
-            key_value = mode ? SET_KEY_LONG_PR : SET_KEY_SHORT_PR;
-            printf("%s\n",
-                   mode ? "enter key long press" : "enter key short press");
+            if (mode == SHORT_PRESS) {
+                key_value = SET_KEY_SHORT_PR;
+                printf("enter key short press\n");
+            } else if (mode == LONG_PRESS) {
+                key_value = SET_KEY_LONG_PR;
+                printf("enter key long press\n");
+            } else if (mode == SUPER_LONG_PRESS) {
+                key_value = SET_KEY_SUPER_LONG_PR;
+                printf("enter key super long press\n");
+            }
             send_key_event(key_value);
             break;
 
@@ -112,8 +125,22 @@ static void scan_gpio_key(void) {
         if ((scan_key.scan_key_time >= GPIO_KEY_LONG_PRESS_INDEX) &&
             (!scan_key.is_long_press)) {
             scan_key.is_long_press = true;
+
+            ///< 如果是enter键，特殊处理,不需要置标志
+            if (key_status != ENTER_KEY_PRESS) {
+                scan_key.is_real_key_press = false;
+            } 
+            check_key_status(key_status, LONG_PRESS);
+            key_status = NO_KEY_PRESS;
+        }
+
+         ///< enter键的超长按
+        if (key_status == ENTER_KEY_PRESS && 
+            (scan_key.scan_key_time >= GPIO_KEY_SUPER_LONG_PRESS_INDEX)
+            && (scan_key.is_long_press)) {
+            scan_key.is_long_press = false;
             scan_key.is_real_key_press = false;
-            check_key_status(key_status, LONG_PRESSS);
+            check_key_status(key_status, SUPER_LONG_PRESS); 
             key_status = NO_KEY_PRESS;
         }
     }
@@ -123,11 +150,22 @@ static void scan_gpio_key(void) {
         scan_key.defibrate_time = 0;
         scan_key.is_long_press = false;
         scan_key.is_real_key_press = false;
-        if (scan_key.scan_key_time < GPIO_KEY_LONG_PRESS_INDEX) {
-            if (key_status > NO_KEY_PRESS && key_status <= BACK_KEY_PRESS) {
+
+        ///< 处理enter键的释放逻辑
+        if (key_status == ENTER_KEY_PRESS) {
+             if (scan_key.scan_key_time < GPIO_KEY_LONG_PRESS_INDEX) {
                 check_key_status(key_status, SHORT_PRESS);
+             }
+        }
+
+        if (key_status != ENTER_KEY_PRESS) {
+            if (scan_key.scan_key_time < GPIO_KEY_LONG_PRESS_INDEX) {
+                if (key_status > NO_KEY_PRESS && key_status <= BACK_KEY_PRESS) {
+                    check_key_status(key_status, SHORT_PRESS);
+                }
             }
         }
+     
         scan_key.scan_key_time = 0;
         key_status = NO_KEY_PRESS;
     }

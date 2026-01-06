@@ -42,6 +42,7 @@ typedef enum {
     BACK_KEY_LONG_PR = 0x13,
     COM_KEY_SHORT_PR1 = 0x14,
     COM_KEY_LONG_PR1 = 0x15,
+    SET_KEY_SUPER_LONG_PR = 0x16,
 } key_event_e;
 
 typedef uint8_t key_event_t_;
