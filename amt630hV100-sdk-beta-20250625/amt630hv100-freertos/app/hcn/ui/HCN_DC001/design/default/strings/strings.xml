@@ -174,5 +174,33 @@ Enter the map without navigation</language>
 </string>
 <string name="null">
   <language name="zh_CN"> </language>
-  <language name="en_US">  </language>
+  <language name="en_US"> </language>
+</string>
+<string name="Bluetooth Name：">
+  <language name="zh_CN">蓝牙名称：</language>
+  <language name="en_US">Bluetooth Name：</language>
+</string>
+<string name="SN：">
+  <language name="zh_CN">设备系列号：</language>
+  <language name="en_US">SN：</language>
+</string>
+<string name="Version：">
+  <language name="zh_CN">版本信息：</language>
+  <language name="en_US">Version：</language>
+</string>
+<string name="CarBit：">
+  <language name="zh_CN">亿连骑行：</language>
+  <language name="en_US">CarBit：</language>
+</string>
+<string name="Bluetooth Ver:">
+  <language name="zh_CN">蓝牙版本：</language>
+  <language name="en_US">Bluetooth Ver:</language>
+</string>
+<string name="Inactive">
+  <language name="zh_CN">未激活</language>
+  <language name="en_US">Inactive</language>
+</string>
+<string name="Activated">
+  <language name="zh_CN">已激活</language>
+  <language name="en_US">Activated</language>
 </string>
