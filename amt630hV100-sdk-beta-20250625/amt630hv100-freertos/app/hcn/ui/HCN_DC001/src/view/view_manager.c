@@ -3,6 +3,7 @@
 #include "set_view/set_page_key.h"
 #include "home_view/home_view_interface.h"
 #include "set_view/set_view_interface.h"
+#include "device_view/device_logic.h"
 #include "proxy/vehicle_data.h"
 #include "common/navigator.h"
 #include "view_manager.h"
@@ -15,6 +16,8 @@
 #include "key_module/hcn_key_common.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #endif
+
+#define OTA_PAGE_INTERVAL 35
 
 static dock_view_e current_dock = ICON_INFO ;     
 
@@ -43,21 +46,23 @@ static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
                 }                                                                                     \
             } else if (tk_str_eq(top_win_name, LINK_PAGE)) {                                          \
                 link_page_deal_key_##keyType();                                                       \
+            }else if  (tk_str_eq(top_win_name, DEVICE_PAGE)) {                                        \
+                device_page_deal_key_##keyType();                                                     \
             }                                                                                         \
         } while(0);        
 
 
 static ret_t on_key_event(void* ctx, event_t* e) 
 {
+    key_event_t* evt = (key_event_t*)e;
+    uint32_t key     = evt->key;
 
     if (e->type == EVT_KEY_DOWN){
-        key_event_t* evt = (key_event_t*)e;
-        uint32_t key     = evt->key;
-    
         switch (key) 
         {
             case TK_KEY_w:
-                deal_key_up_short_press() ;
+                // deal_key_up_short_press() ;
+                navigator_switch_to(DEVICE_PAGE , false) ;
                 break;
             case TK_KEY_s:
                 deal_key_down_short_press();
@@ -74,7 +79,15 @@ static ret_t on_key_event(void* ctx, event_t* e)
         }
     }
     else if (e->type == EVT_KEY_LONG_PRESS){
-        get_demonstration_state() ? demonstration_stop() : demonstration_start();
+        if (key == TK_KEY_d)
+        {
+            get_demonstration_state() ? demonstration_stop() : demonstration_start();
+        }
+        else if(key == TK_KEY_w)
+        {
+            navigator_switch_to(DEVICE_PAGE , false) ;
+        }
+        
     }
     return RET_OK;
 }
@@ -97,10 +110,11 @@ static void hcn_key_handle(uint8_t id)
         case  BACK_KEY_SHORT_PR :
                 deal_key_back_short_press() ;
                 break;
-                
+            
         case  BACK_KEY_LONG_PR:
                 deal_key_back_long_press();
-
+                break;
+                
         case  SET_KEY_SHORT_PR  :
                 deal_key_set_short_press()  ;
                 break;
@@ -111,6 +125,9 @@ static void hcn_key_handle(uint8_t id)
 
         case  MODE_KEY_SHORT_PR :
                 deal_key_down_short_press() ;
+                break;
+        case  SET_KEY_SUPER_LONG_PR :
+                deal_key_super_long_press() ;
                 break;
         default:
                 break;
@@ -152,6 +169,8 @@ static void hcn_key_cb(uint8_t id)
 }
 #endif
 
+static uint64_t start_time = 0 ;
+
 ret_t view_manager_init(widget_t* parent)
 {
     if(parent == NULL) return RET_FAIL;
@@ -165,6 +184,8 @@ ret_t view_manager_init(widget_t* parent)
 #if !ON_PC_CACLE
     set_key_event_cb(hcn_key_cb);
 #endif
+
+    start_time = time_now_s();
 
     return RET_OK ;
 }
@@ -266,8 +287,8 @@ void deal_key_back_long_press()
 #endif
         printf("mileage_clear_trip \n");
 
-        extern void tk_mem_dump ();
-        tk_mem_dump ();
+        // extern void tk_mem_dump ();
+        // tk_mem_dump ();
     }
     
 }
@@ -283,6 +304,20 @@ void deal_key_down_short_press()
 {
     HCN_KEY_DISPATCH(down);
     return ;
+}
+
+void deal_key_super_long_press()
+{
+    uint64_t currentTime = time_now_s();
+    if ( ((currentTime - start_time ) <= OTA_PAGE_INTERVAL )
+            &&ICON_INFO == get_current_win() 
+            && MENU_LEVEL_0 == get_current_levle()  )
+    {
+        navigator_switch_to(DEVICE_PAGE , false) ;
+    }
+    else  
+        printf("Can not open! Timer Interval = [%llu] or Focused Item Not the First One \n" ,currentTime - start_time);
+    
 }
 
 

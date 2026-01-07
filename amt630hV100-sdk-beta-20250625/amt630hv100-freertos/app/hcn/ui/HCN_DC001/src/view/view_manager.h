@@ -68,6 +68,7 @@ void deal_key_up_short_press();
 
 void deal_key_down_short_press();
 
+void deal_key_super_long_press();
 
 void set_ready_press_state(bool state ) ;
 
