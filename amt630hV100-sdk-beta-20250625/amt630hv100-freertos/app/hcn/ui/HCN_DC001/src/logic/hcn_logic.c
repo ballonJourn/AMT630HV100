@@ -141,7 +141,7 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     if (state != update_state)
     {
         if ( true == state ){
-            navigator_switch_to("update_page", false) ;
+            navigator_switch_to(UPDATE_PAGE, false) ;
             printf("checked update_page open\n");
         }else{
             navigator_back();

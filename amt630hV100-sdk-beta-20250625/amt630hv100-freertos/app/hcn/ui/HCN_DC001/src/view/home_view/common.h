@@ -20,6 +20,7 @@
 #define LINK_PAGE    "link_page"
 #define SETTING_PAGE "setting_page"
 #define DEVICE_PAGE  "device_page"
+#define UPDATE_PAGE  "update_page"
 
 #define BLUETOOTH_MUSIC_IMAGE   "buletooth_music_image"
 #define BLUETOOTH_DEFAULT_IMAGE "icon_media_cover_n"

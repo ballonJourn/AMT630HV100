@@ -4644,6 +4644,9 @@
                         <group>
                             <name>pages</name>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\device_page.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\home_page.c</name>
                             </file>
                             <file>
@@ -4679,6 +4682,15 @@
                         </group>
                         <group>
                             <name>view</name>
+                            <group>
+                                <name>device_view</name>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\device_view\device_logic.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\device_view\device_view.c</name>
+                                </file>
+                            </group>
                             <group>
                                 <name>home_view</name>
                                 <file>

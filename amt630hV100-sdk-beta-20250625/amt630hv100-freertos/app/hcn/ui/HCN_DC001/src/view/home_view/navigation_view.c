@@ -21,12 +21,7 @@ ret_t home_nav_view_init(widget_t* parent)
     }
 
     nav_slide_view = widget_lookup(parent,"nav_slide_view", TRUE);
-    if (nav_slide_view)
-    {
-       printf("widget_lookup(parent,\"nav_slide_view\", TRUE);");
-    }
-    else
-        printf("nav_slide_view fail\n");
+
     return RET_OK ;
 }
 
