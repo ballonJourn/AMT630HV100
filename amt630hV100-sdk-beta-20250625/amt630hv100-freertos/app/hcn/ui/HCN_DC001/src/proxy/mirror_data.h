@@ -31,6 +31,11 @@ bool vehicle_get_mirror_activate() ;
 const char* vehicle_get_uuid() ;
 
 
+/// @brief 亿连版本信息
+/// @return 
+const char* vehicle_get_carBit_version();
+
+
 /// @brief 获取简易导航信息
 /// @return 
 const hcnNavigationHudInfo *vehicle_get_mirror_navi_info() ;

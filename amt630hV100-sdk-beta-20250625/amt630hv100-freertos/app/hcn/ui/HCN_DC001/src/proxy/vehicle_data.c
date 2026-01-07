@@ -145,3 +145,11 @@ const char* veicle_get_data_mcu_ver()
 #endif
     return " ";
 }
+
+/////< 0:not enter  1:enter ota page  2:exit ota page
+void vehicle_set_ota_page_state(int32_t state)
+{
+#if !ON_PC_CACLE
+    vehicle_set_data(VEH_ENTER_OTA_PAGE_STATE , state);
+#endif
+}

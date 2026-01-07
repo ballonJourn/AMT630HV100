@@ -1,6 +1,7 @@
 #include "bluetooth_data.h"
 #include "vehicle_data.h"
 #include "vehicle_param/vehicle_param.h"
+#include "carlink_cb/hcn_carlink_cb.h"
 
 bool vehicle_buluetooth_is_connected()
 {
@@ -65,6 +66,13 @@ const char* vehicle_get_bluetooth_name()
 {
     return hcn_bt_get_name();
 }
+
+///< 获取蓝牙库版本
+const char* vehicle_get_bluetooth_version()
+{
+    return hcn_get_bt_version();       
+}
+
 
 const char* vehicle_get_phone_name() 
 {

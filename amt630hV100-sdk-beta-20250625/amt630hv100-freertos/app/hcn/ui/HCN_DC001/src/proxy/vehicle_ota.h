@@ -9,4 +9,8 @@ bool vehicle_get_uptate_state() ;
 
 update_info_t* vehicle_get_uptate_info() ;
 
+const char* vehicle_get_ota_ssid();
+
+const char* vehicle_get_ota_password();
+
 #endif

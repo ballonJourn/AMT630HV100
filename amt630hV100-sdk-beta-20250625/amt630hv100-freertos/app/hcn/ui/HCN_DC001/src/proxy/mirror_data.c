@@ -3,6 +3,7 @@
 #include "view/home_view/common.h"
 #include "vehicle_param/vehicle_param.h"
 #include "carlink_cb/hcn_easy_navi.h"
+#include "carlink_cb/hcn_carlink_cb.h"
 
 bool vehicle_get_mirror_state()
 {
@@ -52,4 +53,9 @@ const hcnNavigationHudInfo *vehicle_get_mirror_navi_info()
 const char* vehicle_get_uuid()
 {
     return hcn_ec_get_uuid() ;
+}
+
+const char* vehicle_get_carBit_version()
+{
+    return hcn_ec_get_version() ;
 }

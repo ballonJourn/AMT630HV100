@@ -42,4 +42,6 @@ const char* veicle_get_data_version();
 
 const char* veicle_get_data_mcu_ver();
 
+void vehicle_set_ota_page_state(int32_t state);
+
 #endif

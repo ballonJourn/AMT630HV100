@@ -30,8 +30,11 @@ void vehicle_music_backward() ;
 //音乐信息
 const bt_music_info_t* vehicle_get_music_data();
 
-///蓝牙数据
+///蓝牙名称
 const char* vehicle_get_bluetooth_name() ;
+
+///< 获取蓝牙库版本
+const char* vehicle_get_bluetooth_version() ;
 
 //获取连接手机名称
 const char* vehicle_get_phone_name() ;
