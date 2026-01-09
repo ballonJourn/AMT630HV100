@@ -398,7 +398,7 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
         return false;
     }
 
-    bool is_save = true;
+    bool is_save = false;
 
     switch (id) {
         case HCN_PARAM_MAINTAIN_COUNTS:
