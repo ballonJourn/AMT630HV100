@@ -29,9 +29,13 @@ extern "C" {
 #define OTA_MCU_START_ADDR      MCU_OTA_FILE_OFFSET
 
 ///< TCP OTA数据包长度定义
-#define TCP_OTA_DATA_MIN_LEN        (7)
-#define TCP_OTA_DATA_MAX_LEN        (1032)
+#define TCP_OTA_DATA_MIN_LEN        (9)
+#define TCP_OTA_DATA_MAX_LEN        (1034)
 #define TCP_OTA_FILE_NAME_MAX_LEN   (64)
+
+///< 帧头定义
+#define TCP_OTA_FRAME_HEAD_1       (0xA5)
+#define TCP_OTA_FRAME_HEAD_2       (0x5A)
 
 ///< TCP OTA协议命令码定义
 #define TCP_HEARTBEAT_CMD           (0)

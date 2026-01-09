@@ -67,10 +67,14 @@ static void on_update_process(update_type_e type, uint8_t error,
         if (progress >= 100) {
             g_update_info.status = UPDATE_STATUS_SUCCESS;
 
-            extern void wdt_cpu_reboot(void);
-			printf("Ota update bin success, cpu will reboot...\r\n");
-			vTaskDelay(500);
-			wdt_cpu_reboot();
+            if (g_update_info.type == UPDATE_USB_SOC) {
+                extern void wdt_cpu_reboot(void);
+                printf("Ota update bin success, cpu will reboot...\r\n");
+                vTaskDelay(500);
+                wdt_cpu_reboot();
+            } else {
+                printf("MCu ota success!\r\n");
+            }
         }
     }
 }
@@ -98,7 +102,7 @@ void send_update_status(uint8_t msg_type, uint32_t total_size,
     send_mw_msg(&msg);
 }
 
-void sens_ota_update_state(uint8_t msg_type, uint8_t percent, uint8_t error) {
+void send_ota_update_state(uint8_t msg_type, uint8_t percent, uint8_t error) {
     if (percent > 100) {
         percent = 100;
     }

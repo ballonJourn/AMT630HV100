@@ -29,7 +29,7 @@
 #include "version/hcn_version.h"
 #include "source/crc32.h"
 
-#define OTA_SERVER_PORT    (8080)           ///< 服务器端口号
+#define OTA_SERVER_PORT    (8008)           ///< 服务器端口号
 #define TCP_OTA_SEND_BUFF_LEN   (256)       ///< tcp发送数据最大长度
 
 typedef struct {
@@ -74,7 +74,7 @@ static int send_device_info(void) {
     last_device_tick = xTaskGetTickCount();
     memset(socket_tx, 0, sizeof(socket_tx));
 
-    uint16_t offset = 2;
+    uint16_t offset = 4;
     socket_tx[offset++] = TCP_DEVICE_INFO_CMD;
 
     ///< 设备号长度
@@ -92,8 +92,10 @@ static int send_device_info(void) {
     strncpy((char *)&socket_tx[offset], get_soc_version(), ver_len);
     offset += ver_len;
     
-	socket_tx[0] = ((offset - 2) >> 8) & 0xFF;
-	socket_tx[1] = (offset - 2) & 0xFF;
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+	socket_tx[2] = ((offset - 4) >> 8) & 0xFF;
+	socket_tx[3] = (offset - 4) & 0xFF;
 
     ///<CRC32校验
     uint32_t calc_checksum = ota_calc_crc32(socket_tx, offset);
@@ -110,38 +112,42 @@ static int send_percent(void) {
     uint32_t calc_checksum = 0;
 
     memset(socket_tx, 0, sizeof(socket_tx));
-    socket_tx[0] = 0x00;
-    socket_tx[1] = 0x02;
-    socket_tx[2] = TCP_FLASH_PERCENTAGE;
-    socket_tx[3] = get_ota_percent();
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+    socket_tx[2] = 0x00;
+    socket_tx[3] = 0x02;
+    socket_tx[4] = TCP_FLASH_PERCENTAGE;
+    socket_tx[5] = get_ota_percent();
 
     calc_checksum = ota_calc_crc32(socket_tx, 4);
-    socket_tx[4] = (calc_checksum >> 24) & 0xFF;
-    socket_tx[5] = (calc_checksum >> 16) & 0xFF;
-    socket_tx[6] = (calc_checksum >> 8) & 0xFF;
-    socket_tx[7] = (calc_checksum >> 0) & 0xFF;
+    socket_tx[6] = (calc_checksum >> 24) & 0xFF;
+    socket_tx[7] = (calc_checksum >> 16) & 0xFF;
+    socket_tx[8] = (calc_checksum >> 8) & 0xFF;
+    socket_tx[9] = (calc_checksum >> 0) & 0xFF;
 
     hcn_log_info("send ota percent:%d\r\n", get_ota_percent());
-    return send(g_socket_fd, socket_tx, 8, 0);
+    return send(g_socket_fd, socket_tx, 10, 0);
 }
 
 static int send_transfer_complete(void) {
     uint32_t calc_checksum = 0;
 
     memset(socket_tx, 0, sizeof(socket_tx));
-    socket_tx[0] = 0x00;
-    socket_tx[1] = 0x01;
-    socket_tx[2] = TCP_TRANSFER_COMPLETE_CMD;
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+    socket_tx[2] = 0x00;
+    socket_tx[3] = 0x01;
+    socket_tx[4] = TCP_TRANSFER_COMPLETE_CMD;
 
     calc_checksum = ota_calc_crc32(socket_tx, 3);
-    socket_tx[3] = (calc_checksum >> 24) & 0xFF;
-    socket_tx[4] = (calc_checksum >> 16) & 0xFF;
-    socket_tx[5] = (calc_checksum >> 8) & 0xFF;
-    socket_tx[6] = (calc_checksum >> 0) & 0xFF;
+    socket_tx[5] = (calc_checksum >> 24) & 0xFF;
+    socket_tx[6] = (calc_checksum >> 16) & 0xFF;
+    socket_tx[7] = (calc_checksum >> 8) & 0xFF;
+    socket_tx[8] = (calc_checksum >> 0) & 0xFF;
 
     hcn_log_info("send transfer complete \r\n");
 
-    return send(g_socket_fd, socket_tx, 7, 0);
+    return send(g_socket_fd, socket_tx, 9, 0);
 }
 
 static int send_ack(uint8_t msg_type, bool success) {
@@ -149,36 +155,40 @@ static int send_ack(uint8_t msg_type, bool success) {
     uint16_t ack_code = success ? 200 : 500;
 
     memset(socket_tx, 0, sizeof(socket_tx));
-    socket_tx[0] = 0x00;
-    socket_tx[1] = 0x03;
-    socket_tx[2] = msg_type;
-    socket_tx[3] = (ack_code >> 8) & 0xFF;
-    socket_tx[4] = (ack_code >> 0) & 0xFF;
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+    socket_tx[2] = 0x00;
+    socket_tx[3] = 0x03;
+    socket_tx[4] = msg_type;
+    socket_tx[5] = (ack_code >> 8) & 0xFF;
+    socket_tx[6] = (ack_code >> 0) & 0xFF;
 
     calc_checksum = ota_calc_crc32(socket_tx, 5);
-    socket_tx[5] = (calc_checksum >> 24) & 0xFF;
-    socket_tx[6] = (calc_checksum >> 16) & 0xFF;
-    socket_tx[7] = (calc_checksum >> 8) & 0xFF;
-    socket_tx[8] = (calc_checksum >> 0) & 0xFF;
-    return send(g_socket_fd, socket_tx, 9, 0);
+    socket_tx[7] = (calc_checksum >> 24) & 0xFF;
+    socket_tx[8] = (calc_checksum >> 16) & 0xFF;
+    socket_tx[9] = (calc_checksum >> 8) & 0xFF;
+    socket_tx[10] = (calc_checksum >> 0) & 0xFF;
+    return send(g_socket_fd, socket_tx, 11, 0);
 }
 
 static int send_heartbeat(void) {
     uint32_t calc_checksum = 0;
 
     memset(socket_tx, 0, sizeof(socket_tx));
-    socket_tx[0] = 0x00;
-    socket_tx[1] = 0x01;
-    socket_tx[2] = TCP_HEARTBEAT_CMD;
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+    socket_tx[2] = 0x00;
+    socket_tx[3] = 0x01;
+    socket_tx[4] = TCP_HEARTBEAT_CMD;
 
     calc_checksum = ota_calc_crc32(socket_tx, 3);
-    socket_tx[3] = (calc_checksum >> 24) & 0xFF;
-    socket_tx[4] = (calc_checksum >> 16) & 0xFF;
-    socket_tx[5] = (calc_checksum >> 8) & 0xFF;
-    socket_tx[6] = (calc_checksum >> 0) & 0xFF;
+    socket_tx[5] = (calc_checksum >> 24) & 0xFF;
+    socket_tx[6] = (calc_checksum >> 16) & 0xFF;
+    socket_tx[7] = (calc_checksum >> 8) & 0xFF;
+    socket_tx[8] = (calc_checksum >> 0) & 0xFF;
 
     hcn_log_info("send heartbeat \r\n");
-    return send(g_socket_fd, socket_tx, 7, 0);
+    return send(g_socket_fd, socket_tx, 9, 0);
 }
 
 static int socket_deinit(void) {
@@ -449,6 +459,8 @@ static void tcp_client_recv_thread(void *pvParameters) {
     hcn_log_info("tcp client recv thread start!\r\n");
 
     int recv_len = 0;
+    static int sync_search = 0;
+
     while (1) {
 wait_recv_connnect:
         if (g_client_param.is_socket_connnected) {
@@ -463,23 +475,66 @@ wait_recv_connnect:
                 }
 
                 g_client_param.socket_rx_pos += recv_len;
+                                
     check_data:
-                if (g_client_param.socket_rx_pos >= TCP_OTA_DATA_MIN_LEN) {
-
-                    ///< 解析包长度 包头长度 + 数据内容长度 + CRC32长度
-                    int packet_len = ((socket_rx[0] << 8) + socket_rx[1]) + 2 + 4;
-                    if (g_client_param.socket_rx_pos >= packet_len) {
-                        ota_task_add(socket_rx, packet_len);
-
-                        ///< 移动剩余数据到数据头部
-                        memmove(socket_rx, socket_rx + packet_len, 
-                                g_client_param.socket_rx_pos - packet_len);
-                        g_client_param.socket_rx_pos -= packet_len;
-                        memset(socket_rx + g_client_param.socket_rx_pos, 0, 
-                                sizeof(socket_rx) - g_client_param.socket_rx_pos);
-
-                        ///< 继续检查是否有完整包
-                        goto check_data;
+                if (g_client_param.socket_rx_pos >= TCP_OTA_DATA_MIN_LEN) { 
+                    
+                    ///< 如果没有找到同步头，先搜索同步头
+                    if (!sync_search) {
+                        int found_sync = 0;
+                        ///< 在缓冲区中搜索同步头
+                        for (int i = 0; i <= g_client_param.socket_rx_pos - 2; i++) {
+                            if (socket_rx[i] == TCP_OTA_FRAME_HEAD_1 
+                                && socket_rx[i+1] == TCP_OTA_FRAME_HEAD_2) {
+                                ///< 找到同步头，将有效数据移动到缓冲区起始位置
+                                if (i > 0) {
+                                    memmove(socket_rx, socket_rx + i, 
+                                            g_client_param.socket_rx_pos - i);
+                                    g_client_param.socket_rx_pos -= i;
+                                }
+                                found_sync = 1;
+                                sync_search = 1;
+                                break;
+                            }
+                        }
+                        
+                        ///< 如果没有找到同步头，清除所有数据重新开始
+                        if (!found_sync) {
+                            ///< 保留最后1个字节（可能下一个字节就是0xA5）
+                            if (g_client_param.socket_rx_pos > 1) {
+                                memmove(socket_rx, socket_rx + g_client_param.socket_rx_pos - 1, 1);
+                                g_client_param.socket_rx_pos = 1;
+                            }
+                            vTaskDelay(pdMS_TO_TICKS(5));
+                            continue;
+                        }
+                    }
+                    
+                    int total_packet_len = 2 + ((socket_rx[2] << 8) + socket_rx[3]) + 2 + 4; 
+                    if (g_client_param.socket_rx_pos >= total_packet_len) {
+                        ///< 验证同步头是否正确
+                        if (socket_rx[0] == TCP_OTA_FRAME_HEAD_1 
+                                && socket_rx[1] == TCP_OTA_FRAME_HEAD_2) {
+                            ota_task_add(socket_rx, total_packet_len);
+                            
+                            memmove(socket_rx, socket_rx + total_packet_len, 
+                                    g_client_param.socket_rx_pos - total_packet_len);
+                            g_client_param.socket_rx_pos -= total_packet_len;
+                            memset(socket_rx + g_client_param.socket_rx_pos, 0, 
+                                    sizeof(socket_rx) - g_client_param.socket_rx_pos);
+                            
+                            sync_search = 0;
+                            goto check_data;
+                        } else {
+                            sync_search = 0;
+                            ///< 丢弃第一个字节，重新搜索
+                            if (g_client_param.socket_rx_pos > 1) {
+                                memmove(socket_rx, socket_rx + 1, 
+                                        g_client_param.socket_rx_pos - 1);
+                                g_client_param.socket_rx_pos--;
+                            }
+                            goto check_data;
+                        }
                     }
                 }
                 vTaskDelay(pdMS_TO_TICKS(5));
@@ -493,6 +548,8 @@ wait_recv_connnect:
 #endif
                          ///< 套接字已关闭或者已关闭无法接收数据
                         socket_reset();
+                        // 重置同步头搜索标志
+                        sync_search = 0;
                         goto wait_recv_connnect;
 
                     case -pdFREERTOS_ERRNO_ENOMEM:

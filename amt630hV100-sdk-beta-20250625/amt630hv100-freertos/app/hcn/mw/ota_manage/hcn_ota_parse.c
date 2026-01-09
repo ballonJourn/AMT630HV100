@@ -247,8 +247,8 @@ exit:
 }
 
 static bool ota_check_sum(uint8_t *msg) {
-    ///< 包头长度 + 数据内容长度 + CRC32长度
-    uint32_t msg_len = ((msg[0] << 8) | msg[1]) + 2 + 4;  
+    ///< 包头长度 + 消息长度 + 数据内容长度 + CRC32长度
+    uint32_t msg_len = 2 + ((msg[2] << 8) | msg[3]) + 2 + 4;  
     uint32_t cacl_checksum = ota_calc_crc32(msg, msg_len - 4);
     if ((msg[msg_len - 4] != ((cacl_checksum >> 24) & 0xFF))
         ||  (msg[msg_len - 3] != ((cacl_checksum >> 16) & 0xFF))
@@ -265,9 +265,9 @@ static void parse_file_info(uint8_t *msg) {
     ///< 每次接收到文件信息时，都需要重置相关参数
     ota_parse_reset();
 
-    uint16_t msg_size = ((msg[0] << 8) + msg[1]) + 2 + 4;
-    uint16_t file_type_offset = 3;
-    uint16_t file_size_offset = 4;
+    uint16_t msg_size = 2 + ((msg[2] << 8) + msg[3]) + 2 + 4;
+    uint16_t file_type_offset = 5;
+    uint16_t file_size_offset = 6;
     uint8_t file_type = 0;
     uint32_t file_size = 0;
 
@@ -333,13 +333,13 @@ static void parse_file_steam(uint8_t *msg) {
         memset(ota_param.ota_buff, 0, FLASH_PRIV_TYPE_BYTE * 2);
     }
 
-    file_type = msg[3];
+    file_type = msg[5];
 
     ///< 文件流消息内容：消息类型1 + 文件类型1 + 文件状态1
-    data_len = ((msg[0] << 8) + msg[1]) -3; 
+    data_len = ((msg[2] << 8) + msg[3]) -3; 
     if (file_type >= OTA_SPILDR_FILE && file_type <= OTA_CONFIG_FILE) {
         if (file_type == OTA_UPDATE_FILE && ota_param.is_first_update_file) {
-            memcpy((void *)&header, &msg[5], sizeof(header));
+            memcpy((void *)&header, &msg[7], sizeof(header));
             ota_param.is_first_update_file = false;
 
              ///< 检查OTA文件头是否合法
@@ -358,7 +358,7 @@ static void parse_file_steam(uint8_t *msg) {
             }
         }
 
-        memcpy(&ota_param.ota_buff[ota_param.ota_cur_rx_size], &msg[5], data_len);
+        memcpy(&ota_param.ota_buff[ota_param.ota_cur_rx_size], &msg[7], data_len);
         ota_param.ota_cur_rx_size += data_len;
         if (ota_param.ota_cur_rx_size >= FLASH_PRIV_TYPE_BYTE) {
             ///< 接收的数据超过4K时，写入flash
@@ -373,7 +373,7 @@ static void parse_file_steam(uint8_t *msg) {
         }
 
         ///< 文件接收完成时，写入flash
-        if (msg[4] == 1) {
+        if (msg[6] == 1) {
             if (ota_param.ota_cur_rx_size > 0) {
                 write_update_data(file_type, ota_param.ota_cur_rx_size);
                 ota_param.ota_cur_rx_size = 0;
@@ -426,13 +426,13 @@ static void ota_parse_process(uint8_t *msg) {
         return;
     }
 
-    switch (msg[2]) {
+    switch (msg[4]) {
         case TCP_DEVICE_INFO_CMD: {
                 if (!ota_check_sum(msg)) {
                     hcn_log_error("recv device info crc32 check failed!\r\n");
                     return;
                 }
-                uint16_t ack = (msg[3] << 8) | msg[4];
+                uint16_t ack = (msg[5] << 8) | msg[6];
                 if (ack == TCP_SUCCESS_ACK) {
                     hcn_log_info("recv device info ack success!\n");
                     set_ota_state(TCP_RECV_DEVICE_ACK);
@@ -459,7 +459,12 @@ static void ota_parse_process(uint8_t *msg) {
             break;
 
         case TCP_TRANSFER_COMPLETE_CMD: {
-                uint16_t ack = (msg[3] << 8) + msg[4];
+                if (!ota_check_sum(msg)) {
+                    hcn_log_error("recv transfer complete crc32 check failed!\r\n");
+                    return;
+                }
+
+                uint16_t ack = (msg[5] << 8) + msg[6];
                 if (ack == TCP_SUCCESS_ACK) {
                     set_ota_state(TCP_SEND_TRANSFER_COMPLETE_ACK);
                     hcn_log_info("Transfer completer success ack!\r\n");

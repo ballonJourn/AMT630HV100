@@ -4594,6 +4594,9 @@
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\uart_mcu_update\hcn_uart_mcu_update.c</name>
                     </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_mcu_update\mcu_update_simulate.c</name>
+                    </file>
                 </group>
                 <group>
                     <name>vehicle_param</name>
