@@ -88,7 +88,7 @@ ret_t parse_music_data(const bt_music_info_t *_music_info)
             home_refresh_music_ex_image(BLUETOOTH_DEFAULT_IMAGE) ;
             home_refresh_music_image(BLUETOOTH_DEFAULT_IMAGE);
         }
-        printf("g_music_info image changed = %d\n" ,_music_info->song_art_cover.img_index);
+        printf("g_music_info image changed image_index = %d\n" ,_music_info->song_art_cover.img_index);
     }
     return RET_OK ;
 }
@@ -144,7 +144,7 @@ ret_t parse_calling_data(const bt_call_t *_call_info)
     if (NULL == _call_info)
         return RET_FAIL ;
     
-
+    
     if(g_call_info.btHfpState != _call_info->btHfpState)
     {
         if (_call_info->btHfpState == OUTGOING_CALL)
@@ -201,7 +201,7 @@ ret_t parse_buletooth_data(const bt_data_t *bt_info)
     
     if (g_bt_info.btSignal != bt_info->btSignal)
     {
-        home_refresh_GMS_level( (int)(0.6 * bt_info->btSignal));
+        home_refresh_GMS_level( (int)(0.6f * bt_info->btSignal));
     }
 
     return RET_OK ;

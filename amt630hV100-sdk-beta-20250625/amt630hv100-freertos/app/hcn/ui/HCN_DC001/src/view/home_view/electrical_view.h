@@ -10,6 +10,12 @@ enum home_elect_com{
     ELECT_NUM_MAX    ,
 };
 
+typedef enum  {
+    NONE ,
+    RED ,
+    YELLOW ,
+    GREEN ,
+}fg_color;
 
 ret_t home_elec_view_init(widget_t* parent);
 
