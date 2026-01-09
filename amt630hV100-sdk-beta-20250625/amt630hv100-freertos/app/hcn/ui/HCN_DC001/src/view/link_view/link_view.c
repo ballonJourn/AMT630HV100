@@ -1,18 +1,12 @@
 #include "link_view.h"
-#include "../home_view/common.h"
+#include "proxy/vehicle_argument.h"
+#include "logic/hcn_global.h"
+#include "view/home_view/electrical_view.h"
 
-typedef enum 
-{
-    NONE  ,
-    GREEN ,
-    RED   ,
-}bar_fg_color ;
-
-static  bar_fg_color cur_color = NONE ;
 
 const char* link_view_widget_name[LINK_VIEW_NUM_MAX] = {
     "speed_lab" , "unit_lab"  , "ride_mode_img" , "gear_view" , 
-    "power_lab" , "power_bar" , "elec_lab"      , "elec_bar"  
+    "power_lab" , "power_bar" , "elec_lab"      , "elec_bar"  , "elec_unit"
 } ;
 
 static char* unit_str[UNIT_MAX] = {"km/h" , "mph"} ;
@@ -20,6 +14,12 @@ static char* unit_str[UNIT_MAX] = {"km/h" , "mph"} ;
 static widget_t* link_view_widget[LINK_VIEW_NUM_MAX] = { NULL };
 
 static widget_t* widget_qr = NULL ;
+
+static const char* color_buff[] = {"#00000000" , "#FF0000" ,"#FFFF00" , "#00FF00"} ;
+
+static fg_color current_color = NONE ;
+
+static uint32_t current_value = 0 ;
 
 ret_t link_view_init(widget_t* parent)
 {
@@ -111,30 +111,72 @@ ret_t link_refresh_power(int power)
 }
 
 
-ret_t link_refresh_electrical(uint32_t mileage) 
+ret_t link_refresh_electricalret_unit(unit_e unit) 
 {
-    mileage = tk_min(mileage , ELECTRI_MAX) ;
+    if (link_view_widget[LINK_VIEW_ELEC_UNIT]){
+        widget_set_text_utf8(link_view_widget[LINK_VIEW_ELEC_UNIT] , (unit == KM_H) ? "km" : "mile" );
+    }
     
-    float step = 100.0f / ELECTRI_MAX  ;
-    int perent = (int)(step * mileage) ;
-
-    bar_fg_color _color = ( perent > 20 ) ? (GREEN) : (RED) ;
-    if (cur_color != _color)
+    uint32_t temp_value = current_value ;
+    if (link_view_widget[LINK_VIEW_ELEC_LABEL])
     {
-        widget_set_style_str(link_view_widget[LINK_VIEW_ELEC_BAR] , STYLE_ID_FG_COLOR , _color ==  GREEN ? "#00FF55" : "#FF0000") ;
-        cur_color = _color ;
-    }
-    
-    if (link_view_widget[LINK_VIEW_ELEC_BAR]){
-        progress_bar_set_value(link_view_widget[LINK_VIEW_ELEC_BAR] , perent) ;
-    }
+        if (MPH == vehicle_get_param_unit())
+            temp_value  *= KM_CONVERT_MILE ; 
 
-    if (link_view_widget[LINK_VIEW_ELEC_LABEL]){
-        widget_set_value_int(link_view_widget[LINK_VIEW_ELEC_LABEL] , mileage);
+        widget_set_value_int(link_view_widget[LINK_VIEW_ELEC_LABEL] , temp_value);
     }
 
 
     return RET_OK ;
+}
+
+ret_t link_refresh_electrical(uint32_t mileage) 
+{
+    mileage = tk_min(mileage , ELECTRI_MAX) ;
+    current_value = mileage ;
+    float step = 100.0f / ELECTRI_MAX  ;
+    int perent = (int)(step * mileage) ;
+    char format[8] = " " ;
+    tk_snprintf(format , sizeof(format) , "%d" , perent) ;
+
+    fg_color _color = NONE ;
+    if ( 0 <= perent && perent <= 10 )
+        _color = RED ;
+    else if( 10 < perent && perent <= 20 )
+        _color = YELLOW ;
+    else 
+        _color = GREEN ;
+
+    if (link_view_widget[LINK_VIEW_ELEC_BAR])
+    {
+        
+        if (current_color != _color)
+        {
+            widget_set_style_str(link_view_widget[LINK_VIEW_ELEC_BAR] , STYLE_ID_FG_COLOR , color_buff[_color]) ;
+            current_color = _color ;
+            printf("elelctrical color changed\n") ;
+        }
+        progress_bar_set_value(link_view_widget[LINK_VIEW_ELEC_BAR] , perent) ;
+    
+    }
+
+    uint32_t temp_value = mileage ;
+    if (link_view_widget[LINK_VIEW_ELEC_LABEL])
+    {
+        if (MPH == vehicle_get_param_unit())
+            temp_value  *= KM_CONVERT_MILE ; 
+
+        widget_set_value_int(link_view_widget[LINK_VIEW_ELEC_LABEL] , temp_value);
+    }
+    
+    
+    return RET_OK ;
+}
+
+ret_t rest_data()
+{
+    current_color = NONE ;
+    current_value = 0 ;
 }
 
 ret_t link_refresh_qr(int state)

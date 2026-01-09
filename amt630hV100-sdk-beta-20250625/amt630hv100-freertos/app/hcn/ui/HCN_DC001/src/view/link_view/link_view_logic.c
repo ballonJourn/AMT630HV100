@@ -1,11 +1,14 @@
 #include "link_view_logic.h"
 #include "link_view.h"
 #include "vehicle_param/vehicle_param.h"
+#include "proxy/vehicle_argument.h"
 #include "view/link_view/link_view.h"
 #include "config/hcn_config.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/mirror_data.h"
 #include "../3rd/awtk-widget-qr/src/qr/qr.h"
+#include "logic/hcn_global.h"
+
 
 #define REFRESH_INTERVAL_50_MS   (50)
 
@@ -19,6 +22,7 @@ static int32_t speed         = 0 ;
 static int32_t poewr         = 0 ;
 static drv_mode_e drv_mode   = DRV_MODE_MAX ;
 static gear_e  gear          = GEAR_MAX ;
+static int32_t electriacl    = 0 ;
 
 #if ON_PC_CACLE == 0
 extern void clear_rect(float x, float y, float w, float h, float a, float r, float g, float b);
@@ -76,10 +80,18 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         poewr         = 0 ;
         drv_mode      = DRV_MODE_E ;
         gear          = GEAR_MAX ;
+        electriacl    = 0 ;
+
+        rest_data();
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
     {
         printf("on_link_page_changed EVT_WINDOW_WILL_OPEN\n") ;
+
+        link_refresh_electricalret_unit(vehicle_get_param_unit());
+
+        link_refresh_unit(vehicle_get_param_unit()) ;
+
         timer_refresh_50_ms(NULL);
 
     #if ON_PC_CACLE == 0
@@ -108,7 +120,12 @@ static ret_t timer_refresh_50_ms(const timer_info_t *info)
     int32_t _speed = vehicle_get_data_speed();
     if (speed != _speed)
     {
-        link_refresh_speed(_speed) ;
+        int32_t temp_value = _speed ;
+        if (MPH == vehicle_get_param_unit())
+            temp_value  *= KM_CONVERT_MILE ; 
+
+        link_refresh_speed(temp_value) ;
+
         speed = _speed ;
     }
 
@@ -133,5 +150,12 @@ static ret_t timer_refresh_50_ms(const timer_info_t *info)
         drv_mode = _drv_mode ;
     }
 
+    int32_t _electriacl = vehicle_get_data_remain_battary() ;
+    if (_electriacl != electriacl)
+    {
+        link_refresh_electrical(_electriacl);
+        electriacl = _electriacl ;
+    }
+    
     return RET_REPEAT ;
 }

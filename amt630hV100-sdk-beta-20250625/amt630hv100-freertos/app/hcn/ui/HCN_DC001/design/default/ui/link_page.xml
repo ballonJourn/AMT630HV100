@@ -14,8 +14,8 @@
   <qr name="link_qr" x="9" y="15" w="187" h="188" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" visible="true"/>
   <label name="label1" x="655" y="138" w="26" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_h="left" text="w"/>
   <label name="elec_lab" x="698" y="139" w="48" h="28" style:normal:text_color="#FFFFFF" style:normal:font_size="26" style:normal:text_align_h="right" text="0"/>
-  <progress_bar name="elec_bar" x="705" y="176" w="71" h="24" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="18" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="3" style:normal:border_color="#FFFFFF" style:normal:round_radius="5" value="0"/>
-  <label name="label1" x="754" y="138" w="26" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_h="left" text="w"/>
+  <progress_bar name="elec_bar" x="705" y="176" w="71" h="24" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="20" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="3" style:normal:border_color="#FFFFFF" style:normal:round_radius="5" format="%d%%" value="0"/>
+  <label name="elec_unit" x="754" y="138" w="26" h="28" style:normal:text_color="#327889" style:normal:font_size="26" style:normal:text_align_h="left" text="km"/>
   <image name="image3" x="775" y="182" w="7" h="12" draw_type="default" image="link_elecRect_head"/>
   <?include filename="component.xml" ?>
 </window>
