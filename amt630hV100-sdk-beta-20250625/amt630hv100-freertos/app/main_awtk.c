@@ -49,6 +49,7 @@ extern int ulog_console_backend_init(void);
 #include "config/hcn_config.h"
 #include "mw_init/hcn_mw_init.h"
 #include "msg_manage/hcn_msg_manage.h"
+#include "dashboard_state/hcn_dev_state.h"
 #include "uart_mcu_update/hcn_uart_mcu_update.h"
 
 #ifdef HCN_ADC_KEY_ENABLE
@@ -777,13 +778,21 @@ static void usb_read_thread(void *para)
 			
 #ifdef HCN_OTA_UPDATE_ENABLE
 			if  (is_same_app) {
-				FF_FILE *mcu_fp = ff_fopen("/usb/CMS32.bin", "rb");
-				if (mcu_fp) {
-					printf("open CMS32.bin success.\r\n");
-					mcu_updatet_init(1, mcu_fp);
-				} else {
-					printf("open CMS32.bin fail.\n");
+				if (get_check_self_state()) {
+					FF_FILE *mcu_fp = ff_fopen("/usb/mcu_update.bin", "rb");
+					if (mcu_fp) {
+						printf("open mcu_update.bin success.\r\n");
+						extern bool mcu_req_update_state(void);
+						if (!mcu_req_update_state()) {
+							mcu_update_init(1, mcu_fp);
+						} else {
+							mcu_req_update_init(1, mcu_fp);
+						}
+					} else {
+						printf("open mcu_update.bin fail.\n");
+					}
 				}
+				
 			}
 #endif
 

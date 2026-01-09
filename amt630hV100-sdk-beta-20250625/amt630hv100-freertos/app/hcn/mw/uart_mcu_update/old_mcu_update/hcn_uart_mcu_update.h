@@ -25,7 +25,7 @@ extern "C" {
 #include "config/hcn_config.h"
 #include "ff_stdio.h"
 
-#ifdef HCN_MCU_PROTOCOL_UPDATE_ENABLE
+#ifdef HCN_UART_MCU_UPDATE_ENABLE
 
 #define MCU_UPDATE_QUEUE_LEN (10)
 
@@ -34,20 +34,19 @@ typedef enum {
     USB_UPDATE_MCU,
     OTA_UPDATE_MCU
 } mcu_update_type_e;
+
 typedef enum {
-    SOC_READY,
-    SEND_FILE,
-    RESEND_FILE,
-    EXIT_UPDATE,
-} mcu_update_step_e;
+    CONTINUE_SEND_MSG,
+    RESEND_MSG,
+    SEND_MSG_DATA_FAIL,
+    MSG_EXIT
+} mcu_update_msg_e;
 
 typedef struct {
     h_bool start_mcu_update;
+    h_bool start_send_task;
+    h_bool start_send2_mcu;
     h_bool mcu_ver_same;
-    h_bool start_mcu_iap;  ///< MCU进入IAP模式
-    h_bool mcu_earse_ready; ///< MCU擦除完成
-    h_bool mcu_req_start_mcu_update; ///< MCU端请求时，启动任务状态
-    h_bool enter_mcu_task; ///< 真正进入了mcu_task
 } mcu_update_status_t;
 
 typedef struct {
@@ -56,7 +55,6 @@ typedef struct {
     int file_len;
     int remain_size;
     int offset_size;
-    int last_write_len;  ///< 上次文件写入地址，从0x00开始
     uint16_t file_crc;
     uint8_t update_type;
     uint8_t update_repeat;
@@ -67,9 +65,10 @@ typedef struct {
     mcu_update_file_t file_info;
 } mcu_update_t;
 
-void parse_mcu_update_msg(uint8_t ack_code);
-void mcu_update_init(uint8_t method, FF_FILE *mcu_file);
-void mcu_req_update_init(uint8_t method, FF_FILE *mcu_file);
+h_bool mcu_update_msg_continue(void);
+h_bool mcu_update_msg_resend(void);
+h_bool mcu_update_msg_data_fail(void);
+void mcu_updatet_init(uint8_t method, FF_FILE *mcu_file);
 uint8_t get_mcu_update_type(void);
 
 #endif

@@ -71,6 +71,10 @@ void start_handshake_timer(void) {
     }
 }
 
+bool get_handshake_state(void) {
+    return is_hande_shake;
+}
+
 const char *get_mcu_version(void) {
     return mcu_ver_full;
 }
@@ -146,7 +150,7 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
     switch (cmd) {
         case UART_MCU_CMD_ACK_SHAKE_HANDS:
         case UART_MCU_CMD_ACC_STATE:
-        case UART_MCU_CMD_VEHICLE_INFO:
+        //case UART_MCU_CMD_VEHICLE_INFO:
         case UART_MCU_CMD_VER_INFO:
         case UART_MCU_CMD_ODO_INFO:
         case UART_MCU_CMD_TRIP_INFO:
@@ -215,7 +219,7 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
 #endif
 
             data_tmp = data[data_start + 3];
-            hcn_log_info("vehcile data :%d\n", data_tmp);
+            //hcn_log_info("vehcile data :%d\n", data_tmp);
 
 #if 0
             hcn_log_info("turn right light:%d\n", data_tmp);

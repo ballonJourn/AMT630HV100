@@ -176,6 +176,8 @@ extern "C" {
 ///< mcu升级
 #ifdef HCN_UART_COMM_ENABLE
 #define HCN_UART_MCU_UPDATE_ENABLE
+#define HCN_MCU_PROTOCOL_UPDATE_ENABLE  ///< 恒晨自身升级协议
+//#define MCU_UPDATE_SIMULATE_ENABLE      ///< 模拟MCU升级
 #endif
 
 ///< 里程保养使能

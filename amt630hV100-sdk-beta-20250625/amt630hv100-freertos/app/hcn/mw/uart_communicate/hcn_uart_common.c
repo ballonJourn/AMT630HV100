@@ -18,6 +18,7 @@
 #include "uart_communicate/hcn_uart_tx.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #include "uart_mcu_update/hcn_uart_mcu_update.h"
+#include "dashboard_state/hcn_dev_state.h"
 #include "log/hcn_log.h"
 #include "utils/hcn_utils.h"
 #include "queue.h"
@@ -27,16 +28,23 @@
 
 #ifdef HCN_UART_COMM_ENABLE
 
+#define UPDATE_MCU_DEBUG
+
 #undef MCU_DATE_TIME_DEBUG
 #undef UART_MCU_DATA_DEBUG
 
 static SystemTime_t g_data_time = {0};
+static bool is_mcu_req_update = false;
 
 static void soc_ack_mcu_process(uint8_t *data) {
     if (!data) {
         hcn_log_error("recv null pointer!\n");
         return;
     }
+}
+
+bool mcu_req_update_state(void) {
+    return is_mcu_req_update;
 }
 
 static void parse_timing_mcu_time(uint8_t *data) {
@@ -82,9 +90,30 @@ static void mcu_update_process(uint8_t *data) {
         return;
     }
 
+#ifdef UPDATE_MCU_DEBUG
+    uint16_t data_len_tmp = ((data[6] << 8) + data[7]);
+    hcn_hex_config_data_print(__FUNCTION__, ":Recv(0x)", data,
+                                    data_len_tmp + UART_MCU_MSG_MIN_LEN);
+#endif
+
+    if (!get_check_self_state()) {
+        return;
+    }    
+
     uint16_t cmd_code = ((data[4] << 8) + data[5]);
+
+    extern bool get_handshake_state(void);
+    if (!get_handshake_state()) {
+        uint8_t ack_code_temp = data[8];
+        if (cmd_code == MSG_CMD_MCU_ACK_STATE 
+            && ack_code_temp == ACK_MCU_IAP_IS_READY && !is_mcu_req_update) {
+            is_mcu_req_update = true;
+        }
+    }
+
     uint8_t type = get_mcu_update_type();
-    if (type) {
+    if (type || is_mcu_req_update) {
+#ifndef HCN_MCU_PROTOCOL_UPDATE_ENABLE
         switch (cmd_code) {
             case UART_CONTINUE_UPDATE_MCU_CMD:
                 mcu_update_msg_continue();
@@ -101,6 +130,12 @@ static void mcu_update_process(uint8_t *data) {
             default:
                 break;
         }
+#else
+        if (cmd_code == MSG_CMD_MCU_ACK_STATE) {
+            uint8_t ack_code = data[8];
+            parse_mcu_update_msg(ack_code);
+        }
+#endif
     }
 }
 
