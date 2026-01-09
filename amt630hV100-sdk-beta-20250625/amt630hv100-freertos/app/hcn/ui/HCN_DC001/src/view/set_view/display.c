@@ -29,7 +29,7 @@ static void setting_menu_view_deal_set()
         vehicle_set_param_display(2);
     else if(option == DIAPLAY_DAY_OPTION)
         vehicle_set_param_display(0);
-    else if (option == DIAPLAY_DAY_OPTION)
+    else if (option == DIAPLAY_NIGHT_OPTION)
         vehicle_set_param_display(1);
     
     global_refresh_display(option);
