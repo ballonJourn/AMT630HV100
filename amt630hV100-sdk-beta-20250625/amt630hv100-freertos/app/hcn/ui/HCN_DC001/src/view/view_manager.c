@@ -104,7 +104,7 @@ static void hcn_key_handle(uint8_t id)
     switch (id)
     {
         case  SET_KEY_LONG_PR   :
-                get_demonstration_state() ? demonstration_stop() : demonstration_start();
+                // get_demonstration_state() ? demonstration_stop() : demonstration_start();  //取消演示模式
                 break;
 
         case  BACK_KEY_SHORT_PR :

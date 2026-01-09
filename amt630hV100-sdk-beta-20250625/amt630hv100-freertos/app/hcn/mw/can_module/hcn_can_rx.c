@@ -333,6 +333,7 @@ static void can_recv_msg_process(CanMsg *pMsg) {
 
         case 0x122:
             parse_can_msg_122_msg(pMsg->Data, pMsg->DLC);
+            break;
 
         case 0x12b:
             parse_can_msg_12b_msg(pMsg->Data, pMsg->DLC);

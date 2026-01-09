@@ -1,6 +1,8 @@
 #include "speed_view_logic.h"
 #include "../proxy/vehicle_data.h"
 #include "view/home_view/home_view_interface.h"
+#include "../proxy/vehicle_argument.h"
+#include "logic/hcn_global.h"
 
 static int32_t speed         = 0 ;
 static int32_t rpm           = 0 ;
@@ -14,8 +16,14 @@ void update_speed()
     int32_t value = vehicle_get_data_speed() ;
     if (value != speed)
     {
-        home_refresh_speed(value);
+        int32_t temp_value = value ;
+        if (MPH == vehicle_get_param_unit())
+            temp_value  *= KM_CONVERT_MILE ; 
+        
+        home_refresh_speed(temp_value);
+
         home_refresh_rpm(value) ;  //车速 转速同一值
+
         speed = value ;
     }
     
