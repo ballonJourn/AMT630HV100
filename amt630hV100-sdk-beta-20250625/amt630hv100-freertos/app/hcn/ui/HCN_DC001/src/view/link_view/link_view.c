@@ -177,6 +177,8 @@ ret_t rest_data()
 {
     current_color = NONE ;
     current_value = 0 ;
+    
+    return RET_OK ;
 }
 
 ret_t link_refresh_qr(int state)
