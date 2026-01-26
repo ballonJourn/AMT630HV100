@@ -61,8 +61,8 @@ static ret_t on_key_event(void* ctx, event_t* e)
         switch (key) 
         {
             case TK_KEY_w:
-                // deal_key_up_short_press() ;
-                navigator_switch_to(DEVICE_PAGE , false) ;
+                deal_key_up_short_press() ;
+                // navigator_switch_to(DEVICE_PAGE , false) ;
                 break;
             case TK_KEY_s:
                 deal_key_down_short_press();
@@ -126,6 +126,7 @@ static void hcn_key_handle(uint8_t id)
         case  MODE_KEY_SHORT_PR :
                 deal_key_down_short_press() ;
                 break;
+
         case  SET_KEY_SUPER_LONG_PR :
                 deal_key_super_long_press() ;
                 break;
@@ -222,7 +223,7 @@ ret_t set_window_page(window_page_e type)
 
         if(page->active != type )
         {
-            update_page_info() ;
+            // update_page_info() ;
             pages_set_active(window_page[MAIN_PAGE] , type);
 
         }
@@ -318,6 +319,7 @@ void deal_key_super_long_press()
     else  
         printf("Can not open! Timer Interval = [%llu] or Focused Item Not the First One \n" ,currentTime - start_time);
     
+    return  ;
 }
 
 

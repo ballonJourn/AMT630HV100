@@ -113,8 +113,15 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
         home_refresh_clock_sec(sec) ;
     }
     
+    if(get_current_levle() < 2  &&
+        get_current_win() ==  ICON_SETTING )
+    {
+        refresh_clock(clock_min , clock_sec) ;
+    }
+
     clock_colon = !clock_colon ;
     home_refresh_clock_colon(clock_colon) ;
+
 
     if (checkself_get_state() != CHECK_STATE_FINISHED ) 
         return RET_REPEAT ;
