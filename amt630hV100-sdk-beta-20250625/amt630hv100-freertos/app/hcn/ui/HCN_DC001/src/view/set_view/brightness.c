@@ -69,11 +69,12 @@ static short_click_deal short_click[] = {
 
 void brightness_init()
 {
-    brightness_view_set_focused_item(option) ;
-    //刷新数据 todo
+    brightness_view_set_focused_item(vehicle_get_param_brightness()) ;
 
+    //刷新数据 todo
     return  ;
 }
+
 
 void on_brightness_deal_short_key(key_id_e key)
 {
@@ -113,6 +114,7 @@ void brightness_view_set_focused_item(int focusedIndex)
         }
         else{
             printf(" brightness_view_set_focused_item not find widget \n");
+            return ;
         }
     }
 

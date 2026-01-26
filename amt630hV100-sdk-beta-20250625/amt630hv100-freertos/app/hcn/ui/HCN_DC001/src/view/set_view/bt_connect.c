@@ -78,7 +78,10 @@ static short_click_deal short_click[] = {
 
 void bt_connect_init()
 {
-    bt_connect_view_set_focused_item(option) ;
+
+    uint8_t value = vehicle_get_param_bluetooth();
+    bt_connect_view_set_focused_item(value == 0 ? BT_CONNECT_OFF_OPTION : BT_CONNECT_ON_OPTION) ;
+
     //刷新数据 todo
 
     return  ;
@@ -111,8 +114,11 @@ void bt_connect_view_set_focused_item(bt_option_e focusedIndex)
         }
         else{
             printf(" bt_connect_view_set_focused_item not find widget \n");
+            return ;
         }
     }
+
+    option = focusedIndex ;
 
     return ;
 }

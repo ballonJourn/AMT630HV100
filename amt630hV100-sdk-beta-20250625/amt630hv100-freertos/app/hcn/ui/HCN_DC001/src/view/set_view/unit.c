@@ -64,9 +64,8 @@ static short_click_deal short_click[] = {
 
 void unit_init()
 {
-    unit_view_set_focused_item(option) ;
+    unit_view_set_focused_item(vehicle_get_param_unit()) ;
     //刷新数据 todo
-
     return  ;
 }
 
@@ -83,6 +82,11 @@ void on_unit_deal_short_key(key_id_e key)
 
 void unit_view_set_focused_item(unit_option_e focusedIndex)
 {
+    if (focusedIndex > UNIT_MILE_OPTION)
+    {
+        focusedIndex = UNIT_KM_OPTION ;
+    }
+    
     for (size_t i = 0; i < UNIT_OPTION_MAX ; i++)
     {
         if (set_unit_widget[i])
@@ -97,8 +101,11 @@ void unit_view_set_focused_item(unit_option_e focusedIndex)
         }
         else{
             printf(" unit_view_set_focused_item not find widget \n");
+            return ;
         }
     }
+
+    option = focusedIndex ;
 
     return ;
 }

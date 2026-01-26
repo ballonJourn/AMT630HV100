@@ -15,6 +15,8 @@ static widget_t* chart_view = NULL ;
 
 static cycling_engrgy_option_e option = RIDE_5KM_OPTION ;
 
+static cycling_engrgy_option_e clicked_option = RIDE_5KM_OPTION ;
+
 ret_t set_cycling_energy_view_init(widget_t* parent)
 {
     if(parent == NULL) return RET_FAIL;
@@ -29,6 +31,7 @@ ret_t set_cycling_energy_view_init(widget_t* parent)
 
 static void setting_menu_view_deal_set()
 {
+    clicked_option = option ;
     printf("on_cycling_engrgy setting_menu_view_deal_set \n") ;
 
     return  ;
@@ -86,8 +89,9 @@ ret_t on_update_chart(const timer_info_t* timer)
 
 void cycling_engrgy_init()
 {
-    cycling_engergy_view_set_focused_item(option) ;
-
+    cycling_engergy_view_set_focused_item(clicked_option) ;
+    option =  clicked_option ;
+    
     //刷新数据 todo
     if (update_timer != 0 && timer_find(update_timer))
         return ;

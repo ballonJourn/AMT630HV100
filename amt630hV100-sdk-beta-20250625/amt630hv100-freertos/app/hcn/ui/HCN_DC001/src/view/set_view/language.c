@@ -65,7 +65,10 @@ static short_click_deal short_click[] = {
 
 void language_init()
 {
-    language_view_set_focused_item(option) ;
+    ///< 语言 0:中文 1:英文,预留位
+    uint8_t value = vehicle_get_param_language();
+
+    language_view_set_focused_item(value) ;
     //刷新数据 todo
 
     return  ;
@@ -84,6 +87,12 @@ void on_language_deal_short_key(key_id_e key)
 
 void language_view_set_focused_item(language_option_e focusedIndex)
 {
+    if (focusedIndex > LANGUAGE_ENGLISH_OPTION)
+    {
+        focusedIndex = LANGUAGE_CHINESE_OPTION ;
+    }
+    
+
     for (size_t i = 0; i < LANGUAGE_OPTION_MAX ; i++)
     {
         if (set_language_widget[i])
@@ -98,9 +107,12 @@ void language_view_set_focused_item(language_option_e focusedIndex)
         }
         else{
             printf(" language_view_set_focused_item not find widget \n");
+            return ;
         }
     }
 
+    option = focusedIndex ;
+    
     return ;
 }
 

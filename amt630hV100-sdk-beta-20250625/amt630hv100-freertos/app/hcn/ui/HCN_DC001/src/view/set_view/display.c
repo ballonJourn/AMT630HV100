@@ -72,6 +72,16 @@ static short_click_deal short_click[] = {
 
 void display_init()
 {
+    uint8_t value = vehicle_get_param_display();
+    if (value == 0)
+        option = DIAPLAY_DAY_OPTION ;
+    else if(value == 1)
+        option = DIAPLAY_NIGHT_OPTION ;
+    else if (value == 2)
+        option = DIAPLAY_AUTO_OPTION ;
+    else
+        option = DIAPLAY_AUTO_OPTION ;
+
     display_view_set_focused_item(option) ;
     //刷新数据 todo
 
@@ -105,9 +115,12 @@ void display_view_set_focused_item(display_option_e focusedIndex)
         }
         else{
             printf(" display_view_set_focused_item not find widget \n");
+            return ;
         }
     }
 
+    option = focusedIndex ;
+    
     return ;
 }
 
