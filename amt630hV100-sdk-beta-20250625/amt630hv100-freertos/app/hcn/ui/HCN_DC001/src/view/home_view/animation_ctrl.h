@@ -39,4 +39,6 @@ ret_t calling_animation_start() ;
 
 ret_t calling_animation_stop() ;
 
+void refresh_pop_call_state(int state);
+
 #endif

@@ -28,6 +28,7 @@ ret_t component_init(widget_t* component, void* ctx) {
   return_value_if_fail(component != NULL, RET_BAD_PARAMS);
 
   widget_foreach(component, visit_init_child, component);
+  printf(" component_init \n");
 
   return RET_OK;
 }

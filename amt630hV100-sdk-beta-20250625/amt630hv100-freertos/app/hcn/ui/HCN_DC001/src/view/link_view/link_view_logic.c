@@ -92,6 +92,9 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
 
         link_refresh_unit(vehicle_get_param_unit()) ;
 
+
+        link_refresh_electrical(8);
+        link_refresh_electrical(0);
         timer_refresh_50_ms(NULL);
 
     #if ON_PC_CACLE == 0
@@ -155,6 +158,7 @@ static ret_t timer_refresh_50_ms(const timer_info_t *info)
     {
         link_refresh_electrical(_electriacl);
         electriacl = _electriacl ;
+        // printf("link_refresh_electrical\n");
     }
     
     return RET_REPEAT ;

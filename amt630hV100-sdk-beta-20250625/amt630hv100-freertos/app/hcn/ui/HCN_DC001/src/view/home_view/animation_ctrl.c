@@ -1,6 +1,7 @@
 #include "animation_ctrl.h"
 #include "dock_view.h"
 #include "../view_manager.h"
+#include "carlink_cb/hcn_carlink_cb.h"
 #include <stdbool.h>
 
 const char* home_move_animation_name[MVOE_NUM_MAX] = {
@@ -202,4 +203,35 @@ ret_t calling_animation_stop()
     }
     return RET_OK ;
 
+}
+
+// static const char* hfp_state[3] = {} ;
+void refresh_pop_call_state(int state)
+{
+    if (state < 0 || state > FIRST_OUTGOING_SECOND_HELD)
+        return ;
+
+    char buff[256] = {0};
+    const char * tr_txt = NULL ;
+    switch (state)
+    {
+        case INCOMING_CALL :
+            tr_txt = locale_info_tr(locale_info(), "call_pop_incoming");
+            break;
+        case OUTGOING_CALL :
+            tr_txt = locale_info_tr(locale_info(), "call_pop_output");
+            break;
+        case ACTIVE_CALL :
+            tr_txt = locale_info_tr(locale_info(), "call_pop_answing");
+            break;
+        default:
+            break;
+    }
+    
+    widget_t *widget =  widget_lookup( window_manager_get_top_window(window_manager()), "call_pop_tips", TRUE);
+    if (widget && tr_txt)
+        widget_set_text_utf8(widget , tr_txt) ;
+    
+        return ;
+    
 }

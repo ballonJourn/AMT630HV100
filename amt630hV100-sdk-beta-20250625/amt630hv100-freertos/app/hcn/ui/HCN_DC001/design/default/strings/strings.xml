@@ -140,9 +140,17 @@ Press&lt;font color="#FFB459"&gt;Back&lt;/font&gt;Hang up</language>
   <language name="en_US">Click confirm  
 Enter the map without navigation</language>
 </string>
-<string name="call_pop">
-  <language name="zh_CN">确认接听 返回挂断</language>
-  <language name="en_US">Enter Answer    Back Hang up</language>
+<string name="call_pop_incoming">
+  <language name="zh_CN">来电中 确认接听 返回挂断</language>
+  <language name="en_US">IncomingCall Enter-Answer Back-Hang up</language>
+</string>
+<string name="call_pop_output">
+  <language name="zh_CN">去电中 返回挂断</language>
+  <language name="en_US">OutgoingCall Enter-Answer Back-Hang up</language>
+</string>
+<string name="call_pop_answing">
+  <language name="zh_CN">通话中 返回挂断</language>
+  <language name="en_US">Answering Back-Hang up</language>
 </string>
 <string name="updating">
   <language name="zh_CN">升级中...</language>

@@ -150,16 +150,19 @@ ret_t parse_calling_data(const bt_call_t *_call_info)
         if (_call_info->btHfpState == OUTGOING_CALL)
         {
             home_refresh_phone_state(CALL_OUTGOING);
+            refresh_pop_call_state(OUTGOING_CALL) ;
             calling_animation_start();
 
         }else if (_call_info->btHfpState == INCOMING_CALL)
         {
             home_refresh_phone_state(CALL_INCOMMING);
+            refresh_pop_call_state(INCOMING_CALL) ;
             calling_animation_start();
 
         }else if (_call_info->btHfpState == ACTIVE_CALL)
         {
             home_refresh_phone_state(CALL_CALLING);
+            refresh_pop_call_state(ACTIVE_CALL) ;
             // calling_animation_stop();
         }
         
