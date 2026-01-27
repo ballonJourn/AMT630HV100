@@ -2,7 +2,7 @@
   <view name="view" x="10" y="10" w="780" h="460" style:normal:border_color="#00000000">
     <label name="title_lbl" x="307" y="10" w="160" h="35" style:normal:font_size="30" style:normal:font_name="default" style:normal:text_align_h="center" sensitive="false" focusable="true" focused="true" style:normal:text_color="#FFFFFF" text="OTA"/>
     <label name="label" x="101" y="54" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" text="UUID："/>
-    <label name="label" x="101" y="109" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="Bluetooth Name："/>
+    <label name="label" x="101" y="109" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" style:normal:font_name="default" tr_text="Bluetooth Name："/>
     <label name="label" x="101" y="165" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="Bluetooth Ver:"/>
     <label name="label" x="101" y="220" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" text="OTA："/>
     <label name="label" x="101" y="277" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="SN："/>

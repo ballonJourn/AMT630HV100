@@ -110,6 +110,9 @@ void home_clean_music_data()
 
     home_refresh_music_bar(0,100);
 
+    home_refresh_music_current_time(0);
+    home_refresh_music_total_time(0);
+
     home_refresh_music_ex_image(BLUETOOTH_DEFAULT_IMAGE) ;
     home_refresh_music_image(BLUETOOTH_DEFAULT_IMAGE);
 }

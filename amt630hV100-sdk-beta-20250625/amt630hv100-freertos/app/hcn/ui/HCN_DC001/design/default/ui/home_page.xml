@@ -91,8 +91,8 @@
           </view>
           <view name="music_page" x="0" y="0" w="276" h="290" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="music_image" x="100" y="66" w="60" h="60" draw_type="scale" image="icon_media_cover_n"/>
-            <hscroll_label name="music_title" x="50" y="157" w="160" h="28" loop="true" style:normal:text_align_h="center" style:normal:font_size="26" only_focus="true" ellipses="true" tr_text="no_music"/>
-            <hscroll_label name="music_clyric" x="50" y="197" w="167" h="40" style:normal:font_size="22" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false" style="music_lyrics"/>
+            <hscroll_label name="music_title" x="50" y="157" w="160" h="28" loop="true" style:normal:text_align_h="center" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:font_name="default_2" tr_text="no_music"/>
+            <hscroll_label name="music_clyric" x="50" y="197" w="167" h="40" style:normal:font_size="22" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false" style="music_lyrics" style:normal:font_name="default_2"/>
           </view>
           <view name="phone_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
@@ -107,8 +107,8 @@
           <view name="setting_page" x="0" y="0" w="276" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
           <view name="music_expand_page" x="0" y="0" w="506" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
             <image name="music_image_ex" x="214" y="21" w="60" h="60" draw_type="scale" image="icon_media_cover_n"/>
-            <hscroll_label name="music_title_ex" x="94" y="100" w="300" h="28" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:text_align_h="center" tr_text="no_music"/>
-            <hscroll_label name="music_lyric_ex" x="80" y="137" w="329" h="28" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:text_align_h="center" style="music_lyrics"/>
+            <hscroll_label name="music_title_ex" x="94" y="100" w="300" h="28" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:text_align_h="center" style:normal:font_name="default_2" tr_text="no_music"/>
+            <hscroll_label name="music_lyric_ex" x="80" y="137" w="329" h="28" style:normal:font_size="26" only_focus="true" ellipses="true" style:normal:text_align_h="center" style="music_lyrics" style:normal:font_name="default_2"/>
             <progress_bar name="music_bar" x="94" y="176" w="300" h="12" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="0"/>
             <image name="music_prev" x="104" y="205" w="50" h="50" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
             <image name="music_state" x="219" y="205" w="50" h="50" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>

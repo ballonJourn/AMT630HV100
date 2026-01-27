@@ -93,7 +93,7 @@ unsigned char rawData[983] = {
 
 const char* home_dock_music_ex_widget_name[MUSIC_DOCK_NUM_MAX] = {
     "music_image_ex" , "music_title_ex" , "music_lyric_ex" , "music_bar" , 
-    "music_prev", "music_state" , "music_next"
+    "music_prev", "music_state" , "music_next" ,"total_time" ,"curr_time" 
 } ;
 
 static widget_t* home_dock_music_ex_widget[MUSIC_DOCK_NUM_MAX] = { NULL };
@@ -177,7 +177,10 @@ ret_t home_refresh_music_bar(int value ,int max)
         progress_bar_set_max(widget , max);
         progress_bar_set_value(widget , value) ;
     }
-    
+
+    home_refresh_music_current_time(value);
+    home_refresh_music_total_time(max);
+
     return RET_OK ;
 }
 
@@ -198,6 +201,40 @@ ret_t home_refresh_music_state(bool_t isplay)
         widget_set_style_str(music_state_widget ,STATE_SELECTE "." STYLE_ID_ICON , music_play_state_image_str[MUSIC_SELECTED][is_playing]);
     }
     
+    return RET_OK ;
+}
+
+ret_t home_refresh_music_current_time(uint32_t total_seconds)
+{
+    uint32_t minutes = total_seconds / 60 ;
+    uint32_t seconds = total_seconds % 60;
+
+    char buff[64]  = { 0 };
+
+    tk_snprintf(buff , sizeof(buff) - 1, "%02d:%02d" , minutes , seconds) ;
+    if (home_dock_music_ex_widget[MUSIC_CURRENT])
+        widget_set_text_utf8(home_dock_music_ex_widget[MUSIC_CURRENT] , buff);
+
+    return RET_OK ;
+}
+
+
+ret_t home_refresh_music_total_time(uint32_t total_seconds)
+{
+    static uint32_t total = 0 ;
+    if (total == total_seconds)
+        return RET_FAIL;
+
+    uint32_t minutes = total_seconds / 60 ;
+    uint32_t seconds = total_seconds % 60;
+
+    total = total_seconds ;
+    char buff[64]  = { 0 };
+
+    tk_snprintf(buff , sizeof(buff) - 1, "%02d:%02d" , minutes , seconds) ;
+    if (home_dock_music_ex_widget[MUSIC_TOTAL])
+        widget_set_text_utf8(home_dock_music_ex_widget[MUSIC_TOTAL] , buff);
+
     return RET_OK ;
 }
 
@@ -223,6 +260,8 @@ void music_ex_view_set_focused_item(music_ex_focused_e focusedIndex)
 
     // image_set_image();
 }
+
+
 
 /***********
 // 图片名默认为assets_manager_load_file加载的路径
