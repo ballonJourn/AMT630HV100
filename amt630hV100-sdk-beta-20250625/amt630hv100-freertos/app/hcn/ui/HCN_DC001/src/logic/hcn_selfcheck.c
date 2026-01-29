@@ -39,6 +39,7 @@ static void handle_state_waiting() {
     {   //动画播放完毕
         manager.state      = CHECK_STATE_CHECKING;
         manager.start_tick = time_now_ms();
+        printf("selfcheck start\n");
     }
 
     return ; 
@@ -49,6 +50,7 @@ static void handle_state_checking() {
 
     if (manager.check_count > max_check_count) {
         manager.state = CHECK_STATE_FINISHED;
+        printf("selfcheck end\n");
         return ;
     }
 
@@ -71,7 +73,7 @@ static void handle_state_finished() {
         timer_remove(manager.timer_id);
         manager.timer_id = 0;
     }
-
+    
     // home_refresh_signal_visible(FALSE);   //先打开
 
     set_check_self_state(CHECK_SELF_STATE_SUCCESS) ;

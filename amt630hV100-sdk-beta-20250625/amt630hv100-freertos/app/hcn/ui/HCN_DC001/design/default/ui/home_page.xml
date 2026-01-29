@@ -185,7 +185,7 @@
           <image name="image4" x="10" y="77" w="506" h="2" draw_type="default" image="setting_line"/>
           <label name="bt_on_option" x="49" y="98" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="bt_open"/>
           <label name="bt_off_option" x="49" y="175" w="450" h="60" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" style:normal:text_align_h="center" tr_text="bt_close"/>
-          <image name="bt_state" x="394" y="30" w="80" h="40" draw_type="default" image="setting_bluebooth_open"/>
+          <image name="bt_state" x="394" y="30" w="80" h="40" draw_type="default" image="setting_bluebooth_close"/>
           <label name="bt_name" x="132" y="36" w="219" h="28" style:normal:font_size="25" style:normal:text_color="#757070"/>
           <label name="bt_phone_info" x="94" y="251" w="360" h="39" style:normal:font_size="25"/>
         </view>
