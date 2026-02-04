@@ -22,6 +22,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "uart_mcu_update/hcn_mcu_update_def.h"
+#include "dashboard_state/hcn_dev_state.h"
 #include "config/hcn_config.h"
 #include "ff_stdio.h"
 
@@ -40,6 +41,11 @@ typedef enum {
     RESEND_FILE,
     EXIT_UPDATE,
 } mcu_update_step_e;
+
+typedef enum {
+    MCU_FILE_DATA = 1,  ///< U盘或者SD卡是的mcu_update.bin文件
+    MCU_FLASH_DATA = 2, ///< OTA升级时，flash中的mcu文件
+} mcu_update_data_tyep_e;
 
 typedef struct {
     h_bool start_mcu_update;
