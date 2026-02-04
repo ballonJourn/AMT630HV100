@@ -89,7 +89,8 @@ typedef struct {
     ride_param_t ride_info;
     tpms_param_t tpms[MAX_WHEEL_POS_NUM];
     char carlink_uuid[MAX_UUID_LEN];
-    pads(1, 40);        ///< 预留40个字节
+    uint32_t mcu_update_len;   ///< mcu更新文件长度
+    pads(1, 36);        ///< 预留40个字节
 } usr_param_t;
 
 /**
@@ -138,6 +139,9 @@ typedef enum {
     HCN_PARAM_RIGHT_FRONT_TIRE_INFO,
     HCN_PARAM_LEFT_REAR_TIRE_INFO,
     HCN_PARAM_RIGHT_REAR_TIRE_INFO,
+
+    /* mcu更新文件长度 */
+    HCN_PARAM_MCU_UPDATE_LEN,
 } usr_param_handle_e;
 
 /**

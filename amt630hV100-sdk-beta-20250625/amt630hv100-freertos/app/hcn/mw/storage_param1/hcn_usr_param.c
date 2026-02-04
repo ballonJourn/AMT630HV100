@@ -88,7 +88,7 @@ static void printf_usr_param(usr_param_t * param) {
 
         printf("ride_time_a:%d\r\n", param->ride_info.ride_time_a);     
         printf("ride_time_b:%d\r\n", param->ride_info.ride_time_b);     
-    
+        printf("mcu update_len:%d\r\n", param->mcu_update_len);
         for (int i = 0; i < MAX_WHEEL_POS_NUM; i++) {
             printf("tpms_info[%d].id:0x%x\n", i, param->tpms[i].tpms_id);
             printf("tpms_info[%d].pressure:%d\n", i, param->tpms[i].tpms_pressure);
@@ -378,6 +378,10 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
         case HCN_PARAM_RIGHT_REAR_TIRE_INFO:
             memcpy(param, &usr_param.tpms[TPMS_RIGHT_REAR], sizeof(tpms_param_t));
             break;
+            
+        case HCN_PARAM_MCU_UPDATE_LEN:
+            *((uint32_t *)param) = usr_param.mcu_update_len;
+            break;        
 
         default:
             status = false;
@@ -617,6 +621,13 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
                        sizeof(tpms_param_t));
             }
             break;
+
+        case HCN_PARAM_MCU_UPDATE_LEN:
+            if (usr_param.mcu_update_len != *((uint32_t *)param)) {
+                usr_param.mcu_update_len = *((uint32_t *)param);  
+                is_save = true;
+            }
+            break;   
 
         default:
             is_save = false;

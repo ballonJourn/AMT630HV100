@@ -4,6 +4,7 @@
 #define UPDATE_MEDIA_SD			0
 #define UPDATE_MEDIA_USB		1
 #define UPDATE_MEDIA_UART		2
+#define UPDATE_MEDIA_WIFI		3
 
 #define UPDATE_STATUS_START		0
 #define UPDATE_STATUS_END		1

@@ -211,7 +211,7 @@ void refresh_pop_call_state(int state)
     if (state < 0 || state > FIRST_OUTGOING_SECOND_HELD)
         return ;
 
-    char buff[256] = {0};
+    //char buff[256] = {0};
     const char * tr_txt = NULL ;
     switch (state)
     {
