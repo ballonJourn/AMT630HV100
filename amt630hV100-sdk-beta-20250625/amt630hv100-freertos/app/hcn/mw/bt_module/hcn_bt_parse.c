@@ -26,6 +26,7 @@
 #include "carlink_cb/hcn_carlink_provide.h"
 #include "vehicle_param/vehicle_param.h"
 #include "bt_module/hcn_bt_song_art_cover.h"
+#include "storage_param1/hcn_usr_param.h"
 #include "board.h"
 
 //#define BT_STR_DEBUG 
@@ -42,6 +43,7 @@ static bt_music_info_t music_info = {0};
 static char g_bt_version[32] = {0};
 static int g_pb_count = 0;
 static uint32_t last_switch_tick = 0;
+static bool is_get_mac_addr = false;
 
 static int bt_send_cmd(const char *buff) {
     char buffer[UART_BT_SEND_BUF_LEN] = {0};
@@ -466,6 +468,59 @@ static void on_music_tracks_info(char (*state)[TEXT_PARAM_LEN],
      }                               
 }
 
+static void on_update_uuid(char *uuid_str) {
+    char uuid_temp[20] = {0};
+    bool is_save = true;
+
+    if (get_hcn_usr_param(HCN_PARAM_EC_UUID, uuid_temp)) {
+        uint8_t uuid_len = strlen(uuid_temp);
+        uint8_t uuid_size = sizeof(uuid_temp);
+        if (uuid_len < uuid_size) { 
+            ///< 原先UUID是0,0xFF等无效值，需要保存新的UUID
+            for (int i = uuid_len; i < uuid_size; i++) {
+                if (uuid_temp[i] == 0xFF || ((uuid_temp[i] == 0x00) && (i == 0))) {
+                    is_save = false;
+                    break;
+                }
+            }
+
+            for (int j = 0; j < uuid_len; j++) {
+                if (!((uuid_temp[j] >= '0' && uuid_temp[j] <= '9') || 
+                    (uuid_temp[j] >= 'A' && uuid_temp[j] <= 'Z'))) {
+                    is_save = false;
+                    break;    
+                }    
+            }
+        } else {
+            is_save = false;
+        }
+
+        if (!is_save || (strncmp(uuid_temp, UUID_HEAD, strlen(UUID_HEAD)) != 0)
+            || strlen(uuid_temp) != (strlen(uuid_str) + strlen(UUID_HEAD))) {
+            memset(uuid_temp, 0, sizeof(uuid_temp));
+            snprintf(uuid_temp, sizeof(uuid_temp), "%s%s", UUID_HEAD, uuid_str);
+            if (set_hcn_usr_param(HCN_PARAM_EC_UUID, uuid_temp)) {
+                hcn_log_info("Set new uuid:%s\r\n", uuid_temp);
+            } else {
+                hcn_log_error("Set uuid param failed!\r\n");
+            }
+        }
+    } else {
+        hcn_log_error("Get uuid param failed!\r\n");
+    }
+}
+
+static void on_bt_update_addr(char *addr_str) {
+    if (addr_str) {
+        uint8_t len = strlen(addr_str) < 12 ? strlen(addr_str) : 12;
+        memcpy(g_bt_data.btMacAddr, addr_str, len);
+        if (strlen(g_bt_data.btMacAddr) > 0 && !is_get_mac_addr) {
+            is_get_mac_addr = true;
+            on_update_uuid(g_bt_data.btMacAddr);
+        }
+    }
+}
+
 static void on_bt_str_parse(char *at_str) {
     if (at_str == NULL) {
         hcn_log_error("\r\nbt at_str is NULL!\r\n");
@@ -506,6 +561,7 @@ static void on_bt_str_parse(char *at_str) {
                                     (uint32_t) g_bt_data.btSwitchState);
         }
 
+        hcn_log_info("[ouchunhua]real state:%d\r\n", g_bt_data.btSwitchState);
         if (g_bt_data.btSwitchState == 0) {
             if (g_bt_data.btConnected == 1) {
                 disconnect_all_remote_bt_dev();
@@ -524,7 +580,7 @@ static void on_bt_str_parse(char *at_str) {
             }
         }
     }  else if (strstr(cmd_str, "+ADDR")){
-
+        on_bt_update_addr(prama_data);
     } else if (strstr(cmd_str, "+DEVSTAT")) {
         on_bt_dev_state_change(prama_data);
     } else if (strstr(cmd_str, "+PBCNT")) {

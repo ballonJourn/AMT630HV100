@@ -159,6 +159,7 @@ typedef struct {
     char btCallPerson2[TEXT_PARAM_LEN];      ///< 三方通话联系人
  } bt_call_t;
 
+ #define BT_ADDR_STR_LEN    (32)
 typedef struct {
     dev_state_e btDevState;    ///< 判断模块是否初始化完成 != 0
     uint8_t btPowerState;      ///< 电源状态 0：未上电 1:已上电
@@ -174,7 +175,8 @@ typedef struct {
     char btDevName[TEXT_PARAM_LEN]; ///< 蓝牙设备名称
     char bleName[TEXT_PARAM_LEN];   ///< 蓝牙低功耗设备名称
     char btDevPin[TEXT_PARAM_LEN];  ///< 设备配对密码
-    char btHfpAddr[TEXT_PARAM_LEN]; ///< 连接设备的蓝牙MAC地址，去除了:分割
+    char btMacAddr[BT_ADDR_STR_LEN];  ///< 蓝牙MAC地址
+    char btHfpAddr[BT_ADDR_STR_LEN]; ///< 连接设备的蓝牙MAC地址，去除了:分割
     char btConnectDevName[BT_CONNECT_DEV_NAME_LEN]; ///< 蓝牙连接设备的名称,
 } bt_data_t;
 

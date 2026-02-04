@@ -22,6 +22,8 @@ extern "C" {
 #include <stdbool.h>
 #include "hcn_carlink_cb.h"
 
+#define UUID_HEAD "HCN"          // UUID头，客户简写 恒晨："HCN"
+
 void hcn_initialize(HcnLibConfig* HcnCfg, IhcnCallBack* HcnCallback);
 IhcnCallBack *get_hcn_callback(void);
 HcnLibConfig *get_hcn_lib_config(void);

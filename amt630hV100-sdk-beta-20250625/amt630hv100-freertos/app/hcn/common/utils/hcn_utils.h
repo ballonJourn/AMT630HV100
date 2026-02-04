@@ -38,7 +38,7 @@ typedef struct {
  * @return 无
  */
 void hcn_hex_config_data_print(char const *function, char *prefix, uint8_t *data,
-                              uint8_t length);
+                              uint16_t length);
 
 /**
  * @brief  字符串转小写
