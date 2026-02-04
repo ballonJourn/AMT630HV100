@@ -276,6 +276,7 @@ static uint32_t get_mediafile_checksum(const char *ufile, int filetype, int bche
 	}
 
 	rlen = ff_fread(buf, 1, IMAGE_RW_SIZE, fp);
+	printf("read %s first %d bytes.\n", ufile, rlen);
 	if (rlen <= 0) {
 		printf("read %s data fail.\n", ufile);
 		ff_fclose(fp);
@@ -319,6 +320,8 @@ static uint32_t get_mediafile_checksum(const char *ufile, int filetype, int bche
 
 	ff_fclose(fp);
 	vPortFree(buf);
+
+	printf("calc checksum:0x%08x, file checksum:0x%08x\n", calc_checksum, checksum);
 
 	if (calc_checksum == checksum)
 		return checksum;
@@ -550,11 +553,13 @@ int update_from_media(char *mpath, int filetype)
 	strcat(update_file, g_upfilename[filetype]);
 
 	printf("%s checksum...\n", update_file);
+	///< 获取升级文件校验和并校验
 	if (!(checksum = get_mediafile_checksum(update_file, filetype, 1))) {
 		printf("checksum fail, don't update.\n");
 		return 0;
 	}
 
+	///< 和当前运行文件校验和对比
 	if (checksum == get_upfile_checksum(filetype, 0, 0, 0)) {
 		if (!(filetype == UPFILE_TYPE_WHOLE && sysinfo->app_checksum == 0)) {
 			printf("checksum is the same as now, don't update.\n");
