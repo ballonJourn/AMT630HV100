@@ -152,6 +152,7 @@ typedef enum {
     
     ///< enter ota page state
     VEH_ENTER_OTA_PAGE_STATE,  ///< 0:not enter  1:enter ota page  2:exit ota page
+    VEH_OTA_START_STATUS,      ///< 0:not start  1:starting  2:Startup successful
 
     VEH_DATA_END,
 } veh_data_e;

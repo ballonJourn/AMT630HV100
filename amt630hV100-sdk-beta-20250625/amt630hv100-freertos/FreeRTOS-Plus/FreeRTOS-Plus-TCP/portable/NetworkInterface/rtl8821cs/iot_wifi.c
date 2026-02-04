@@ -50,6 +50,7 @@
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_DHCP.h"
 #include "FreeRTOS_DHCP_Server.h"
+#include "vehicle_param/vehicle_param.h"
 #if USE_LWIP
 #include "dhcp.h"
 #endif
@@ -1130,6 +1131,8 @@ int start_sta_proc(const char* ssid, const char* passwd, char need_passwd)
 		return -1;
 	}
 
+	vehicle_set_data(VEH_OTA_START_STATUS, 1);
+
     WIFINetworkParams_t xNetworkParams = {0};
     WIFIReturnCode_t xWifiStatus;
 #if !USE_LWIP
@@ -1192,6 +1195,7 @@ int start_sta_proc(const char* ssid, const char* passwd, char need_passwd)
     else
         xNetworkParams.xSecurity = eWiFiSecurityOpen;
 
+	vehicle_set_data(VEH_OTA_START_STATUS, 2);
 retry:
     // Connect!
 	if (g_current_mode != eWiFiModeStation) {
