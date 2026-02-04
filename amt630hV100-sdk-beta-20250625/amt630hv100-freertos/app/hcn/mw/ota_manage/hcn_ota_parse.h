@@ -30,7 +30,7 @@ extern "C" {
 
 ///< TCP OTA数据包长度定义
 #define TCP_OTA_DATA_MIN_LEN        (9)
-#define TCP_OTA_DATA_MAX_LEN        (1034)
+#define TCP_OTA_DATA_MAX_LEN        (1035)
 #define TCP_OTA_FILE_NAME_MAX_LEN   (64)
 
 ///< 帧头定义
@@ -42,10 +42,10 @@ extern "C" {
 #define TCP_DEVICE_INFO_CMD         (1)
 #define TCP_FILE_INFO_CMD           (2)
 #define TCP_FILE_STREAM_CMD         (3)
-#define TCP_TRANSFER_COMPLETE_CMD   (4)
-#define TCP_UPDATE_START_CMD        (5)
-#define TCP_CONFIG_CMD              (6)
-#define TCP_FLASH_PERCENTAGE        (7)
+#define TCP_FLASH_PERCENTAGE        (4)
+#define TCP_TRANSFER_COMPLETE_CMD   (5)
+#define TCP_UPDATE_START_CMD        (6)
+#define TCP_CONFIG_CMD              (7)
 
 ///< OTA文件类型定义
 #define OTA_SPILDR_FILE         (1)

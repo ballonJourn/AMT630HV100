@@ -23,6 +23,7 @@ extern "C" {
 #include <stdbool.h>
 
 int start_sta_init(void);
+void wifi_mode_switching(void);
 
 #ifdef __cplusplus
 }

@@ -21,7 +21,7 @@
 #include "fsc_bt.h"
 #include "iap.h"
 #include "config/hcn_config.h"
-
+#include "vehicle_param/vehicle_param.h"
 
 #if (CARLINK_EC == 1) || (CARLINK_CP == 1) || (CARLINK_AA == 1)
 #if !defined(USE_LWIP) || !USE_LWIP
@@ -689,7 +689,7 @@ exit:
 
 }
 
-
+static bool is_connected_ap = false;
 static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
 {
     WIFIEventType_t xEventType = xEvent->xEventType;
@@ -712,6 +712,7 @@ static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
 		carlink_notify_event(&ev);
 
         printf("\r\n The meter is connected to ap \r\n");
+		is_connected_ap = true;
     } else if (eWiFiEventDisconnected                == xEventType) {// meter is sta
 		struct carlink_event ev = {0};
 		ev.type = CARLINK_EVENT_WIFI_DISCONNECT;
@@ -720,6 +721,18 @@ static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
 		carlink_notify_event(&ev);
 
         printf("\r\n The meter is disconnected from ap \r\n");
+#ifdef HCN_OTA_UPDATE_ENABLE
+		extern bool ota_task_started(void);
+		if (is_connected_ap && ota_task_started()) {
+			is_connected_ap = false;
+			printf("restart sta for ota\r\n");
+			extern void stop_sta_task(void);
+			stop_sta_task();
+			vTaskDelay(pdMS_TO_TICKS(500));
+			extern int start_sta_init(void);
+			start_sta_init();
+		}
+#endif
     } else if (eWiFiEventAPStationConnected       == xEventType) {// meter is ap
 		struct carlink_event ev = {0};
 		ev.type = CARLINK_EVENT_AP_CONNECT;

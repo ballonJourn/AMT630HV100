@@ -30,7 +30,7 @@
 static TaskHandle_t ota_wifi_task = NULL;
 
 static wifi_user_e wifi_usr = WIFI_USER_OTA;
-
+static bool ota_task_running = false;
 #if 0
 #define ucNumNetworks		12
 
@@ -151,27 +151,34 @@ exit:
 #endif
 
 extern int start_sta_ota_proc(const char* ssid, const char* passwd, char need_passwd);
+extern int start_sta_ext(const char* ssid, const char* passwd, char need_passwd);
+
 static void ota_wifi_task_proc(void *param) {
     while (vehicle_get_data(VEH_CARLINK_URL_STATUS) == 0) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    vTaskDelay(pdMS_TO_TICKS(6000));
 
-	hcn_log_info("ota ssid:%s pwd:%s\r\n", hcn_get_ota_ssid(), hcn_get_ota_ap_pwd());
-	start_sta_ota_proc(hcn_get_ota_ssid(), hcn_get_ota_ap_pwd(), 1);
+	//hcn_log_info("ota ssid:%s pwd:%s\r\n", hcn_get_ota_ssid(), hcn_get_ota_ap_pwd());
+	
+	//start_sta_ota_proc(hcn_get_ota_ssid(), hcn_get_ota_ap_pwd(), 1);
+	start_sta_ota_proc("nova 6 (5G)", "09876543", 1);
 	if (wifi_usr == WIFI_USER_OTA) {
+		hcn_log_info("start tcp client\r\n");
+		ota_task_running = true;
 		start_tcp_client();
 	} else {
+		hcn_log_info("stop tcp client\r\n");
 		stop_tcp_client();
 	}
 
 	hcn_log_info("ota_wifi_task_proc exit\n");
 
-	vTaskDelete(NULL);
 	ota_wifi_task = NULL;
+	vTaskDelete(NULL);
 }
 
 int start_sta_init(void) {
+	hcn_log_info("start ota wifi task\r\n");
     if (xTaskCreate(ota_wifi_task_proc, "start_ota_sta", 2048, 
                     NULL, 4, &ota_wifi_task) != pdPASS) {
         hcn_log_error("Create ota_wifi_task_proc failed!\n");
@@ -181,11 +188,35 @@ int start_sta_init(void) {
     return 0;
 }
 
-void stop_sta_task(void) {
-	if (ota_wifi_task) {
-		vTaskDelete(ota_wifi_task);
-		ota_wifi_task = NULL;
-	}
-
-	stop_tcp_client();
+bool ota_task_started(void) {
+	return ota_task_running;
 }
+
+void stop_sta_task(void) {
+	ota_task_running = false;
+	stop_tcp_client();
+	printf("ota sta task stopped\r\n");
+}
+
+extern int restart_p2p();
+void wifi_mode_switching(void) {
+	if (vehicle_get_data(VEH_ENTER_OTA_PAGE_STATE) == 1) {
+		vehicle_set_data(VEH_ENTER_OTA_PAGE_STATE, 0);
+		if (start_sta_init() != 0) {
+			hcn_log_info("Start ota task failed!");
+			return;
+		}
+	} else if (vehicle_get_data(VEH_ENTER_OTA_PAGE_STATE) == 2) {\
+		vehicle_set_data(VEH_ENTER_OTA_PAGE_STATE, 0);
+		vehicle_set_data(VEH_OTA_START_STATUS, 0);
+		wifi_usr = WIFI_USER_EC;
+		ota_task_running = false;
+		hcn_log_info("start p2p step1\r\n");
+		stop_sta_task();
+		vTaskDelay(pdMS_TO_TICKS(500));
+		hcn_log_info("start p2p switch..\r\n");
+		restart_p2p();
+	}
+}
+
+

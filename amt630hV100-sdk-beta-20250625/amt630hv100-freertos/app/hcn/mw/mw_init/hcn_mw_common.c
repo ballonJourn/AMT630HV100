@@ -23,6 +23,7 @@
 #include "dashboard_state/hcn_dev_state.h"
 #include "backlight/hcn_backlight.h"
 #include "storage_param1/hcn_usr_param.h"
+#include "ota_manage/hcn_ota_start_sta.h"
 
 #define VEHICLE_THREAD_PERIOD  pdMS_TO_TICKS(100)
 
@@ -109,17 +110,20 @@ static void test_odo_data(void) {
 
 #endif
 
+extern void ota_mcu_process(void);
 static void common_io_thread(void *param) {
     light_gpio_init(VEHICLE_THREAD_PERIOD);
 
     for (;;) {
         vTaskDelay(VEHICLE_THREAD_PERIOD);
         scan_frame_light();
+        wifi_mode_switching();
+        ota_mcu_process();
     }
 }
 
 void mw_common_init(void) {
-    if (xTaskCreate(common_io_thread, "common_io_thread", configMINIMAL_STACK_SIZE,
+    if (xTaskCreate(common_io_thread, "common_io_thread", configMINIMAL_STACK_SIZE*5,
                     NULL, configMAX_PRIORITIES / 4, NULL) != pdPASS) {
         hcn_log_error("create common io task fail.\n");
         return;

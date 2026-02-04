@@ -25,11 +25,15 @@
 #include "sysinfo.h"
 #include "ota_manage/hcn_ota_parse.h"
 #include "ota_manage/hcn_tcp_client.h"
+#include "ota_manage/hcn_ota.h"
 #include "storage_param1/hcn_read_nor_flash.h"
 #include "log/hcn_log.h"
 #include "source/crc32.h"
+#include "utils/hcn_utils.h"
 
-#define OTA_PARSE_QUEUE_LEN   (20)
+#define OTA_PARSE_DEBUG_ENABLE
+
+#define OTA_PARSE_QUEUE_LEN   (30)
 #define OTA_CRC_ALL_FLASH_ENABLE   ///< 检验所有写入nor flash的参数
 #define OTA_UPDATE_PROGRESS_ENABLE  ///< 升级进度条显示
 
@@ -50,6 +54,8 @@ static UpFileHeader header;
 static sfud_flash *sflash_ota = NULL;
 static SemaphoreHandle_t ota_sem = NULL;
 static uint32_t write_flash_error = 0;
+static bool is_first_parse = true;
+static uint32_t g_calc_checksum = 0;
 
 static bool is_update_file(UpFileHeader *pbuff){
     if (pbuff == NULL) {
@@ -122,6 +128,7 @@ static uint32_t get_update_file_checksum(uint32_t start_addr, uint32_t file_size
             }
 
             calc_checksum = xcrc32(read_buff, remain_size, calc_checksum);
+            offset += remain_size;
         } else {
             vPortFree(read_buff);
             read_buff = NULL;
@@ -151,7 +158,7 @@ static uint32_t get_ota_file_offset(uint8_t file_type, int toburn) {
             break;
         case OTA_UPDATE_FILE: {
                 SysInfo *sysinfo = GetSysInfo();
-                hcn_log_info("sysinfo->image_offset=0x%08x\n", sysinfo->image_offset);
+                hcn_log_info("\r\nsysinfo->image_offset=0x%08x\n", sysinfo->image_offset);
                 if (file_type == OTA_UPDATE_FILE) {
                     if (!toburn) {
                         offset = sysinfo->image_offset;
@@ -164,7 +171,6 @@ static uint32_t get_ota_file_offset(uint8_t file_type, int toburn) {
                         }
                     }
                 }
-                offset = 0xffffffff;
             }
             
             break;
@@ -186,32 +192,70 @@ static void start_ota(void) {
         return;
     }
 
-        
     SysInfo *sysinfo = GetSysInfo();
+    static bool is_error = true;
     meter_info_t *meter_info = get_hcn_info();
 
     if (ota_files[OTA_MCU_FILE - 1].ota_write_offset == 
         ota_files[OTA_MCU_FILE - 1].ota_file_size &&
         ota_files[OTA_MCU_FILE - 1].ota_write_offset > 0) {
         hcn_log_info("Ota Mcu file is success!\r\n");
+        meter_info->mcu_update = 2;
+        meter_info->usr.mcu_update_len = ota_files[OTA_MCU_FILE - 1].ota_file_size;
+    } else {
+        is_error = false;
     }
 
     if (ota_files[OTA_SPILDR_FILE - 1].ota_write_offset == 
         ota_files[OTA_SPILDR_FILE - 1].ota_file_size &&
         ota_files[OTA_SPILDR_FILE - 1].ota_write_offset > 0) {
         hcn_log_info("Ota spi ldr file is success!\r\n");
+    } else {
+        is_error = false;
     }
 
     if (ota_files[OTA_STEPLDR_FILE - 1].ota_write_offset == 
         ota_files[OTA_STEPLDR_FILE - 1].ota_file_size &&
         ota_files[OTA_STEPLDR_FILE - 1].ota_write_offset > 0) {
         hcn_log_info("Ota step ldr file is success!\r\n");
+    } else {
+        is_error = false;
     }
 
     if (ota_files[OTA_UPDATE_FILE - 1].ota_write_offset == 
         ota_files[OTA_UPDATE_FILE - 1].ota_file_size &&
         ota_files[OTA_UPDATE_FILE - 1].ota_write_offset > 0) {
         hcn_log_info("Ota update file is success!\r\n");
+    } else {
+        is_error = false;
+    }
+ 
+    if (is_error) {
+        if ((g_calc_checksum != 0) && (g_calc_checksum != 0xffffffff)) {
+            sysinfo->app_checksum = g_calc_checksum;
+        }
+
+        sysinfo->app_size = ota_files[OTA_UPDATE_FILE - 1].ota_file_size;
+        if ((ota_files[OTA_UPDATE_FILE - 1].ota_addr_offset == UPDATEFILE_MEDIA_OFFSET)
+            || (ota_files[OTA_UPDATE_FILE - 1].ota_addr_offset == UPDATEFILE_MEDIA_B_OFFSET)) {
+            hcn_log_info("current image offset = 0x%08x\r\n", ota_files[OTA_UPDATE_FILE - 1].ota_addr_offset);
+            sysinfo->image_offset = ota_files[OTA_UPDATE_FILE - 1].ota_addr_offset;
+        }
+
+        sysinfo->update_media_type = UPDATE_MEDIA_WIFI;
+        sysinfo->update_status = UPDATE_STATUS_END;
+        SaveSysInfo();
+        if (save_hcn_info() != 0) {
+            hcn_log_info("Save hcn usr error!\r\n");
+            return;
+        }
+        hcn_log_info("OTA update success, os will reboot!\r\n");
+        wdt_cpu_reboot();
+    } else {
+        send_update_status(HCN_MSG_OTA_STAUS, \
+                ota_param.ota_total_size, \
+                ota_param.ota_write_size, UPDATE_ERROR_FLASH);
+        hcn_log_error("OTA file exist error!\r\n");
     }
 }
 
@@ -232,7 +276,16 @@ static void write_update_data(uint8_t file_type, int len) {
 
             ota_param.ota_write_size += len;
             ota_files[file_type - 1].ota_write_offset += len;
-
+#if 0
+            uint16_t temp_len = 0;
+            temp_len = (int)len;
+            if (send_file_recv_state_ack(temp_len) <= 0) {
+                hcn_log_error("Send file recv state ack failed!\r\n");
+            }
+#endif
+            send_update_status(HCN_MSG_OTA_STAUS, \
+                ota_param.ota_total_size, \
+                ota_param.ota_write_size, UPDATE_ERROR_NONE);
             uint8_t temp_percent = 100 - (((ota_param.ota_total_size - \
                     ota_param.ota_write_size) * 100) / ota_param.ota_total_size);
             if (ota_param.ota_percent != temp_percent) {
@@ -241,6 +294,8 @@ static void write_update_data(uint8_t file_type, int len) {
             }
         }
     }
+
+    return;
 
 exit:
     hcn_log_info("Ota write error!\r\n");
@@ -262,6 +317,10 @@ static bool ota_check_sum(uint8_t *msg) {
 }
 
 static void parse_file_info(uint8_t *msg) {
+    if (!is_first_parse) {
+        hcn_log_error("parse_file_info is not first parse!\n");
+        return;
+    }
     ///< 每次接收到文件信息时，都需要重置相关参数
     ota_parse_reset();
 
@@ -270,6 +329,7 @@ static void parse_file_info(uint8_t *msg) {
     uint16_t file_size_offset = 6;
     uint8_t file_type = 0;
     uint32_t file_size = 0;
+    uint16_t crc32_offset = msg_size - 4;
 
 next_file_info:
     file_type = msg[file_type_offset];
@@ -298,13 +358,15 @@ next_file_info:
     file_type_offset += offset;
     file_size_offset += offset;
 
-    if (msg_size > file_type_offset) {
+    if ((msg_size > file_type_offset) && (file_type_offset < crc32_offset)) {
         goto next_file_info;
     }
 
     set_ota_state(TCP_RECV_FILE_INFO);
 
-    hcn_log_info("ota total size: %d bytes\n", ota_param.ota_total_size);
+    hcn_log_info("ota total size: %ld bytes\n", ota_param.ota_total_size);
+
+    is_first_parse = false;
 }
 
 static void parse_file_steam(uint8_t *msg) {
@@ -317,7 +379,7 @@ static void parse_file_steam(uint8_t *msg) {
 
     uint8_t file_type = 0;
     int data_len = 0;
-
+    
     if (ota_param.ota_total_size == 0) {
         hcn_log_error("Parse file stream ota totalsize = 0!\n");
         goto exit;
@@ -344,7 +406,8 @@ static void parse_file_steam(uint8_t *msg) {
 
              ///< 检查OTA文件头是否合法
             if (!is_update_file(&header)) {
-                hcn_log_error("OTA update file header is invalid!\n");
+                vTaskDelay(pdMS_TO_TICKS(20));
+                hcn_log_error("\r\nOTA update file header is invalid!\n");
                 goto exit;
             }
 
@@ -353,9 +416,13 @@ static void parse_file_steam(uint8_t *msg) {
             if (start_addr != 0xffffffff) {
                 ota_files[file_type - 1].ota_addr_offset = start_addr;
             } else {
-                hcn_log_error("OTA update wrire file offset invalid!\r\n");
+                vTaskDelay(pdMS_TO_TICKS(20));
+                hcn_log_error("\r\nOTA update wrire file offset invalid!\r\n");
                 goto exit;
             }
+            vTaskDelay(pdMS_TO_TICKS(20));
+            hcn_log_info("OTA update write offset:0x%08x\r\n", \
+                            ota_files[file_type - 1].ota_addr_offset);
         }
 
         memcpy(&ota_param.ota_buff[ota_param.ota_cur_rx_size], &msg[7], data_len);
@@ -370,13 +437,14 @@ static void parse_file_steam(uint8_t *msg) {
                         ota_param.ota_cur_rx_size - FLASH_PRIV_TYPE_BYTE);
                 ota_param.ota_cur_rx_size -= FLASH_PRIV_TYPE_BYTE;
             }
-        }
+        } 
 
         ///< 文件接收完成时，写入flash
         if (msg[6] == 1) {
             if (ota_param.ota_cur_rx_size > 0) {
                 write_update_data(file_type, ota_param.ota_cur_rx_size);
                 ota_param.ota_cur_rx_size = 0;
+                hcn_log_info("ota write file success:%d\r\n", file_type);
             }
 
             if (ota_param.ota_total_size == ota_param.ota_write_size) {
@@ -391,25 +459,35 @@ static void parse_file_steam(uint8_t *msg) {
                 uint32_t checksum = get_update_file_checksum(
                     ota_files[OTA_UPDATE_FILE - 1].ota_addr_offset, 
                     ota_files[OTA_UPDATE_FILE - 1].ota_file_size);
+                hcn_log_info("update file calc checksum:0x%08x, header checksum:0x%08x\r\n", \
+                        checksum, header.checksum);
                 
                 if (checksum != header.checksum) {
+                    hcn_log_error("Ota update file crc32 check failed!\r\n");
+                    send_update_status(HCN_MSG_OTA_STAUS, \
+                        ota_param.ota_total_size, \
+                        ota_param.ota_write_size, UPDATE_ERROR_CRC);
                     goto exit;
                 }
 #endif
                 if (write_flash_error != 0) {
+                    hcn_log_error("Ota write flash has %d errors!\r\n", write_flash_error);
                     goto exit;
                 }
 
                 vTaskDelay(pdMS_TO_TICKS(1000));
                 ota_param.is_ready_update = true;
+                g_calc_checksum = checksum;
                 set_ota_state(TCP_SEND_TRANSFER_COMPLETE);
-
-                hcn_log_info("otaTotalSize:%d, otaWriteSize:%d\n", \
-                        ota_param.ota_total_size, ota_param.ota_write_size);
-                hcn_log_info("otaFileSize:%d, otaWriteOffset:%d\n", \
-                        ota_files[file_type - 1].ota_file_size, 
-                        ota_files[file_type - 1].ota_write_offset);
+                vTaskDelay(pdMS_TO_TICKS(100));
+                start_ota();
             }
+            
+            hcn_log_info("otaTotalSize:%d, otaWriteSize:%d\n", \
+                    ota_param.ota_total_size, ota_param.ota_write_size);
+            hcn_log_info("otaFileSize:%d, otaWriteOffset:%d\n", \
+                    ota_files[file_type - 1].ota_file_size, 
+                    ota_files[file_type - 1].ota_write_offset);
         } else {
             ///< 正在发送
         }
@@ -500,7 +578,7 @@ static void ota_parse_thread(void *param) {
             vPortFree(msg);
             msg = NULL;
         }
-        vTaskDelay(pdMS_TO_TICKS(1));
+        //vTaskDelay(pdMS_TO_TICKS(1));
     }   
 }
 
@@ -529,8 +607,15 @@ int ota_task_add(uint8_t *msg, uint16_t len) {
     }
 
     memset(data, 0, TCP_OTA_DATA_MAX_LEN);
-    int data_len = len < TCP_OTA_DATA_MAX_LEN ? len : TCP_OTA_DATA_MAX_LEN;
+    int data_len = len > TCP_OTA_DATA_MAX_LEN ? TCP_OTA_DATA_MAX_LEN : len;
     memcpy(data, msg, data_len);
+
+    //hcn_log_info("ota_task_add data_len=%d\r\n", data_len);
+#ifdef OTA_PARSE_DEBUG_ENABLE
+    if (data_len < 128) {
+        //hcn_hex_config_data_print("ota", ":recv(0x)", data, data_len);   
+    }  
+#endif
 
     if (xQueueSend(ota_parse_queue, &data, pdMS_TO_TICKS(1000)) != pdPASS) {
         hcn_log_error("ota_task_add xQueueSend failed!\n");
@@ -582,6 +667,8 @@ int ota_parse_init(void) {
     ota_files[1].ota_addr_offset = OTA_STEPLDR_START_ADDR;
     ota_files[2].ota_addr_offset = OTA_UPDATE_START_ADDR;
     ota_files[3].ota_addr_offset = OTA_MCU_START_ADDR;
+    is_first_parse = true;
+    write_flash_error = 0;
 
     for (uint8_t i  = 0; i < OTA_ALL_FILE; i++) {
         ota_files[i].ota_file_buff = NULL;
@@ -602,12 +689,13 @@ void ota_parse_reset(void) {
     ota_param.ota_percent_change = false;
     ota_param.is_ready_update = false;
     ota_param.is_first_update_file = true;
+    is_first_parse = true;
     ota_param.ota_total_size = 0;
     ota_param.ota_write_size = 0;
     ota_param.ota_cur_rx_size = 0;
     write_flash_error = 0;
 
-    set_ota_state(TCP_SEND_DEVICE_INFO);
+    //set_ota_state(TCP_SEND_DEVICE_INFO);
 
     for (uint8_t i  = 0; i < OTA_ALL_FILE; i++) {
         if (ota_files[i].ota_file_buff) {

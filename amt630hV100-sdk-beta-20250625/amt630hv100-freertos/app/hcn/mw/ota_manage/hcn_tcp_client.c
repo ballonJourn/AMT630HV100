@@ -28,6 +28,9 @@
 #include "carlink_cb/hcn_carlink_cb.h"
 #include "version/hcn_version.h"
 #include "source/crc32.h"
+#include "utils/hcn_utils.h"
+#include "err.h"
+#include "errno.h"
 
 #define OTA_SERVER_PORT    (8008)           ///< 服务器端口号
 #define TCP_OTA_SEND_BUFF_LEN   (256)       ///< tcp发送数据最大长度
@@ -53,6 +56,7 @@ static uint8_t socket_rx[TCP_OTA_DATA_MAX_LEN] = {0};
 static uint8_t socket_tx[TCP_OTA_SEND_BUFF_LEN] = {0};
 static int g_socket_fd = -1;
 static struct sockaddr_in g_server_addr;
+static bool is_socket_reset = false;
 
 static tcp_ota_state ota_state = TCP_SEND_DEVICE_INFO;
 
@@ -119,7 +123,7 @@ static int send_percent(void) {
     socket_tx[4] = TCP_FLASH_PERCENTAGE;
     socket_tx[5] = get_ota_percent();
 
-    calc_checksum = ota_calc_crc32(socket_tx, 4);
+    calc_checksum = ota_calc_crc32(socket_tx, 6);
     socket_tx[6] = (calc_checksum >> 24) & 0xFF;
     socket_tx[7] = (calc_checksum >> 16) & 0xFF;
     socket_tx[8] = (calc_checksum >> 8) & 0xFF;
@@ -139,7 +143,7 @@ static int send_transfer_complete(void) {
     socket_tx[3] = 0x01;
     socket_tx[4] = TCP_TRANSFER_COMPLETE_CMD;
 
-    calc_checksum = ota_calc_crc32(socket_tx, 3);
+    calc_checksum = ota_calc_crc32(socket_tx, 5);
     socket_tx[5] = (calc_checksum >> 24) & 0xFF;
     socket_tx[6] = (calc_checksum >> 16) & 0xFF;
     socket_tx[7] = (calc_checksum >> 8) & 0xFF;
@@ -148,6 +152,27 @@ static int send_transfer_complete(void) {
     hcn_log_info("send transfer complete \r\n");
 
     return send(g_socket_fd, socket_tx, 9, 0);
+}
+
+int send_file_recv_state_ack(uint16_t file_len) {
+    uint32_t calc_checksum = 0;
+
+    memset(socket_tx, 0, sizeof(socket_tx));
+    socket_tx[0] = TCP_OTA_FRAME_HEAD_1;
+    socket_tx[1] = TCP_OTA_FRAME_HEAD_2;
+    socket_tx[2] = 0x00;
+    socket_tx[3] = 0x03;
+    socket_tx[4] = TCP_FILE_STREAM_CMD;
+    socket_tx[5] = (file_len >> 8) & 0xFF;
+    socket_tx[6] = (file_len >> 0) & 0xFF;
+
+    calc_checksum = ota_calc_crc32(socket_tx, 7);
+    socket_tx[7] = (calc_checksum >> 24) & 0xFF;
+    socket_tx[8] = (calc_checksum >> 16) & 0xFF;
+    socket_tx[9] = (calc_checksum >> 8) & 0xFF;
+    socket_tx[10] = (calc_checksum >> 0) & 0xFF;
+    hcn_log_info("send file recv state ack, len:%d\r\n", file_len);
+    return send(g_socket_fd, socket_tx, 11, 0);
 }
 
 static int send_ack(uint8_t msg_type, bool success) {
@@ -163,11 +188,13 @@ static int send_ack(uint8_t msg_type, bool success) {
     socket_tx[5] = (ack_code >> 8) & 0xFF;
     socket_tx[6] = (ack_code >> 0) & 0xFF;
 
-    calc_checksum = ota_calc_crc32(socket_tx, 5);
+    calc_checksum = ota_calc_crc32(socket_tx, 7);
     socket_tx[7] = (calc_checksum >> 24) & 0xFF;
     socket_tx[8] = (calc_checksum >> 16) & 0xFF;
     socket_tx[9] = (calc_checksum >> 8) & 0xFF;
     socket_tx[10] = (calc_checksum >> 0) & 0xFF;
+
+    hcn_log_info("send ack, type:%d, code:%d\r\n", msg_type, ack_code);
     return send(g_socket_fd, socket_tx, 11, 0);
 }
 
@@ -181,7 +208,7 @@ static int send_heartbeat(void) {
     socket_tx[3] = 0x01;
     socket_tx[4] = TCP_HEARTBEAT_CMD;
 
-    calc_checksum = ota_calc_crc32(socket_tx, 3);
+    calc_checksum = ota_calc_crc32(socket_tx, 5);
     socket_tx[5] = (calc_checksum >> 24) & 0xFF;
     socket_tx[6] = (calc_checksum >> 16) & 0xFF;
     socket_tx[7] = (calc_checksum >> 8) & 0xFF;
@@ -189,6 +216,25 @@ static int send_heartbeat(void) {
 
     hcn_log_info("send heartbeat \r\n");
     return send(g_socket_fd, socket_tx, 9, 0);
+}
+
+void test_dev_info_ack(void) {
+    uint8_t buffer[32] = {0};
+
+    buffer[0] = TCP_OTA_FRAME_HEAD_1;
+    buffer[1] = TCP_OTA_FRAME_HEAD_2;
+    buffer[2] = 0x00;
+    buffer[3] = 0x03;
+    buffer[4] = TCP_DEVICE_INFO_CMD;
+    buffer[5] = (TCP_SUCCESS_ACK >> 8) & 0xFF;
+    buffer[6] = (TCP_SUCCESS_ACK >> 0) & 0xFF;
+    uint32_t calc_checksum = ota_calc_crc32(buffer, 7);
+    buffer[7] = (calc_checksum >> 24) & 0xFF;
+    buffer[8] = (calc_checksum >> 16) & 0xFF;
+    buffer[9] = (calc_checksum >> 8) & 0xFF;
+    buffer[10] = (calc_checksum >> 0) & 0xFF;
+
+    hcn_hex_config_data_print("tcp send", ":recv(0x)", buffer, 11);   
 }
 
 static int socket_deinit(void) {
@@ -207,28 +253,24 @@ static int socket_deinit(void) {
         return -1;
     }
 
-    hcn_log_info("reset socket fd:%d\r\n", g_socket_fd);
-
     memset(&g_server_addr, 0, sizeof(g_server_addr));
     g_server_addr.sin_family = AF_INET;
     g_server_addr.sin_port = htons(OTA_SERVER_PORT);
 
-    struct timeval timeout;
+    int send_timeout = 2000;  ///< 2秒超时
+    int recv_timeout = 3000;  ///< 3秒超时
     int optval = 1;
     uint32_t gw_addr = 0;
 
-    ///< 设置发送和接收超时时间为2s
-    timeout.tv_sec = 2;
-    timeout.tv_usec = 0;
     if (setsockopt(g_socket_fd, SOL_SOCKET, SO_SNDTIMEO, 
-              (char*)&timeout, sizeof(timeout)) < 0) {
-        hcn_log_error("Set socket send timeout faile!\r\n");
+                &send_timeout, sizeof(send_timeout)) < 0) {
+        hcn_log_error("Set socket send timeout failed!\r\n");
         goto exit;
     }
 
     if (setsockopt(g_socket_fd, SOL_SOCKET, SO_RCVTIMEO, 
-              (char*)&timeout, sizeof(timeout)) < 0) {
-        hcn_log_error("Set socket recv timeout faile!\r\n");
+                &recv_timeout, sizeof(recv_timeout)) < 0) {
+        hcn_log_error("Set socket recv timeout failed!\r\n");
         goto exit;
     }
 
@@ -251,6 +293,7 @@ static int socket_deinit(void) {
 exit:
     if (g_socket_fd >= 0) {
         closesocket(g_socket_fd);
+        g_socket_fd = -1;
     }
 
     return -1;
@@ -280,22 +323,23 @@ static int socket_init(void) {
     g_server_addr.sin_family = AF_INET;
     g_server_addr.sin_port = htons(OTA_SERVER_PORT);
 
-    struct timeval timeout;
+    ///< 使用struct timeval设置发送和接收超时时间需要注意，结构体中的秒数描述是错误的
+    ///< lwip底层实际是当毫秒用，设置时如要用该结构体，需要设置为毫秒值
+
+    int send_timeout = 2000;  ///< 2秒超时
+    int recv_timeout = 3000;  ///< 3秒超时
     int optval = 1;
     uint32_t gw_addr = 0;
 
-    ///< 设置发送和接收超时时间为2s
-    timeout.tv_sec = 2;
-    timeout.tv_usec = 0;
     if (setsockopt(g_socket_fd, SOL_SOCKET, SO_SNDTIMEO, 
-              (char*)&timeout, sizeof(timeout)) < 0) {
-        hcn_log_error("Set socket send timeout faile!\r\n");
+                &send_timeout, sizeof(send_timeout)) < 0) {
+        hcn_log_error("Set socket send timeout failed!\r\n");
         goto exit;
     }
 
     if (setsockopt(g_socket_fd, SOL_SOCKET, SO_RCVTIMEO, 
-              (char*)&timeout, sizeof(timeout)) < 0) {
-        hcn_log_error("Set socket recv timeout faile!\r\n");
+                &recv_timeout, sizeof(recv_timeout)) < 0) {
+        hcn_log_error("Set socket recv timeout failed!\r\n");
         goto exit;
     }
 
@@ -318,11 +362,17 @@ static int socket_init(void) {
         (gw_addr >> 8) & 0xFF,
         (gw_addr >> 16) & 0xFF,
         (gw_addr >> 24) & 0xFF);
+
+    if (is_socket_reset) {
+        is_socket_reset = false;
+    }
+
     return 0;
 
 exit:
     if (g_socket_fd >= 0) {
         closesocket(g_socket_fd);
+        g_socket_fd = -1;
     }
 
     return -1;
@@ -440,7 +490,12 @@ static void tcp_client_send_thread(void *pvParameters) {
         } else {
             hcn_log_info("try connect server,socket_fd = %d, ret = %d\r\n", g_socket_fd, ret);
             vTaskDelay(pdMS_TO_TICKS(2000));
-            socket_deinit();
+            if (!is_socket_reset) {
+                if (socket_deinit() < 0) {
+                    hcn_log_error("socket deinit failed!\r\n");
+                    break;
+                }
+            } 
         }
     }
     
@@ -451,20 +506,19 @@ static void tcp_client_send_thread(void *pvParameters) {
 
 	hcn_log_info("tcp_client_send_thread exit\n");
 
-	vTaskDelete(NULL);
     client_send_task = NULL;
+	vTaskDelete(NULL);
 }
 
 static void tcp_client_recv_thread(void *pvParameters) {
     hcn_log_info("tcp client recv thread start!\r\n");
-
-    int recv_len = 0;
+    
+    static int recv_len = 0;
     static int sync_search = 0;
 
     while (1) {
 wait_recv_connnect:
         if (g_client_param.is_socket_connnected) {
-            hcn_log_info("Connect client....\r\n");
            recv_len = recv(g_socket_fd, 
                         (void *)(socket_rx + g_client_param.socket_rx_pos), 
                         TCP_OTA_DATA_MAX_LEN - g_client_param.socket_rx_pos, 0);      
@@ -473,7 +527,7 @@ wait_recv_connnect:
                     hcn_log_error("tcp client socket disconnected, reconnect!\r\n");
                     goto wait_recv_connnect;
                 }
-
+                //hcn_log_info("recv len = %d\r\n", recv_len);
                 g_client_param.socket_rx_pos += recv_len;
                                 
     check_data:
@@ -539,14 +593,27 @@ wait_recv_connnect:
                 }
                 vTaskDelay(pdMS_TO_TICKS(5));
             } else if (recv_len < 0) {
-                hcn_log_error("recv task FreeRTOS_recv failed:%d!\r\n", recv_len);
-                switch (recv_len) {
-#if !USE_LWIP
-                    case -pdFREERTOS_ERRNO_ENOTCONN:
-#else
-                    case -ERR_CONN:
-#endif
+                extern int lwip_errno();
+                int err = lwip_errno();
+                hcn_log_error("recv task FreeRTOS_recv failed:%d %d!\r\n", recv_len, err);
+                if (err == EAGAIN) {
+                    hcn_log_info("recv timeout, continue...\n");
+                    vTaskDelay(pdMS_TO_TICKS(1));
+                    continue;
+                }
+
+                hcn_log_info("recv error, next...\n");
+                switch (err) {
+                    case ECONNRESET:
+                    case ENOTCONN: 
+
                          ///< 套接字已关闭或者已关闭无法接收数据
+                         if ((err == ECONNRESET) || (err == ENOTCONN)) {
+                             hcn_log_error("recv bad msg, reset socket\n");
+                         } else {
+                             hcn_log_error("recv conn error, reset socket\n");
+                         }
+                         is_socket_reset = true;
                         socket_reset();
                         // 重置同步头搜索标志
                         sync_search = 0;
@@ -572,10 +639,11 @@ wait_recv_connnect:
             vTaskDelay(pdMS_TO_TICKS(500));
         }
     }
+
     hcn_log_info("tcp_client_recv_thread exit\n");
 
-    vTaskDelete(NULL);
     client_recv_task = NULL;
+    vTaskDelete(NULL);
 }
 
 void stop_tcp_client(void) {
@@ -594,19 +662,25 @@ void stop_tcp_client(void) {
         client_recv_task = NULL;
     }
 
+#if  0
     g_client_param.is_socket_connnected = false;
     g_client_param.socket_rx_pos = 0;
+#endif
+
     hcn_log_info("tcp client socket stop ok!\r\n");
 }
 
 void start_tcp_client(void) {
     ota_parse_init();
-    socket_init();
+    if (socket_init() < 0) {
+        hcn_log_error("tcp client socket init fail.\n");
+        return;
+    }
 
     if (client_send_task == NULL) {
         if (xTaskCreate(tcp_client_send_thread, "tcp_client_send_thread",
                         configMINIMAL_STACK_SIZE*4 ,
-                        NULL, configMAX_PRIORITIES / 3 + 1,
+                        NULL, configMAX_PRIORITIES / 3 + 3,
                         &client_send_task) != pdPASS) {
             hcn_log_error("create tcp client send task fail.\n");
             return;
@@ -616,10 +690,12 @@ void start_tcp_client(void) {
     if (client_recv_task == NULL) {
         if (xTaskCreate(tcp_client_recv_thread, "tcp_client_recv_thread",
                         configMINIMAL_STACK_SIZE*4,
-                        NULL, configMAX_PRIORITIES / 3 + 2,
+                        NULL, configMAX_PRIORITIES / 3 + 3,
                         &client_recv_task) != pdPASS) {
             hcn_log_error("create tcp client recv task fail.\n");
             return;
         }
     }
 }
+
+

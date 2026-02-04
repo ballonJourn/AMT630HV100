@@ -28,6 +28,7 @@ void stop_tcp_client(void);
 uint32_t ota_calc_crc32(uint8_t *data, uint32_t len);
 tcp_ota_state get_ota_state(void);
 void set_ota_state(tcp_ota_state state);
+int send_file_recv_state_ack(uint16_t file_len);
 
 #ifdef __cplusplus
 }
