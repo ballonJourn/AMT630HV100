@@ -29,6 +29,13 @@
 #include "storage_param1/hcn_usr_param.h"
 #include "board.h"
 
+typedef struct {
+    bool amp_enabled;         ///< 功放使能
+    bool start_auto_off_timer; ///< 开启定时器
+    uint32_t last_play_time; ///< 上次播放时间
+    uint32_t auto_off_delay; ///< 自动延迟关闭时间
+} audio_ctrl_t;
+
 //#define BT_STR_DEBUG 
 #define DOWNLOAD_TIMER_PERIOD_MS   (3000)
 #define BT_TASK_QUEUE_LENGTH       (10)
@@ -44,6 +51,8 @@ static char g_bt_version[32] = {0};
 static int g_pb_count = 0;
 static uint32_t last_switch_tick = 0;
 static bool is_get_mac_addr = false;
+
+static audio_ctrl_t audio_ctrl = {false, false, 0, 120000};
 
 static int bt_send_cmd(const char *buff) {
     char buffer[UART_BT_SEND_BUF_LEN] = {0};
@@ -90,6 +99,61 @@ void hcn_bt_download_book() {
         snprintf(buff, sizeof(buff), "AT+PBDOWN=1,%d", BT_PHONE_BOOK_MAX_NUM);
         bt_send_cmd(buff);
         timer = xTaskGetTickCount();
+    }
+}
+
+static void stop_audio(void) {
+    vTaskDelay(pdMS_TO_TICKS(20));
+    hcn_log_info("Music stop play....\r\n");
+    aw_pa_stop();
+}
+
+static void open_audio(void) {
+    if (audio_ctrl.amp_enabled) {
+        audio_ctrl.start_auto_off_timer = false;
+        hcn_log_info("Audio dirver already success!\r\n");
+        return;
+    }
+
+    int ret = -1;
+    uint8_t try_times = 2;
+    do {
+        vTaskDelay(pdMS_TO_TICKS(200));
+        aw_pa_stop();
+        hcn_log_info("Music start play....\r\n");
+        vTaskDelay(pdMS_TO_TICKS(100));
+        ret = aw_pa_start();
+        if (ret == 0) {
+            hcn_log_info("Open audio dirver success!\r\n");
+            audio_ctrl.amp_enabled = true;
+            audio_ctrl.start_auto_off_timer = false;
+        } else {
+            hcn_log_error("Open audio driver failed, try times = %d\r\n", try_times);
+        }
+        try_times--;
+    } while ((try_times > 0 ) && (ret != 0));
+}
+   
+static void start_audio_timer(void) {
+    if (!audio_ctrl.start_auto_off_timer) {
+        audio_ctrl.start_auto_off_timer = true;
+        audio_ctrl.last_play_time = xTaskGetTickCount();
+    }   
+}
+
+static void stop_audio_timer(void) {
+    audio_ctrl.start_auto_off_timer = false;
+}
+
+void amp_off_timer_callback(void) {
+    if (audio_ctrl.start_auto_off_timer) {
+        if ((xTaskGetTickCount() - audio_ctrl.last_play_time >= \
+            audio_ctrl.auto_off_delay) && audio_ctrl.amp_enabled) {
+            audio_ctrl.start_auto_off_timer = false;
+            hcn_log_info("audio timer timeout, will stop audio...\r\n");
+            stop_audio();
+            audio_ctrl.amp_enabled = false;
+        }
     }
 }
 
@@ -378,6 +442,13 @@ static void on_bt_hfp_state_proc(char (*state)[TEXT_PARAM_LEN],
             }
             
             clean_bt_data_info();
+
+            if (audio_ctrl.amp_enabled) {
+                audio_ctrl.amp_enabled = false;
+                stop_audio_timer();
+                hcn_log_info("BT disconnect, will stop audio..\r\n");
+                stop_audio();
+            }
         }
     }
     
@@ -626,6 +697,9 @@ static void on_bt_str_parse(char *at_str) {
         music_info.play_state = atoi(prama_data);
         hcn_log_info("\r\naudio paly state:%d\r\n", music_info.play_state);
         if (music_info.play_state == BT_MUSIC_PLAY_STATE_PLAYING) {
+#if 1
+            open_audio();
+#else
             int ret = -1;
             uint8_t try_times = 2;
             do {
@@ -641,11 +715,15 @@ static void on_bt_str_parse(char *at_str) {
                 }
                 try_times--;
             } while ((try_times > 0 ) && (ret != 0));
+#endif
         } else if (music_info.play_state == \
                     BT_MUSIC_PLAY_STATE_PAUSED) {
-            vTaskDelay(pdMS_TO_TICKS(20));
-            hcn_log_info("Music stop play....\r\n");
-            aw_pa_stop();
+
+#if 1
+            start_audio_timer();         
+#else
+            stop_audio();            
+#endif
         }
     }  else if (strstr(cmd_str, "+COVERART")) {
         int cover_state = atoi(prama_data);

@@ -111,6 +111,7 @@ static void test_odo_data(void) {
 #endif
 
 extern void ota_mcu_process(void);
+extern void amp_off_timer_callback(void);
 static void common_io_thread(void *param) {
     light_gpio_init(VEHICLE_THREAD_PERIOD);
 
@@ -119,6 +120,7 @@ static void common_io_thread(void *param) {
         scan_frame_light();
         wifi_mode_switching();
         ota_mcu_process();
+        amp_off_timer_callback();
     }
 }
 
