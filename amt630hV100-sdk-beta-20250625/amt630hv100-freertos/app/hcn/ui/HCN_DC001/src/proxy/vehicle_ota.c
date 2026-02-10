@@ -7,7 +7,7 @@ bool vehicle_get_uptate_state()
     update_info_t * update_info = get_current_update_info();
     if (update_info)
     {
-        if (update_info->type <= UPDATE_OTA)
+        if (update_info->type <= UPDATE_OTA && update_info->type != UPDATE_OTA)
             return update_info->type == UPDATE_NONE ? false : true ;
     }
     return false ;

@@ -16,6 +16,10 @@ static ret_t timer_refresh_100_ms(const timer_info_t *info) ;
 
 static ret_t on_device_page_changed(void* ctx, event_t* e) ;
 
+static bool initInfo = false ;
+static int32_t ota_state = 0 ;
+
+static update_info_t update_info = {0};
 
 ret_t device_init(widget_t *win) 
 {
@@ -54,6 +58,11 @@ static ret_t on_device_page_changed(void* ctx, event_t* e)
             printf("on_device_page_changed timer_remove successed\n");
         }
         vehicle_set_ota_page_state(2);
+
+        initInfo = false ;
+        ota_state = 0 ;
+        memset(&update_info , 0x00 , sizeof(update_info)) ;
+
         // memset(&device_info , 0x00 , sizeof(device_info)) ;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
@@ -70,9 +79,8 @@ static ret_t on_device_page_changed(void* ctx, event_t* e)
 static ret_t timer_refresh_100_ms(const timer_info_t *info)
 {
     (void)info ;
-
-    if (vehicle_get_mirror_url() )
-    // if(1)
+    //版本信息
+    if (vehicle_get_mirror_url() && !initInfo)
     {
         const char *tr_txt = locale_info_tr(locale_info(), vehicle_get_mirror_activate() ? "Activated" : "Inactive");
         device_refresh_info(DEVICE_UUID_STATUS ,tr_txt ) ;
@@ -98,11 +106,43 @@ static ret_t timer_refresh_100_ms(const timer_info_t *info)
         // device_refresh_info(veicle_get_data_mcu_ver());
         printf("device page info refresh successed \n") ;
 
-        timer_array[REFRESH_TIMER_100_MS] = 0 ;
-
-        return RET_REMOVE ;
+        initInfo = true ;
     }
     
+    //OTA信息
+    update_info_t *_update_info =  vehicle_get_uptate_info() ;
+    if (_update_info)
+    {
+        // if (_update_info->type == UPDATE_OTA)
+        {
+
+            if (_update_info->status != update_info.status)
+            {
+                device_refresh_state(_update_info->status) ;
+                update_info.status = _update_info->status ;
+            }
+            
+            if (_update_info->progress != update_info.progress)
+            {
+                device_refresh_bar(_update_info->progress) ;
+                update_info.progress =  _update_info->progress ;
+            }
+            
+            if (_update_info->error != update_info.error)
+            {
+                device_refresh_error(_update_info->error) ;
+                update_info.error = _update_info->error ;
+            }
+
+        }
+    }
+    
+    int _state = vehicle_get_ota_state() ;
+    if (_state != ota_state)
+    {
+        device_refresh_ota_state(_state) ;
+        ota_state = _state ;
+    }
     
     return RET_REPEAT ;
 }

@@ -4,7 +4,7 @@
 #include "proxy/vehicle_data.h"
 #include "dashboard_state/hcn_dev_state.h"
 
-#define SELF_CHECK_DURATION 2000 
+#define SELF_CHECK_DURATION 1200 
 #define SELF_CHECK_INTERVAL 50
 
 typedef struct {
@@ -50,7 +50,7 @@ static void handle_state_checking() {
 
     if (manager.check_count > max_check_count) {
         manager.state = CHECK_STATE_FINISHED;
-        printf("selfcheck end\n");
+        printf("selfcheck end elapsed time = %llu ms\n" , time_now_ms() - manager.start_tick);
         return ;
     }
 

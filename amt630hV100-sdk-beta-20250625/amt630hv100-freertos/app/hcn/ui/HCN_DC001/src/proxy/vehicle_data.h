@@ -38,6 +38,8 @@ int32_t vehicle_get_data_remain_battary();
 
 int32_t vehicle_get_data_current_display() ;
 
+int32_t vehicle_get_ota_state() ;
+
 const char* veicle_get_data_version();
 
 const char* veicle_get_data_mcu_ver();

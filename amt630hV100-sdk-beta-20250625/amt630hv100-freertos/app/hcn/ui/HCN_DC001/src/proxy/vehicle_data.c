@@ -153,3 +153,13 @@ void vehicle_set_ota_page_state(int32_t state)
     vehicle_set_data(VEH_ENTER_OTA_PAGE_STATE , state);
 #endif
 }
+
+
+int32_t vehicle_get_ota_state()
+{
+#if !ON_PC_CACLE
+    int32_t ota_state = vehicle_get_data(VEH_OTA_START_STATUS);
+    return ota_state ;
+#endif   
+    return 0 ;
+}
