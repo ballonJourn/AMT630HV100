@@ -98,7 +98,7 @@ static void printf_usr_param(usr_param_t * param) {
         printf("\r\nuuid:");
         for(int i = 0; i < 20; i++)
         {
-            printf("%d",param->carlink_uuid[i]);
+            printf("%c",param->carlink_uuid[i]);
         }
         printf("\r\n");
         printf("\r\n ...............usr param end......................\r\n");

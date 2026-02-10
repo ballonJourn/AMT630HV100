@@ -47,6 +47,8 @@ static TaskHandle_t mcu_update_task = NULL;
 static md5_context g_md5_ctx;
 static char hcn_mcu_full_ver[MCU_VER_MAX_LEN] = {"MCU-DC001-GD_24.11.13V0"};
 
+static bool is_recv_mcu_req = false;
+
 h_bool stop_mcu_update(void);
 h_bool start_mcu_update(void);
 
@@ -123,12 +125,19 @@ static h_bool send_soc_ready_2_mcu(void) {
 
 static h_bool send_exit_update_2_mcu(void) {
     meter_info_t *meter_info = get_hcn_info();
+    uint32_t mcu_len = 0;
+
     if (meter_info->mcu_update == 2) {
         meter_info->mcu_update = 0;
-        uint32_t mcu_len = 0;
         set_hcn_usr_param(HCN_PARAM_MCU_UPDATE_LEN, (void *)&mcu_len);
     } else {
         meter_info->mcu_update = 0;
+        if (get_hcn_usr_param(HCN_PARAM_MCU_UPDATE_LEN, &mcu_len)) {
+            if (mcu_len > 0) {
+                mcu_len = 0;
+                set_hcn_usr_param(HCN_PARAM_MCU_UPDATE_LEN, (void *)&mcu_len);
+            }
+        }
     }
 
     if (save_hcn_info() != 0) {
@@ -407,6 +416,7 @@ void parse_mcu_update_msg(uint8_t ack_code) {
             break;
 
         case ACK_MCU_IAP_IS_READY:
+             is_recv_mcu_req = true;       
             if (mcu_update.status.start_mcu_update 
                 && !mcu_update.status.mcu_req_start_mcu_update) {
                  mcu_ack_ready_msg();
@@ -708,8 +718,8 @@ static bool read_mcu_file_header(mcu_update_t *update, FF_FILE *file,
 }
 
 void mcu_req_update_init(uint8_t method, FF_FILE *mcu_file) {
-    if (!mcu_file) {
-        hcn_log_error("Hcn mcu req update file not open!\n");
+    if ((method == 1) && !mcu_file) {
+        hcn_log_error("Hcn mcu update file not open!\n");
         return;
     }
 
@@ -754,10 +764,96 @@ void mcu_req_update_init(uint8_t method, FF_FILE *mcu_file) {
                     }
                 }
             }
-        } 
+        } else if (mcu_update.file_info.update_type == OTA_UPDATE_MCU) {
+            uint32_t ota_mcu_size = 0;
+            uint32_t temp_data = 0;
+
+            if (!get_hcn_usr_param(HCN_PARAM_MCU_UPDATE_LEN, 
+                                &ota_mcu_size)) {
+                hcn_log_error("Get ota mcu image size failed!\r\n");
+                return;
+            }
+
+            if (ota_mcu_size == 0) {
+                hcn_log_error("Flash mcu code error, can not update!\r\n");
+                return;
+            }
+
+            ///< 头部0x30 + 尾部16字节md5
+            temp_data = 0x30 + 16; 
+            if (ota_mcu_size > temp_data &&  ota_mcu_size < MCU_OTA_FILE_SIZE) {
+                mcu_update.file_info.file_len = ota_mcu_size;
+                mcu_update.file_info.update_buff =
+                    (uint8_t *)pvPortMalloc(mcu_update.file_info.file_len);
+                if (mcu_update.file_info.update_buff) {
+                    sfud_flash *sflash = sfud_get_device(0);
+                    if (!sflash) {
+                        hcn_log_error("Get sfud flash device failed!\r\n");
+                        vPortFree(mcu_update.file_info.update_buff);
+                        mcu_update.file_info.update_buff = NULL;
+                        return;
+                    }
+
+                    uint32_t read_total_len = 0;
+                    uint32_t head_info_offset = FLASH_PRIV_TYPE_BYTE;
+                    if (!read_mcu_file_header(&mcu_update, NULL, 
+                                        MCU_FLASH_DATA, sflash)) {
+                        hcn_log_error("Ota read header error!\r\n");
+                        if (mcu_update.file_info.update_buff) {
+                            vPortFree(mcu_update.file_info.update_buff);
+                            mcu_update.file_info.update_buff = NULL;
+                        }
+                        return;
+                    }
+
+                    read_total_len += head_info_offset;
+
+                    uint32_t remain_size = 
+                        mcu_update.file_info.file_len - head_info_offset;
+                    uint32_t read_size = FLASH_PRIV_TYPE_BYTE;
+                    uint32_t offset = head_info_offset;
+
+                    while (remain_size > 0) {
+                        vTaskDelay(1);
+                        if (remain_size < FLASH_PRIV_TYPE_BYTE) {
+                            read_size = remain_size;
+                        }
+
+                        if (sfud_read(sflash, MCU_OTA_FILE_OFFSET + offset, 
+                            read_size, 
+                            (void *)&mcu_update.file_info.update_buff[offset]) 
+                            != SFUD_SUCCESS) {
+                            hcn_log_error("Ota read mcu update file from flash error!\r\n");   
+                            if (mcu_update.file_info.update_buff) {
+                                vPortFree(mcu_update.file_info.update_buff);
+                                mcu_update.file_info.update_buff = NULL;
+                            }
+                            return; 
+                        }
+
+                        offset += read_size;
+                        read_total_len += read_size;
+                        remain_size -= read_size;
+                    }
+
+                    if (read_total_len == mcu_update.file_info.file_len) {
+                        hcn_log_info("Hcn ota read mcu update file finish\r\n");
+                        goto md5_crc;
+                    } else {
+                        hcn_log_error("Ota read mcu update file length failed!\r\n");
+                        if (mcu_update.file_info.update_buff) {
+                            vPortFree(mcu_update.file_info.update_buff);
+                            mcu_update.file_info.update_buff = NULL;
+                        }
+                        return;
+                    }
+                }
+            }
+        }
     md5_crc:
         if (mcu_update_md5_crc() && 
-            (mcu_update.file_info.update_type == USB_UPDATE_MCU)) {
+            ((mcu_update.file_info.update_type == USB_UPDATE_MCU) || 
+            (mcu_update.file_info.update_type == OTA_UPDATE_MCU))) {
             ///< start mcu update 
             if (!mcu_update.file_info.save_data_buff) {
                 mcu_update.file_info.save_data_buff =
@@ -856,6 +952,11 @@ void mcu_update_init(uint8_t method, FF_FILE *mcu_file) {
             if (!get_hcn_usr_param(HCN_PARAM_MCU_UPDATE_LEN, 
                                 &ota_mcu_size)) {
                 hcn_log_error("Get ota mcu image size failed!\r\n");
+                return;
+            }
+
+            if (ota_mcu_size == 0) {
+                hcn_log_error("Flash mcu code error, can not update!\r\n");
                 return;
             }
 
@@ -990,9 +1091,13 @@ void ota_mcu_process(void) {
 
      if (get_check_self_state() == CHECK_SELF_STATE_SUCCESS) {
         meter_info_t *meter_info = get_hcn_info();
-        if (meter_info->mcu_update == 2 && ota_mcu_first) {
+        if (meter_info->mcu_update == 2 && ota_mcu_first && !is_recv_mcu_req) {
             ota_mcu_first = false;
             mcu_update_init(OTA_UPDATE_MCU, NULL);
+        } else if (meter_info->mcu_update == 2 && ota_mcu_first && is_recv_mcu_req) {
+            ota_mcu_first = false;
+            hcn_log_info("Flash update, recv mcu req....\r\n");
+            mcu_req_update_init(2, NULL);
         }
      }
 }
