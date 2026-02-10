@@ -632,7 +632,6 @@ static void on_bt_str_parse(char *at_str) {
                                     (uint32_t) g_bt_data.btSwitchState);
         }
 
-        hcn_log_info("[ouchunhua]real state:%d\r\n", g_bt_data.btSwitchState);
         if (g_bt_data.btSwitchState == 0) {
             if (g_bt_data.btConnected == 1) {
                 disconnect_all_remote_bt_dev();
