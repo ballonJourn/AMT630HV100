@@ -212,3 +212,19 @@ Enter the map without navigation</language>
   <language name="zh_CN">已激活</language>
   <language name="en_US">Activated</language>
 </string>
+<string name="OTA_state">
+  <language name="zh_CN">OTA状态：</language>
+  <language name="en_US">OTA State</language>
+</string>
+<string name="OTA_no_start">
+  <language name="zh_CN">关闭</language>
+  <language name="en_US">Close</language>
+</string>
+<string name="OTA_starting">
+  <language name="zh_CN">启动中</language>
+  <language name="en_US">Starting</language>
+</string>
+<string name="OTA_started">
+  <language name="zh_CN">启动成功</language>
+  <language name="en_US">Startup Successful</language>
+</string>

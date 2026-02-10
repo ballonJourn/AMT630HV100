@@ -8,6 +8,7 @@
     <label name="label" x="101" y="277" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="SN："/>
     <label name="label" x="101" y="332" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="Version："/>
     <label name="label" x="101" y="388" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="CarBit："/>
+    <label name="label" x="101" y="439" w="170" h="31" style:normal:font_size="25" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="OTA_state"/>
     <label name="uuid_status" x="625" y="51" w="61" h="36" style:normal:font_size="20" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
     <label name="uuid" x="439" y="51" w="169" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF"/>
     <label name="bluetooth" x="516" y="106" w="170" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
@@ -16,5 +17,11 @@
     <label name="sn" x="516" y="274" w="170" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
     <label name="version" x="516" y="329" w="170" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
     <label name="carBit" x="516" y="385" w="170" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="ota_state" x="516" y="435" w="170" h="36" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#14FF3C" tr_text="OTA_no_start"/>
+  </view>
+  <view name="view1" x="274" y="132" w="253" h="208" style:normal:bg_color="#00000000">
+    <progress_circle name="progress_circle" x="46" y="39" w="158" h="128" start_angle="-90" style:normal:text_color="#FFFFFF" format="%d%%" style:normal:bg_color="#DBDBDB" line_width="10" style:normal:font_size="30" value="0"/>
+    <label name="lab_state" x="44" y="1" w="160" h="27" style:normal:font_size="22" style:normal:text_color="#FFFFFF" tr_text="null"/>
+    <label name="lab_error" x="46" y="169" w="160" h="28" style:normal:font_size="22" style:normal:text_color="#FFFFFF" tr_text="null"/>
   </view>
 </window>
