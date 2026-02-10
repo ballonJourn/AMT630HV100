@@ -276,13 +276,6 @@ static void write_update_data(uint8_t file_type, int len) {
 
             ota_param.ota_write_size += len;
             ota_files[file_type - 1].ota_write_offset += len;
-#if 0
-            uint16_t temp_len = 0;
-            temp_len = (int)len;
-            if (send_file_recv_state_ack(temp_len) <= 0) {
-                hcn_log_error("Send file recv state ack failed!\r\n");
-            }
-#endif
             send_update_status(HCN_MSG_OTA_STAUS, \
                 ota_param.ota_total_size, \
                 ota_param.ota_write_size, UPDATE_ERROR_NONE);
@@ -578,7 +571,6 @@ static void ota_parse_thread(void *param) {
             vPortFree(msg);
             msg = NULL;
         }
-        //vTaskDelay(pdMS_TO_TICKS(1));
     }   
 }
 
@@ -696,7 +688,8 @@ void ota_parse_reset(void) {
     write_flash_error = 0;
 
     //set_ota_state(TCP_SEND_DEVICE_INFO);
-
+    set_update_state_reset();
+    
     for (uint8_t i  = 0; i < OTA_ALL_FILE; i++) {
         if (ota_files[i].ota_file_buff) {
             vPortFree(ota_files[i].ota_file_buff);

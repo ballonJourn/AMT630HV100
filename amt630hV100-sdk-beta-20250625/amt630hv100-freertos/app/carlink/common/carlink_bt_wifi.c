@@ -728,6 +728,8 @@ static  void carlink_wifi_event_handler( WIFIEvent_t * xEvent )
 			printf("restart sta for ota\r\n");
 			extern void stop_sta_task(void);
 			stop_sta_task();
+			extern void set_update_state_reset(void);
+			set_update_state_reset();
 			vTaskDelay(pdMS_TO_TICKS(500));
 			extern int start_sta_init(void);
 			start_sta_init();
