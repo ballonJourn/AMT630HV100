@@ -217,7 +217,7 @@ static void uart_mcu_rx_thread(void *param) {
             continue;
         }
 
-        if ((uart_rx[0] != UART_MCU_MSG_HEAD_1) &&
+        if ((uart_rx[0] != UART_MCU_MSG_HEAD_1) ||
             (uart_rx[1] != UART_MCU_MSG_HEAD_2)) {
             memmove(uart_rx, uart_rx + 1, UART_MCU_MSG_MIN_LEN - 1);
             uart_rx_pos -= 1;
