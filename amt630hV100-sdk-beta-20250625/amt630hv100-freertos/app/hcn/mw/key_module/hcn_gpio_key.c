@@ -30,8 +30,8 @@
 ///< more than 2500 ms 
 #define GPIO_KEY_LONG_PRESS_TIME (2500)
 
-///< super long press time 10000ms(10s)
-#define GPIO_KEY_SUPER_LONG_PRESS_TIME (10000)
+///< super long press time 10000ms(8s)
+#define GPIO_KEY_SUPER_LONG_PRESS_TIME (8000)
 
 #define SCAN_KEY_DEFIBRATE_INDEX \
     (SCAN_KEY_DEFIBRATE_TIME / SCAN_KEY_THREAD_INTERVAL_PERIOD)
