@@ -82,10 +82,6 @@ static void on_update_process(update_type_e type, uint8_t error,
 void send_update_status(uint8_t msg_type, uint32_t total_size, 
                         uint32_t cur_off, uint8_t error) 
 {
-    if (msg_type == HCN_MSG_OTA_STAUS) {
-        return;
-    }
-    
     uint8_t percent = 0;
     if (total_size > 0) {
         percent = ((cur_off * 100) / total_size);
