@@ -67,7 +67,7 @@ static void save_unsaved_mileage(void) {
   int currentHundred = (int)(mileage_data.trip_mileage / 100 ) ;
   if(currentHundred != mileage_data.lastHundred)
   {
-    printf("saved = %.2f\n" ,mileage_data.trip_mileage / 1000);
+    //printf("saved = %.2f\n" ,mileage_data.trip_mileage / 1000);
     set_mileage_state(true) ;
     vehicle_save_odo_mileage();
     vehicle_save_mile_tripA(); 
