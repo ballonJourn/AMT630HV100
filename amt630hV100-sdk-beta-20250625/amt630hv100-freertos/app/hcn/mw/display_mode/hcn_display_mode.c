@@ -84,7 +84,6 @@ static void check_auto_healight(void) {
 
 static void check_display_mode(void) {
     uint8_t display_mode = 0;
-    int cur_display = 0;
 
     if (!get_recovery_usr_param()) {
         return;
@@ -95,32 +94,20 @@ static void check_display_mode(void) {
         return;
     }
 
-    cur_display = vehicle_get_data(VEH_CUR_DISPALY_MODE);
     if (display_mode == AUTO_MODE) {
-        if (display.sensor_level > 1) {
-            if (display.cur_display_mode != DAY_MODE) {
-                display.cur_display_mode = DAY_MODE;
-            }
-
-            if (cur_display == NIGHT_MODE) {
-                vehicle_set_data(VEH_CUR_DISPALY_MODE, 0);
-                hcn_log_info("Current display mode: Day %d\n",
-                       display.cur_display_mode);
-            }
-
-        } else if (display.sensor_level <= 1) {
-            if (display.cur_display_mode != NIGHT_MODE) {
-                display.cur_display_mode = NIGHT_MODE;
-            }
-
-            if (cur_display == DAY_MODE) {
-                vehicle_set_data(VEH_CUR_DISPALY_MODE, 1);
-                hcn_log_info("Current display mode: Night %d\n",
-                       display.cur_display_mode);
-            }
+        int target_display = display.sensor_level > 1 ? DAY_MODE : NIGHT_MODE;
+        if (display.cur_display_mode != target_display) {
+            display.cur_display_mode = target_display;
+            vehicle_set_data(VEH_CUR_DISPALY_MODE, display.cur_display_mode);
+            hcn_log_info("Current display mode: %s %d\n",
+                   display.cur_display_mode == DAY_MODE ? "Day" : "Night",
+                   display.cur_display_mode);
         }
-    } else if (display.cur_display_mode != cur_display) {
-        display.cur_display_mode = cur_display;
+    } else {
+        if (display.cur_display_mode != display_mode) {
+            display.cur_display_mode = display_mode;
+            vehicle_set_data(VEH_CUR_DISPALY_MODE, display.cur_display_mode);
+        }
     }
 }
 
