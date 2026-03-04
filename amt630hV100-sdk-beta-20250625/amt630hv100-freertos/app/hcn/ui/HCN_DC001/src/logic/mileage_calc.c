@@ -29,6 +29,8 @@ typedef struct {
   int speed_count;
   double unsaved_odo_distance;
   bool is_read;
+
+  int lastHundred  ; 
 } MileageData;
 
 static MileageData mileage_data = {0};
@@ -61,12 +63,17 @@ static void check_and_reset_trip(void) {
 }
 
 static void save_unsaved_mileage(void) {
-  if (mileage_data.unsaved_odo_distance >= SAVE_ODO_THRESHOLD) {
+
+  int currentHundred = (int)(mileage_data.trip_mileage / 100 ) ;
+  if(currentHundred != mileage_data.lastHundred)
+  {
+    printf("saved = %.2f\n" ,mileage_data.trip_mileage / 1000);
     set_mileage_state(true) ;
     vehicle_save_odo_mileage();
     vehicle_save_mile_tripA(); 
-    mileage_data.unsaved_odo_distance -= SAVE_ODO_THRESHOLD;
+    mileage_data.lastHundred = currentHundred ;
   }
+  
 }
 
 static void process_full_speed_array(void) {
@@ -79,10 +86,13 @@ static void process_full_speed_array(void) {
   vehicle_set_mile_odo(mileage_data.odo_mileage);
   vehicle_set_mile_tripA(mileage_data.trip_mileage);
   vehicle_set_mile_once(mileage_data.odo_once);
+
+  // printf("trip_mileage = %.2f\n" , (float)(mileage_data.trip_mileage / 1000 ));
+
   check_and_reset_trip();
   save_unsaved_mileage();  //保存数据
-  // printf("mileage_data = %.2f \n" ,mileage_data.odo_mileage);
-}
+
+} 
 
 static void calc_task(void *param) {
   printf("calc_task\n");
@@ -113,6 +123,7 @@ void mileage_calc_init(void) {
 
 void mileage_clear_trip() {
   mileage_data.trip_mileage = 0.0;
+  mileage_data.lastHundred = 0 ;
   vehicle_set_mile_tripA(mileage_data.trip_mileage);
   global_refresh_mileage();
   vehicle_save_mile_tripA(); 

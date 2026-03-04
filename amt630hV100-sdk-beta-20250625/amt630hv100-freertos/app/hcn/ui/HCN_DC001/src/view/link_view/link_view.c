@@ -154,7 +154,7 @@ ret_t link_refresh_electrical(uint32_t mileage)
         {
             widget_set_style_str(link_view_widget[LINK_VIEW_ELEC_BAR] , STYLE_ID_FG_COLOR , color_buff[_color]) ;
             current_color = _color ;
-            printf("elelctrical color changed\n") ;
+            // printf("elelctrical color changed\n") ;
         }
         progress_bar_set_value(link_view_widget[LINK_VIEW_ELEC_BAR] , perent) ;
     

@@ -50,7 +50,7 @@ ret_t home_refresh_electrical(uint32_t mileage)
         {
             widget_set_style_str(home_elec_widget[ELECT_BAR] , STYLE_ID_FG_COLOR , color_buff[_color]) ;
             current_color = _color ;
-            printf("elelctrical color changed\n") ;
+            // printf("elelctrical color changed\n") ;
         }
     
     }

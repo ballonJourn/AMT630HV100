@@ -98,7 +98,7 @@
             <view name="bt_connected" x="53" y="38" w="201" h="214" visible="false">
               <image name="phone_state_img" x="36" y="57" w="100" h="100" draw_type="default" image="icon_answer"/>
               <rich_text name="phone_tips" x="0" y="0" w="179" h="57" style:normal:font_size="24" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
-              <label name="phone_num" x="0" y="175" w="179" h="39" style:normal:font_size="28" text="137 9611 2548"/>
+              <hscroll_label name="phone_num" x="0" y="175" w="179" h="39" only_focus="true" style:normal:font_size="28" style:normal:text_align_h="center" ellipses="true" text="137 9611 2548 "/>
             </view>
             <view name="bt_no_connected" x="53" y="38" w="201" h="214" visible="true">
               <image name="image3" x="31" y="57" w="100" h="100" draw_type="default" image="icon_call"/>

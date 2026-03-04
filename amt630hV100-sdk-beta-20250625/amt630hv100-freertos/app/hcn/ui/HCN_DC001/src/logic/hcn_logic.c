@@ -139,6 +139,10 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
             display_value = _value ;
         }
     }
+    else if(display_value != 0xFF)
+    {
+        display_value = 0xFF ;
+    }
     
     //小窗口时间
     uint64_t interval  = time_now_s() - time_start;
