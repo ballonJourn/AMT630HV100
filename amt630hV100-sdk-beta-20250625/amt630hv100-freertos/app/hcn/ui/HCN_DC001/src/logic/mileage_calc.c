@@ -102,6 +102,7 @@ static void calc_task(void *param) {
   mileage_data.trip_mileage = vehicle_get_mile_tripA();
   mileage_data.is_read      = true;
   mileage_data.odo_once     = 0 ;
+  mileage_data.lastHundred  = (int)(mileage_data.trip_mileage / 100) ;
   for (;;) {
     vTaskDelayUntil(&xLastWakeTime, SPEED_INTERVAL);
 
