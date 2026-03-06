@@ -112,7 +112,7 @@ void set_backlight_level(uint8_t level) {
 void init_auto_backlight(uint8_t level) {
     if (auto_led_level != level) {
         uint32_t level_value = get_dutu_cycle_value(level);
-        hal_pwm_config(HCN_LCD_PWM_CH, level_value, HCN_LCD_PWM_CH);
+        hal_pwm_config(HCN_LCD_PWM_CH, level_value, PWM_BACKLIGHT_PERION);
         hal_pwm_enable(HCN_LCD_PWM_CH);
 
         auto_backlight.target_led_value = level_value;
