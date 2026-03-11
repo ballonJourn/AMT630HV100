@@ -438,6 +438,8 @@ static void parse_file_steam(uint8_t *msg) {
                 write_update_data(file_type, ota_param.ota_cur_rx_size);
                 ota_param.ota_cur_rx_size = 0;
                 hcn_log_info("ota write file success:%d\r\n", file_type);
+            } else {
+                hcn_log_info("ota write file success:%d\r\n", file_type);
             }
 
             if (ota_param.ota_total_size == ota_param.ota_write_size) {
@@ -621,7 +623,10 @@ int ota_task_add(uint8_t *msg, uint16_t len) {
 int ota_parse_init(void) {
     if (ota_parse_queue) {
         hcn_log_info("ota parse already init!\n");
-        return 0;
+        if (!is_first_parse) {
+            is_first_parse = true;
+        }
+        return 0; 
     }
     
     if (ota_parse_queue == NULL) {

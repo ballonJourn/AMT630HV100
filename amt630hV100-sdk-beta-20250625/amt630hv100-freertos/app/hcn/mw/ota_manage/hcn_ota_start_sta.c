@@ -161,7 +161,6 @@ static void ota_wifi_task_proc(void *param) {
 	hcn_log_info("ota ssid:%s pwd:%s\r\n", hcn_get_ota_ssid(), hcn_get_ota_ap_pwd());
 	
 	start_sta_ota_proc(hcn_get_ota_ssid(), hcn_get_ota_ap_pwd(), 1);
-	//start_sta_ota_proc("nova 6 (5G)", "09876543", 1);
 
 	if (wifi_usr == WIFI_USER_OTA) {
 		hcn_log_info("start tcp client\r\n");
