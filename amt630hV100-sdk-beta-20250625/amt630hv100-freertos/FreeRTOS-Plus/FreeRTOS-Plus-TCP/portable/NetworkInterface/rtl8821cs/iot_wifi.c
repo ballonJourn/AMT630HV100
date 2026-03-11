@@ -690,14 +690,6 @@ static const uint8_t ucIPAddressAp[4] = {192, 168, 13, 1};
 #endif
 WIFIDeviceMode_t g_current_mode = eWiFiModeNotSupported;
 
-WIFIDeviceMode_t get_current_wifi_mode(void) {
-	return g_current_mode;
-}
-
-void set_current_wifi_mode(WIFIDeviceMode_t mode) {
-	g_current_mode = mode;
-}
-
 int wifi_initialize(WIFIDeviceMode_t mode)
 {
 	WIFIReturnCode_t xWifiStatus;
@@ -1146,11 +1138,14 @@ int start_sta_proc(const char* ssid, const char* passwd, char need_passwd)
 	 WIFI_SetMode(eWiFiModeStation);
 	 printf("Current mode is not sta, so reboot wifi\r\n");
         WIFI_Off();
+	 printf("wifi off start....\r\n");
     	  vTaskDelay(pdMS_TO_TICKS(2000));
-    }
-    
-    xWifiStatus = WIFI_On();
+		  	 printf("wifi off end....\r\n");
 
+    }
+    printf("wifi on start....\r\n");
+    xWifiStatus = WIFI_On();
+	printf("wifi on end....\r\n");
     if( xWifiStatus == eWiFiSuccess ) {
         printf("WiFi module initialized.\r\n");
     } else {
