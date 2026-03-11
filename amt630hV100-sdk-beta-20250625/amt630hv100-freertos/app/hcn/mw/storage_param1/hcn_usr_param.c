@@ -824,4 +824,10 @@ uint8_t get_system_log(void) {
     }
 }
 
+void clean_eeprom_operate(void) {
+    printf("Clear eeprom operate...\r\n");
+    maintain_info_t maintence_temp;
+    memset(&maintence_temp, 0, sizeof(maintain_info_t));
+}
+
 #endif //HCN_NOR_FLASH_PARAM_ENABLE

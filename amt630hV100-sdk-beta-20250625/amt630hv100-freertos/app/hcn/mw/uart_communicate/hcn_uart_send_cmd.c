@@ -297,4 +297,22 @@ int send_mcu_request_trip(uint8_t type) {
     return -1;
 }
 
+int send_mcu_clear_eeprom(void) {
+    hcn_mcu_msg_t *msg = uart_alloc_msg();
+    if (msg != NULL) {
+        msg->buffer[2] = 0x00;
+        msg->buffer[3] = 0x01;
+        msg->buffer[4] = (UART_MCU_CMD_CLAER_EEPROM >> 8) & 0xff;
+        msg->buffer[5] = (UART_MCU_CMD_CLAER_EEPROM & 0xff);
+        msg->buffer[6] = 0x00;
+        msg->buffer[7] = 0x01;
+        msg->buffer[8] = 0x00;
+        msg->buffer[9] = uart_mcu_calc_crc(msg->buffer);
+        msg->buffer[10] = UART_MCU_MSG_TAIL;
+        return send_mcu_msg(msg);
+    }
+    
+    return -1;
+}
+
 #endif

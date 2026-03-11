@@ -135,6 +135,13 @@ int send_mcu_set_trip_b(uint32_t trip_b);
  */
 int send_mcu_request_trip(uint8_t type);
 
+/**
+ * @brief  清除eeprom数据
+ * @param  none
+ * @return 0:success -1:failed
+ */
+int send_mcu_clear_eeprom(void);
+
 #endif
 
 #ifdef __cplusplus

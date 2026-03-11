@@ -27,6 +27,8 @@
 #include "utils/hcn_utils.h"
 #include "vehicle_param/vehicle_param.h"
 #include "dashboard_state/hcn_dev_state.h"
+#include "storage_param2/hcn_mile_param.h"
+#include "uart_communicate/hcn_uart_send_cmd.h"
 
 //#define CAN_RX_DEBUG
 #define CAN_RX_TIMEOUT_INTERVAL    (1000)
@@ -97,6 +99,26 @@ static void timeout_clear_can_data(void) {
             vehicle_set_data(VEH_LIGHT_ABS, 1);
         }
     }
+}
+
+#define CRC8_MAGIC_NUM (0x1D)
+
+static uint8_t can_j1850_crc8(const uint8_t *data, uint8_t length) {
+    uint8_t crc = 0xFF; 
+    for (uint8_t i = 0; i < length; i++) {
+        crc ^= data[i]; 
+        for (uint8_t j = 0; j < 8; j++) 
+	    {
+	        if (crc & 0x80) { 
+	            crc = (crc << 1) ^ CRC8_MAGIC_NUM; 
+	        } else {
+	            crc <<= 1; 
+	        }
+	    }
+        crc &= 0xFF; 
+    }
+	crc ^= 0xFF;
+    return crc; 
 }
 
 static int parse_can_msg_110_msg(uint8_t *buf, uint8_t size) {
@@ -260,8 +282,72 @@ static int parse_can_msg_12b_msg(uint8_t *buf, uint8_t size) {
     return 0;
 }
 
+static int parse_can_msg_776_msg(uint8_t *buf, uint8_t size) {
+    if (get_check_self_state() < CHECK_SELF_STATE_SUCCESS) {
+        return 0;
+    }
+    
+    if ((buf == NULL) || (size < 8)) {
+        hcn_log_error("can_ecu_776 dlc[%d] or msg buff err!\r\n",size);
+        return -1;
+    }
+
+    uint8_t crc_chceck;
+    static uint8_t rx_cnt = 0;
+	static uint8_t rx_buf[8] = {0};
+#if 0
+     hcn_hex_config_data_print("can", "recv(0x):", buf, 8);   
+#endif
+
+    crc_chceck = can_j1850_crc8(buf, 7);
+    if (crc_chceck != buf[7]) {
+        hcn_log_error("can_ecu_776 Error checksum = 0x%x, buf[7] = 0x%x !\r\n", \
+            crc_chceck, buf[7]);
+        return -1;
+    }
+
+    if (rx_cnt == 0) {
+		memcpy(rx_buf, buf, 8);
+		rx_cnt++;
+	} else if (rx_cnt == 1) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else{
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	} else if(rx_cnt == 2) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else {
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	}
+
+	if (rx_cnt == 3) {
+		rx_cnt = 0;
+		uint32_t trip_a;
+        uint32_t tmp = 0;
+
+        if (!get_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &tmp)) {
+            hcn_log_error("Get HCN_MILE_PARAM_TRIP_A error!\r\n");
+            return -1;
+        }
+
+        trip_a = (((uint32_t) buf[0]) << 24 ) |  (((uint32_t) buf[1]) << 16 ) | \
+                (((uint32_t) buf[2]) << 8 ) |(((uint32_t) buf[3]) << 0);
+		if (trip_a != tmp) {
+            set_hcn_mile_param(HCN_MILE_PARAM_TRIP_A, &trip_a);
+            vehicle_set_data(VEH_MILEAGE_CHANGE_MSG, 1);
+		}
+	}
+
+	return 0;
+}
+
 static int parse_can_msg_777_msg(uint8_t *buf, uint8_t size) {
-    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+    if (get_check_self_state() < CHECK_SELF_STATE_SUCCESS) {
         return 0;
     }
     
@@ -270,11 +356,62 @@ static int parse_can_msg_777_msg(uint8_t *buf, uint8_t size) {
         return -1;
     }
 
-    return 0;
+    uint8_t crc_chceck;
+    static uint8_t rx_cnt = 0;
+	static uint8_t rx_buf[8] = {0};
+#if 0
+     hcn_hex_config_data_print("can", "recv(0x):", buf, 8);   
+#endif
+
+    crc_chceck = can_j1850_crc8(buf, 7);
+    if (crc_chceck != buf[7]) {
+        hcn_log_error("can_ecu_777 Error checksum = 0x%x, buf[7] = 0x%x !\r\n", \
+                    crc_chceck, buf[7]);
+        return -1;
+    }
+
+    if (rx_cnt == 0) {
+		memcpy(rx_buf, buf, 8);
+		rx_cnt++;
+	} else if (rx_cnt == 1) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else{
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	} else if(rx_cnt == 2) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else {
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	}
+
+	if (rx_cnt == 3) {
+		rx_cnt = 0;
+		uint32_t trip_b;
+        uint32_t tmp = 0;
+
+        if (!get_hcn_mile_param(HCN_MILE_PARAM_TRIP_B, &tmp)) {
+            hcn_log_error("Get HCN_MILE_PARAM_TRIP_B error!\r\n");
+            return -1;
+        }
+
+        trip_b = (((uint32_t) buf[0]) << 24 ) |  (((uint32_t) buf[1]) << 16 ) | \
+                (((uint32_t) buf[2]) << 8 ) |(((uint32_t) buf[3]) << 0);
+		if (trip_b != tmp) {
+            set_hcn_mile_param(HCN_MILE_PARAM_TRIP_B, &trip_b);
+            vehicle_set_data(VEH_MILEAGE_CHANGE_MSG, 2);
+		}
+	}
+
+	return 0;
 }
 
 static int parse_can_msg_778_msg(uint8_t *buf, uint8_t size) {
-    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+   if (get_check_self_state() < CHECK_SELF_STATE_SUCCESS) {
         return 0;
     }
     
@@ -283,22 +420,115 @@ static int parse_can_msg_778_msg(uint8_t *buf, uint8_t size) {
         return -1;
     }
 
-    return 0;
+    uint8_t crc_chceck;
+    static uint8_t rx_cnt = 0;
+	static uint8_t rx_buf[8] = {0};
+#if 0
+     hcn_hex_config_data_print("can", "recv(0x):", buf, 8);   
+#endif
+
+    crc_chceck = can_j1850_crc8(buf, 7);
+    if (crc_chceck != buf[7]) {
+        hcn_log_error("can_ecu_778 Error checksum = 0x%x, buf[7] = 0x%x !\r\n", \
+                    crc_chceck, buf[7]);
+        return -1;
+    }
+
+    if (rx_cnt == 0) {
+		memcpy(rx_buf, buf, 8);
+		rx_cnt++;
+	} else if (rx_cnt == 1) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else{
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	} else if(rx_cnt == 2) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else {
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	}
+
+	if (rx_cnt == 3) {
+		rx_cnt = 0;
+		uint32_t odo;
+        uint32_t tmp = 0;
+
+        if (!get_hcn_mile_param(HCN_MILE_PARAM_ODO, &tmp)) {
+            hcn_log_error("Get HCN_MILE_PARAM_ODO error!\r\n");
+            return -1;
+        }
+
+        odo = (((uint32_t) buf[0]) << 24 ) |  (((uint32_t) buf[1]) << 16 ) | \
+                (((uint32_t) buf[2]) << 8 ) |(((uint32_t) buf[3]) << 0);
+		if (odo != tmp) {
+            set_hcn_mile_param(HCN_MILE_PARAM_ODO, &odo);
+            vehicle_set_data(VEH_MILEAGE_CHANGE_MSG, 3);
+		}
+	}
+
+	return 0;
 }
 
 static int parse_can_msg_779_msg(uint8_t *buf, uint8_t size) {
-    if (get_check_self_state() < CHECK_SELF_STATE_START) {
+    if (get_check_self_state() < CHECK_SELF_STATE_SUCCESS) {
         return 0;
     }
     
     if ((buf == NULL) || (size < 8)) {
-        hcn_log_error("can_ecu_778 dlc[%d] or msg buff err!\r\n",size);
+        hcn_log_error("can_ecu_779 dlc[%d] or msg buff err!\r\n",size);
         return -1;
     }
-    
-    hcn_log_info("can_ecu_779 data recv ok!\r\n");
 
-    return 0;
+    uint8_t crc_chceck;
+    static uint8_t rx_cnt = 0;
+	static uint8_t rx_buf[8] = {0};
+#if 0
+     hcn_hex_config_data_print("can", "recv(0x):", buf, 8);   
+#endif
+
+    crc_chceck = can_j1850_crc8(buf, 7);
+    if (crc_chceck != buf[7]) {
+        hcn_log_error("can_ecu_779 Error checksum = 0x%x, buf[7] = 0x%x !\r\n", \
+                    crc_chceck, buf[7]);
+        return -1;
+    }
+
+    if (rx_cnt == 0) {
+		memcpy(rx_buf, buf, 8);
+		rx_cnt++;
+	} else if (rx_cnt == 1) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else{
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	} else if(rx_cnt == 2) {
+		if (memcmp(rx_buf, buf, 8) == 0) {
+			rx_cnt++;
+		} else {
+			memcpy(rx_buf, buf, 8);
+			rx_cnt = 1;
+		}
+	}
+
+	if (rx_cnt == 3) {
+		if ((buf[0] == 0xa1) && (buf[1] == 0xb1) 
+            && (buf[2] == 0xc1) && (buf[3] == 0xd1) 
+            && (buf[4] == 0xe1) && (buf[5] == 0xf1) 
+            && (buf[6] == 0xee)) {
+            extern void clean_eeprom_operate(void);
+            //send_mcu_clear_eeprom();
+            printf("clear eerpom, os will reboot...\r\n"); 
+        }
+	}
+
+	return 0;
 }
 
 bool can_get_communication_status(void) {
@@ -339,6 +569,10 @@ static void can_recv_msg_process(CanMsg *pMsg) {
             parse_can_msg_12b_msg(pMsg->Data, pMsg->DLC);
             break;
 
+        case 0x776:
+            parse_can_msg_776_msg(pMsg->Data, pMsg->DLC);
+            break;
+            
         case 0x777:
             parse_can_msg_777_msg(pMsg->Data, pMsg->DLC);
             break;
