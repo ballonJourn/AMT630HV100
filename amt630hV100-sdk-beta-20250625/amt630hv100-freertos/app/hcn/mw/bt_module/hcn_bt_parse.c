@@ -257,9 +257,11 @@ const char* hcn_bt_get_name() {
     }
 }
 
+#if  0
 static void disconnect_all_remote_bt_dev(void) {
     bt_send_cmd("AT+DSCA");
 }
+#endif
 
 const char *hcn_get_bt_version(void) {
     return g_bt_version;
@@ -634,7 +636,7 @@ static void on_bt_str_parse(char *at_str) {
 
         if (g_bt_data.btSwitchState == 0) {
             if (g_bt_data.btConnected == 1) {
-                disconnect_all_remote_bt_dev();
+                //disconnect_all_remote_bt_dev();
                 hcn_log_info("disconnect remote bt dev!\r\n");
                 ///< 断开所以蓝牙连接
                 memset(music_info.lyrics, 0, sizeof(music_info.lyrics));
