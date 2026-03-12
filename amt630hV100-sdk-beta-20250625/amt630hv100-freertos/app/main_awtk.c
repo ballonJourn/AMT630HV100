@@ -777,7 +777,7 @@ static void usb_read_thread(void *para)
 			}
 			
 #ifdef HCN_OTA_UPDATE_ENABLE
-			if  (is_same_app) {
+			if (is_same_app || !fp) {
 				if (get_check_self_state()) {
 					FF_FILE *mcu_fp = ff_fopen("/usb/mcu_update.bin", "rb");
 					if (mcu_fp) {
