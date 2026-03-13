@@ -269,6 +269,7 @@ static void uart_mcu_parse_msg_process(uint8_t *data) {
                 ((data[data_start + 4] << 24) + (data[data_start + 5] << 16) +
                  (data[data_start + 6] << 8) + data[data_start + 7]);
             vehicle_set_data(VEH_MILEAGE_SUB_B, data_tmp);
+            hcn_log_info("trip b = %dm\r\b", data_tmp);
         } break;
 
         case UART_MCU_CMD_RPM_AND_SPEED: {
