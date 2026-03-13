@@ -221,6 +221,10 @@
     <normal/>
     <disable/>
   </style>
+  <style name="call_tips" text_color="#FFFFFF">
+    <normal bg_color="#000000B4"/>
+    <disable/>
+  </style>
   <style name="clock_option" font_size="80" text_color="#FFFFFF">
     <normal/>
     <selected bg_color="#0085A464" selected_text_color="#00000000"/>

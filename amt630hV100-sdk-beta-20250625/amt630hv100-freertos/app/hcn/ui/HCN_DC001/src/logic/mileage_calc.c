@@ -83,13 +83,11 @@ static void process_full_speed_array(void) {
   mileage_data.speed_count = 1;
   mileage_data.unsaved_odo_distance += distance;
   mileage_data.odo_once     += distance ;
+  check_and_reset_trip();
   vehicle_set_mile_odo(mileage_data.odo_mileage);
   vehicle_set_mile_tripA(mileage_data.trip_mileage);
   vehicle_set_mile_once(mileage_data.odo_once);
-
   // printf("trip_mileage = %.2f\n" , (float)(mileage_data.trip_mileage / 1000 ));
-
-  check_and_reset_trip();
   save_unsaved_mileage();  //保存数据
 
 } 
@@ -152,4 +150,17 @@ bool get_mileage_state()
 void set_mileage_state(bool state)
 {
   refresh_mileage = state ;
+}
+
+void on_mileage_changed()
+{
+  mileage_data.odo_mileage  = vehicle_get_mile_odo();
+  mileage_data.trip_mileage = vehicle_get_mile_tripA();
+  mileage_data.is_read      = true;
+  mileage_data.lastHundred  = -1;
+
+  check_and_reset_trip();
+  save_unsaved_mileage();
+  
+  return ;
 }

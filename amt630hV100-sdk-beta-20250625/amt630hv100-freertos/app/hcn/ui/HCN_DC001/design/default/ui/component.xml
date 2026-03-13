@@ -2,5 +2,5 @@
 <view name="call_aniamtor" x="174" y="-51" w="453" h="51" animation="opacity(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,from=0,to=255);move(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,x_from=178,x_to=178,y_from=-51,y_to=47);move(name=calling_tips,delay=800,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,x_from=178,x_to=178,y_from=47,y_to=40)">
   <image name="image2" x="38" y="7" w="40" h="40" draw_type="scale" image="call_huang"/>
   <image name="image7" x="367" y="8" w="40" h="40" draw_type="scale" image="call_pick"/>
-  <label name="call_pop_tips" x="99" y="0" w="251" h="28" style:normal:font_name="default_2" tr_text="call_pop_output"/>
+  <label name="call_pop_tips" x="99" y="0" w="251" h="28" style:normal:font_name="default_2" style="call_tips" style:normal:round_radius="20" tr_text="call_pop_output"/>
 </view>

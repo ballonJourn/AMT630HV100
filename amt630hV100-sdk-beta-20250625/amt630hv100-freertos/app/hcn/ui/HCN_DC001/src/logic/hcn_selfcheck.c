@@ -3,6 +3,7 @@
 #include "hcn_logic.h"
 #include "proxy/vehicle_data.h"
 #include "dashboard_state/hcn_dev_state.h"
+#include "mileage_calc.h"
 
 #define SELF_CHECK_DURATION 1200 
 #define SELF_CHECK_INTERVAL 50
@@ -79,6 +80,8 @@ static void handle_state_finished() {
     set_check_self_state(CHECK_SELF_STATE_SUCCESS) ;
 
     manager.state       = CHECK_STATE_FINISHED ;
+
+    mileage_calc_init();
 
     return ;
 }

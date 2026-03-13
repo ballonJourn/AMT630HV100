@@ -33,5 +33,6 @@ void vehicle_set_mile_tripB(double value) ;
 uint32_t vehicle_get_mile_once();
 void vehicle_set_mile_once(double value) ;
 
+int32_t vehicle_get_mile_changed() ;
 
 #endif

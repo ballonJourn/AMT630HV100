@@ -10,7 +10,7 @@ void mileage_clear_trip();
 void mileage_clear_odo();
 bool get_mileage_state();
 void set_mileage_state(bool state);
-
+void on_mileage_changed();
 #endif
 
 

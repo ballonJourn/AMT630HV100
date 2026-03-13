@@ -1,6 +1,7 @@
 #include "vehicle_mile.h"
 #include "vehicle_data.h"
 #include "storage_param2/hcn_mile_param.h"
+#include "vehicle_param/vehicle_param.h"
 #if !ON_PC_CACLE
 #include "log/hcn_log.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
@@ -120,3 +121,15 @@ void vehicle_save_odo_mileage(void)
 #endif
 } 
 
+int32_t vehicle_get_mile_changed()
+{
+#if !ON_PC_CACLE
+    uint32_t state = 0 ;
+    state = vehicle_get_data(VEH_MILEAGE_CHANGE_MSG);
+    if (state)
+        vehicle_set_data(VEH_MILEAGE_CHANGE_MSG , 0);
+    
+    return state;
+#endif
+    return  0 ;
+}
