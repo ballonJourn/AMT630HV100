@@ -760,16 +760,16 @@ static void usb_read_thread(void *para)
 			int ret = -1;
 			bool is_same_app = false;
 
-			fp = ff_fopen("/usb/update.bin", "rb");
-			if (fp) {
-				ff_fclose(fp);
-				ret = update_from_media("/usb", UPFILE_TYPE_WHOLE);
-			}
-
 			fp = ff_fopen("/usb/lnchemmc.bin", "rb");
 			if (fp) {
 				ff_fclose(fp);
 				update_from_media("/usb", UPFILE_TYPE_LNCHEMMC);
+			}
+
+			fp = ff_fopen("/usb/update.bin", "rb");
+			if (fp) {
+				ff_fclose(fp);
+				ret = update_from_media("/usb", UPFILE_TYPE_WHOLE);
 			}
 
 			if (ret == 1) {
