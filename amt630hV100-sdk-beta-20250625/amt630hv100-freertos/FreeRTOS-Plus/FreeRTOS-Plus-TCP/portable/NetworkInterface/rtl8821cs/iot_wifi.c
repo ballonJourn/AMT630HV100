@@ -92,6 +92,14 @@ exit:
 }
 /*-----------------------------------------------------------*/
 
+WIFIReturnCode_t WIFI_P2P_Stop(void) {
+	xSemaphoreTake(xWiFiSem, portMAX_DELAY );
+	cmd_wifi_p2p_stop(0, NULL);
+	wifi_started = false;
+	xSemaphoreGive(xWiFiSem);
+    return eWiFiSuccess;
+}
+
 WIFIReturnCode_t WIFI_Off( void )
 {
 	xSemaphoreTake(xWiFiSem, portMAX_DELAY );
