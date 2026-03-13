@@ -68,8 +68,6 @@ ret_t home_view_init(widget_t * win)
     // 自检
     selfcheck_init();
 
-    mileage_calc_init();
-
     //添加定时器
     home_timer_init();
 
@@ -197,6 +195,9 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
         set_mileage_state(false);
     }
 
+    if (vehicle_get_mile_changed() && (vehicle_get_data_speed() == 0 ) )
+        on_mileage_changed();
+    
     bluetooth_view_update();
 
     speed_view_update() ;
