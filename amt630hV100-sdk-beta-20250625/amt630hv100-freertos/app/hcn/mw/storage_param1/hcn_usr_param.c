@@ -828,6 +828,10 @@ void clean_eeprom_operate(void) {
     printf("Clear eeprom operate...\r\n");
     maintain_info_t maintence_temp;
     memset(&maintence_temp, 0, sizeof(maintain_info_t));
+    memcpy(&usr_param.maintain_info, &maintence_temp, sizeof(maintain_info_t));
+    if (save_hcn_usr_param() != 0) {
+        hcn_log_info("Clear eeprom save usr param failed!\r\n");
+    }
 }
 
 #endif //HCN_NOR_FLASH_PARAM_ENABLE

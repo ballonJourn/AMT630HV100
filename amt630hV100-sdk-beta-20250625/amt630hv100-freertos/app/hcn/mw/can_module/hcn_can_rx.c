@@ -523,8 +523,10 @@ static int parse_can_msg_779_msg(uint8_t *buf, uint8_t size) {
             && (buf[4] == 0xe1) && (buf[5] == 0xf1) 
             && (buf[6] == 0xee)) {
             extern void clean_eeprom_operate(void);
-            //send_mcu_clear_eeprom();
-            printf("clear eerpom, os will reboot...\r\n"); 
+            clean_eeprom_operate();
+            vTaskDelay(pdMS_TO_TICKS(1000));
+            send_mcu_clear_eeprom();
+            hcn_log_info("clear eerpom, os will reboot...\r\n"); 
         }
 	}
 
