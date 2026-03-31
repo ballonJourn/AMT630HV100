@@ -1,0 +1,56 @@
+Software License Agreement for HyperSnap-DX.
+
+This is a legal agreement between you and Hyperionics Technologies, Inc.  
+covering your use of HyperSnap-DX (the "Software").  Be sure to read the 
+following agreement before using the Software.  BY USING THE SOFTWARE 
+(REGARDLESS IF YOU HAVE REGISTERED THE SOFTWARE OR NOT), 
+YOU ARE AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT.
+IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT
+USE THE SOFTWARE AND DESTROY ALL COPIES IN YOUR POSSESSION.  
+
+The Software is owned by Hyperionics Technology, LLC and is protected by 
+United States copyright laws and international treaty provisions.  
+Therefore, you must treat the Software like any other copyrighted material 
+(e.  g., a book or musical recording).  Paying a single user license fee 
+allows you the right to use one copy of the Software on a single computer.  
+You may not network the Software or otherwise use it or make it available 
+for use on more than one computer at the same time.  Corporate customers 
+with multi-user network licenses should undertake a reasonable effort to 
+make sure that the total number of concurrent users within their 
+organization does not exceed their license user limit.  You may not rent 
+or lease the Software, nor may you modify, adapt, translate, reverse 
+engineer, decompile, or disassemble the Software.  If you violate any part 
+of this agreement, your right to use this Software terminates 
+automatically and you must then destroy all copies of the Software in your 
+possession.  
+
+The Software and its related documentation are provided "AS IS" and 
+without warranty of any kind and Hyperionics Technology expressly 
+disclaims all other warranties, expressed or implied, including, but not 
+limited to, the implied warranties of merchantability and fitness for a 
+particular purpose.  Under no circumstances shall Hyperionics Technology 
+be liable for any incidental, special, or consequential damages that 
+result from the use or inability to use the Software or related 
+documentation, even if Hyperionics Technology has been advised of the 
+possibility of such damages.  In no event shall Hyperionics Technology' 
+liability exceed the license fee paid, if any.  
+
+This Agreement shall be governed by the laws of the Commonwealth of 
+Pennsylvania.  If for any reason a court of competent jurisdiction finds 
+any provision of the Agreement, or portion thereof, to be unenforceable, 
+that provision of the Agreement shall be enforced to the maximum extent 
+permissible so as to effect the intent of the parties, and the remainder 
+of this Agreement shall continue in full force and effect.  
+
+The Software and documentation is provided with RESTRICTED RIGHTS.  Use, 
+duplication, or disclosure by the Government is subject to restrictions as 
+set forth in subdivision (b)( 3)( ii) of the ASPR Rights in Technical Data 
+and Computer Software clause as 252.  227- 7013.  Manufacturer is: 
+Hyperionics Technology, 3146 Chestnut Drive, Murrysville, PA 15668, USA, 
+info@hyperionics.com.  
+
+Copyright (C) 1995-2004 by Hyperionics Technology, LLC.  All rights 
+reserved.  Hyperionics, HyperSnap-DX, HyperCam and FileBox eXtender are 
+trademarks of Hyperionics Technology, LLC.  
+
+

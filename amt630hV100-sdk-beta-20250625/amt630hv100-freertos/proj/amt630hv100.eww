@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspace>
+    <project>
+        <path>$WS_DIR$\amt630hv100.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\awtk.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\lvgl.ewp</path>
+    </project>
+    <batchBuild>
+        <batchDefinition>
+            <name>amt630hv100-lvgl-DDR32X16</name>
+            <member>
+                <project>lvgl</project>
+                <configuration>library</configuration>
+            </member>
+            <member>
+                <project>amt630hv100</project>
+                <configuration>DDR32X16</configuration>
+            </member>
+        </batchDefinition>
+        <batchDefinition>
+            <name>amt630hv100-awtk</name>
+            <member>
+                <project>awtk</project>
+                <configuration>library</configuration>
+            </member>
+            <member>
+                <project>amt630hv100</project>
+                <configuration>AWTK</configuration>
+            </member>
+        </batchDefinition>
+    </batchBuild>
+</workspace>

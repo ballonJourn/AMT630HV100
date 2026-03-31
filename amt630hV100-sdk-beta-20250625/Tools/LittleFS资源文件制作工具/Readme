@@ -1,0 +1,7 @@
+编辑mklfs.bat文件修改-c参数后资源文件所在的目录，之后双击运行mklfs.bat生成rom.bin资源镜像。
+
+备注：
+1. -s后指定的镜像大小要大于资源文件目录大小，如果指定的size不够的话运行mklfs.bat终端会打印下面错误:
+    lfs.c:563:error: No more free space
+
+2. -s后指定的镜像大小最大不能超过0xf00000

@@ -1,0 +1,19 @@
+﻿1) 倒车辅助线demo
+
+1.1) 初始化
+
+int reversing_auxiliary_line_init (int width, int height);
+width,height指定VG区域的大小, 如 reversing_auxiliary_line_init (704, 440), 也可为其他值,如(720, 440)
+
+1.2) 退出
+int reversing_auxiliary_line_exit (void);
+
+1.3) 刷新
+int reversing_auxiliary_line_draw (void);
+
+1.4) 倒车轨迹原始数据及转换工具
+原始SVG数据及转换后的OpenVG格式 C文件位于image目录下.
+运行run.bat自动将所有SVG文件转换并生成对应的C文件.
+
+
+

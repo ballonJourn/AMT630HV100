@@ -1,0 +1,4 @@
+<window theme="main" name="main">
+  <qr x="c" y="m" w="240" h="240" value="https://github.com/zlgopen/awtk" style:normal:fg_color="#000000" style:normal:selected_fg_color="#00000000" style:normal:mask_color="#7030A0" style:normal:grid_color="#4472C4" style:normal:even_bg_color="#8EAAD7" style:normal:odd_bg_color="#2F5496" style:normal:bg_color="#FFFFFF"/>
+  <button x="c" y="b:30" w="80" h="30" name="close" text="Close"/>
+</window>
