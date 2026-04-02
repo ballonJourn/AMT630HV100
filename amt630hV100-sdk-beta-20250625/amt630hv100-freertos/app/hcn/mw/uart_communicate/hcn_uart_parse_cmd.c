@@ -457,7 +457,7 @@ int uart_mcu_parse_task_init(void) {
 
     handshake_timer = xTimerCreate("hande_shake", HANDSHAKE_TIMEOUT_PERIOD,
                                    pdFALSE, NULL, handshake_timeout);
-    if (start_src_timer == NULL) {
+    if (handshake_timer == NULL) {
         hcn_log_error("Create start handshake timer failed!\n");
         vQueueDelete(recv_msg_queue);
         xTimerDelete(start_src_timer, 0);

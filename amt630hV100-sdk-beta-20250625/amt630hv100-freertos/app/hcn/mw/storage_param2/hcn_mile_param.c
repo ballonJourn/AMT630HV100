@@ -319,10 +319,10 @@ static char check_mile_param(void) {
         uint16_t pos_earse = (11 * 4); 
 
         for (int i = 0; i < (MILEAGE_PARAM_PAGE_NUM/page_num); i++) {
-            earse_count_addr = (MILEAGE_PARAM_START_ADDR + pos_earse) 
+            earse_count_addr = (MILEAGE_PARAM_START_ADDR + pos_earse)
                                 + (page_num * E2PROM_PAGE_SIZE * i);
-            e2prom_read_data(earse_count_addr, (uint8_t*)temp, sizeof(temp));
-            hcn_log_info("earse count value = %d\n", earse_count_addr);
+            e2prom_read_data(earse_count_addr, (uint8_t*)&temp, sizeof(temp));
+            hcn_log_info("earse count value = %lu\n", temp);
             if (max_value >= temp) {
                 max_value = temp;
                 g_mile_write_addr = earse_count_addr - pos_earse;

@@ -278,7 +278,7 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
             break;
 
         case HCN_PARAM_MAINTAIN_DATE:
-            memcpy(&param, &usr_param.maintain_info.maintain_time.last_maintain_date, 
+            memcpy(param, &usr_param.maintain_info.maintain_time.last_maintain_date,
                         sizeof(maintain_date_t));
             break;
 

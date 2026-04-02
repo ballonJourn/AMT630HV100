@@ -79,9 +79,13 @@ int decimal_2_bcd( int decimal) {
 }
 
 char *substring(char *dst, char *src, int start, int len) {
+    if (dst == NULL || src == NULL) {
+        return NULL;
+    }
+
     char *p = dst;
     char *q = src;
-    
+
     int length = strlen(src);
     if (start >= length || start < 0) {
         return NULL;
@@ -98,21 +102,25 @@ char *substring(char *dst, char *src, int start, int len) {
     return dst;
 }
 
-uint16_t string_split(char *dest_str, char *token, 
-                char out_str[][TEXT_PARAM_LEN], 
+uint16_t string_split(char *dest_str, char *token,
+                char out_str[][TEXT_PARAM_LEN],
                 int out_str_len) {
+    if (dest_str == NULL || token == NULL || out_str == NULL) {
+        return 0;
+    }
+
     char *result = NULL;
     result = strtok(dest_str, token);
 
     uint16_t i = 0;
     while (result != NULL && i < out_str_len) {
         uint16_t result_len = (uint16_t)strlen(result);
-        strncpy(out_str[i], result, result_len < TEXT_PARAM_LEN ? \
-                result_len : TEXT_PARAM_LEN - 1);
+        strncpy(out_str[i], result, TEXT_PARAM_LEN - 1);
+        out_str[i][TEXT_PARAM_LEN - 1] = '\0';
         result = strtok(NULL, token);
         i++;
     }
-    
+
     return i;
 }
 

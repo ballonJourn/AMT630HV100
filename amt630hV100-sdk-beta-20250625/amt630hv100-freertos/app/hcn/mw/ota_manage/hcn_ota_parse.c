@@ -75,7 +75,7 @@ static bool check_update_file_header(uint32_t offset) {
         return false;
     }
 
-    memset(readbuf, 0, sizeof(128));
+    memset(readbuf, 0, 128);
     sfud_flash *sflash = sfud_get_device(0);
     sfud_read(sflash, offset, 128, (void*)readbuf);  
     UpFileHeader * header = (UpFileHeader *)readbuf;
@@ -334,32 +334,35 @@ next_file_info:
         if (file_size > 0) {
             ota_files[file_type - 1].ota_file_size = file_size;
         }
+
+        ota_param.ota_total_size += file_size;
+        uint16_t file_name_size = (msg[file_size_offset + 4] << 8) + 
+                                    msg[file_size_offset + 5];
+        char name_buff[64] = {0};  
+        memcpy(name_buff, &msg[file_size_offset + 6], file_name_size);
+        strncpy(ota_files[file_type - 1].file_name, name_buff, \
+                    sizeof(ota_files[file_type - 1].file_name) - 1);
+        
+        hcn_log_info("recv file info: type=%d, size=%d bytes, name=%s\n", 
+                        file_type, file_size, ota_files[file_type - 1].file_name);
+        
+        ///< 文件标识1 + 文件大小4 + 文件名长度2 + 文件名N
+        uint16_t offset = 1 + 4 + 2 + file_name_size;
+        file_type_offset += offset;
+        file_size_offset += offset;
+
+        if ((msg_size > file_type_offset) && (file_type_offset < crc32_offset)) {
+            goto next_file_info;
+        }
+
+        set_ota_state(TCP_RECV_FILE_INFO);
+
+        hcn_log_info("ota total size: %ld bytes\n", ota_param.ota_total_size);
+
+        is_first_parse = false;
+    } else {
+        hcn_log_error("unknown ota file type %d!\n", file_type);
     }
-
-    ota_param.ota_total_size += file_size;
-    uint16_t file_name_size = (msg[file_size_offset + 4] << 8) + 
-                                msg[file_size_offset + 5];
-    char name_buff[64] = {0};  
-    memcpy(name_buff, &msg[file_size_offset + 6], file_name_size);
-    strncpy(ota_files[file_type - 1].file_name, name_buff, file_name_size);
-    
-    hcn_log_info("recv file info: type=%d, size=%d bytes, name=%s\n", 
-                    file_type, file_size, ota_files[file_type - 1].file_name);
-    
-    ///< 文件标识1 + 文件大小4 + 文件名长度2 + 文件名N
-    uint16_t offset = 1 + 4 + 2 + file_name_size;
-    file_type_offset += offset;
-    file_size_offset += offset;
-
-    if ((msg_size > file_type_offset) && (file_type_offset < crc32_offset)) {
-        goto next_file_info;
-    }
-
-    set_ota_state(TCP_RECV_FILE_INFO);
-
-    hcn_log_info("ota total size: %ld bytes\n", ota_param.ota_total_size);
-
-    is_first_parse = false;
 }
 
 static void parse_file_steam(uint8_t *msg) {
