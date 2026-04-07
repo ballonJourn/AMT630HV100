@@ -21,7 +21,7 @@ extern "C" {
 #include "config/hcn_config.h"
 
 #define APP_PROJECT_NUM "DC001"
-#define APP_UI_VERSION  "01"
+#define APP_UI_VERSION  "XMAX"
 #define APP_SUB_NUM     "V1"
 
 void soc_version_init(void);
