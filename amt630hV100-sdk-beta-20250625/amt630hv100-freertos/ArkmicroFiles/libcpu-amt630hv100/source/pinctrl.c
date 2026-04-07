@@ -192,9 +192,15 @@ static xPinGroup_t pin_groups[] = {
 	{.groupid = PGRP_PWM0, .pins_num = 1, .pins = {{0, 1}}},
 #else
 	{.groupid = PGRP_PWM1, .pins_num = 1, .pins = {{1, 1}}},
-	{.groupid = PGRP_PWM2, .pins_num = 1, .pins = {{2, 1}}},
-	{.groupid = PGRP_PWM3, .pins_num = 1, .pins = {{3, 1}}},
 #endif
+
+#if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
+	{.groupid = PGRP_PWM2, .pins_num = 1, .pins = {{60, 1}}},
+#else
+	{.groupid = PGRP_PWM2, .pins_num = 1, .pins = {{2, 1}}},
+#endif
+	{.groupid = PGRP_PWM3, .pins_num = 1, .pins = {{3, 1}}},
+
 	{.groupid = PGRP_PWM0_IN, .pins_num = 1, .pins = {{4, 0}},//pin18   GPIO4
         .mux_reg = 0x60000120, .mux_offset = 12, .mux_mask = 0x3, .mux_val = 0},
 	{.groupid = PGRP_PWM1_IN, .pins_num = 1, .pins = {{5, 0}},//pin19   GPIO5
@@ -356,5 +362,9 @@ void vPinctrlSetup(void)
 
 #ifdef HCN_BL_PWM_ENABLE
 	pinctrl_set_group(PGRP_PWM0);
+#endif
+
+#if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
+	pinctrl_set_group(PGRP_PWM2);
 #endif
 }

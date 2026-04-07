@@ -31,7 +31,7 @@ extern "C" {
 
 #define KEY_MODE_GPIO           (5)
 #define KEY_UP_GPIO             (1)
-#define KEY_SET_GPIO            (49)
+#define KEY_SET_GPIO            (7)
 #define KEY_BACK_GPIO           (4)
 
 #define  UP_KEY    hal_gpio_get_input_value(KEY_UP_GPIO)

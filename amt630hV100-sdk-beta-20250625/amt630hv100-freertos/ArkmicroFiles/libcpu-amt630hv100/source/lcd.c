@@ -1122,6 +1122,11 @@ int lcd_init(void)
 
 	gpio_direction_output(HCN_LCD_DISPLAY_EN_GPIO, 1);
 
+#if LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
+	extern void lvds_avdd_init(void);
+	lvds_avdd_init();
+#endif
+
 	fb_buf = pvPortMalloc(FB_SIZE * FB_COUNT);
 	if (!fb_buf) {
 		printf("ERR: malloc framebuffer fail.\n");

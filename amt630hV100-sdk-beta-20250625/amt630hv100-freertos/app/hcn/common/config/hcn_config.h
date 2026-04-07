@@ -50,6 +50,8 @@ extern "C" {
 ///< 屏幕GPIO配置
 #if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
 #define HCN_LVDS_SCREEN_RST_GPIO    74
+#define HCN_AVDD_PWM_CH             (2)
+#define HCN_AVDD_EN_GPIO            (8)
 #endif
 
 ///< 背光使能GPIO
@@ -96,8 +98,8 @@ extern "C" {
 ///< wifi相关信息
 #define HCN_WIFI_SUPPORT
 #define HCN_WIFI_INIT_DELAY_ENABLE  ///< wifi初始化延时
-#define WIFI_RESET_IO		(45)
-#define WIFI_BT_PWR_GPIO    (44)
+#define WIFI_RESET_IO		(13)
+#define WIFI_BT_PWR_GPIO    (12)
 
 ///< 蓝牙reset io
 #define BT_RESET_IO        (46) 
@@ -117,8 +119,8 @@ extern "C" {
 
 ///< 手机互联使能
 #define HCN_CARLINK_ENABLE
-#define HCN_LCD_EC_WIDTH        (800)
-#define HCN_LCD_EC_HEIGHT       (480)
+#define HCN_LCD_EC_WIDTH        (1024)
+#define HCN_LCD_EC_HEIGHT       (600)
 
 ///< 天气功能使能
 //#define HCN_CARLINK_WEATHER_ENABLE

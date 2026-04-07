@@ -17,6 +17,7 @@
 #include "hal_pwm/hal_pwm.h"
 #include "config/hcn_config.h"
 #include "log/hcn_log.h"
+#include "hal_gpio/hal_gpio.h"
 
 #if 0
 #define LEVEL_1_DUTY_VALUE (500000)
@@ -180,4 +181,14 @@ bool is_change_backlight_success(uint8_t level) {
     return (temp == auto_backlight.cur_led_value);
 }
 
+#if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
+#define AVDD_PWM_PERIOD (1200000)
+#define AVDD_PWM_DUTY_VALUE (0)
 
+void lvds_avdd_init(void) {
+    hal_gpio_set_output(HCN_AVDD_EN_GPIO, 1);
+    hal_pwm_config(HCN_AVDD_PWM_CH, AVDD_PWM_DUTY_VALUE, AVDD_PWM_PERIOD);
+    hal_pwm_enable(HCN_AVDD_PWM_CH);
+}
+
+#endif
