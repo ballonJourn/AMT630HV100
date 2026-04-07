@@ -31,21 +31,21 @@ extern "C" {
 #define HCN_LCD_INTERFACE_MIPI		(3)
 
 ///< 屏幕分辨率
-#define HCN_LCD_WIDTH	            800
-#define HCN_LCD_HEIGHT	            480
+#define HCN_LCD_WIDTH	            1024
+#define HCN_LCD_HEIGHT	            600
 
 ///< 屏幕色深
 #define HCN_LCD_BPP		            32
-#define HCN_LCD_INTERFACE_TYPE		HCN_LCD_INTERFACE_TTL
+#define HCN_LCD_INTERFACE_TYPE		HCN_LCD_INTERFACE_LVDS
 
 ///< 屏幕参数配置
-#define HCN_LCD_TIMING_VBP          16
-#define HCN_LCD_TIMING_VFP		    16
-#define HCN_LCD_TIMING_VSW	        4
-#define HCN_LCD_TIMING_HBP		    8
-#define HCN_LCD_TIMING_HFP		    8
-#define HCN_LCD_TIMING_HSW		    4
-#define HCN_LCD_CLK_FREQ            26000000
+#define HCN_LCD_TIMING_VBP          23
+#define HCN_LCD_TIMING_VFP		    12
+#define HCN_LCD_TIMING_VSW	        2
+#define HCN_LCD_TIMING_HBP		    136
+#define HCN_LCD_TIMING_HFP		    160
+#define HCN_LCD_TIMING_HSW		    24
+#define HCN_LCD_CLK_FREQ            52000000
 
 ///< 屏幕GPIO配置
 #if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
@@ -65,8 +65,8 @@ extern "C" {
 #endif
 
 ///< OSD显示设置, UI显示大小
-#define OSD_WIDTH      800 
-#define OSD_HEIGHT     480            
+#define OSD_WIDTH      1024 
+#define OSD_HEIGHT     600           
 
 /**
  * @brief memory config 以FreeRTos + AWTK为例
