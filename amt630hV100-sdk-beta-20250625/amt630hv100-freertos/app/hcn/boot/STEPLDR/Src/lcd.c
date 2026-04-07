@@ -4,6 +4,8 @@
 #include "gpio.h"
 #include "sysctl.h"
 #include "timer.h"
+#include "hcn_config.h"
+#include "pwm.h"
 
 /* LCD timing */
 #define LCD_PARAM0				0x000
@@ -417,8 +419,8 @@ static int ark_lcd_timing_init(struct ark_lcd_timing *timing)
 #define      DEN1_v_rise            (VFP+VSW+VBP)
 #define      DEN1_v_fall            (VFP+VSW+VBP+VD)
 
-// Ö¡Æµ = LCDÊ±ÖÓ/(CPL * LPS)
-// Ã¿ÐÐÊ±ÖÓÖÜÆÚ¸öÊý
+// Ö¡Æµ = LCDÊ±ï¿½ï¿½/(CPL * LPS)
+// Ã¿ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½
 #define      CPL                    (TH)   // clock cycles per line  max 4096     ;  from register   timing2 16
 #define      LPS                    (TV)   // Lines per screen value  ;  from register   timing1 0
 
@@ -646,6 +648,21 @@ static void lvds_screen_reset(void)
 }
 #endif
 
+void lvds_avdd_init(void) {
+  unsigned int val;
+  gpio_direction_output(HCN_AVDD_EN_GPIO, 1);
+
+  //select pad gpio60-->select pwm2
+  val = rSYS_PAD_CTRL03;
+  val &= ~(0x3<<24);
+  val |= (0x1<<24);
+  rSYS_PAD_CTRL03 = val;
+  
+  //set pwm
+  pwm_config(2, 0, 1200000);
+  pwm_enable(2); 
+}
+
 int lcd_init(void)
 {
 	struct ark_lcd_timing timing;
@@ -656,6 +673,7 @@ int lcd_init(void)
 	vSysctlConfigure(SYS_PAD_CTRL04, 0, 0xffffffff, 0x55555555);
 	vSysctlConfigure(SYS_PAD_CTRL05, 0, 0xffffff, 0x555555);
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
+        lvds_avdd_init();
 	vSysctlConfigure(SYS_PAD_CTRL04, 0, 0xfffff, 0xaaaaa);
 #endif
 
