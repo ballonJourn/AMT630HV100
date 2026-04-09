@@ -68,4 +68,8 @@ void hcn_mw_init(void) {
     carlink_cb_init();
 
     mw_msg_manage_init();
+
+#ifdef HCN_UART_DVR_ENABLE
+    uart_dvr_init();
+#endif
 }

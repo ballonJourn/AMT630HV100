@@ -154,7 +154,13 @@ typedef enum {
     VEH_ENTER_OTA_PAGE_STATE,  ///< 0:not enter  1:enter ota page  2:exit ota page
     VEH_OTA_START_STATUS,      ///< 0:not start  1:starting  2:Startup successful
 
-    VEH_MILEAGE_CHANGE_MSG, ///< 0:not change, 1:tip a 2:trip b 3:odo 
+    VEH_MILEAGE_CHANGE_MSG, ///< 0:not change, 1:tip a 2:trip b 3:odo
+
+    ///<DVR
+    VEH_DVR_LOAD,   ///< 0:not TFCard has been load 1:TFCard has been load
+    VEH_DVR_RECORDING, ///< 0:DVR is not recording 1:DVR is recording
+    VEH_DVR_MODE, ///< 0:USB has been closed 1:UVC Mode 2:MSDC Mode
+    VEH_DRV_TIME, ///< 1: Record time 1 minute 2: Record time is 2 minutes 3: Record time is 3 minutes
 
     VEH_DATA_END,
 } veh_data_e;

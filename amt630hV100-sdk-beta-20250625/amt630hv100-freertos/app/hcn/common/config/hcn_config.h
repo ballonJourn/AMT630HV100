@@ -168,6 +168,13 @@ extern "C" {
 #define HCN_CHINESE_UUID    "CARBITDC0D30226452"
 #endif
 
+///< 串口DVR使能
+// #define HCN_UART_DVR_ENABLE
+#ifdef HCN_UART_DVR_ENABLE
+#define HCN_UART_DVR_PORT    (2)
+#define HCN_UART_DVR_BAUDRATE (115200)
+#endif
+
 ///< 串口通信使能,与MCU通信
 #define HCN_UART_COMM_ENABLE
 #ifdef HCN_UART_COMM_ENABLE

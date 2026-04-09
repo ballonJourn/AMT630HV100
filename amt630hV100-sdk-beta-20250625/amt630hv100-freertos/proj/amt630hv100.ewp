@@ -4590,6 +4590,21 @@
                     </file>
                 </group>
                 <group>
+                    <name>uart_dvr</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_dvr\hcn_uart_dvr.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_dvr\hcn_uart_dvr_parse_cmd.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_dvr\hcn_uart_dvr_send_cmd.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\uart_dvr\hcn_uart_dvr_tx.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>uart_mcu_update</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\uart_mcu_update\hcn_uart_mcu_update.c</name>
