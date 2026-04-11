@@ -1,0 +1,10 @@
+<window name="home_page" style="bg" theme="default" style:normal:bg_image="bg">
+  <label name="label0" x="301" y="433" w="32" h="32" style="led_red" text=""/>
+  <label name="label1" x="342" y="433" w="32" h="32" style="led_green" text=""/>
+  <label name="label2" x="385" y="433" w="32" h="32" style="led_green" text=""/>
+  <label name="label3" x="428" y="433" w="32" h="32" style="led_gray" text=""/>
+  <label name="label4" x="471" y="433" w="32" h="32" style="led_yellow" text=""/>
+  <view name="view_qr" x="0" y="0" w="800" h="480" style:normal:bg_color="#5B9BD6" visible="true">
+    <qr name="qr_ec" x="280" y="120" w="240" h="240" value="https://github.com/zlgopen/awtk"/>
+  </view>
+</window>

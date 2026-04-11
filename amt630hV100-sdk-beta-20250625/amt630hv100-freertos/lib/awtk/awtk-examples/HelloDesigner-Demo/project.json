@@ -1,0 +1,37 @@
+{
+  "name": "HelloDesigner-Demo",
+  "entry": "home_page/home_page",
+  "assets": {
+    "loadFrom": "any",
+    "const": "resource_data",
+    "defaultLanguage": "en",
+    "defaultCountry": "US",
+    "themes": {
+      "default": {
+        "activedSystemBar": "system_bar",
+        "activedBottomSystemBar": "system_bar_b",
+        "packaged": true,
+        "fonts": {
+          "default": {
+            "text": "﻿ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\n基础背景切换列表控件动画中"
+          }
+        },
+        "lcd": {
+          "width": "800",
+          "height": "480",
+          "colorDepth": "16bit",
+          "colorFormat": "BGR(A)"
+        }
+      }
+    },
+    "screenDPR": "x1",
+    "activedTheme": "default",
+    "outputDir": "res"
+  },
+  "creator": {
+    "name": "AWTK Designer",
+    "version": "1.0.2"
+  },
+  "awtkRoot": "${DesignerPath}/SDK/awtk",
+  "modifyTime": "2020/12/23"
+}

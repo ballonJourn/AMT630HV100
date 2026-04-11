@@ -1,0 +1,13 @@
+.vscode/
+/AMTLDR/settings/
+/AMTLDR/AMT630Hv100/list/
+/AMTLDR/AMT630Hv100/Obj/
+/AMTLDR/AMT630Hv100/Exe/AMTLDR.out
+/AMTLDR/AMTLDR.dep
+/AMTLDR/AMTLDR.ewt
+/STEPLDR/Debug/list/
+/STEPLDR/Debug/Obj/
+/STEPLDR/Debug/Exe/stepldr.out
+/STEPLDR/settings/
+/STEPLDR/stepldr.dep
+/STEPLDR/stepldr.ewt

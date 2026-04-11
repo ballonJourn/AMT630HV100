@@ -1,0 +1,1 @@
+filem.exe把spildr.bin，stepldr.bin和update.bin合成烧录FLASH的文件，请假按照“文件导入.png”的地址和文件顺序导入文件，生成合并的bin文件可以直接做批量烧录FLASH

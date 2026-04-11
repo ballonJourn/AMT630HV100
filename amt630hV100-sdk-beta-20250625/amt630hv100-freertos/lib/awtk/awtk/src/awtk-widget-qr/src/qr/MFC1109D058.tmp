@@ -1,0 +1,326 @@
+﻿/**
+ * File:   qr.c
+ * Author: AWTK Develop Team
+ * Brief:  显示二维码的控件
+ *
+ * Copyright (c) 2020 - 2020 Guangzhou ZHIYUAN Electronics Co.,Ltd.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * License file for more details.
+ *
+ */
+
+/**
+ * History:
+ * ================================================================
+ * 2020-06-01 Li XianJing <xianjimli@hotmail.com> created
+ *
+ */
+
+#include "tkc/mem.h"
+#include "tkc/utils.h"
+#include "base/widget_vtable.h"
+#include "base/window_manager.h"
+
+#include "qr.h"
+//#include "../3rd/gtest/googletest/include/gtest/gtest.h"
+#define IMAGE_QR_MAX_RATIO 0.45f /* 贴图的面积和二维码的面积最大比例 */
+
+static ret_t qr_ensure_qrcode(widget_t* widget);
+
+ret_t qr_set_value(widget_t* widget, const char* value) {
+  qr_t* qr = QR(widget);
+  return_value_if_fail(qr != NULL, RET_BAD_PARAMS);
+  
+  if (tk_str_eq(qr->value, value)) { return RET_OK; }
+  qr->value = tk_str_copy(qr->value, value);
+
+  if (qr->qrcode != NULL) {
+    QRcode_free(qr->qrcode);
+    qr->qrcode = NULL;
+  }
+  
+  ret_t ret = qr_ensure_qrcode(widget);
+  return (ret == RET_OK) ? widget_invalidate(widget, NULL) : RET_FAIL;
+}
+
+static ret_t qr_get_prop(widget_t* widget, const char* name, value_t* v) {
+  qr_t* qr = QR(widget);
+  return_value_if_fail(qr != NULL && name != NULL && v != NULL, RET_BAD_PARAMS);
+
+  if (tk_str_eq(WIDGET_PROP_VALUE, name) || tk_str_eq(WIDGET_PROP_TEXT, name)) {
+    value_set_str(v, qr->value);
+    return RET_OK;
+  }
+
+  return RET_NOT_FOUND;
+}
+
+static ret_t qr_set_prop(widget_t* widget, const char* name, const value_t* v) {
+  qr_t* qr = QR(widget);
+  return_value_if_fail(widget != NULL && name != NULL && v != NULL, RET_BAD_PARAMS);
+
+  if (tk_str_eq(WIDGET_PROP_VALUE, name) || tk_str_eq(WIDGET_PROP_TEXT, name)) {
+    qr_set_value(widget, value_str(v));
+
+    if (qr->qrcode != NULL) {
+      QRcode_free(qr->qrcode);
+      qr->qrcode = NULL;
+    }
+
+    return RET_OK;
+  }
+
+  return RET_NOT_FOUND;
+}
+
+static ret_t qr_on_destroy(widget_t* widget) {
+  qr_t* qr = QR(widget);
+  return_value_if_fail(widget != NULL && qr != NULL, RET_BAD_PARAMS);
+
+  TKMEM_FREE(qr->value);
+  if (qr->qrcode != NULL) {
+    QRcode_free(qr->qrcode);
+    qr->qrcode = NULL;
+  }
+
+  return RET_OK;
+}
+
+#define MIN_SIZE 21
+static ret_t qr_ensure_qrcode(widget_t* widget) {
+  qr_t* qr = QR(widget);
+  int32_t size = tk_min(widget->w, widget->h) - 5;
+
+  if (size < MIN_SIZE) {
+    return RET_FAIL;
+  }
+
+  if (qr->qrcode != NULL) {
+    return RET_OK;
+  }
+
+  qr->qrcode = QRcode_encodeString(qr->value, 3, QR_ECLEVEL_L, QR_MODE_8, 1);
+
+  if (qr->qrcode != NULL) {
+    return RET_OK;
+  }
+
+  return RET_FAIL;
+}
+
+static ret_t qr_paint_logo(widget_t* widget, canvas_t* c) {
+  vgcanvas_t* vg = canvas_get_vgcanvas(c);
+  const char* logo_name = NULL;
+  bitmap_t logo = {0};
+  return_value_if_fail(widget != NULL && vg != NULL, RET_BAD_PARAMS);
+
+  logo_name = style_get_str(widget->astyle, STYLE_ID_BG_IMAGE, NULL);
+
+  if (logo_name != NULL && widget_load_image(widget, logo_name, &logo) == RET_OK) {
+    vgcanvas_translate(vg, c->ox + (widget->w - logo.w) / 2.0f,
+                       c->oy + (widget->h - logo.h) / 2.0f);
+    vgcanvas_draw_image(vg, &logo, 0, 0, logo.w, logo.h, 0, 0, logo.w, logo.h);
+  }
+  return RET_OK;
+}
+#define PRINTF printf
+void bitmap_dump(bitmap_t* b) {
+  rgba_t rgba;
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint32_t w = b->w;
+  uint32_t h = b->h;
+
+  PRINTF("-----------------------------------------------\n");
+  for (y = 0; y < h; y++) {
+    PRINTF("%02d:", y);
+    for (x = 0; x < w; x++) {
+      if (bitmap_get_pixel(b, x, y, &rgba) == RET_OK) {
+        //PRINTF("%02x%02x%02x%02x ", rgba.r, rgba.g, rgba.b, rgba.a);
+        if (y = h - 1) {
+          PRINTF("%02x%02x%02x%02x ", rgba.r, rgba.g, rgba.b, rgba.a);
+        }
+      }
+    }
+    PRINTF("\n");
+  }
+}
+#ifdef WITH_VG_GPU
+// 20211024 针对VG优化, 16像素对齐
+#define VG_ALIGN_OPTIMIZE
+#endif
+
+#ifdef VG_ALIGN_OPTIMIZE
+#define bmpALIGNDOWN(n, align) ((n) & ~((align)-1))
+
+#define bmpALIGN(n, align) (bmpALIGNDOWN((n) + (align)-1, align))
+#endif
+
+static ret_t qr_on_paint_self(widget_t* widget, canvas_t* c) {
+  qr_t* qr = QR(widget);
+  style_t* style = widget->astyle;
+  //uint32_t last_time = get_timer(0);
+  if (style != NULL) {
+    color_t trans = color_init(0, 0, 0, 0);
+    uint32_t margin = style_get_int(style, STYLE_ID_MARGIN, 2);
+    color_t bg = style_get_color(style, STYLE_ID_BG_COLOR, trans);
+    color_t fg = style_get_color(style, STYLE_ID_FG_COLOR, trans);
+    
+    if (qr_ensure_qrcode(widget) == RET_OK) {
+      rect_t r = { 0, 0, widget->w, widget->h };
+      uint32_t w = 0;
+      uint32_t h = 0;
+      uint32_t i = 0;
+      uint32_t j = 0;
+
+      uint8_t* p = qr->qrcode->data;
+      uint32_t size = qr->qrcode->width;
+#ifdef VG_ALIGN_OPTIMIZE
+      // 20211024 针对VG优化, 16像素对齐
+      uint32_t width = bmpALIGN((tk_min(widget->w, widget->h) - 2 * margin) / size, 16);
+      uint32_t pix_size = width;
+      
+      //bitmap->line_length = tk_max(width * bpp, line_length);
+#else
+      uint32_t pix_size = (tk_min(widget->w, widget->h) - 2 * margin) / size;
+#endif
+      
+      uint32_t x = (widget->w - pix_size * size) / 2;
+      uint32_t y = (widget->h - pix_size * size) / 2;
+      rect_t r_clip = rect_init(widget->x + ((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->w,
+                                widget->y + ((1 - IMAGE_QR_MAX_RATIO) / 2.0f) * widget->h,
+                                IMAGE_QR_MAX_RATIO * widget->w, IMAGE_QR_MAX_RATIO * widget->h);
+
+      return_value_if_fail(pix_size > 1, RET_BAD_PARAMS);
+#define USE_BITMAP 1
+#if USE_BITMAP  
+      vgcanvas_t* vg = canvas_get_vgcanvas(c);
+      bitmap_t* qr_bitmap =
+          bitmap_create_ex((pix_size)*size, (pix_size)*size, 0, BITMAP_FMT_BGRA8888);
+
+      return_value_if_fail(qr_bitmap != NULL, RET_BAD_PARAMS);
+      uint8_t* img_data = bitmap_lock_buffer_for_write(qr_bitmap);
+
+      //memset(img_data, 0xff, qr_bitmap->w * qr_bitmap->h * 4 );
+//#define TEST_ARRAY
+#ifdef TEST_ARRAY
+      uint8_t* tmp_1 ;      
+      tmp_1 = img_data;
+      int offset = 0;
+#else
+      uint32_t* tmp_1;
+      tmp_1 = (uint32_t*)img_data;
+#endif
+      uint32_t xx = 0;
+      uint32_t yy = 0;
+      static int total_size = 0;
+      for (y = 0; y < size; y++) {
+        for (yy = 0; yy < pix_size; yy++) {
+          for (x = 0; x < size; x++) {
+            for (xx = 0; xx < pix_size; xx++) {
+#ifdef TEST_ARRAY
+              if (offset > qr_bitmap->w * qr_bitmap->h * 4) {
+                printf("warning:offset out of round....\r\n");
+              }else{
+                if (p[(y * size) + x] & 0x1) {
+                  tmp_1[offset] = fg.rgba.r;
+                  tmp_1[offset + 1] = fg.rgba.g;
+                  tmp_1[offset + 2] = fg.rgba.b;
+                  tmp_1[offset + 3] = fg.rgba.a;
+                } else {
+                  tmp_1[offset] = bg.rgba.r;
+                  tmp_1[offset + 1] = bg.rgba.g;
+                  tmp_1[offset + 2] = bg.rgba.b;
+                  tmp_1[offset + 3] = bg.rgba.a;
+                  
+                }
+                if(total_size>=225*232){
+                  printf("total_size = %d,the data value = %02x%02x%02x%02x \r\n",total_size,tmp_1[offset],tmp_1[offset+1],tmp_1[offset+2],tmp_1[offset+3]);
+                }
+              }
+              offset += 4;
+              
+#else
+              if (p[(y * size) + x] & 0x01) {
+                *tmp_1++ = fg.color;
+              } else {
+                *tmp_1++ = bg.color;
+              }
+#endif
+              total_size++;
+            }
+          }
+        }
+      }
+      bitmap_unlock_buffer(qr_bitmap);
+      bitmap_dump(qr_bitmap);
+      rect_t src = {0, 0, tk_min(widget->w, widget->h), tk_min(widget->w, widget->h)};
+      rect_t dst = {(widget->w - pix_size * size) / 2, (widget->h - pix_size * size) / 2,
+                    pix_size * size, pix_size * size};
+      vgcanvas_translate(vg, widget->x + (widget->w - pix_size * size) / 2.0f,
+                         widget->y + (widget->h - pix_size * size) / 2.0f);
+      vgcanvas_draw_image(vg, qr_bitmap, 0, 0, pix_size * size, pix_size * size, 0, 0,
+                          pix_size * size, pix_size * size);
+      //canvas_draw_image(c, qr_bitmap, &src, &dst);
+      bitmap_destroy(qr_bitmap);
+      //bitmap_destroy(&bmp);
+#else  
+      for (j = 0; j < size; j++) {
+        x = (widget->w - pix_size * size) / 2;
+        for (i = 0; i < size; i++) {
+          if (*p & 0x01) {
+            canvas_set_fill_color(c, fg);
+          } else {
+            canvas_set_fill_color(c, bg);
+          }
+          canvas_fill_rect(c, x, y, pix_size, pix_size);
+          p++;
+          x += pix_size;
+        }
+        y += pix_size;
+      }
+ #endif     
+      widget_paint_with_clip(widget, &r_clip, c, qr_paint_logo);
+    }
+  }
+  //printf("\r\n****** use time = %d ms**********\r\n",(get_timer(0)-last_time)/1000);
+  return RET_OK;
+}
+static ret_t qr_on_event(widget_t* widget, event_t* e) {
+  qr_t* qr = QR(widget);
+  return_value_if_fail(widget != NULL && qr != NULL, RET_BAD_PARAMS);
+
+  (void)qr;
+  
+  return RET_OK;
+}
+
+const char* s_qr_properties[] = {WIDGET_PROP_VALUE, NULL};
+
+TK_DECL_VTABLE(qr) = {.size = sizeof(qr_t),
+                      .type = WIDGET_TYPE_QR,
+                      .clone_properties = s_qr_properties,
+                      .persistent_properties = s_qr_properties,
+                      .parent = TK_PARENT_VTABLE(widget),
+                      .create = qr_create,
+                      .on_paint_self = qr_on_paint_self,
+                      .set_prop = qr_set_prop,
+                      .get_prop = qr_get_prop,
+                      .on_event = qr_on_event,
+                      .on_destroy = qr_on_destroy};
+
+widget_t* qr_create(widget_t* parent, xy_t x, xy_t y, wh_t w, wh_t h) {
+  widget_t* widget = widget_create(parent, TK_REF_VTABLE(qr), x, y, w, h);
+  qr_t* qr = QR(widget);
+  return_value_if_fail(qr != NULL, NULL);
+  return widget;
+}
+
+widget_t* qr_cast(widget_t* widget) {
+  return_value_if_fail(WIDGET_IS_INSTANCE_OF(widget, qr), NULL);
+
+  return widget;
+}

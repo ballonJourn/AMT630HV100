@@ -1,0 +1,70 @@
+; Files to install
+File Copy: Torn Edge - *.hs5stamp
+File Copy: agreement.txt
+File Copy: dxsnap.dll
+File Copy: HomePage.url
+File Copy: HprRes5.dll
+File Copy: HprSnap5.exe
+File Copy: HprSnap5.exe.manifest
+File Copy: HprSnap5Man.chm
+File Copy: RegHS5.hlp
+File Copy: setup.exe > HprUnInst.exe
+File Copy: HS5ctx.zip
+File Copy: HsSizer5.dll
+File Copy: HSVoice.cfg
+File Copy: HSVoice.xml
+File Copy: lfavi10n.dll
+File Copy: lfbmp10n.dll
+File Copy: lfcal10n.dll
+File Copy: lfcmp10n.dll
+File Copy: lfeps10n.dll
+File Copy: lffax10n.dll
+File Copy: lfgif10n.dll
+File Copy: lfica10n.dll
+File Copy: lfimg10n.dll
+File Copy: lflma10n.dll
+File Copy: lflmb10n.dll
+File Copy: lfmsp10n.dll
+File Copy: lfpcd10n.dll
+File Copy: lfpct10n.dll
+File Copy: lfpcx10n.dll
+File Copy: lfpsd10n.dll
+File Copy: lfras10n.dll
+File Copy: lftga10n.dll
+File Copy: lftif10n.dll
+File Copy: lfwfx10n.dll
+File Copy: lfwmf10n.dll
+File Copy: lfwpg10n.dll
+File Copy: ltdis10n.dll
+File Copy: ltdlg10N.dll
+File Copy: ltefx10N.dll
+File Copy: ltfil10n.dll
+File Copy: ltimg10n.dll
+File Copy: ltkrn10n.dll
+File Copy: lttwn10n.dll
+File Copy: Morpheus.chm
+File Copy: readme.txt
+; Files to install if present and delete with uninstall
+File Copy: *.hs5lic
+File Copy: HprSnap5.ini
+; Files to delete only, e.g. from old installs
+File Del: REGHS5.GID
+File Del: UNWISE.EXE
+File Del: HprRes5.hlp
+File Del: HprRes5.cnt
+File Del: Hyperionics Home Page.url
+File Del: HprSnap5Man.hlp
+File Del: HprSnap5Man.cnt
+File Del: INSTALL.LOG
+File Del: HprRes5.xxx
+File Del: HprSnap5.xxx
+File Del: HprSnap5.sw
+File Del: Softwrap.dll
+
+Made Dir: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5
+Shell Link: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5\HyperSnap-DX 5.lnk
+Shell Link: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5\HyperSnap-DX 5 帮助.lnk
+Shell Link: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5\关于 HyperSnap-DX 5.lnk
+Shell Link: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5\注册 HyperSnap-DX 5.lnk
+Shell Link: C:\Documents and Settings\All Users\「开始」菜单\程序\HyperSnap-DX 5\卸载 HyperSnap-DX 5.lnk
+Shell Link: C:\Documents and Settings\All Users\桌面\HyperSnap-DX 5.lnk

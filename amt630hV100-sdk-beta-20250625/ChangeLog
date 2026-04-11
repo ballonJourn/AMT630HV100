@@ -1,0 +1,478 @@
+
+v20220521
+	AMT630HV100在AMT630H的基础上增加了以下功能：
+	1.h264解码
+	2.增加一路i2s
+	3.增加四路ADC，同时去掉了电阻触摸屏的支持
+	4.DDR2容量扩展到64MB
+	5.增加mipi接口屏的支持
+
+v20220628
+	1.串口1改成485高速串口，同时优化内存溢出问题和接收数据丢失问题
+	2.spi驱动更新
+	3.UUP_MAX_LOADER_SIZE宏定义大小改大为STEPLDR_MAX_SIZE（STEPLDR工程）
+	4.提高串口中断优先级，防止flash频繁读取时不能及时响应串口中断引起串口fifo溢出丢数据
+	5.添加录音驱动，添加麦克风es7243e驱动，更新i2s放音驱动参数（根据音频参数动态设置采样率、采样位数和采样通道数）
+	6.更新SYS_PLL和CPU_PLL寄存器偏移地址错误，GPU时钟源切换为CPU_PLL
+	7.更新开机动画偶现闪白屏问题
+	8.更新“升级文件”夹中的升级文件
+	9.awtk更新
+		1) VG_DRIVER_AWTK.a
+			增加一个API, 暂时仅AWTK内部使用用于surface脏矩形数据拷贝
+			extern  VGubyte *vgGetCurrentSurfacePixels (void);
+		2) 编译选项
+			ENABLE_FB_DIRTY_RECTS_COPY
+				用于2帧/3帧FrameBuffer脏矩形拷贝,比较未使能该功能, AWTK性能(帧率)上一般提升10~15%. 
+				AWTK有使用脏矩形进行性能优化时, 使能该选项性能提升更大.
+			ENABLE_TOUCH_UP_LONG_PERIOD_RESPONSE
+				当快速触摸时,因为按下/释放的间隔时间过短, 按下的效果无法在LCD显示出来. 
+				使能ENABLE_TOUCH_UP_LONG_PERIOD_RESPONSE可以显示明显的Touch Down按下响应
+			HIGH_PREFORMANCE_REFRESH_SUPPORT
+				高性能刷新模式下(HIGH_PREFORMANCE_REFRESH_SUPPORT),先检测是否存在需要刷新的内容.
+				若存在, 执行刷新操作. 
+				若不存在, 执行短间隔睡眠时间(1ms)
+			FAST_DRAW_OPAQUE_IMAGE_SUPPORT
+				非透明全尺寸矩形大小的Image绘制优化, 不再执行矩形填充操作, 优化刷新帧率
+		3）验证“amt630hV100-sdk-beta\升级文件\AWTK”目录下的七个例子
+
+v20220711
+	1. 修复一些已发现的bug。
+	2. 添加i2c slave模式支持。
+	3. 添加屏显水平和垂直镜像功能,优化ark_lcd_wait_for_vsync函数，可以同时唤醒所有等待vsync的线程。
+	4. 修复同时使用两路CAN不能设置不同波特率的问题。
+	5. 提高amtldr以及stepldr工程spiflash的兼容性。
+	6. 修复串口接收demo存在的数组溢出问题。
+	7. 提高串口中断优先级解决串口丢数据问题。
+	8. 优化AWTK性能。
+	9. 添加从SD卡加载wav音频文件并播放的demo，修改i2s驱动消除pop音。
+	10.修复stepldr工程先使用串口升级amt630hv100.bin文件后再用sd卡或者u盘升级可能导致应用加载不起来的问题。
+	11.更新串口升级工具“Tools\630HV100串口升级工具\630HV100串口升级工具.exe”的波特率（从115200扩展支持到921600）。
+	12.更新烧录文件合成工具“Tools\630HV100烧录文件合成工具\filem.exe”，之前的工具sysinfo里的stepldr_offset值没有更新成和代码一致。
+	13.添加支持领骑摩托手机互联。
+
+v20220730
+	1.添加LCD水平和垂直镜像操作。
+	2.不使用VG_DRIVER时扩大RAM空间（增加2M），避免栈空间不够引起的编译错误。
+	3.更新JPEG解码概率性异常问题。
+	4.STEPLDR添加两种spiflash的支持。
+	5.更新开机动画概率性闪白屏问题。
+	6.优化手机互联视频效果（死机、卡顿、花屏等）。
+	7.更新spi时钟分频系数
+
+v20220831
+	1.VG_ONLY和AWTK工程添加支持（尔雅和亿联）手机互联。
+	2.更新“升级文件”目录下的升级文件（支持手机互联）。
+	3.优化STEPLDR工程的串口升级。
+	4.优化AWTK的旋转显示问题。
+	5.更新CAN的波特率参数（对应SYSPLL=400M时的参数）。
+	6.优化wifi模块异常引起的系统启动时的卡死问题。
+	7.优化开机动画重复播放异常和帧率提速后无改善问题。
+	8.优化pxp输出ARGB888格式的黑屏问题。
+	9.系统锁相环时钟syspll改为400M。
+	10.更新mfc分频系数（由1分频改为2分频）
+	11.AWTK添加NOVG
+		1）. 以前的版本定义AWTK宏定义时需要同时定义VG_ONLY，现在的版本VG_ONLY只表示既不使用AWTK UI引擎也不使用LVGL UI引擎，即仅调用vg接口的单指针和双指针表盘demo。
+			AWTK宏表示使用AWTK UI引擎, VG_ONLY和AWTK都没有定义的话表示使用LVGL UI引擎。
+		2）. 使用awtk时默认是使用vg加速的，如果不用vg加速的话需要修改awtk库工程配置去掉DIRTY_RECTS_CLIP_SUPPORT，WITH_VGCANVAS，WITH_VG_GPU宏定义，
+			修改amt630hv100-AWTK工程配置去掉VG_DRIVER，WITH_VGCANVAS，WITH_VG_GPU宏定义。
+			另外需要使用芯片blend2d模块来加速的话需要修改awtk库工程配置添加WITH_G2D宏定义，修改amt630hv100-AWTK工程配置添加WITH_ARK_G2D宏定义。
+	12.ADC时钟频率改为1M。
+	13.低电压复位电压由2.5V改为2.8V。
+	14.增加一款32M spi flash（PCT25VF016B）。
+	15.增加spi nand flash驱动（支持DS35Q1GA）。
+	16.更新STEPLDR工程的lcd时钟频率（系统锁相环时钟配置为400M，整数分频后实际频率396M，所有LCD时钟源频率需要同步更新为396M）.
+
+v20220915
+	1.优化手机互联引起的系统卡死问题。
+	2.USB添加NCM功能。
+	3.添加EMMC支持。
+	4.添加ULOG日志管理。
+	5.修改gpio96-gpio99寄存器配置。
+	6.高速串口先初始化再配置pad脚，否则在初始化过程中有收到数据会导致串口出错。
+	7.添加红外遥控功能。
+
+v20220916
+	1.优化亿联WiFi启动慢的问题。
+	2.更新亿联库。
+	3.屏蔽ulog。
+	4.升级串口默认改为uart3（否则会跟手机互联的蓝牙通信串口重复使用uart1）。
+
+v20221028
+	1.更新STEPLDR工程中串口升级中存在的bug(FlashBurn返回值判断异常)。
+	2.更新MIPI屏升级进度条没有居中问题。
+	3.VGONLY工程添加亿联手机互联初始化接口。
+	4.添加输入功能pwm驱动。
+	5.更新亿联手机互联的手机联网后无法连接的问题。
+	6.更新尔雅手机互联的苹果手机投屏时占用过多内存问题。
+	7.添加WIFI和BT的复位控制脚宏定义。
+
+v20221213
+	1.更新adc驱动，拓展支持adc的ch4~ch7。
+	2.更新苹果手机互联右测图像切边（切掉几个像素点）问题。
+	3.更新手机互联蓝牙模块库文件。
+	4.支持SPI NAND FLASH的四线读写模式。
+	5.优化SPI NAND FLASH的JTAG升级失败问题。
+	6.添加支持DS35Q2GA型号的SPI NAND FLASH。
+	7.更新i2s放音结束后产生气泡音问题。
+	8.更新I2S全双工模式功能。
+	9.更新解析非标准WAV音频文件头信息。
+	10.更新蓝牙驱动和库文件。
+
+v20230318
+	1.添加支持W25Q512JVF型号的SPI NOR FLASH。
+	2.优化PXP旋转后的自动切边问题。
+	3.优化退出倒车时的延时问题。
+	4.手机互联投屏显示数据源格式改为NV12（避免源图像经过PXP转换格式后导致图像变模糊）。
+	5.添加一款TTL显示屏（ST7701S）驱动，分辨率：480x960。
+	6.更新串口升级工具“630HV100串口升级工具V2.0.exe”。
+	7.LVGL工程配置更新目标文件校验路径（Options->Build Actions->Post-build command line: $PROJ_DIR$\gen_checksum.exe $PROJ_DIR$\LVGL\Exe\amt630hv100.bin）。
+	8.更新串口升级中的内存访问越界问题。
+	9.更新SD多次插拔后引起系统崩溃问题。
+	10.更新STEPLDR工程中mmu配置。
+	11.硬件原理图资料更新。
+	12.I2S驱动bug（寄存器状态位和时钟使能位）更新。
+	13.芯片引脚复用功能表更新。
+	14.优化STEPLDR工程中spi nor flash的兼容问题。
+	15.优化amt630hV100-sdk-beta工程中spi nand flash驱动的块擦除接口存在的bug。
+	16.优化emmc驱动。
+	17.添加OTA升级功能。
+
+v20230428
+	1.添加ft6336u触摸屏驱动，统一触摸屏初始化和配置接口，把多种触摸驱动放在touchscreen目录下统一管理。
+	2.优化USB device模式下频繁断开重连设备引起的异常问题（gadget.c）。
+	3.系统启动时关闭osd1，避免OSD1层初始化后显示异常数据。
+	4.配置pwm时去掉关闭pwm的操作，避免通过pwm调节背光亮度时引起瞬间黑屏的现象。
+	5.添加i2c模块宏控制开关（两路硬件i2c和多路模拟i2c），屏蔽未使用的i2c模块。
+	6.添加关机动画接口。
+	7.更新亿联库ECTiny.SZKY06.1.0.8.1.2debec9.AMT630-20230302,蓝牙库v1.4.0,wifi库wlan_lib_v1.6。
+	8.解决亿联安卓app在特定时间点上点击重新连接一直连接不上的问题。
+	9.异化wifi ap的名称。
+	10.更新“7”中亿联蓝牙和wifi库后系统ROM和堆栈空间不够，调整内存配置参数(amt630hv100_awtk.icf)。
+	11.更新LCD时序参数VSW0_v_fall。
+	12.更新芯片IO口驱动能力，由默认的8ma改为4ma（8ma影响EMC的认证，并且系统瞬态电流变大会影响高低温测试时的稳定性）（AMTLDR/Src/Entry.c）。
+	13.更新i2s的IO口驱动能力（改为2ma），优化i2s的波形(更新文件：pinctrl.c)。
+	14.手机互联默认分辨率调整为自适应屏幕大小。
+
+v20230605
+	1.更新PXP驱动，旋转支持ARGB8888输入格式（缩放不支持）。
+	2.支持NCM功能（具体请参考“Doc/amt630hv100 NCM模式使用说明.pdf”）。
+	3.优化lcd中断处理函数中的冗余代码。
+	4.更新“Tools/630HV100烧录文件合成工具”,新工具兼容了双备份程序的sysinfo。
+	5.更新FAT16文件系统最小簇值，避免SPI NOR FLASH的指定分区（比如指定OTA分区）过小时引起FAT16文件系统初始化失败。
+
+v20230914
+	1、更新gpio驱动能力配置，删除AMTLDR/Src/Entry.c中的rSYS_IO_DRIVER07配置，此寄存器不可配置，否则可能会概率性引起其他模块供电异常【必要更新】。
+		【说明】：此改动必须更新。
+	2、更新spi nand flash驱动，以兼容spi nor flash驱动接口的调用（spi nand和spi nor存储单元擦除单位不一致，所以接口使用时不兼容）。
+		兼容逻辑：spi nand写数据时，如果数据不是整块被写入，就会先备份块内数据，其次在备份数据buffe中替换要写入的数据，然后擦除块，最后写入整块的备份数据。
+		此功能通过宏“SNFUD_ERASE_WRITE_DYNAMIC_MANAGE”控制开关，默认已经打开，如果不需要兼容spi nor flash驱动接口，可以自行屏蔽。
+	3、更新lvgl库里pxp缩放参数，添加对argb8888格式的支持。
+	4、更新SD卡和spi flash的文件系统驱动，优化指定挂载分区的处理逻辑，解决指定挂载分区大小超过实际存储空间后使用异常的问题。
+	5、更新“630H升级包工具V2.8.exe”，默认改成4096字节对齐，不用再手动设置升级文件的对齐地址。
+	6、添加msleep函数接口（usb hcd.c、es7243e.c中部分mdelay改为msleep）。
+
+v20231221
+	1、更新lvds屏启动时概率性闪白点问题。
+		modified:   STEPLDR/Src/Entry.c
+		modified:   STEPLDR/Src/lcd.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
+	2、优化ota升级和抓日志逻辑。
+		modified:   amt630hv100-freertos/app/net_log.c
+		modified:   amt630hv100-freertos/app/net_update.c
+	3、stepldr工程添加模拟i2c驱动。
+		modified:   STEPLDR/Src/board.h
+		modified:   STEPLDR/Src/amt630h.h
+		new file:   STEPLDR/Src/i2c-gpio.c
+		new file:   STEPLDR/Src/i2c-gpio.h
+		new file:   STEPLDR/Src/i2c.c
+		new file:   STEPLDR/Src/i2c.h
+	4、gpio驱动添加gpio引脚模式配置。
+		modified:   STEPLDR/Src/gpio.c
+		new file:   STEPLDR/Src/pinctrl.c
+		new file:   STEPLDR/Src/pinctrl.h
+	5、优化sdmmc驱动中概率性出现的发送指令或者数据后等待寄存器返回状态时的超时异常问题.
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/sdmmc.c
+	6、优化ulog接口在中断中调用时的异常问题。
+		modified:   amt630hv100-freertos/lib/ulog/ulog.c
+		modified:   amt630hv100-freertos/lib/ulog/ulog.h
+	7、优化ulog保存到flash的逻辑。
+		modified:   amt630hv100-freertos/app/net_log.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-FAT/portable/common/ff_sddisk.h
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-FAT/portable/ff_sddisk.c
+	8、修复ncm设备拔插后出现概率性无法识别问题。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/ark_dwc2.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/ark_dwc2.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/core.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/core_intr.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/gadget.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/hcd.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/udc/ether.c
+	9、优化USB异常初始化为usb full speed时基于ncm抓log的相关逻辑
+		modified:   amt630hv100-freertos/app/net_log.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/core.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/gadget.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/hcd.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/udc/ether.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/udc/f_ncm.c
+	10、修改ncm设备IP地址（192.168.13.1->192.168.2.100），网段跟net_log.c中一致。
+		modified:   amt630hv100-freertos/app/carlink/common/ark_network.c
+	11、PXP驱动添加水平镜像和垂直镜像宏定义开关
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/pxp.c
+	12、修改触摸屏多点控制宏开关使用bug
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/touchscreen/ft6336.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/touchscreen/gt9xx.c
+	13、优化nand flash初始化打印信息
+		modified:   lib/sfud/src/snfud.c
+	14、屏蔽开机动画中的关机动画逻辑（冗余逻辑）
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/animation.c
+	15、音频放音添加音量设置接口
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/soc-dai.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/es8156.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/i2s.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/audio/drv_sound.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/i2s.c
+
+v20240626：
+	1、更新SPI Nand Flash驱动，优化坏块管理存在的问题【重要更新】。
+		【说明】：使用spi nand flash请务必更新,相关说明请参考”Doc/amt630hv100 SPI NAND FLASH使用说明.pdf“。
+		modified:   AMTLDR/Src/SpinandBooter.c
+		modified:   AMTLDR/Src/amt630h.h
+		modified:   STEPLDR/Src/SpinandBooter.c
+		modified:   STEPLDR/Src/amt630h.h
+		modified:   amt630hv100-freertos/lib/sfud/inc/sfud.h
+		modified:   amt630hv100-freertos/lib/sfud/inc/snfud_def.h
+		modified:   amt630hv100-freertos/lib/sfud/src/snfud.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/sysinfo.c
+		add:		Doc/amt630hv100 SPI NAND FLASH使用说明.pdf
+	2、优化mipi屏驱动，方便客户自行调屏。
+		modified:   STEPLDR/Src/amt630h.h
+		modified:   STEPLDR/Src/mipi.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/mipi.c
+	3、优化升级进度条显示时的LCD时序配置。
+		modified:   STEPLDR/Src/lcd.c
+	4、更新uvc驱动，优化uvc iso传输时的异常参数，uvc接口调用时添加宏开关控制。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_uvc.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_uvc.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/ark_dwc2.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb.c
+	5、优化I2S驱动，全双工时录音和放音需要同时打开。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/i2s.c
+	6、优化TTL(RGB)屏低温概率性卡死问题（DDR锁相环时钟由700M降到600M。LVDS屏没有此问题，可以保持700M）
+		modified:   AMTLDR/Src/Entry.c
+	7、优化usb初始化时的耗时问题。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/core.c
+	8、优化usb的传输速率。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_massstorage.c
+	9、更新vg driver库VG_DRIVER_AWTK.a，补充VG库各个线程的名称。
+		modified:   amt630hv100-freertos/lib/vg_driver/VG_DRIVER_AWTK.a
+	10、更新pwm capture驱动。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/pwm_cap.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/pwm_cap.h
+	11、更新spi1 slave模式驱动， 并添加宏定义控制SPI1的开关。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/ecspi.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/spi.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/pinctrl.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+	12、修改AWTK线程优先级为16，并修改AWTK UI线程名称。
+		modified:   amt630hv100-freertos/lib/vg_driver/vg_driver_wrapper.c
+	13、更新IIC驱动，优化i2c通讯异常后一直报错无法恢复的问题（原因是fifo深度不够）。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/i2c-dw.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/i2c-dw.h
+	14、更新定时器驱动，获取当前tick值时添加互斥操作。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/timer.c
+	15、更新CAN驱动，优化寄存器异常配置的问题。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/can.c
+	16、优化手机互联退出后显示层残留手机投屏图象的问题。
+		modified:   amt630hv100-freertos/app/carlink/common/carlink_video.c
+	17、更新wifi的网络协议栈lwip；添加wifi的p2p功能；更新亿联手机互联和wifi模块rtl8821cs驱动。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+		modified:   amt630hv100-freertos/app/main_awtk.c
+		modified:   amt630hv100-freertos/app/main_lvgl.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/include/linux/usb/ether.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/udc/ether.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/udc/f_ncm.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-CLI/Sample-CLI-commands.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-TCP/include/FreeRTOS_IP.h
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-TCP/iperf_task.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-TCP/portable/NetworkInterface/rtl8821cs/iot_wifi.c
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-TCP/portable/NetworkInterface/rtl8821cs/iot_wifi.h
+		modified:   amt630hv100-freertos/FreeRTOSConfig.h
+		modified:   amt630hv100-freertos/app/carlink/EC/include/ECTiny.h
+		modified:   amt630hv100-freertos/app/carlink/EC/include/ECTypes.h
+		modified:   amt630hv100-freertos/app/carlink/EC/lib/ECTiny.a
+		modified:   amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+		add:		amt630hv100-freertos/app/carlink/EC-orig/
+		add:		amt630hv100-freertos/app/carlink/EC/lib/ECTiny_old.a
+		add:		amt630hv100-freertos/app/carlink/EC/src/carlink_ec_no_lwip.c
+		modified:   amt630hv100-freertos/app/carlink/common/ark_network.c
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/api/wifi/wifi_conf.c
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/api/wifi/wifi_util.c
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/api/wifi/wifi_util.h
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/api/wifi_interactive_mode.c
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/os/os_dep/net_stack_intf.c
+		modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/platform/include/rtwlan_config.h
+		add:		amt630hv100-freertos/lib/wlan/rtl8821cs/api/wifi/rtw_wpa_supplicant/
+		add:		amt630hv100-freertos/lib/wlan/rtl8821cs/wlan_lib/wlan_lib_v1.5.a
+		add:		amt630hv100-freertos/lib/wlan/rtl8821cs/wlan_lib/wlan_lib_v1.8.a
+		add:		amt630hv100-freertos/lib/lwip/
+		modified:   amt630hv100-freertos/proj/amt630hv100.ewp
+		modified:   amt630hv100-freertos/proj/amt630hv100_awtk.icf
+		modified:   amt630hv100-freertos/proj/amt630hv100_lvgl.icf
+	18、更新awtk的Meter.v2-Demo，添加亿联手机互联的二维码扫描连接界面。
+		modified:   amt630hv100-freertos/app/main_awtk.c
+		modified:   amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+		modified:   amt630hv100-freertos/lib/awtk/awtk-examples/Meter.v2-Demo
+		add:		amt630hv100-freertos/lib/awtk/awtk/3rd/awtk-widget-qr/
+	19、添加差分升级功能。
+		modified:   amt630hv100-freertos/app/main_awtk.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/ota_update.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/ota_update.c
+		add:		amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/delta_update.h
+		add:		amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/delta_update.c
+		add:		amt630hv100-freertos/lib/HPatch/
+		add:		Tools\差分升级工具
+		add:		Doc\amt630hv100 差分升级使用说明.pdf
+		//串口升级支持差分升级
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/uart.c
+		modified：	Tools\630HV100串口升级工具
+	20、公版原理图资料更新。
+		modified:	Doc\公版原理图
+
+v20250428：
+	1、开机动画动态识别图片格式并解码显示（仅支持yuv420/yuv422格式的jpeg图片）。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/animation.c
+
+		//设置VIDEO_DISPLAY_WIDTH和VIDEO_DISPLAY_HEIGHT 16字节对齐，否则yuv422格式会造成内存溢出。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+
+		//更新LCD驱动，添加yuv模式通用设置接口和参数，支持y_uv420/y_u_v420/y_uv422/y_u_v422四种格式。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/lcd.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
+		modified:   amt630hv100-freertos/app/carlink/common/carlink_video.c		//调用LCD显示格式的地方同步更新。
+
+		//jpeg解码驱动中添加解码接收缓存大小校验逻辑，避免图片过大造成接收缓存内存溢出。
+		modified:   amt630hv100-freertos/lib/hx170dec/src/mfcapi.c
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_uvc.c	//调用JPEG解码接口的地方同步更新。
+	2、优化插U盘上电启动时偶发卡死的问题
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_os_adapter.h
+	3、优化USB模式切换时的等待时间
+		 modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/core.c
+	4、优化uvc驱动里的冗余代码
+		 modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/usb_uvc.c
+	5、更新amtldr和stepldr工程中spi nand flash驱动，优化驱动的兼容性。
+		modified:   AMTLDR/Src/SpinandBooter.c
+		modified:   STEPLDR/Src/SpinandBooter.c
+	6、优化stepldr工程中的模拟i2c驱动，启动时钟延展功能，避免i2c通信时部分设备通信异常
+		modified:   STEPLDR/Src/i2c-gpio.c
+	7、优化文件系统接口中的bug
+		modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-FAT/ff_string.c
+	8、更新说明文档”amt630hv100_bsp_user_guider.pdf“，添加awtk工程配置说明
+	9、添加无线carplay和android auto（默认awtk工程开启，lvgl和openvg工程参考main_awtk.c添加初始化接口）
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/lcd.h
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
+        modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/FreeRTOS-Plus-POSIX/include/FreeRTOS_POSIX_types.h
+        modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/FreeRTOS-Plus-POSIX/include/portable/FreeRTOS_POSIX_portable.h
+        modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/FreeRTOS-Plus-POSIX/include/portable/FreeRTOS_POSIX_portable_default.h
+        modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_pthread.c
+        modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/include/FreeRTOS_POSIX/pthread.h
+        modified:   amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+        modified:   amt630hv100-freertos/app/carlink/EC/src/carlink_ec.h
+        deleted:    amt630hv100-freertos/app/carlink/EC/src/carlink_ec_no_lwip.c
+        modified:   amt630hv100-freertos/app/carlink/common/carlink_video.c
+        modified:   amt630hv100-freertos/app/carlink/common/carlink_video.h
+        modified:   amt630hv100-freertos/app/main_awtk.c
+        modified:   amt630hv100-freertos/lib/bt/fsc_bt/console.c
+        modified:   amt630hv100-freertos/lib/bt/fsc_bt/console.h
+        modified:   amt630hv100-freertos/lib/bt/fsc_bt/fsc_bt.c
+        modified:   amt630hv100-freertos/lib/bt/fsc_bt/fscbt_interface.h
+        modified:   amt630hv100-freertos/lib/bt/fsc_bt/lib/blueware.a
+        modified:   amt630hv100-freertos/lib/lwip/src/include/lwipopts.h
+        modified:   amt630hv100-freertos/lib/lwip/src/netif/ethernetwlanif.c
+        modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/os/customer_rtos/customer_rtos_service.c
+        modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/os/os_dep/net_stack_intf.c
+        modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/platform/include/rtwlan_config.h
+        modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/platform/sdio/wifi_io.c
+        modified:   amt630hv100-freertos/lib/wlan/rtl8821cs/platform/sdio/wifi_io.h
+        modified:   amt630hv100-freertos/proj/amt630hv100.ewp
+        modified:   amt630hv100-freertos/proj/amt630hv100_awtk.icf
+		add:		amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/include/FreeRTOS_POSIX/syslog.h
+        add:		amt630hv100-freertos/app/carlink/AA/
+        add:		amt630hv100-freertos/app/carlink/CP/
+        add:		amt630hv100-freertos/app/carlink/common/carlink_bt_wifi.c
+        add:		amt630hv100-freertos/app/carlink/common/carlink_common.c
+        add:		amt630hv100-freertos/app/carlink/common/carlink_common.h
+        add:		amt630hv100-freertos/lib/faad2/
+        add:		amt630hv100-freertos/lib/opus/
+        add:		amt630hv100-freertos/lib/wlan/rtl8821cs/wlan_lib/wlan_lib_v2.1.a
+        add:		amt630hv100-freertos/lib/wolfssl/
+	10、优化spi nand flash驱动，兼容W25N01GV和W25N02KV两款型号。
+		 modified:   AMTLDR/Src/SpinandBooter.c
+		 modified:   STEPLDR/Src/SpinandBooter.c
+		 modified:   amt630hv100-freertos/lib/sfud/inc/snfud_def.h
+		 modified:   amt630hv100-freertos/lib/sfud/src/snfud.c
+
+v20250625：
+	1、手机互联优化更新
+		1.1、增加DISABLE_CARLINK_H264_FRAME_BUF，选择手机互联视频解码是要缓存h264帧；
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_video.c
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_video.h
+		1.2、解决carplay连接的问题，增加carplay保存数据裸读写flash的接口;
+			modified:   amt630hv100-freertos/app/carlink/CP/src/carlink_cp.c
+			modified:   amt630hv100-freertos/app/carlink/CP/include/carplay.h
+			modified:   amt630hv100-freertos/app/carlink/CP/include/mycommon.h
+		1.3、解决android auto连接的问题；
+			modified:   amt630hv100-freertos/app/carlink/AA/src/carlink_aa.c
+			modified:   amt630hv100-freertos/app/carlink/AA/src/AndroidAuto.h
+		1.4、增加了设置/获取线程名的接口；
+			modified:   amt630hv100-freertos/FreeRTOS-Plus/FreeRTOS-Plus-POSIX/FreeRTOS-Plus-POSIX/source/FreeRTOS_POSIX_pthread.c
+		1.5、手机互联更新文件列表如下
+			modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+			modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/source/keypad.c
+			modified:   amt630hv100-freertos/FreeRTOSConfig.h
+			modified:   amt630hv100-freertos/app/carlink/AA/lib/AndroidAuto.a
+			modified:   amt630hv100-freertos/app/carlink/AA/src/carlink_aa.c
+			modified:   amt630hv100-freertos/app/carlink/CP/include/carplay.h
+			modified:   amt630hv100-freertos/app/carlink/CP/include/mycommon.h
+			modified:   amt630hv100-freertos/app/carlink/CP/lib/carplay.a
+			modified:   amt630hv100-freertos/app/carlink/CP/src/carlink_cp.c
+			modified:   amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+			modified:   amt630hv100-freertos/app/carlink/EY/carlink_ey.c
+			modified:   amt630hv100-freertos/app/carlink/common/ark_network.c
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_bt_wifi.c
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_common.c
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_video.c
+			modified:   amt630hv100-freertos/app/carlink/common/carlink_video.h
+			modified:   amt630hv100-freertos/app/main_awtk.c
+			modified:   amt630hv100-freertos/app/main_lvgl.c
+			modified:   amt630hv100-freertos/lib/lwip/src/include/lwipopts.h
+			modified:   amt630hv100-freertos/proj/amt630hv100_lvgl.icf
+	2、更新lvgl库编译报错问题
+		modified:   amt630hv100-freertos/lib/LittlevGL/lv_drivers/display/arklcd.c
+	3、优化SPI四线模式dma传输速率慢引起的fifo溢出问题，提高spi所占用dma通道的优先级。
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/include/dma.h
+		modified:   amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/audio/drv_sound.c
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/dma.c
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/dwspi.c
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/ecspi.c
+        modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/sdmmc.c
+		modified:   amt630hv100-freertos/lib/sfud/port/sfud_port.c
+        modified:   amt630hv100-freertos/lib/sfud/src/sfud.c
+	4、添加一款32MBytes的spi nor flash，型号GD25Q256EY1G。
+		modified:   AMTLDR/Src/SpiBooter.c
+		modified:   STEPLDR/Src/SpiBooter.c
+		modified:   amt630hv100-freertos/lib/sfud/inc/sfud_flash_def.h
+	5、优化音频放音时对音频源文件解析的兼容性，避免部分非标准格式音频解析失败。
+		modified:   amt630hv100-freertos/app/main_lvgl.c
+	6、优化USB NCM初始化枚举过程中异常报错的问题
+		modified:   amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/usb/gadget.c
+	7、优化更新spi nand flash驱动，以兼容不同型号的flash，并添加支持三款flash：MX35LF1G、MX35LF2G、MX35LF4G。
+		modified:   AMTLDR/AMTLDR.icf
+		modified:   AMTLDR/Src/SpinandBooter.c
+		modified:   STEPLDR/Src/SpinandBooter.c
+		modified:   amt630hv100-freertos/lib/sfud/src/sfud.c
+		modified:   amt630hv100-freertos/lib/sfud/inc/snfud_def.h

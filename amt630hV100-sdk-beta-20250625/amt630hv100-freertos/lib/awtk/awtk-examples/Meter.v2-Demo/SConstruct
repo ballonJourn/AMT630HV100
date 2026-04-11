@@ -1,0 +1,13 @@
+﻿import os
+import scripts.app_helper as app
+
+ARGUMENTS['SHARED'] = 'False'
+ARGUMENTS['IDL_DEF'] = 'False'
+helper = app.Helper(ARGUMENTS)
+CUSTOM_WIDGET_LIBS = ['awtk-widget-qr']
+helper.add_libs(CUSTOM_WIDGET_LIBS)
+helper.call(DefaultEnvironment)
+
+CustomWidgetSConscriptFiles = ['3rd/widgets/awtk-widget-qr/src/SConscript']
+SConscriptFiles = CustomWidgetSConscriptFiles + ['src/SConscript']
+SConscript(SConscriptFiles)
