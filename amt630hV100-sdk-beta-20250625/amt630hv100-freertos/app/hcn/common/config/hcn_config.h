@@ -67,8 +67,8 @@ extern "C" {
 #endif
 
 ///< OSD显示设置, UI显示大小
-#define OSD_WIDTH      1024 
-#define OSD_HEIGHT     600           
+#define OSD_WIDTH      800
+#define OSD_HEIGHT     480       
 
 /**
  * @brief memory config 以FreeRTos + AWTK为例
@@ -156,7 +156,7 @@ extern "C" {
 #endif  
 
 ///< 手机互联名称信息配置
-#define HCN_WIFI_NAME_FORMAT_ENABLE                 ///< hcn wifi名称格式化使能,否则使用默认名称
+//#define HCN_WIFI_NAME_FORMAT_ENABLE                 ///< hcn wifi名称格式化使能,否则使用默认名称
 #define HCN_DEFAULT_AP_NAME             "ap63011"   ///< 默认wifi ap名称
 #define HCN_CUSTOMER_NAME               "HCN"       ///< 客户名称前缀，会改变
 #define HCN_MANUFACTURER_NAME           "HCN"       ///< 制造商名称，固定不改变

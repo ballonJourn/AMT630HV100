@@ -296,8 +296,8 @@
 #define CARLINK_EY			0
 //如果要将亿联,carplay和android auto都使能，有可能苹果手机和支持android auto的安卓手机都安装了亿联的应用,
 //v100端应用程序必须加上设置界面来配置优先选择连亿联还是手机自带的互联(android auto/carplay)
-#define CARLINK_EC			1
-#define CARLINK_CP          0
+#define CARLINK_EC			0
+#define CARLINK_CP          1
 #define CARLINK_AA          0
 #endif
 
@@ -322,7 +322,7 @@
 /*******************************************/
 
 /************ i2c configuration ************/
-// #define HW_I2C0_SUPPORT			//Hardware i2c0 support
+#define HW_I2C0_SUPPORT			//Hardware i2c0 support
 #define HW_I2C1_SUPPORT			//Hardware i2c1 support
 //#define ANALOG_I2C_SUPPORT		//Analog i2c support
 

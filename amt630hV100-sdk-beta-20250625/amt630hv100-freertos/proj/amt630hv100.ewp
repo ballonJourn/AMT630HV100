@@ -3135,6 +3135,7 @@
                     <state>$PROJ_DIR$\..\lib\opus\opus.a</state>
                     <state>$PROJ_DIR$\..\lib\wolfssl\wolfssl.a</state>
                     <state>$PROJ_DIR$\..\lib\bt\fsc_bt\lib\gocGsp.a</state>
+                    <state>$PROJ_DIR$\..\app\carlink\CP\lib\carplay.a</state>
                 </option>
                 <option>
                     <name>IlinkOverrideProgramEntryLabel</name>
@@ -4042,9 +4043,6 @@
             </group>
             <group>
                 <name>cp</name>
-                <excluded>
-                    <configuration>AWTK</configuration>
-                </excluded>
                 <file>
                     <name>$PROJ_DIR$\..\app\carlink\CP\src\carlink_cp.c</name>
                 </file>

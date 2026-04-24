@@ -659,7 +659,7 @@ void lvds_avdd_init(void) {
   rSYS_PAD_CTRL03 = val;
   
   //set pwm
-  pwm_config(2, 0, 1200000);
+  pwm_config(2, 35000, 100000);
   pwm_enable(2); 
 }
 

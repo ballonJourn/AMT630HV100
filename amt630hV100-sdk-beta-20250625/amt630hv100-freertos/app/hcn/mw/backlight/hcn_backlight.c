@@ -182,8 +182,8 @@ bool is_change_backlight_success(uint8_t level) {
 }
 
 #if HCN_LCD_INTERFACE_TYPE == HCN_LCD_INTERFACE_LVDS
-#define AVDD_PWM_PERIOD (1200000)
-#define AVDD_PWM_DUTY_VALUE (0)
+#define AVDD_PWM_PERIOD (100000)
+#define AVDD_PWM_DUTY_VALUE (35000)
 
 void lvds_avdd_init(void) {
     hal_gpio_set_output(HCN_AVDD_EN_GPIO, 1);

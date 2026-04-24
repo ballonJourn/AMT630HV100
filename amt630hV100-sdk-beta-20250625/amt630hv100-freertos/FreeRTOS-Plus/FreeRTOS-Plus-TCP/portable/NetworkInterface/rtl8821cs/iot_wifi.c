@@ -1115,12 +1115,14 @@ int wifi_ap_test_proc()
 }
 
 #if (!CARLINK_EY && !CARLINK_EC) && (USE_LWIP == 1)
+#if 0
 eDHCPCallbackAnswer_t xApplicationDHCPHook( eDHCPCallbackPhase_t eDHCPPhase, uint32_t ulIPAddress )
 {
 	(void)eDHCPPhase;
 	(void)ulIPAddress;
 	return eDHCPStopNoChanges;
 }
+#endif
 #endif
 
 int start_sta_proc(const char* ssid, const char* passwd, char need_passwd)

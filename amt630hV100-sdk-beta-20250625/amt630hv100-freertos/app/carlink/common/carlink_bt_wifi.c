@@ -527,10 +527,11 @@ static void carlink_bt_callback(char * cAtStr)
 		carlink_carplay_ie_replace_bt_mac(cAtStr + 6, 12);
 #endif
 		g_cp_bt_mac_ready = true;
-
+#if 0
 		if (bt_msg_task_add(cAtStr, strlen(cAtStr)) != 0) {
 			printf("bt_callback_ec bt mac send fail!\r\n");
 		}
+#endif
 	} 
 
 #if !CARLINK_EC
@@ -593,6 +594,7 @@ static void carlink_bt_callback(char * cAtStr)
 		ev.link_type = AUTO_WIRELESS;
 		carlink_notify_event(&ev);
     } else {
+#if 0
 		if (0 != strncmp(cAtStr, "+PBDATA=1", 9)) {
             printf("bt_callback_ec %s\r\n", cAtStr);
         }
@@ -600,6 +602,7 @@ static void carlink_bt_callback(char * cAtStr)
 		if (bt_msg_task_add(cAtStr, strlen(cAtStr)) != 0) {
 			printf("bt_callback_ec msg full!\r\n");
 		}
+#endif
 	}
 }
 
