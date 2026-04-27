@@ -36,8 +36,8 @@
 #define UVC_HEADER_LEN						0x0c
 
 #define UVC_MAX_ENDPOINT_LEN				0x2000
-#define UVC_VIDEO_WIDTH						1024
-#define UVC_VIDEO_HEIGHT					600
+#define UVC_VIDEO_WIDTH						1280
+#define UVC_VIDEO_HEIGHT					720
 #define UVC_JPEG_FIFO_COUNT					4
 
 #define UVC_JPEG_BUF_SIZE 					(UVC_VIDEO_WIDTH * UVC_VIDEO_HEIGHT)
@@ -716,8 +716,8 @@ static int uvc_iso_data_proc(uvc_dev_info_t *uvc)
 		if (bfh & UVC_STREAM_EOF) {
 			//printf("### EOF\n");
 			xSemaphoreTake(uvc->frame_list_mutex, portMAX_DELAY);
-			if ((frame->buf[12] == 0xff) && (frame->buf[13] == 0xd8) &&
-				(frame->buf[frame->len+10] == 0xff) && (frame->buf[frame->len+11] == 0xd9)) {
+			if ((frame->buf[12] == 0xff) && (frame->buf[13] == 0xd8) //&&
+				/*(frame->buf[frame->len+10] == 0xff) && (frame->buf[frame->len+11] == 0xd9)*/) {
 				CP15_clean_dcache_for_dma((uint32_t)frame->buf, (uint32_t)frame->buf + frame->len);
 				vListInsertEnd(&uvc->frame_ready_list, &frame->entry);
 				xSemaphoreGive(uvc->frame_list_mutex);
