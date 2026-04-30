@@ -31,8 +31,8 @@ extern "C" {
 #define HCN_LCD_INTERFACE_MIPI		(3)
 
 ///< 屏幕分辨率
-#define HCN_LCD_WIDTH	            800
-#define HCN_LCD_HEIGHT	            480
+#define HCN_LCD_WIDTH	            1024
+#define HCN_LCD_HEIGHT	            600
 
 ///< 屏幕色深
 #define HCN_LCD_BPP		            32
@@ -203,6 +203,14 @@ extern "C" {
 #endif
 
 ///< use flash db 
+
+/**
+ * @brief HCN_DC002 (1024x600) 配置覆盖
+ * 编译DC002时需定义 HCN_DC002_ENABLE 宏
+ */
+#ifdef HCN_DC002_ENABLE
+#include "hcn_dc002_config.h"
+#endif
 //#define HCN_USE_FLASH_DB_ENABLE
 
 #ifdef __cplusplus

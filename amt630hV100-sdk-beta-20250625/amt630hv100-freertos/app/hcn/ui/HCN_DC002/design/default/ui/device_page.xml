@@ -1,0 +1,27 @@
+<window name="device_page" style:normal:bg_color="#000000">
+  <view name="view" x="13" y="12" w="998" h="575" style:normal:border_color="#00000000">
+    <label name="title_lbl" x="393" y="12" w="205" h="44" style:normal:font_size="38" style:normal:font_name="default" style:normal:text_align_h="center" sensitive="false" focusable="true" focused="true" style:normal:text_color="#FFFFFF" text="OTA"/>
+    <label name="label" x="129" y="68" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" text="UUID："/>
+    <label name="label" x="129" y="136" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" style:normal:font_name="default" tr_text="Bluetooth Name："/>
+    <label name="label" x="129" y="206" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="Bluetooth Ver:"/>
+    <label name="label" x="129" y="275" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" text="OTA："/>
+    <label name="label" x="129" y="346" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="SN："/>
+    <label name="label" x="129" y="415" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="Version："/>
+    <label name="label" x="129" y="485" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="CarBit："/>
+    <label name="label" x="129" y="549" w="218" h="39" style:normal:font_size="32" style:normal:text_align_h="left" style:normal:text_color="#FFFFFF" tr_text="OTA_state"/>
+    <label name="uuid_status" x="800" y="64" w="78" h="45" style:normal:font_size="25" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="uuid" x="562" y="64" w="216" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF"/>
+    <label name="bluetooth" x="660" y="132" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="bluetooth_ver" x="660" y="202" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="ota" x="660" y="271" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="sn" x="660" y="342" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="version" x="660" y="411" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="carBit" x="660" y="481" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#FFFFFF" text="--"/>
+    <label name="ota_state" x="660" y="544" w="218" h="45" style:normal:font_size="32" style:normal:text_align_h="right" style:normal:text_color="#14FF3C" tr_text="OTA_no_start"/>
+  </view>
+  <view name="view1" x="351" y="165" w="324" h="260" style:normal:bg_color="#00000000">
+    <progress_circle name="progress_circle" x="59" y="49" w="202" h="160" start_angle="-90" style:normal:text_color="#FFFFFF" format="%d%%" style:normal:bg_color="#DBDBDB" line_width="13" style:normal:font_size="38" value="0"/>
+    <label name="lab_state" x="56" y="1" w="205" h="34" style:normal:font_size="28" style:normal:text_color="#FFFFFF" tr_text="null"/>
+    <label name="lab_error" x="59" y="211" w="205" h="35" style:normal:font_size="28" style:normal:text_color="#FFFFFF" tr_text="null"/>
+  </view>
+</window>

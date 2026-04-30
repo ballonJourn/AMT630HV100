@@ -1,0 +1,6 @@
+<?xml parent="{&quot;x&quot;:&quot;0&quot;,&quot;y&quot;:&quot;0&quot;,&quot;w&quot;:&quot;100%&quot;,&quot;h&quot;:&quot;100%&quot;,&quot;name&quot;:&quot;component&quot;}"?>
+<view name="call_aniamtor" x="223" y="-64" w="580" h="64" animation="opacity(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,from=0,to=255);move(name=call_animation,easing=linear,auto_start=false,auto_destroy=false,x_from=228,x_to=228,y_from=-64,y_to=59);move(name=calling_tips,delay=800,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,x_from=228,x_to=228,y_from=59,y_to=50)">
+  <image name="image2" x="49" y="9" w="51" h="50" draw_type="scale" image="call_huang"/>
+  <image name="image7" x="470" y="10" w="51" h="50" draw_type="scale" image="call_pick"/>
+  <label name="call_pop_tips" x="127" y="0" w="321" h="35" style:normal:font_name="default_2" style="call_tips" style:normal:round_radius="25" tr_text="call_pop_output"/>
+</view>
