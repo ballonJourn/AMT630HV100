@@ -36,16 +36,16 @@
     <label name="odo_label" x="809" y="9" w="102" h="35" style:normal:font_name="default" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="999999"/>
     <label name="odo_unit" x="916" y="9" w="44" h="35" style:normal:font_name="default" style:normal:text_align_h="left" style:normal:font_size="35" style:normal:text_align_v="bottom" text="km"/>
   </view>
-  <view name="electrical_view" x="228" y="548" w="568" h="50" style:normal:bg_image="power_level_bg">
-    <progress_bar name="electrical_bar" x="192" y="21" w="186" h="12" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00FF00" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" style:normal:fg_image="" style:normal:fg_image_draw_type="repeat9" style:normal:icon="" style:normal:icon_at="right" animation="value(name=animation_demo,duration=2000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" value="100"/>
+  <view name="electrical_view" x="228" y="548" w="568" h="52" style:normal:bg_image="power_level_bg">
+    <progress_bar name="electrical_bar" x="192" y="20" w="186" h="12" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00FF00" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" style:normal:fg_image="" style:normal:fg_image_draw_type="repeat9" style:normal:icon="" style:normal:icon_at="right" animation="value(name=animation_demo,duration=2000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" value="100"/>
     <label name="electrical_percentage" x="95" y="10" w="38" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
     <label name="label1" x="132" y="10" w="31" h="35" style:normal:text_color="#4A93BB" style:normal:font_size="33" style:normal:text_align_v="bottom" text="%"/>
     <label name="electrical_value" x="379" y="10" w="61" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
     <label name="electrical_unit" x="445" y="10" w="52" h="35" style:normal:text_color="#4A93BB" style:normal:font_size="35" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
   </view>
-  <pages name="pages" x="0" y="96" w="1024" h="418" style:normal:border_color="#00000000" value="0">
+  <pages name="pages" x="0" y="91" w="1024" h="418" style:normal:border_color="#00000000" value="0">
     <view name="home_pg" x="0" y="0" w="100%" h="100%">
-      <view name="speed_view" x="303" y="0" w="418" h="418" animation="move(name=move_speed_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=303,x_to=586,y_from=96,y_to=96);move(name=move_speed_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=586,x_to=303,y_from=96,y_to=96)">
+      <view name="speed_view" x="303" y="0" w="418" h="418" animation="move(name=move_speed_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=303,x_to=586,y_from=91,y_to=91);move(name=move_speed_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=586,x_to=303,y_from=91,y_to=91)">
         <image name="bg_cricle" x="0" y="0" w="418" h="418" draw_type="default" image="bg_cricle"/>
         <image name="bg_halo" x="49" y="49" w="320" h="320" draw_type="center" image="bg_halo_0"/>
         <image name="bg_center" x="73" y="73" w="272" h="272" draw_type="default" image="bg_center"/>
@@ -60,20 +60,20 @@
           <image name="gear_R" draw_type="center" style:normal:icon="gear_r_n" style:selected:icon="gear_r_p"/>
         </slide_menu>
       </view>
-      <view name="power_view" x="671" y="58" w="353" h="294" style:normal:bg_image="power_bg" animation="move(name=move_power_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=671,x_to=1024,y_from=154,y_to=154);move(name=move_power_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=1024,x_to=671,y_from=154,y_to=154)">
-        <image name="power_bg" x="37" y="245" w="256" h="32" draw_type="default" image="power_progress"/>
-        <image_value name="power_value" x="84" y="90" w="180" h="98" image="power_" format="%d" value="0" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
-        <slider min="0" name="power_progress" x="51" y="250" w="232" h="26" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="3" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" style="default"/>
+      <view name="power_view" x="688" y="63" w="336" h="300" style:normal:bg_image="power_bg" animation="move(name=move_power_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=688,x_to=1024,y_from=154,y_to=154);move(name=move_power_in,duration=450,easing=linear,auto_start=false,auto_destroy=false,x_from=1024,x_to=688,y_from=154,y_to=154)">
+        <image name="power_bg" x="50" y="243" w="256" h="32" draw_type="default" image="power_progress"/>
+        <image_value name="power_value" x="100" y="100" w="180" h="98" image="power_" format="%d" value="0" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
+        <slider min="0" name="power_progress" x="50" y="243" w="256" h="32" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="3" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" style="default"/>
       </view>
-      <view name="dock_selec_view" x="0" y="22" w="648" h="362">
-        <slide_view name="dock_slider_view" x="0" y="0" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default" vertical="true" animating_time="500" auto_play="0" animation="w(name=move_dock_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,from=353,to=622);w(name=move_dock_in,duration=350,easing=linear,auto_start=false,auto_destroy=false,from=622,to=353)" w="100%">
-          <view name="info_page" x="0" y="0" w="353" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <image name="image" x="137" y="60" w="52" h="52" draw_type="default" image="icon_riding_time"/>
-            <image name="image1" x="137" y="176" w="52" h="52" draw_type="default" image="icon_riding_distance"/>
-            <label name="ride_time" x="88" y="122" w="157" h="35" style:normal:font_size="30" text="0h 0min"/>
-            <label name="ride_distance" x="84" y="239" w="157" h="35" style:normal:font_size="30" text="0 km"/>
+      <view name="dock_selec_view" x="0" y="59" w="648" h="300">
+        <slide_view name="dock_slider_view" x="0" y="0" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default" vertical="true" animating_time="500" auto_play="0" animation="w(name=move_dock_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,from=336,to=648);w(name=move_dock_in,duration=350,easing=linear,auto_start=false,auto_destroy=false,from=648,to=336)" w="100%">
+          <view name="info_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+            <image name="image" x="133" y="44" w="52" h="52" draw_type="default" image="icon_riding_time"/>
+            <image name="image1" x="133" y="165" w="52" h="52" draw_type="default" image="icon_riding_distance"/>
+            <label name="ride_time" x="84" y="106" w="157" h="35" style:normal:font_size="30" text="0h 0min"/>
+            <label name="ride_distance" x="84" y="227" w="157" h="35" style:normal:font_size="30" text="0 km"/>
           </view>
-          <view name="navi_page" x="0" y="0" w="353" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+          <view name="navi_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <slide_view name="nav_slide_view" x="65" y="50" w="242" h="258">
               <view name="qr_view" x="0" y="0" w="242" h="258" visible="true">
                 <qr name="navi_qr" x="19" y="12" w="166" h="162" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000" disg:custom="container"/>
@@ -89,12 +89,12 @@
               </view>
             </slide_view>
           </view>
-          <view name="music_page" x="0" y="0" w="353" h="362" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+          <view name="music_page" x="0" y="0" w="336" h="300" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <image name="music_image" x="128" y="82" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
             <hscroll_label name="music_title" x="64" y="196" w="205" h="35" loop="true" style:normal:text_align_h="center" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:font_name="default_2" tr_text="no_music"/>
             <hscroll_label name="music_clyric" x="64" y="246" w="214" h="50" style:normal:font_size="28" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false" style="music_lyrics" style:normal:font_name="default_2"/>
           </view>
-          <view name="phone_page" x="0" y="0" w="353" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+          <view name="phone_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
             <view name="bt_connected" x="68" y="48" w="257" h="268" visible="false">
               <image name="phone_state_img" x="46" y="71" w="128" h="125" draw_type="default" image="icon_answer"/>
               <rich_text name="phone_tips" x="0" y="0" w="229" h="71" style:normal:font_size="30" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
@@ -104,35 +104,35 @@
               <image name="image3" x="40" y="71" w="128" h="125" draw_type="default" image="icon_call"/>
             </view>
           </view>
-          <view name="setting_page" x="0" y="0" w="353" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
+          <view name="setting_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
           <view name="music_expand_page" x="0" y="0" w="648" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
             <image name="music_image_ex" x="274" y="26" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
             <hscroll_label name="music_title_ex" x="120" y="125" w="384" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style:normal:font_name="default_2" tr_text="no_music"/>
             <hscroll_label name="music_lyric_ex" x="102" y="171" w="421" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style="music_lyrics" style:normal:font_name="default_2"/>
-            <progress_bar name="music_bar" x="120" y="220" w="384" h="15" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="0"/>
-            <image name="music_prev" x="133" y="256" w="64" h="62" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
-            <image name="music_state" x="280" y="256" w="64" h="62" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>
-            <image name="music_next" x="408" y="256" w="64" h="62" draw_type="default" style:normal:icon="icon_next_n" style:selected:icon="icon_next_p"/>
-            <label name="total_time" x="447" y="235" w="58" h="29" style:normal:text_align_h="right" text="00:00"/>
-            <label name="curr_time" x="120" y="235" w="58" h="29" style:normal:text_align_h="left" text="00:00"/>
+            <progress_bar name="music_bar" x="120" y="207" w="384" h="15" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="0"/>
+            <image name="music_prev" x="228" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
+            <image name="music_state" x="278" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>
+            <image name="music_next" x="392" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_next_n" style:selected:icon="icon_next_p"/>
+            <label name="total_time" x="447" y="222" w="58" h="29" style:normal:text_align_h="right" text="00:00"/>
+            <label name="curr_time" x="120" y="222" w="58" h="29" style:normal:text_align_h="left" text="00:00"/>
           </view>
         </slide_view>
       </view>
     </view>
     <view name="setting_pg" x="0" y="0" w="100%" h="100%">
-      <scroll_view name="scroll_menu" x="69" y="48" w="227" h="312" visible="true" enable="true" snap_to_page="false" move_to_page="false">
-        <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="227" tr_text="tmps"/>
-        <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="62" tr_text="ride_ele"/>
-        <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="125" tr_text="connect"/>
-        <label name="language" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="188" tr_text="language"/>
-        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" h="62" y="250" tr_text="brightness"/>
-        <label name="unit" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="312" tr_text="unit"/>
-        <label name="clock" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="375" tr_text="clock"/>
-        <label name="display" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="438" tr_text="display"/>
-        <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="227" y="500" tr_text="device"/>
+      <scroll_view name="scroll_menu" x="73" y="55" w="180" h="312" visible="true" enable="true" snap_to_page="false" move_to_page="false">
+        <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="180" tr_text="tmps"/>
+        <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="62" tr_text="ride_ele"/>
+        <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="125" tr_text="connect"/>
+        <label name="language" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="188" tr_text="language"/>
+        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" h="62" y="250" tr_text="brightness"/>
+        <label name="unit" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="312" tr_text="unit"/>
+        <label name="clock" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="375" tr_text="clock"/>
+        <label name="display" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="438" tr_text="display"/>
+        <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="500" tr_text="device"/>
       </scroll_view>
-      <list_view name="list_view" x="69" y="48" w="227" h="312" default_item_height="62" style:normal:bg_color="#00000000" item_height="62" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
-        <scroll_view name="scroll_menu1" x="0" y="0" w="227" h="312" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
+      <list_view name="list_view" x="73" y="55" w="180" h="312" default_item_height="62" style:normal:bg_color="#00000000" item_height="62" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
+        <scroll_view name="scroll_menu1" x="0" y="0" w="180" h="312" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
           <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" text="胎压检测"/>
           <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="骑行能耗"/>
           <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="连接手机"/>
@@ -143,11 +143,11 @@
           <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="设备信息"/>
         </scroll_view>
       </list_view>
-      <image name="image5" x="161" y="372" w="36" h="16" draw_type="default" image="setting_page_down_n"/>
-      <image name="image6" x="161" y="26" w="36" h="16" draw_type="default" image="setting_page_up_n"/>
-      <slide_view x="352" y="0" w="668" h="408" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
+      <image name="image5" x="145" y="372" w="36" h="16" draw_type="default" image="setting_page_down_n"/>
+      <image name="image6" x="145" y="33" w="36" h="16" draw_type="default" image="setting_page_up_n"/>
+      <slide_view x="324" y="9" w="700" h="400" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
         <view name="tmps_view" x="0" y="0" w="100%" h="100%">
-          <image name="tmps_car" x="143" y="66" w="384" h="251" draw_type="default" image="setting_tire_pressure_bg"/>
+          <image name="tmps_car" x="150" y="100" w="350" h="235" draw_type="default" image="setting_tire_pressure_bg"/>
           <progress_bar name="tmps_bar_front" x="36" y="76" w="10" h="250" vertical="true" reverse="true" value="80"/>
           <progress_bar name="tmps_bar_near" x="541" y="76" w="10" h="250" vertical="true" reverse="true" value="40"/>
           <image name="icon_tmps_front" x="59" y="76" w="52" h="52" draw_type="default" image="icon_tmps_w"/>
