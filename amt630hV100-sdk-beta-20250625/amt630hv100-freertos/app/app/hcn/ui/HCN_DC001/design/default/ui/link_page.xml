@@ -1,0 +1,21 @@
+<window name="link_page" style:normal:bg_color="#00000000" style:normal:border_color="#00000000">
+  <view name="view" x="755" y="12" w="256" h="250" style:normal:bg_image="interconnection_bg">
+    <label name="speed_lab" x="0" y="-14" w="151" h="124" style:normal:text_color="#FFFFFF" style:normal:font_size="124" text="0"/>
+    <label name="unit_lab" x="183" y="45" w="63" h="35" style:normal:text_color="#606060" style:normal:font_size="35" text="km/h"/>
+  </view>
+  <image name="ride_mode_img" x="783" y="118" w="27" h="21" draw_type="default" image="drv_mode_0"/>
+  <slide_menu name="gear_view" x="859" y="104" w="146" h="48" min_scale="1" align_v="top" value="1">
+    <image name="gear_N" draw_type="center" style:normal:icon="linkgear_n_n" style:selected:icon="linkgear_n_p"/>
+    <image name="gear_D" draw_type="center" style:selected:icon="linkgear_d_p" style:normal:icon="linkgear_d_n"/>
+    <image name="gear_R" draw_type="center" style:normal:icon="linkgear_r_n" style:selected:icon="linkgear_r_p"/>
+  </slide_menu>
+  <label name="power_lab" x="767" y="174" w="61" h="35" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
+  <slider name="power_bar" x="767" y="228" w="108" h="22" style:normal:icon="box_power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" style:normal:bg_color="#848484" style:normal:fg_color="#FFFFFF" style:normal:round_radius="0" bar_size="5" dragger_size="0" value="0"/>
+  <qr name="link_qr" x="12" y="19" w="239" h="235" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" visible="true"/>
+  <label name="label1" x="838" y="172" w="33" h="35" style:normal:text_color="#327889" style:normal:font_size="33" style:normal:text_align_h="left" text="w"/>
+  <label name="elec_lab" x="893" y="174" w="61" h="35" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
+  <progress_bar name="elec_bar" x="902" y="220" w="91" h="30" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="25" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="4" style:normal:border_color="#FFFFFF" style:normal:round_radius="6" format="%d%%" value="0"/>
+  <label name="elec_unit" x="965" y="172" w="33" h="35" style:normal:text_color="#327889" style:normal:font_size="33" style:normal:text_align_h="left" text="km"/>
+  <image name="image3" x="992" y="228" w="9" h="15" draw_type="default" image="link_elecRect_head"/>
+  <?include filename="component.xml" ?>
+</window>

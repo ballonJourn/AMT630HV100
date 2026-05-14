@@ -1,0 +1,8 @@
+<window name="update_page" style:normal:bg_color="#000000">
+  <view name="view" x="146" y="82" w="733" h="426" style:normal:border_color="#FFFFFF" style:normal:border_width="1" style:normal:round_radius="13">
+    <progress_bar name="update_bar" x="110" y="206" w="513" h="28" style:normal:fg_color="#0070C0" style:normal:bg_color="#FFFFFF19" style:normal:text_color="#FFFFFF" show_text="true" value="1"/>
+    <label name="lab_state" x="197" y="88" w="338" h="62" style:normal:font_size="38" style:normal:text_color="#FFFFFF" style:normal:font_name="default" tr_text="null"/>
+    <label name="lab_type" x="264" y="152" w="205" h="35" style:normal:font_size="25" style:normal:text_color="#FFFFFF"/>
+    <label name="lab_error" x="241" y="264" w="251" h="42" style:normal:text_color="#FF0000" style:normal:font_size="32" tr_text="null"/>
+  </view>
+</window>
