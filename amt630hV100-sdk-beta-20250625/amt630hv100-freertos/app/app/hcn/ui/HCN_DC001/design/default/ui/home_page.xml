@@ -65,16 +65,16 @@
         <image_value name="power_value" x="100" y="100" w="180" h="98" image="power_" format="%d" value="0" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)"/>
         <slider min="0" name="power_progress" x="50" y="243" w="256" h="32" animate:value="0" style:normal:icon="power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" bar_size="0" dragger_size="3" style:normal:fg_color="#00000000" style:normal:bg_color="#00000000" sensitive="false" animation="value(name=animation_demo,duration=5000,yoyo_times=0,easing=linear,auto_start=false,auto_destroy=false,from=0,to=100)" style="default"/>
       </view>
-      <view name="dock_selec_view" x="0" y="59" w="648" h="300">
+      <view name="dock_selec_view" x="0" y="23" w="648" h="372">
         <slide_view name="dock_slider_view" x="0" y="0" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="default" vertical="true" animating_time="500" auto_play="0" animation="w(name=move_dock_out,duration=450,easing=linear,auto_start=false,auto_destroy=false,from=336,to=648);w(name=move_dock_in,duration=350,easing=linear,auto_start=false,auto_destroy=false,from=648,to=336)" w="100%">
           <view name="info_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <image name="image" x="133" y="44" w="52" h="52" draw_type="default" image="icon_riding_time"/>
-            <image name="image1" x="133" y="165" w="52" h="52" draw_type="default" image="icon_riding_distance"/>
-            <label name="ride_time" x="84" y="106" w="157" h="35" style:normal:font_size="30" text="0h 0min"/>
-            <label name="ride_distance" x="84" y="227" w="157" h="35" style:normal:font_size="30" text="0 km"/>
+            <image name="image" x="133" y="80" w="52" h="52" draw_type="default" image="icon_riding_time"/>
+            <image name="image1" x="133" y="201" w="52" h="52" draw_type="default" image="icon_riding_distance"/>
+            <label name="ride_time" x="84" y="142" w="157" h="35" style:normal:font_size="30" text="0h 0min"/>
+            <label name="ride_distance" x="84" y="263" w="157" h="35" style:normal:font_size="30" text="0 km"/>
           </view>
           <view name="navi_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <slide_view name="nav_slide_view" x="65" y="50" w="242" h="258">
+            <slide_view name="nav_slide_view" x="65" y="86" w="242" h="258">
               <view name="qr_view" x="0" y="0" w="242" h="258" visible="true">
                 <qr name="navi_qr" x="19" y="12" w="166" h="162" value="http://www.carbit.com.cn/down6/642/643/_ylqx?modelid=30507&amp;sn=Ph5z&amp;action=9&amp;ssid=HCN-00B2&amp;pwd=88888888&amp;auth=WPA-PSK&amp;name=HCN-00B2-p2p" style:activated:bg_image="" style:normal:fg_color="#000000" style:normal:bg_color="#FFFFFF" style:normal:grid_color="#000000" style:normal:selected_bg_color="#00000000" disg:custom="container"/>
                 <label name="label2" x="12" y="196" w="183" h="35" style:normal:font_size="30" tr_text="scan_qr"/>
@@ -89,32 +89,32 @@
               </view>
             </slide_view>
           </view>
-          <view name="music_page" x="0" y="0" w="336" h="300" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <image name="music_image" x="128" y="82" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
-            <hscroll_label name="music_title" x="64" y="196" w="205" h="35" loop="true" style:normal:text_align_h="center" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:font_name="default_2" tr_text="no_music"/>
-            <hscroll_label name="music_clyric" x="64" y="246" w="214" h="50" style:normal:font_size="28" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false" style="music_lyrics" style:normal:font_name="default_2"/>
+          <view name="music_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+            <image name="music_image" x="128" y="118" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
+            <hscroll_label name="music_title" x="64" y="232" w="205" h="35" loop="true" style:normal:text_align_h="center" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:font_name="default_2" tr_text="no_music"/>
+            <hscroll_label name="music_clyric" x="64" y="282" w="214" h="50" style:normal:font_size="28" only_focus="true" ellipses="true" line_wrap="true" word_wrap="true" style:normal:text_align_h="center" loop="false" style="music_lyrics" style:normal:font_name="default_2"/>
           </view>
           <view name="phone_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
-            <view name="bt_connected" x="68" y="48" w="257" h="268" visible="false">
+            <view name="bt_connected" x="68" y="84" w="257" h="268" visible="false">
               <image name="phone_state_img" x="46" y="71" w="128" h="125" draw_type="default" image="icon_answer"/>
               <rich_text name="phone_tips" x="0" y="0" w="229" h="71" style:normal:font_size="30" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
               <hscroll_label name="phone_num" x="0" y="219" w="229" h="49" only_focus="true" style:normal:font_size="35" style:normal:text_align_h="center" ellipses="true" text="137 9611 2548 "/>
             </view>
-            <view name="bt_no_connected" x="68" y="48" w="257" h="268" visible="true">
+            <view name="bt_no_connected" x="68" y="84" w="257" h="268" visible="true">
               <image name="image3" x="40" y="71" w="128" h="125" draw_type="default" image="icon_call"/>
             </view>
           </view>
           <view name="setting_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="" style:normal:bg_image_draw_type="center"/>
           <view name="music_expand_page" x="0" y="0" w="648" h="100%" style:normal:bg_image="left_bg_p" style:normal:bg_image_draw_type="default">
-            <image name="music_image_ex" x="274" y="26" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
-            <hscroll_label name="music_title_ex" x="120" y="125" w="384" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style:normal:font_name="default_2" tr_text="no_music"/>
-            <hscroll_label name="music_lyric_ex" x="102" y="171" w="421" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style="music_lyrics" style:normal:font_name="default_2"/>
-            <progress_bar name="music_bar" x="120" y="207" w="384" h="15" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="0"/>
-            <image name="music_prev" x="228" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
-            <image name="music_state" x="278" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>
-            <image name="music_next" x="392" y="238" w="64" h="62" draw_type="default" style:normal:icon="icon_next_n" style:selected:icon="icon_next_p"/>
-            <label name="total_time" x="447" y="222" w="58" h="29" style:normal:text_align_h="right" text="00:00"/>
-            <label name="curr_time" x="120" y="222" w="58" h="29" style:normal:text_align_h="left" text="00:00"/>
+            <image name="music_image_ex" x="274" y="27" w="77" h="75" draw_type="scale" image="icon_media_cover_n"/>
+            <hscroll_label name="music_title_ex" x="120" y="128" w="384" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style:normal:font_name="default_2" tr_text="no_music"/>
+            <hscroll_label name="music_lyric_ex" x="102" y="176" w="421" h="35" style:normal:font_size="33" only_focus="true" ellipses="true" style:normal:text_align_h="center" style="music_lyrics" style:normal:font_name="default_2"/>
+            <progress_bar name="music_bar" x="120" y="226" w="384" h="15" style:normal:border_color="#00000000" style:normal:fg_color="#00000000" style:normal:fg_image="music_bar" style:normal:fg_image_draw_type="patch3_x" style:normal:bg_image="music_bar_bg_n" style:normal:bg_color="#00000000" style:normal:bg_image_draw_type="default" show_text="false" value="0"/>
+            <image name="music_prev" x="133" y="263" w="64" h="62" draw_type="default" style:normal:icon="icon_pre_n" style:selected:icon="icon_pre_p"/>
+            <image name="music_state" x="280" y="263" w="64" h="62" draw_type="default" style:normal:icon="icon_play_n" style:normal:bg_image="" style:selected:icon="icon_play_p"/>
+            <image name="music_next" x="408" y="263" w="64" h="62" draw_type="default" style:normal:icon="icon_next_n" style:selected:icon="icon_next_p"/>
+            <label name="total_time" x="447" y="241" w="58" h="29" style:normal:text_align_h="right" text="00:00"/>
+            <label name="curr_time" x="120" y="241" w="58" h="29" style:normal:text_align_h="left" text="00:00"/>
           </view>
         </slide_view>
       </view>
