@@ -1,3 +1,15 @@
+/**
+ * @file hcn_global.c
+ * @brief 全局设置: 语言/单位/主题/里程 — LVGL 版本
+ *
+ * M029: 重写 AWTK 资源管理器依赖
+ * - locale_info_change → 自建 i18n (桩, M028 完善)
+ * - assets_set_global_theme → lv_theme 切换 (桩, M028 完善)
+ * - assets_manager/image_manager → 移除 (LVGL 用 lv_img_dsc_t)
+ * - gloabl_load_image → LVGL 不支持运行时动态加载图片到资源系统
+ *   蓝牙封面改为 lv_img_set_src + 内存 buffer
+ */
+
 #include "hcn_global.h"
 #include "view/set_view/set_view_interface.h"
 #include "view/home_view/home_view_interface.h"
@@ -5,157 +17,143 @@
 #include "proxy/vehicle_data.h"
 #include "proxy/vehicle_mile.h"
 #include "hcn_logic.h"
+#include <string.h>
 
-extern ret_t assets_set_global_theme(const char* name); 
+/* ======================================================================
+ * 主题/语言 桩实现 (M028 完善)
+ * ====================================================================== */
 
-extern ret_t stb_load_image(int32_t subtype, const uint8_t* buff, uint32_t buff_size, bitmap_t* image,
-                            bool_t require_bgra, bool_t enable_bgr565, bool_t enable_rgb565         ) ;
+static uint8_t s_current_theme = 0; /* 0=day, 1=night */
+static uint8_t s_current_lang  = 0; /* 0=zh_CN, 1=en_US */
 
 static const char* country_language_str[LANGUAGE_OPTION_MAX] = {
-    "zh_CN" , "en_US" 
+    "zh_CN" , "en_US"
 };
 
 ret_t global_refresh_unit(uint8_t unit)
 {
-    //速度
     int32_t value ;
     value = vehicle_get_data_speed() ;
     if (MPH == vehicle_get_param_unit())
-            value *= KM_CONVERT_MILE ; 
+            value *= KM_CONVERT_MILE ;
     home_refresh_speed(value) ;
     home_refresh_unit(unit);
 
-    // 里程
     global_refresh_mileage();
     home_refresh_mileage_unit(unit) ;
 
-    //电量
-    // home_refresh_electrical(uint32_t mileage) 
     home_refresh_electrical_unit(unit);
-
-    //info窗口 参数需改
-    // uint32_t u32_vlaue =  vehicle_get_mile_once();
-    // if (MPH == vehicle_get_param_unit())
-    //         u32_vlaue *= KM_CONVERT_MILE ; 
-    // home_refresh_info_distance(u32_vlaue);
-
 
     return RET_OK ;
 }
 
-ret_t global_refresh_language(uint8_t value) 
+ret_t global_refresh_language(uint8_t value)
 {
     if (value > LANGUAGE_OPTION_MAX)
         return RET_FAIL ;
-    
-    char country [3] = {0};
-    char language[3] = {0};
-    strncpy(language, country_language_str[value] , 2);
-    strncpy(country , country_language_str[value] + 3, 2);
 
-    locale_info_change(locale_info(), language, country) ;
+    s_current_lang = value;
+
+    /**
+     * AWTK: locale_info_change(locale_info(), language, country)
+     * LVGL: 自建 i18n — 在 M028 中实现多语言字符串表切换
+     * 目前仅记录语言选择, 不实际切换 UI 文本
+     */
+    printf("[hcn_global] language set to: %s\n", country_language_str[value]);
+
+    /* TODO M028: 遍历所有 label, 根据 key 查表重新设置文本 */
 
     return RET_OK ;
 }
 
-ret_t global_refresh_display(uint8_t value) 
+ret_t global_refresh_display(uint8_t value)
 {
     if (DIAPLAY_AUTO_OPTION == value)
         return RET_OK ;
-    
-    uint8_t temp = 0 ;
-    assets_manager_t *am = assets_manager();
-    if (tk_str_eq(am->theme, "default"))
-        temp = DIAPLAY_DAY_OPTION ;
-    else if (tk_str_eq(am->theme, "night"))
-        temp = DIAPLAY_NIGHT_OPTION ;
-    else {};
 
-    if (value != temp)
-        assets_set_global_theme(value == DIAPLAY_NIGHT_OPTION ? "night" : "default");
-    else
-        printf("The current theme and settings are the same");
-    
+    if (value == s_current_theme) {
+        printf("[hcn_global] theme unchanged (%d)\n", value);
+        return RET_OK;
+    }
+
+    s_current_theme = value;
+
+    /**
+     * AWTK: assets_set_global_theme("night" / "default")
+     * LVGL: lv_theme 切换
+     *
+     * TODO M028: 实现 lv_theme day/night 切换:
+     *   - 预定义两套 lv_style_t (day_styles / night_styles)
+     *   - 遍历所有控件, 切换 style
+     *   - 或使用 lv_theme_set_act() 全局切换
+     */
+    printf("[hcn_global] theme -> %s\n",
+           value == DIAPLAY_NIGHT_OPTION ? "night" : "day");
+
     return RET_OK;
 }
 
 ret_t global_data_init(const timer_info_t *info)
 {
-    // printf("===================");
     (void)info ;
-    
+
     static bool is_init_usr_param  = false ;
     static bool is_init_mile_param = false ;
-    
+
     if (!is_init_usr_param && (true == vehicle_get_param_recovery()))
     {
-        // 设置语言
         uint8_t value  ;
         value = vehicle_get_param_language();
         global_refresh_language(value) ;
-        
-        // 设置单位 // 设置里程程息 、 剩余里程
+
         value = vehicle_get_param_unit() ;
         global_refresh_unit(value);
-        
-        //显示主题 0：白天 1:黑夜 2:自动
+
         value = vehicle_get_param_display();
         if (0 == value)
             global_refresh_display(DIAPLAY_DAY_OPTION);
         else if(1 == value)
             global_refresh_display(DIAPLAY_NIGHT_OPTION);
-        else 
+        else
             global_refresh_display(vehicle_get_data_current_display()) ;
-        
-        // 档位 
+
         value =  vehicle_get_data_gear() ;
         home_refresh_gear(value) ;
-        
-        // // 驾驶模式
+
         value = vehicle_get_data_drv_mode() ;
         home_refresh_drv_mode(value) ;
-        
+
         refresh_ver(veicle_get_data_version());
 
-        is_init_usr_param = true ; 
-
+        is_init_usr_param = true ;
         printf("vehicle_get_param_recovery successed %s : %d\n" ,__FUNCTION__ , __LINE__);
     }
 
-
     if (!is_init_mile_param  && (true == vehicle_get_mile_recovery()) )
     {
-        // 里程
         global_refresh_mileage();
-
         is_init_mile_param = true ;
-
         printf("vehicle_get_mile_recovery successed %s : %d\n" ,__FUNCTION__ , __LINE__);
     }
 
-
     if (is_init_usr_param && is_init_mile_param)
     {
-        // info->ctx = 0 ;  //(timerID)
-        // clean_timer_ID(REFRESH_TIMER_100_MS);
         return RET_REMOVE ;
     }
-    
-    return RET_REPEAT ;
 
+    return RET_REPEAT ;
 }
 
 
 void global_refresh_mileage()
 {
-    // 里程
     uint32_t u32_odo   = vehicle_get_mile_odo()  ;
     uint32_t u32_tripA = vehicle_get_mile_tripA();
     uint32_t u32_tripB = vehicle_get_mile_tripB();
     uint32_t u32_once  = vehicle_get_mile_once() ;
     if (MPH == vehicle_get_param_unit())
     {
-        u32_odo   *= KM_CONVERT_MILE ; 
+        u32_odo   *= KM_CONVERT_MILE ;
         u32_tripA *= KM_CONVERT_MILE ;
         u32_tripB *= KM_CONVERT_MILE ;
         u32_once  *= KM_CONVERT_MILE ;
@@ -168,58 +166,42 @@ void global_refresh_mileage()
 }
 
 
-// 判断一个字节是否是 UTF-8 编码的首字节
-static int is_utf8_head(char c) 
+/* UTF-8 辅助函数 — 纯算法, 无 AWTK 依赖 */
+static int is_utf8_head(char c)
 {
     return ((c & 0xE0) == 0xC0) || ((c & 0xF0) == 0xE0) || ((c & 0xF8) == 0xF0);
 }
 
-// 返回 UTF-8 编码的一个字符所占用的字节数
 static int utf8_char_len(char c)
 {
-    if ((c & 0xE0) == 0xC0) 
-    {
-        return 2;
-    } 
-    else if ((c & 0xF0) == 0xE0) 
-    {
-        return 3;
-    } 
-    else if ((c & 0xF8) == 0xF0) 
-    {
-        return 4;
-    } 
-    else 
-    {
-        return 1;
-    }
+    if ((c & 0xE0) == 0xC0) return 2;
+    else if ((c & 0xF0) == 0xE0) return 3;
+    else if ((c & 0xF8) == 0xF0) return 4;
+    else return 1;
 }
 
-// 截取一个 UTF-8 编码字符串的前限定个字节，保证不截断任何一个完整字符
-bool truncate_utf8_string(char* str , int intercept_length) 
+bool truncate_utf8_string(char* str , int intercept_length)
 {
     int len = strlen(str);
     int i;
     int byte_count = 0;
 
-    if((len > intercept_length) 
+    if((len > intercept_length)
         && (len < APP_MESSAGE_CONTENT_INFO_LEN))
-    {       
-        for (i = 0; i < len && byte_count < intercept_length; i += utf8_char_len(str[i])) 
+    {
+        for (i = 0; i < len && byte_count < intercept_length; i += utf8_char_len(str[i]))
         {
-            // 如果下一个字符会使得字节数超过限定，则直接退出循环
             if ((is_utf8_head(str[i]))
                 && (byte_count + utf8_char_len(str[i]) > intercept_length))
             {
-                break;  
+                break;
             }
             byte_count += utf8_char_len(str[i]);
         }
-        // 确保截取后的字符串以 '\0' 结尾
-        str[byte_count ]    = '.';  
-        str[byte_count + 1] = '.';  
-        str[byte_count + 2] = '.';  
-        str[byte_count + 3] = '\0';  
+        str[byte_count ]    = '.';
+        str[byte_count + 1] = '.';
+        str[byte_count + 2] = '.';
+        str[byte_count + 3] = '\0';
         return true;
     }
     else if(len <= intercept_length)
@@ -230,39 +212,25 @@ bool truncate_utf8_string(char* str , int intercept_length)
     return false;
 }
 
-ret_t gloabl_load_image(uint8_t *buff ,  uint32_t length)
+/**
+ * gloabl_load_image — 蓝牙音乐封面动态加载
+ *
+ * AWTK: assets_manager_add_data → image_manager → widget刷新
+ * LVGL: 不支持运行时往资源系统添加图片
+ *
+ * LVGL 方案: 将 PNG buffer 解码到 lv_img_dsc_t, 然后 lv_img_set_src
+ * 需要 lv_png 解码支持 (已在 main_hcn_lvgl.c 中 lv_png_init())
+ *
+ * TODO M032: 实现 music_view 中的封面显示
+ */
+ret_t gloabl_load_image(uint8_t *buff, uint32_t length)
 {
     if (NULL == buff || 0 == length)
         return RET_FAIL ;
-    
-    bitmap_t tmps = {0};
 
-    ret_t ret = RET_FAIL;
-    const asset_info_t* asset = assets_manager_ref(assets_manager(), ASSET_TYPE_IMAGE, BLUETOOTH_MUSIC_IMAGE );
-    if (asset != NULL) 
-    {
-        printf("asset_info_t ref successed! size: %d ", asset->size);
-        if (RET_OK == image_manager_get_bitmap(image_manager(), BLUETOOTH_MUSIC_IMAGE, &tmps)) 
-        {
-            image_manager_unload_bitmap(image_manager(), &tmps);
-            printf(" asset_info_t release success \n") ;
-        }
-        assets_manager_clear_cache_ex(assets_manager() ,ASSET_TYPE_IMAGE , BLUETOOTH_MUSIC_IMAGE );
-        assets_manager_unref(assets_manager(), asset);
+    printf("[hcn_global] gloabl_load_image len=%u (TODO M032)\n", length);
 
-    } 
-    else 
-    {
-        printf("asset_info_t not exist ,need to preload size:%d\n", length);
-    }
-    ret = assets_manager_add_data(assets_manager(), BLUETOOTH_MUSIC_IMAGE , ASSET_TYPE_IMAGE, ASSET_TYPE_IMAGE_PNG, (uint8_t*)buff, length) ;
+    /* TODO M032: decode PNG buffer → lv_img_dsc_t → lv_img_set_src */
 
-    if (ret == RET_OK)
-    {
-        printf("assets_manager_add_data successed \n") ;
-    }
-
-    return ret ;
-    
-
+    return RET_OK ;
 }
