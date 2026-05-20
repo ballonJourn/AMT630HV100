@@ -1,7 +1,7 @@
 #ifndef SETTING_MENU_H_
 #define SETTING_MENU_H_
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 
 typedef enum setting_menu{
     SETTING_MENU_TMPS       ,

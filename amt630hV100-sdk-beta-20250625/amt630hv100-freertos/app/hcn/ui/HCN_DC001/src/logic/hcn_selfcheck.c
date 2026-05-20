@@ -1,5 +1,5 @@
 #include "hcn_selfcheck.h"
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "hcn_logic.h"
 #include "proxy/vehicle_data.h"
 #include "dashboard_state/hcn_dev_state.h"

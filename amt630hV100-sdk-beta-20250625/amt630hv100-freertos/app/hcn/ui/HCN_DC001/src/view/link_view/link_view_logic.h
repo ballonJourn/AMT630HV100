@@ -1,6 +1,6 @@
 #ifndef LINK_VIEW_LOGICH__
 #define LINK_VIEW_LOGICH__
-#include "awtk.h"
+#include "view/home_view/common.h"
 
 typedef enum
 {

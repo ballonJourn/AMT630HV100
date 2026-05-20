@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "navigation_view_logic.h"
 #include "proxy/mirror_data.h"
 #include "view/home_view/navigation_view.h"

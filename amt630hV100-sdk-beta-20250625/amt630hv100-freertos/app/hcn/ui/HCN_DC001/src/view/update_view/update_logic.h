@@ -1,6 +1,6 @@
 #ifndef UPDATE_VIEW_LOGICH__
 #define UPDATE_VIEW_LOGICH__
-#include "awtk.h"
+#include "view/home_view/common.h"
 
 typedef enum
 {

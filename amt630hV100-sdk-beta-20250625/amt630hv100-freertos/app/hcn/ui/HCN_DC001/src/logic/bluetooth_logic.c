@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "buletooth_logic.h"
 #include "view/home_view/home_view_interface.h"
 #include "proxy/vehicle_data.h"

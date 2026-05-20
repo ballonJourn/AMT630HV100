@@ -1,62 +1,60 @@
-#include "awtk.h"
-#include "../3rd/awtk-widget-qr/src/qr_register.h"
-#include "../3rd/awtk-widget-chart-view/src/chart_view_register.h"
+/**
+ * @file application.c
+ * @brief HCN 应用初始化入口
+ *
+ * M021: 从 AWTK 迁移为 LVGL
+ * - 移除 awtk.h, qr_register, chart_view_register
+ * - 移除 custom_widgets_register() (AWTK 控件注册)
+ * - navigator_to → screen_mgr_to (通过 navigator.c wrapper)
+ */
+
+#include "view/home_view/common.h"
 #include "common/navigator.h"
-
-#ifndef APP_SYSTEM_BAR
-#define APP_SYSTEM_BAR "system_bar"
-#endif /*APP_SYSTEM_BAR*/
-
-#ifndef APP_BOTTOM_SYSTEM_BAR
-#define APP_BOTTOM_SYSTEM_BAR "system_bar_b"
-#endif /*APP_BOTTOM_SYSTEM_BAR*/
+#include "lvgl_compat/screen_manager.h"
 
 #ifndef APP_START_PAGE
 #define APP_START_PAGE "home_page"
-#endif /*APP_START_PAGE*/
+#endif
 
 /**
- * 注册自定义控件
+ * Forward declarations of screen init functions
+ * Each page registers via screen_mgr_register() then navigator_to() loads it.
+ * Implementations will be in ui_build/ui_*.c (M024-M027)
  */
-static ret_t custom_widgets_register(void) {
-  qr_register();
-  chart_view_register();
-  return RET_OK;
+extern int ui_home_page_init(lv_obj_t *screen, void *ctx);
+extern int ui_link_page_init(lv_obj_t *screen, void *ctx);
+extern int ui_device_page_init(lv_obj_t *screen, void *ctx);
+extern int ui_update_page_init(lv_obj_t *screen, void *ctx);
+
+/**
+ * 注册所有页面的 init 回调
+ */
+static void register_all_screens(void)
+{
+    screen_mgr_register("home_page",   ui_home_page_init);
+    screen_mgr_register("link_page",   ui_link_page_init);
+    screen_mgr_register("device_page", ui_device_page_init);
+    screen_mgr_register("update_page", ui_update_page_init);
 }
 
 /**
- * 当程序初始化完成时调用，全局只触发一次。
+ * 初始化程序 — 由 main_hcn_lvgl.c 调用
  */
-static ret_t application_on_launch(void) {
-  
-  return RET_OK;
-}
+int application_init(void)
+{
+    register_all_screens();
 
-/**
- * 当程序退出时调用，全局只触发一次。
- */
-static ret_t application_on_exit(void) {
+    /* 导航到起始页 */
+    navigator_to(APP_START_PAGE);
 
-  return RET_OK;
-}
-
-/**
- * 初始化程序
- */
-ret_t application_init(void) {
-  custom_widgets_register();
-  application_on_launch();
-
-  // locale_info_change(locale_info(), "zh", "CN") ;
-  return navigator_to(APP_START_PAGE);
+    return 0;
 }
 
 /**
  * 退出程序
  */
-ret_t application_exit(void) {
-  application_on_exit();
-  log_debug("application_exit\n");
-
-  return RET_OK;
+int application_exit(void)
+{
+    printf("application_exit\n");
+    return 0;
 }

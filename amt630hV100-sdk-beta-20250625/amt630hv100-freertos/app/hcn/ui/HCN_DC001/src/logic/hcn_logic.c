@@ -1,6 +1,6 @@
 #include <stdio.h>  
 #include <stdlib.h>
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "hcn_logic.h"
 #include "view/view_manager.h"
 #include "hcn_selfcheck.h"

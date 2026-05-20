@@ -1,6 +1,5 @@
 #ifndef LINK_VIEW_H__
 #define LINK_VIEW_H__
-#include "awtk.h"
 #include "view/home_view/common.h"
 
 enum link_view_com

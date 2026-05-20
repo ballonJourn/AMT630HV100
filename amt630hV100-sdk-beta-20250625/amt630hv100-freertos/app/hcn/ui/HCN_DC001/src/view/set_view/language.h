@@ -1,7 +1,7 @@
 #ifndef LANGUAGE__H_
 #define LANGUAGE__H_
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "../view_manager.h"
 
 enum set_language_com{

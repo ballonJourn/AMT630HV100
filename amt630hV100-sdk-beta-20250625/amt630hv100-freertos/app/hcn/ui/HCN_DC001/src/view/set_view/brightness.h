@@ -1,7 +1,7 @@
 #ifndef BRIGHTNESS_H__
 #define BRIGHTNESS_H__
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "../view_manager.h"
 
 

@@ -1,7 +1,7 @@
 #ifndef UPDATE_VIEW_H__
 #define UPDATE_VIEW_H__
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "ota_manage/hcn_ota.h"
 
 enum update_com{

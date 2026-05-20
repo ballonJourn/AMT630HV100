@@ -1,7 +1,7 @@
 #ifndef CYCLING_ENERGY__H_
 #define CYCLING_ENERGY__H_
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "../view_manager.h"
 
 enum set_cycling_energy_com{

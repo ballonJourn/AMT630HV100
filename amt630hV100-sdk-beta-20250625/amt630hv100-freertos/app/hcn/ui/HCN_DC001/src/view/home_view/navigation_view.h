@@ -1,7 +1,7 @@
 #ifndef NAVIGATION_VIEW_H__
 #define NAVIGATION_VIEW_H__
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "view/view_manager.h"
 
 enum home_navigation_com{

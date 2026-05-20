@@ -1,7 +1,7 @@
 #ifndef SETTING_CLOCK__H_
 #define SETTING_CLOCK__H_
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "../view_manager.h"
 
 enum set_clock_com{

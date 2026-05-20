@@ -1,7 +1,7 @@
 #ifndef HB_COMMON_H
 #define HB_COMMON_H
 
-#include "awtk.h"
+#include "lvgl_compat/awtk_to_lvgl.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

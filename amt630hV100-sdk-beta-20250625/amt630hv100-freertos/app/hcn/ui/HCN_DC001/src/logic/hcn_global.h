@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "awtk.h"
+#include "view/home_view/common.h"
 
 #define APP_MESSAGE_CONTENT_INFO_LEN    (128 )
 #define INTERCEPT_artitle_LENGTH      ((size_t)(8 * 3) ) // 8

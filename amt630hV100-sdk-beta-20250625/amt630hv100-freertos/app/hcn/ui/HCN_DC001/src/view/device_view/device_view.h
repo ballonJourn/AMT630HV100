@@ -1,7 +1,7 @@
 #ifndef DEVICE_PAGE_H__
 #define DEVICE_PAGE_H__
 
-#include "awtk.h"
+#include "view/home_view/common.h"
 #include "ota_manage/hcn_ota.h"
 
 typedef enum {

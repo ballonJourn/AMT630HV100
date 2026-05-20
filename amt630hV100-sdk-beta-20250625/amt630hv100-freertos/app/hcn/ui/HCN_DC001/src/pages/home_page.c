@@ -1,4 +1,4 @@
-﻿#include "awtk.h"
+﻿#include "view/home_view/common.h"
 #include "../common/navigator.h"
 #include "../logic/hcn_logic.h"
 #include "../view/view_manager.h"
