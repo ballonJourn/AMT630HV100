@@ -19,7 +19,8 @@
 #include <task.h>
 #include "carlink_common.h"
 #include "board.h"
-
+#include "vehicle_param/vehicle_param.h"
+#include "config/hcn_config.h"
 
 #if CARLINK_CP
 
@@ -156,6 +157,7 @@ static void iap2_msg_wl_carplay_update(void *ctx, int status)//手机端"Carplay
 	struct carplay_ctx* pctx = (struct carplay_ctx*)ctx;
 	
 	pctx->mPhoneCarplayFlag = status;
+	vehicle_set_data(VEH_CARLINK_CP_PHONE_DEV_STATUS, status);
 	printf("%s:%d status:%d %d\r\n", __func__, __LINE__, status, pctx->mPhoneCarplayFlag);
 }
 //static void iap2_msg_language_update(void *ctx, const char *lang){}
@@ -384,6 +386,7 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
 		case CARLINK_EVENT_BT_IAP_READY: {
 			pctx->mIapReady = true;
 			printf("%s:%d\r\n", __func__, __LINE__);
+			vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
 			start_cp(pctx);
             break;
         }
@@ -400,8 +403,9 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
             break;
         }
 		case CARLINK_EVENT_MSG_SESSION_CONNECT: {
-			printf("CARLINK_EVENT_MSG_SESSION_CONNECT\r\n");
+			printf("\r\nCARLINK_EVENT_MSG_SESSION_CONNECT\r\n");
 			pctx->mCarplayConnected = 1;
+			vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
             break;
         }
 		case CARLINK_EVENT_MSG_SESSION_STOP: {
@@ -412,6 +416,8 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
 				}
 			} else {
 				pctx->mCarplayConnected = 0;
+				vehicle_set_data(VEH_CARLINK_CP_STATUS, 0);
+				vehicle_set_data(VEH_CARLINK_CP_PHONE_DEV_STATUS, 0);
 				carlink_bt_open();
 				printf("%s:%d\r\n", __func__, __LINE__);
 				start_cp(pctx);
@@ -442,6 +448,10 @@ static void carplay_iap_data_read(void* ctx, const void* buf, int len)
 
 static void  taskInitCarlinkCpProc(void* param)
 {
+	printf("cp task start\r\n");
+	while (vehicle_get_data(VEH_CARLINK_URL_STATUS) == 0) {
+		vTaskDelay(pdMS_TO_TICKS(100));
+	}
 	struct carplay_ctx* pctx = &g_cp_handle;
 	struct carlink_event ev = {0};
 	int ret  = -1;
@@ -529,6 +539,7 @@ static void  taskInitCarlinkCpProc(void* param)
 
 static void carplay_init_parameter()
 {
+	printf("cp init parameter\r\n");
 	g_link_info->link_type 							= CARPLAY_WIRELESS;
 
 	g_link_info->iap2_name = IAP2NAME;

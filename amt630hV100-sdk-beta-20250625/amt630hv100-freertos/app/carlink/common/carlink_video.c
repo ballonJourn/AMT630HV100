@@ -556,8 +556,13 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 		ark_lcd_set_osd_info_atomic(LCD_VIDEO_LAYER, &info);
 		ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 		ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-		ark_lcd_osd_enable(LCD_UI_LAYER, 1);
-		ark_lcd_set_osd_sync(LCD_UI_LAYER);
+		if (vehicle_get_data(VEH_CARLINK_CP_STATUS) == 1) {
+			ark_lcd_osd_enable(LCD_UI_LAYER, 0);
+			ark_lcd_set_osd_sync(LCD_UI_LAYER);
+		} else {
+			ark_lcd_osd_enable(LCD_UI_LAYER, 1);
+			ark_lcd_set_osd_sync(LCD_UI_LAYER);
+		}
 		vVideoDisplayBufRender(dstaddr);
 		if (outBuf.num > 1) {// for apple h264
 			video_ts = (1000 / g_video_fps);

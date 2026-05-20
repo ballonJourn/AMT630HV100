@@ -14,6 +14,8 @@
 
 #include <stdio.h>
 #include "hcn_key_common.h"
+#include "vehicle_param/vehicle_param.h"
+#include "hcn_cp_keyevent.h"
 
 static key_event_cb_t key_event_cb = NULL;
 
@@ -29,7 +31,15 @@ int set_key_event_cb(key_event_cb_t event_cb) {
 }
 
 void send_key_event(uint8_t key_event) {
-    if (key_event_cb) {
-        key_event_cb(key_event);
+    printf("key cp status:%d %d\r\n", vehicle_get_data(VEH_CARLINK_CP_STATUS), 
+    vehicle_get_data(VEH_CARLINK_CP_PHONE_DEV_STATUS));
+    if ((vehicle_get_data(VEH_CARLINK_CP_STATUS) == 1)
+        && (vehicle_get_data(VEH_CARLINK_CP_PHONE_DEV_STATUS) == 1)) {
+         printf("send cp key event directly, event: %d\r\n", key_event);
+         send_keyevent_to_cp(key_event);
+    } else {
+        if (key_event_cb) {
+            key_event_cb(key_event);
+        }
     }
 }

@@ -79,7 +79,6 @@ reset_wifi:
     carlink_ec_init(0, NULL);
 
     vTaskDelay(pdMS_TO_TICKS(200)); 
-
     hcn_log_info("wifi init ok!\n");
 
     vTaskDelete(NULL);

@@ -61,7 +61,7 @@ void carlink_send_key_event(uint8_t key, bool pressed)
 	ev.u.para[0] = key;
 	ev.u.para[1] = (uint8_t)pressed;
 
-	carlink_notify_event_isr(&ev);
+	carlink_notify_event(&ev);
 }
 
 

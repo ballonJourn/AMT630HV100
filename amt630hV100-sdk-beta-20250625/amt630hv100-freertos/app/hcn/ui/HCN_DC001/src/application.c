@@ -47,8 +47,6 @@ ret_t application_init(void) {
   custom_widgets_register();
   application_on_launch();
 
-
-
   // locale_info_change(locale_info(), "zh", "CN") ;
   return navigator_to(APP_START_PAGE);
 }

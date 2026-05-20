@@ -66,13 +66,13 @@ ret_t global_refresh_display(uint8_t value)
     uint8_t temp = 0 ;
     assets_manager_t *am = assets_manager();
     if (tk_str_eq(am->theme, "default"))
-        temp = DIAPLAY_NIGHT_OPTION ;
-    else if (tk_str_eq(am->theme, "day"))
         temp = DIAPLAY_DAY_OPTION ;
+    else if (tk_str_eq(am->theme, "night"))
+        temp = DIAPLAY_NIGHT_OPTION ;
     else {};
 
     if (value != temp)
-        assets_set_global_theme(value == DIAPLAY_NIGHT_OPTION ? "default" : "day");
+        assets_set_global_theme(value == DIAPLAY_NIGHT_OPTION ? "night" : "default");
     else
         printf("The current theme and settings are the same");
     
