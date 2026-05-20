@@ -442,13 +442,13 @@ static inline void *locale_info(void)
 /**
  * locale_info_tr — 翻译字符串
  * AWTK: locale_info_tr(locale_info(), "key") → 返回翻译后的字符串
- * LVGL: 暂时直接返回 key 本身 (英文透传)
- * TODO M028: 实现多语言字符串表
+ * LVGL: 调用 hcn_tr() 查表 (M028 实现)
  */
+extern const char *hcn_tr(const char *key);
 static inline const char *locale_info_tr(void *info, const char *key)
 {
     (void)info;
-    return (key != NULL) ? key : "";
+    return hcn_tr(key);
 }
 
 /* ======================================================================

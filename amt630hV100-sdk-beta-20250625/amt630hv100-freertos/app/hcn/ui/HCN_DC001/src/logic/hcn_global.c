@@ -56,12 +56,12 @@ ret_t global_refresh_language(uint8_t value)
 
     /**
      * AWTK: locale_info_change(locale_info(), language, country)
-     * LVGL: 自建 i18n — 在 M028 中实现多语言字符串表切换
-     * 目前仅记录语言选择, 不实际切换 UI 文本
+     * LVGL: M028 实现 — 调用 hcn_i18n_set_lang()
      */
-    printf("[hcn_global] language set to: %s\n", country_language_str[value]);
+    extern void hcn_i18n_set_lang(uint8_t lang);
+    hcn_i18n_set_lang(value);
 
-    /* TODO M028: 遍历所有 label, 根据 key 查表重新设置文本 */
+    printf("[hcn_global] language set to: %s\n", country_language_str[value]);
 
     return RET_OK ;
 }
@@ -80,13 +80,17 @@ ret_t global_refresh_display(uint8_t value)
 
     /**
      * AWTK: assets_set_global_theme("night" / "default")
-     * LVGL: lv_theme 切换
-     *
-     * TODO M028: 实现 lv_theme day/night 切换:
-     *   - 预定义两套 lv_style_t (day_styles / night_styles)
-     *   - 遍历所有控件, 切换 style
-     *   - 或使用 lv_theme_set_act() 全局切换
+     * LVGL: M028 实现 — 调用 ui_theme_set_day/night
      */
+    extern void ui_theme_set_day(void);
+    extern void ui_theme_set_night(void);
+
+    if (value == DIAPLAY_NIGHT_OPTION) {
+        ui_theme_set_night();
+    } else {
+        ui_theme_set_day();
+    }
+
     printf("[hcn_global] theme -> %s\n",
            value == DIAPLAY_NIGHT_OPTION ? "night" : "day");
 
