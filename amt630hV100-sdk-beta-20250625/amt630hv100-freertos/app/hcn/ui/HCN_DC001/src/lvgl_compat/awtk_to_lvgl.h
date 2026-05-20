@@ -257,16 +257,52 @@ static inline void slider_set_value(lv_obj_t *obj, int value)
 /* --- style wrapper --- */
 static inline void widget_set_style_str(lv_obj_t *obj, const char *style_id, const char *value)
 {
-    /**
-     * AWTK: widget_set_style_str(obj, "normal:fg_image", "xxx")
-     * AWTK: widget_set_style_str(obj, STYLE_ID_FG_COLOR, "#FF0000")
-     * LVGL: 需要解析style_id和value并设置对应lv_style属性
-     * 完整实现在 M028 主题层
-     */
     (void)obj;
     (void)style_id;
     (void)value;
-    /* TODO: M028 */
+    /* TODO: M028 主题层 */
+}
+
+/* --- AWTK style/prop 常量 --- */
+#define STYLE_ID_ICON  "icon"
+#define WIDGET_PROP_STATE_FOR_STYLE "state_for_style"
+
+/* --- value_t (AWTK通用值容器) --- */
+typedef struct {
+    int    type;
+    char   str_val[64];
+    int    int_val;
+} value_t;
+
+static inline const char *value_str(const value_t *v)
+{
+    return (v != NULL) ? v->str_val : "";
+}
+
+static inline ret_t widget_get_prop(lv_obj_t *obj, const char *prop, value_t *v)
+{
+    (void)obj; (void)prop;
+    if (v) {
+        memset(v, 0, sizeof(value_t));
+        strncpy(v->str_val, "normal", sizeof(v->str_val) - 1);
+    }
+    return RET_OK;
+}
+
+/* --- tk_str_cmp (AWTK) → strcmp --- */
+#define tk_str_cmp(a, b)  strcmp((a), (b))
+
+/* --- progress_bar_set_max --- */
+static inline void progress_bar_set_max(lv_obj_t *obj, int max_val)
+{
+    if (obj) lv_bar_set_range(obj, 0, max_val);
+}
+
+/* --- series_push (AWTK chart_view 第三方控件) --- */
+static inline void series_push(lv_obj_t *obj, float *value, int count)
+{
+    /* TODO M035: 替换为 lv_chart API */
+    (void)obj; (void)value; (void)count;
 }
 
 static inline void widget_invalidate_force(lv_obj_t *obj, void *unused)
@@ -401,6 +437,94 @@ extern ret_t locale_info_change(void *info, const char *lang, const char *countr
 static inline void *locale_info(void)
 {
     return NULL; /* TODO: M028 i18n */
+}
+
+/**
+ * locale_info_tr — 翻译字符串
+ * AWTK: locale_info_tr(locale_info(), "key") → 返回翻译后的字符串
+ * LVGL: 暂时直接返回 key 本身 (英文透传)
+ * TODO M028: 实现多语言字符串表
+ */
+static inline const char *locale_info_tr(void *info, const char *key)
+{
+    (void)info;
+    return (key != NULL) ? key : "";
+}
+
+/* ======================================================================
+ * 12. AWTK 资源管理器桩 (仅为编译通过, 功能在LVGL中不需要)
+ * ====================================================================== */
+
+/* assets_manager 类型桩 */
+typedef struct { const char *theme; } assets_manager_t;
+typedef struct { uint32_t size; uint8_t *data; } asset_info_t;
+typedef struct { int w; int h; } bitmap_t;
+
+#define ASSET_TYPE_IMAGE      0
+#define ASSET_TYPE_IMAGE_PNG  1
+
+static inline assets_manager_t *assets_manager(void)
+{
+    static assets_manager_t s_am = { "default" };
+    return &s_am;
+}
+
+/* image_manager 桩 — LVGL 不使用此机制 */
+static inline void *image_manager(void) { return NULL; }
+
+static inline ret_t image_manager_get_bitmap(void *im, const char *name, bitmap_t *bmp)
+{
+    (void)im; (void)name; (void)bmp;
+    return RET_OK;
+}
+
+static inline ret_t image_manager_unload_bitmap(void *im, bitmap_t *bmp)
+{
+    (void)im; (void)bmp;
+    return RET_OK;
+}
+
+/* assets_manager 操作桩 */
+static inline const asset_info_t *assets_manager_ref(assets_manager_t *am, int type, const char *name)
+{
+    (void)am; (void)type; (void)name;
+    return NULL;
+}
+
+static inline void assets_manager_unref(assets_manager_t *am, const asset_info_t *info)
+{
+    (void)am; (void)info;
+}
+
+static inline void assets_manager_clear_cache_ex(assets_manager_t *am, int type, const char *name)
+{
+    (void)am; (void)type; (void)name;
+}
+
+static inline ret_t assets_manager_add_data(assets_manager_t *am, const char *name,
+                                             int type, int subtype,
+                                             uint8_t *data, uint32_t size)
+{
+    (void)am; (void)name; (void)type; (void)subtype; (void)data; (void)size;
+    return RET_OK;
+}
+
+static inline asset_info_t *assets_manager_load_file(assets_manager_t *am, int type, const char *name)
+{
+    (void)am; (void)type; (void)name;
+    return NULL;
+}
+
+static inline ret_t assets_manager_add(assets_manager_t *am, asset_info_t *info)
+{
+    (void)am; (void)info;
+    return RET_OK;
+}
+
+static inline void widget_invalidate(lv_obj_t *obj, void *unused)
+{
+    (void)unused;
+    if (obj) lv_obj_invalidate(obj);
 }
 
 #ifdef __cplusplus
