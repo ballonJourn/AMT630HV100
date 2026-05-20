@@ -27,31 +27,9 @@ extern ret_t device_page_init(widget_t *win, void *ctx);
 extern ret_t update_page_init(widget_t *win, void *ctx);
 
 /**
- * Home page screen init
- * The screen object is created by screen_manager, we just populate it.
+ * Home page — implemented in ui_home_page.c (M024)
+ * extern int ui_home_page_init(lv_obj_t *screen, void *ctx);
  */
-int ui_home_page_init(lv_obj_t *screen, void *ctx)
-{
-    /* Call the existing AWTK-era init function.
-     * It uses widget_lookup() which now goes through our registry.
-     * The widgets need to be created and registered first (XML→C, M024).
-     *
-     * For now, create a placeholder label so the page is visible.
-     * TODO M024: Replace with full XML→C widget tree
-     */
-    lv_obj_t *label = lv_label_create(screen, NULL);
-    lv_label_set_text(label, "HCN Dashboard - Home Page (M024 stub)");
-    lv_obj_align(label, NULL, LV_ALIGN_CENTER, 0, 0);
-
-    widget_reg_add("home_stub_label", label);
-
-    /* TODO M024: Build full widget tree from home_page.xml, then call:
-     * home_page_init(screen, ctx);
-     */
-    (void)ctx;
-    printf("[ui_build] home_page stub initialized\n");
-    return 0;
-}
 
 /**
  * Link (phone mirror) page screen init
