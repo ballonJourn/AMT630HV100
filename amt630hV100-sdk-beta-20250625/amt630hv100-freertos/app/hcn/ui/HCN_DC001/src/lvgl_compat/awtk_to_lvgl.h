@@ -298,11 +298,61 @@ static inline void progress_bar_set_max(lv_obj_t *obj, int max_val)
     if (obj) lv_bar_set_range(obj, 0, max_val);
 }
 
-/* --- series_push (AWTK chart_view 第三方控件) --- */
+/* --- series_push (AWTK chart_view → LVGL lv_chart) M035 --- */
+
+/**
+ * series_push — 向图表中推入数据点
+ *
+ * AWTK: series_push(line_series_widget, &float_value, count)
+ * LVGL: lv_chart_set_next(chart, series, value)
+ *
+ * 实现策略:
+ * - obj 参数在 AWTK 中是 line_series 控件, 其 parent 是 chart_view
+ * - 在 LVGL 中, obj 是一个普通 lv_obj (占位), 我们找其 parent
+ *   并检查 parent 是否已被转换为 lv_chart
+ * - 如果 parent 尚未初始化为 chart, 进行懒初始化
+ *
+ * 注意: cycling_energy.c 中 value 是 float, lv_chart 使用 lv_coord_t (int16)
+ */
+static lv_chart_series_t *s_chart_series = NULL;
+static lv_obj_t          *s_chart_obj    = NULL;
+
+static void _ensure_chart_init(lv_obj_t *chart_container)
+{
+    if (s_chart_obj != NULL) return;
+    if (chart_container == NULL) return;
+
+    /* 在 chartview 容器内创建 lv_chart */
+    lv_coord_t w = lv_obj_get_width(chart_container);
+    lv_coord_t h = lv_obj_get_height(chart_container);
+
+    lv_obj_t *chart = lv_chart_create(chart_container, NULL);
+    lv_obj_set_pos(chart, 0, 0);
+    lv_obj_set_size(chart, w, h);
+    lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
+    lv_chart_set_point_count(chart, 20); /* 20 个数据点 */
+    lv_chart_set_range(chart, -30, 120); /* cycling_energy 的值范围 */
+    lv_obj_set_style_local_bg_opa(chart, LV_CHART_PART_BG, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_obj_set_style_local_border_opa(chart, LV_CHART_PART_BG, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+
+    s_chart_series = lv_chart_add_series(chart, lv_color_hex(0x59E9FF));
+    s_chart_obj = chart;
+}
+
 static inline void series_push(lv_obj_t *obj, float *value, int count)
 {
-    /* TODO M035: 替换为 lv_chart API */
-    (void)obj; (void)value; (void)count;
+    if (obj == NULL || value == NULL) return;
+
+    /* obj 是 line_series 占位控件, 其 parent 是 chartview */
+    lv_obj_t *chart_container = lv_obj_get_parent(obj);
+    _ensure_chart_init(chart_container);
+
+    if (s_chart_obj == NULL || s_chart_series == NULL) return;
+
+    for (int i = 0; i < count; i++) {
+        lv_coord_t v = (lv_coord_t)(value[i]);
+        lv_chart_set_next(s_chart_obj, s_chart_series, v);
+    }
 }
 
 static inline void widget_invalidate_force(lv_obj_t *obj, void *unused)

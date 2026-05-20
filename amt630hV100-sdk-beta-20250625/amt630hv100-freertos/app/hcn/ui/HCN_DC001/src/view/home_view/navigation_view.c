@@ -1,5 +1,5 @@
 #include "navigation_view.h"
-#include "../../../3rd/awtk-widget-qr/src/qr/qr.h"
+#include "ui_build/qr_lvgl.h"
 
 #define ICON_NAVI_DEFAULT  "icon_nav_1"
 

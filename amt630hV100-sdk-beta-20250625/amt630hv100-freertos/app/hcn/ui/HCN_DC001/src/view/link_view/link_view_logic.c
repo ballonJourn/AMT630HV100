@@ -6,7 +6,7 @@
 #include "config/hcn_config.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/mirror_data.h"
-#include "../3rd/awtk-widget-qr/src/qr/qr.h"
+#include "ui_build/qr_lvgl.h"
 #include "logic/hcn_global.h"
 
 
