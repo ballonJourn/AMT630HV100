@@ -1,0 +1,154 @@
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+index 67cca118..97bd0cd6 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libboard-amt630hv100/include/board.h
+@@ -64,7 +64,8 @@
+ #define LCD_BPP		16
+ #define LCD_INTERFACE_TYPE		LCD_INTERFACE_TTL
+ #endif
+-#elif defined(AWTK)
++#elif defined(AWTK) || defined(HCN_SCREEN_ENABLE)
++/* HCN dashboard: AWTK mode or LVGL mode — both use hcn_config.h parameters */
+ #define LCD_WIDTH	HCN_LCD_WIDTH 
+ #define LCD_HEIGHT	HCN_LCD_HEIGHT 
+ #define LCD_BPP		HCN_LCD_BPP 
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
+index ca45f50c..6f8b2da3 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/ArkmicroFiles/libcpu-amt630hv100/source/lcd.c
+@@ -101,7 +101,7 @@
+ #define LCD_ITU_SAV_CODE_CFG	0x258
+ #define LCD_HLOCK_CFG_RG		0x25C
+ 
+-#if defined(AWTK) || LCD_ROTATE_ANGLE != LCD_ROTATE_ANGLE_0
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE) || LCD_ROTATE_ANGLE != LCD_ROTATE_ANGLE_0
+ #define FB_COUNT	3
+ #else
+ #define FB_COUNT	2
+@@ -252,7 +252,7 @@ fb_queue_s *fb_queue_get_unit_from_base(unsigned int base)
+ }
+ #endif
+ 
+-#if defined(AWTK)
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+ void ark_lcs_get_osd_area(uint32_t *width, uint32_t *height)
+ {
+ 	*width = OSD_WIDTH;
+@@ -955,7 +955,7 @@ static int ark_lcd_hw_init()
+ {
+ 	uint32_t HD, VD;
+ 
+-#ifdef AWTK
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+ 	HD = OSD_WIDTH;
+ 	VD = OSD_HEIGHT;
+ #else
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/FreeRTOSConfig.h b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/FreeRTOSConfig.h
+index b0d1154d..fa1ca421 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/FreeRTOSConfig.h
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/FreeRTOSConfig.h
+@@ -55,8 +55,8 @@
+ #ifdef VG_DRIVER
+ #ifdef VG_ONLY
+ #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (15+32) * 1024 * 1024) )
+-#elif defined(AWTK)
+-// 注意：AWTK使用时， 堆大小不可任意设计， 一般需将堆大小设置为1MB或者512KB的倍数， 其他值慎用。
++#elif defined(AWTK) || defined(HCN_SCREEN_ENABLE)
++// 注意：堆大小不可任意设计， 一般需将堆大小设置为1MB或者512KB的倍数， 其他值慎用。
+ // ***
+ // configTOTAL_HEAP_SIZE 不可以随意设置，比如( 18.8 * 1024 * 1024)， 当设置为该值时， 使能Google 拼音输入法后，当输入拼音提取候选字时， 内核报告如下异常
+ //    Data Abort occured in 0 domain
+@@ -69,9 +69,9 @@
+ //#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (18.8+32) * 1024 * 1024) )  // google拼音出现异常
+ //#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (8.5+32) * 1024 * 1024) )  // google拼音正常工作
+ #ifdef __HCN_CONFIG_H__
+-#define configTOTAL_HEAP_SIZE					HCN_configTOTAL_HEAP_SIZE  // google拼音正常工作
++#define configTOTAL_HEAP_SIZE					HCN_configTOTAL_HEAP_SIZE
+ #else
+-#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (3.5+32) * 1024 * 1024) )  // google拼音正常工作
++#define configTOTAL_HEAP_SIZE					( ( size_t ) ( (3.5+32) * 1024 * 1024) )
+ #endif
+ 
+ #elif defined(REVERSE_TRACK)
+@@ -80,7 +80,7 @@
+ #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (10+32) * 1024 * 1024) )
+ #endif
+ #else
+-#ifdef AWTK
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+ #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (21+32) * 1024 * 1024) )
+ #else
+ #define configTOTAL_HEAP_SIZE					( ( size_t ) ( (26+32) * 1024 * 1024) )
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC-orig/src/carlink_ec.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC-orig/src/carlink_ec.c
+index 4add094c..06f19b3d 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC-orig/src/carlink_ec.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC-orig/src/carlink_ec.c
+@@ -746,7 +746,7 @@ void* initECTiny(void* param)
+         printf("ssid:%s\r\n", qr_info.ssid);
+         const char *UrlData = EC_generateQRCodeUrl(&qr_info);
+         printf("++++++++++++++++++++++UrlData:%s+++++++++++++++++++++++++++\n", UrlData);
+-        #ifdef AWTK
++        #if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+         set_qr_text_buf(UrlData);
+         #endif
+     }
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+index f49629c5..5a27d53b 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/carlink/EC/src/carlink_ec.c
+@@ -59,7 +59,7 @@ static uint8_t   apple_connect_flag = 0;
+ int start_http_camera();
+ void stop_http_camera();
+ #endif
+-#ifdef AWTK
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+ void set_qr_text_buf(const char *str);
+ #endif
+ 
+@@ -800,7 +800,7 @@ void* initECTiny(void* param)
+         vehicle_set_data(VEH_CARLINK_URL_STATUS, 1);
+     }
+ 
+-#ifdef AWTK
++#if defined(AWTK) || defined(HCN_SCREEN_ENABLE)
+ 	set_qr_text_buf(UrlData);
+ #endif
+ 
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/common/config/hcn_config.h b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/common/config/hcn_config.h
+index ca3642f7..6fe6ba9a 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/common/config/hcn_config.h
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/common/config/hcn_config.h
+@@ -79,9 +79,17 @@ extern "C" {
+  * define symbol __ICFEDIT_region_RAM_start__ = 0x20640000;
+  * define symbol __ICFEDIT_region_RAM_end__   = 0x23ffffff;
+  */
+-#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (23.5) * 1024 * 1024) ) )
+-#define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024) 
+-#define HCN_AWTK_HEAP_SIZE ((19) * 1024 * 1024)
++/**
++ * M007: LVGL 内存配置
++ * 原 AWTK: FreeRTOS 23.5MB + AWTK 19MB + VG 12MB
++ * LVGL 模式: FreeRTOS 16MB (含 LV_MEM) + VG 12MB
++ * LVGL 本身远比 AWTK 轻量, 16MB 对 FreeRTOS heap 足够。
++ * 注意: 值必须是 512KB 的倍数 (ARM MMU 对齐要求, 见原注释)
++ */
++#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (16) * 1024 * 1024) ) )
++#define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024)
++/* LVGL 使用 FreeRTOS heap, 不需要独立堆; LV_MEM_SIZE 在 lv_conf.h 中配置 */
++/* #define HCN_AWTK_HEAP_SIZE — removed, AWTK not used */
+ 
+ ///< 背光亮度控制使能
+ #define HCN_BL_PWM_ENABLE
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/main_lvgl.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/main_lvgl.c
+index ffe25866..fc273c37 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/main_lvgl.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/main_lvgl.c
+@@ -4,7 +4,7 @@
+  *
+  */
+ 
+-#if !defined(VG_ONLY) && !defined(AWTK)
++#if !defined(VG_ONLY) && !defined(AWTK) && !defined(HCN_SCREEN_ENABLE)
+ 
+ /*********************
+  *      INCLUDES
