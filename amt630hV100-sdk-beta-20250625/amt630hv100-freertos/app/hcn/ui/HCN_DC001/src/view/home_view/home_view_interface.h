@@ -17,5 +17,6 @@
 #include "view/home_view/info_view.h"
 #include "view/home_view/music_view.h"
 #include "view/home_view/phone_view.h"
+#include "view/home_view/dvr_view.h"
 
 #endif

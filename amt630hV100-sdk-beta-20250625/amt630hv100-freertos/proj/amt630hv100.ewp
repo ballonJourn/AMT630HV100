@@ -4725,6 +4725,9 @@
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\dock_view.c</name>
                                 </file>
                                 <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\dvr_view.c</name>
+                                </file>
+                                <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\home_view\electrical_view.c</name>
                                 </file>
                                 <file>

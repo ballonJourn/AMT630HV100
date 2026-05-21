@@ -41,6 +41,11 @@ typedef enum window{
     WINDOWS_NUM_MAX ,
 }window_page_e ;
 
+typedef enum pages_index{
+    PAGE_HOME    = 0,
+    PAGE_SETTING = 1,
+}pages_index_e ;
+
 ret_t view_manager_init(widget_t* parent) ;
 
 ret_t set_dock_view(dock_view_e dock_view) ;

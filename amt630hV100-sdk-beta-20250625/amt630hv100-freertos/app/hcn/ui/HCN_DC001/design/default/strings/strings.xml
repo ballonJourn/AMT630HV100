@@ -227,4 +227,59 @@ Enter the map without navigation</language>
 <string name="OTA_started">
   <language name="zh_CN">启动成功</language>
   <language name="en_US">Startup Successful</language>
+</string><string name="dvr_front_video">
+  <language name="zh_CN">前摄视频</language>
+  <language name="en_US">Front Video</language>
+</string>
+<string name="dvr_rear_video">
+  <language name="zh_CN">后摄视频</language>
+  <language name="en_US">Rear Video</language>
+</string>
+<string name="dvr_front_photo">
+  <language name="zh_CN">前摄照片</language>
+  <language name="en_US">Front Photo</language>
+</string>
+<string name="dvr_rear_photo">
+  <language name="zh_CN">后摄照片</language>
+  <language name="en_US">Rear Photo</language>
+</string>
+<string name="dvr_camera">
+  <language name="zh_CN">摄像头</language>
+  <language name="en_US">Camera</language>
+</string>
+<string name="dvr_on">
+  <language name="zh_CN">开</language>
+  <language name="en_US">ON</language>
+</string>
+<string name="dvr_off">
+  <language name="zh_CN">关</language>
+  <language name="en_US">OFF</language>
+</string>
+<string name="dvr_loop_time">
+  <language name="zh_CN">循环时间</language>
+  <language name="en_US">Loop Time</language>
+</string>
+<string name="dvr_format">
+  <language name="zh_CN">格式化</language>
+  <language name="en_US">Format</language>
+</string>
+<string name="dvr_quick_format">
+  <language name="zh_CN">快速格式化</language>
+  <language name="en_US">Quick Format</language>
+</string>
+<string name="dvr_about">
+  <language name="zh_CN">关于</language>
+  <language name="en_US">About</language>
+</string>
+<string name="dvr_confirm_delete">
+  <language name="zh_CN">确定删除？</language>
+  <language name="en_US">Confirm Delete?</language>
+</string>
+<string name="dvr_confirm">
+  <language name="zh_CN">确认</language>
+  <language name="en_US">Confirm</language>
+</string>
+<string name="dvr_cancel">
+  <language name="zh_CN">取消</language>
+  <language name="en_US">Cancel</language>
 </string>

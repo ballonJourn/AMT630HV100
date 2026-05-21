@@ -2,11 +2,15 @@
 #include <stdlib.h>
 #include "set_view/set_page_key.h"
 #include "home_view/home_view_interface.h"
+#include "home_view/dvr_view.h"
 #include "set_view/set_view_interface.h"
 #include "device_view/device_logic.h"
 #include "proxy/vehicle_data.h"
 #include "common/navigator.h"
 #include "view_manager.h"
+
+static void dvr_overlay_init(widget_t* win);
+static void dvr_show(bool_t show);
 #include "link_view/link_page_key.h"
 #include "proxy/vehicle_time.h"
 #include "proxy/bluetooth_data.h"
@@ -39,6 +43,8 @@ static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
             if (tk_str_eq(top_win_name, HOME_PAGE)) {                                                 \
                 if ((current_level) == (MENU_LEVEL_0)) {                                              \
                     home_page_deal_key_##keyType();                                                   \
+                } else if (((current_level) >= (MENU_LEVEL_1)) && ((current_dock) == (ICON_DVR))) {   \
+                    dvr_page_deal_key_##keyType();                                                    \
                 } else if (((current_level) == (MENU_LEVEL_1)) && ((current_dock) == (ICON_MUSIC))) { \
                     music_page_deal_key_##keyType();                                                  \
                 } else {                                                                              \
@@ -188,6 +194,8 @@ ret_t view_manager_init(widget_t* parent)
 
     start_time = time_now_s();
 
+    dvr_overlay_init(parent);
+
     return RET_OK ;
 }
 
@@ -199,18 +207,58 @@ void update_page_info()
 }
 
 
+static widget_t* dvr_pg_widget     = NULL;
+static widget_t* signal_view_widget = NULL;
+static widget_t* mileage_view_widget = NULL;
+static widget_t* electrical_view_widget = NULL;
+static widget_t* pages_widget      = NULL;
+static widget_t* time_view_widget  = NULL;
+
+static void dvr_overlay_init(widget_t* win)
+{
+    if (dvr_pg_widget == NULL) {
+        dvr_pg_widget       = widget_lookup(win, "dvr_pg",          TRUE);
+        signal_view_widget  = widget_lookup(win, "signal_view",     TRUE);
+        mileage_view_widget = widget_lookup(win, "mileage_view",    TRUE);
+        electrical_view_widget = widget_lookup(win, "electrical_view", TRUE);
+        pages_widget        = widget_lookup(win, "pages",           TRUE);
+        time_view_widget    = widget_lookup(win, "time_view",       TRUE);
+    }
+}
+
+static void dvr_show(bool_t show)
+{
+    if (dvr_pg_widget)       widget_set_visible(dvr_pg_widget,       show);
+    if (signal_view_widget)  widget_set_visible(signal_view_widget,  !show);
+    if (mileage_view_widget) widget_set_visible(mileage_view_widget, !show);
+    if (electrical_view_widget) widget_set_visible(electrical_view_widget, !show);
+    if (pages_widget)        widget_set_visible(pages_widget,        !show);
+    if (time_view_widget)    widget_set_visible(time_view_widget,    !show);
+}
+
 ret_t set_dock_view(dock_view_e dock_view)
 {
     if (window_page[DOCK_SELECT_VIEW])
     {
-        slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
+        if (dock_view != ICON_DVR)
+        {
+            slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
+        }
     }
 
     set_current_win(dock_view) ;
 
     home_refresh_dock_icon(dock_view) ;
 
-    set_window_page( dock_view == ICON_SETTING );
+    if (dock_view == ICON_DVR)
+    {
+        dvr_show(TRUE);
+    }
+    else
+    {
+        dvr_show(FALSE);
+        set_window_page( dock_view == ICON_SETTING );
+    }
 
     return RET_OK;
 }

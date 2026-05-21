@@ -5,6 +5,7 @@
 #include "home_view_interface.h"
 #include "common/navigator.h"
 #include "proxy/bluetooth_data.h"
+#include "dvr_api.h"
 
 void home_page_deal_key_set()
 {
@@ -28,6 +29,11 @@ void home_page_deal_key_set()
         case ICON_SETTING:
             set_current_level(MENU_LEVEL_1);
             setting_menu_set_focused_item(get_current_menu_index());
+            break;
+        case ICON_DVR:
+            set_current_level(MENU_LEVEL_1);
+            /* Start DVR preview when entering DVR page */
+            dvr_start_preview();
             break;
         default:
             break;
@@ -66,7 +72,9 @@ void home_page_deal_key_back()
 void home_page_deal_key_down ()
 {
     int index =  get_current_win() ;
-    index = (index + 1) % (ICON_SETTING + 1) ;
+    index = index + 1 ;
+    if (index == ICON_MUSIC_EX) index++ ;  /* skip music_ex */
+    if (index > ICON_DVR) index = ICON_INFO ;
 
     //刷新页面
     set_dock_view(index) ;
@@ -75,12 +83,11 @@ void home_page_deal_key_down ()
 void home_page_deal_key_up   ()
 {
     int index =  get_current_win() ;
-    index = (index - 1 + ICON_MUSIC_EX ) % (ICON_SETTING + 1) ;
+    index = index - 1 ;
+    if (index == ICON_MUSIC_EX) index-- ;  /* skip music_ex */
+    if (index < ICON_INFO) index = ICON_DVR ;
 
     //刷新页面
     set_dock_view(index) ;
     
 }
-
-
-

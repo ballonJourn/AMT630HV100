@@ -64,6 +64,7 @@ ret_t home_view_init(widget_t * win)
     home_dock_music_view_init   (win) ;
     home_phone_view_init        (win) ;
     home_info_view_init         (win) ;
+    home_dvr_view_init          (win) ;
 
     // 自检
     selfcheck_init();

@@ -10,6 +10,7 @@ typedef enum home_dock_com{
     ICON_SETTING ,
 
     ICON_MUSIC_EX,
+    ICON_DVR     ,
     ICON_NUM_MAX ,
 }dock_view_e;
 
