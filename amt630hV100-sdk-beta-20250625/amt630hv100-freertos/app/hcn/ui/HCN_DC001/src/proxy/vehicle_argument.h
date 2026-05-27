@@ -42,4 +42,9 @@ uint8_t vehicle_get_param_bluetooth();
 
 void vehicle_set_param_bluetooth(uint8_t value);
 
+//毫米波雷达开关
+uint8_t vehicle_get_param_radar();
+
+void vehicle_set_param_radar(uint8_t value);
+
 #endif

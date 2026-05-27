@@ -18,6 +18,7 @@
 #include <FreeRTOS.h>
 #include <string.h>
 #include "mmwave_radar/hcn_mmwave_radar.h"
+#include "storage_param1/hcn_usr_param.h"
 #include "vehicle_param/vehicle_param.h"
 #include "log/hcn_log.h"
 #include "utils/hcn_utils.h"
@@ -499,7 +500,14 @@ static void radar_rx_thread(void *param) {
     vTaskDelay(pdMS_TO_TICKS(500));
     mmwave_radar_read_version();
     vTaskDelay(pdMS_TO_TICKS(100));
-    mmwave_radar_data_switch(1);
+
+    ///< 读取用户存储的雷达开关状态，决定是否开启数据上传
+    uint8_t radar_sw = 1;
+#ifdef HCN_NOR_FLASH_PARAM_ENABLE
+    extern bool get_hcn_usr_param(int id, void *param);
+    get_hcn_usr_param(HCN_PARAM_RADAR_SWITCH, &radar_sw);
+#endif
+    mmwave_radar_data_switch(radar_sw);
 
     uint8_t rx_buf[RADAR_RX_BUF_SIZE];
     uint8_t frame_buf[RADAR_WARN_FRAME_TOTAL_LEN]; ///< 最大帧缓冲

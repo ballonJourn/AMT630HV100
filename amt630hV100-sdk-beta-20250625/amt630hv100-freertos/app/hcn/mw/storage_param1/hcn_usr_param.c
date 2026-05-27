@@ -350,6 +350,10 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
             *((uint8_t *)param) = usr_param.usr_set.drive_mode;
             break;
 
+        case HCN_PARAM_RADAR_SWITCH:
+            *((uint8_t *)param) = usr_param.usr_set.radar_switch;
+            break;
+
         case HCN_PARAM_EC_UUID:
             snprintf((char *)param, sizeof(usr_param.carlink_uuid), 
                     "%s", usr_param.carlink_uuid);
@@ -561,6 +565,13 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
         case HCN_PARAM_DRIVE_MODE:
             if (usr_param.usr_set.drive_mode != *((uint8_t *)param)) {
                 usr_param.usr_set.drive_mode = *((uint8_t *)param); 
+                is_save = true;
+            }
+            break;
+
+        case HCN_PARAM_RADAR_SWITCH:
+            if (usr_param.usr_set.radar_switch != *((uint8_t *)param)) {
+                usr_param.usr_set.radar_switch = *((uint8_t *)param);
                 is_save = true;
             }
             break;
