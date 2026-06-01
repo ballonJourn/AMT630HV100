@@ -89,10 +89,13 @@ static BaseType_t prvParameterStartIwprivCommand( char *pcWriteBuffer, size_t xW
 #endif
 static BaseType_t prvParameterIperfCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 
-/*
- * open or close system log command.
- */
-static BaseType_t prvParameterSysLogCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+#if ENABLE_BD_USB_DVR_FUNC
+static BaseType_t prvDVRCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRStatusCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRViewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRDisplayCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRPreviewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+#endif
 
 /*
  * Implements the "query heap" command.
@@ -211,16 +214,55 @@ static const CLI_Command_Definition_t xParameterEcho =
 		"iperf",
 		"\r\n iperf [ip] [port]:\r\n Starts iperf client\r\n",
 		prvParameterIperfCommand, /* The function to run. */
-		1 /* One parameter is expected.  Valid values are "start" and "stop". */
+		0 /* One parameter is expected.  Valid values are "start" and "stop". */
 	};
 
-	static const CLI_Command_Definition_t xSysLogCmd =
-	{
-		"sysLog",
-		"\r\n syslog [0|1], open or close syslog\r\n",
-		prvParameterSysLogCommand, /* The function to run. */
-		1 /* One parameter is expected.*/
-	};
+#if ENABLE_BD_USB_DVR_FUNC
+/* Structure that defines the "dvr" command line command. */
+static const CLI_Command_Definition_t xDVRCommand =
+{
+	"dvr",
+	"\r\ndvr [getid|recstart|recstop|snap|sos|getlist|pbstart|pbpause|pbstop|getsts] [mode] [index]:\r\n DVR control\r\n",
+	prvDVRCommand, /* The function to run. */
+	-1 /* The user can enter any number of commands. */
+};
+
+/* Structure that defines the "dvrstatus" command line command. */
+static const CLI_Command_Definition_t xDVRStatusCommand =
+{
+	"dvrstatus",
+	"\r\ndvrstatus:\r\n Display DVR status (SD, recording, MIC, etc)\r\n",
+	prvDVRStatusCommand, /* The function to run. */
+	0 /* No parameters are expected. */
+};
+
+/* Structure that defines the "dvrview" command line command. */
+static const CLI_Command_Definition_t xDVRViewCommand =
+{
+	"dvrview",
+	"\r\ndvrview [0|1|2|3|4]:\r\n Switch DVR view mode: 0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh\r\n",
+	prvDVRViewCommand, /* The function to run. */
+	1 /* One parameter is expected. */
+};
+
+/* Structure that defines the "dvrdsp" command line command. */
+static const CLI_Command_Definition_t xDVRDisplayCommand =
+{
+	"dvrdsp",
+	"\r\ndvrdsp [x] [y] [w] [h]:\r\n Set DVR display window position and size\r\n",
+	prvDVRDisplayCommand, /* The function to run. */
+	4 /* Four parameters are expected: x y width height */
+};
+
+/* Structure that defines the "dvrpreview" command line command. */
+static const CLI_Command_Definition_t xDVRPreviewCommand =
+{
+	"dvrpreview",
+	"\r\ndvrpreview [0|1]:\r\n Enable/disable DVR preview mode (0=disable jpeg decode, 1=enable)\r\n",
+	prvDVRPreviewCommand, /* The function to run. */
+	1 /* One parameter is expected. */
+};
+#endif
 /*-----------------------------------------------------------*/
 
 void vRegisterSampleCLICommands( void )
@@ -254,7 +296,13 @@ void vRegisterSampleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xStartIwprivCmd);
 #endif
 	FreeRTOS_CLIRegisterCommand( &xIperfCmd);
-	FreeRTOS_CLIRegisterCommand( &xSysLogCmd );
+#if ENABLE_BD_USB_DVR_FUNC
+	FreeRTOS_CLIRegisterCommand( &xDVRCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRStatusCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRViewCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRDisplayCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRPreviewCommand );
+#endif
 }
 /*-----------------------------------------------------------*/
 
@@ -798,50 +846,346 @@ static BaseType_t prvParameterIperfCommand( char *pcWriteBuffer, size_t xWriteBu
     return pdFALSE;
 }
 
-static BaseType_t prvParameterSysLogCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+#if ENABLE_BD_USB_DVR_FUNC
+/* External DVR API functions from main_awtk.c */
+extern void dvr_api_get_id(void);
+extern void dvr_api_rec_start(void);
+extern void dvr_api_rec_stop(void);
+extern void dvr_api_snap(void);
+extern void dvr_api_sos(void);
+extern void dvr_api_get_list(uint8_t mode);
+extern void dvr_api_pb_start(uint8_t mode, uint16_t index);
+extern void dvr_api_pb_pause(void);
+extern void dvr_api_pb_stop(void);
+extern void dvr_api_get_status(void);
+extern void dvr_api_view_switch(uint8_t mode);
+extern uint8_t dvr_get_sd_status(void);
+extern uint8_t dvr_get_rec_status(void);
+extern uint8_t dvr_get_lock_status(void);
+extern uint8_t dvr_get_mic_status(void);
+extern uint8_t dvr_get_sd_error_status(void);
+extern uint8_t dvr_get_sd_full_status(void);
+extern uint16_t dvr_get_video_list_count(void);
+extern uint16_t dvr_get_photo_list_count(void);
+extern uint8_t dvr_get_view_mode(void);
+extern int dvr_api_check_exists(void);
+extern int dvr_api_is_running(void);
+extern void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int32_t height);
+extern void dvr_api_get_display_window(int32_t *x, int32_t *y, int32_t *width, int32_t *height);
+extern void dvr_api_set_preview_enable(uint8_t enable);
+extern uint8_t dvr_api_get_preview_enable(void);
+
+/*
+ * Implements the "dvr" command line command.
+ */
+static BaseType_t prvDVRCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
     const char *pcParameter;
-    BaseType_t lParameterStringLength;
+    BaseType_t xParameterStringLength;
 
-    /* Remove compile time warnings about unused parameters, and check the
-    write buffer is not NULL.  NOTE - for simplicity, this example assumes the
-    write buffer length is adequate, so does not check for buffer overflows. */
     ( void ) pcCommandString;
     ( void ) xWriteBufferLen;
     configASSERT( pcWriteBuffer );
 
-    /* Obtain the parameter string. */
-    pcParameter = FreeRTOS_CLIGetParameter
-    				(
-    				pcCommandString,		/* The command string itself. */
-    				1,						/* Return the first parameter. */
-    				&lParameterStringLength	/* Store the parameter string length. */
-    				);
+    /* Obtain the first parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter(
+        pcCommandString,
+        1,
+        &xParameterStringLength );
 
-
-    /* Sanity check something was returned. */
-    configASSERT( pcParameter );
-	pcWriteBuffer[ 0 ] = 0x00;  //clear out buffer
-	/* There are only two valid parameter values. */
-
-	extern void set_system_log(uint8_t status);
-
-	if (strncmp(pcParameter, "0", strlen("0")) == 0)
-	{
-		printf("\r\ncmd system log close\r\n");
-		set_system_log(0);
-	}
-	else if (strncmp(pcParameter, "1", strlen("1")) == 0)
-	{
-		set_system_log(1);
-		printf("\r\ncmd system log open\r\n");
-	}
-    else 	 
+    if( pcParameter != NULL )
     {
-		printf("Invalid cmd:%s\n", pcCommandString);
+        if( strncmp( pcParameter, "getid", strlen( "getid" ) ) == 0 )
+        {
+            dvr_api_get_id();
+            sprintf( pcWriteBuffer, "DVR: Get ID command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "recstart", strlen( "recstart" ) ) == 0 )
+        {
+            dvr_api_rec_start();
+            sprintf( pcWriteBuffer, "DVR: Record start command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "recstop", strlen( "recstop" ) ) == 0 )
+        {
+            dvr_api_rec_stop();
+            sprintf( pcWriteBuffer, "DVR: Record stop command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "snap", strlen( "snap" ) ) == 0 )
+        {
+            dvr_api_snap();
+            sprintf( pcWriteBuffer, "DVR: Snap command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "sos", strlen( "sos" ) ) == 0 )
+        {
+            dvr_api_sos();
+            sprintf( pcWriteBuffer, "DVR: SOS/Emergency lock command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "getlist", strlen( "getlist" ) ) == 0 )
+        {
+            /* Get second parameter: mode (0=video, 1=photo) */
+            const char *pcModeParam = FreeRTOS_CLIGetParameter( pcCommandString, 2, &xParameterStringLength );
+            uint8_t mode = 0;
+            if( pcModeParam != NULL && xParameterStringLength > 0 )
+            {
+                mode = (uint8_t)atoi( pcModeParam );
+            }
+            dvr_api_get_list( mode );
+            sprintf( pcWriteBuffer, "DVR: Get file list command sent (mode=%s)\r\n", mode ? "photo" : "video" );
+        }
+        else if( strncmp( pcParameter, "pbstart", strlen( "pbstart" ) ) == 0 )
+        {
+            /* Get second parameter: mode, third parameter: index */
+            const char *pcModeParam = FreeRTOS_CLIGetParameter( pcCommandString, 2, &xParameterStringLength );
+            const char *pcIdxParam = FreeRTOS_CLIGetParameter( pcCommandString, 3, &xParameterStringLength );
+            uint8_t mode = 0;
+            uint16_t index = 0;
+            if( pcModeParam != NULL && xParameterStringLength > 0 )
+            {
+                mode = (uint8_t)atoi( pcModeParam );
+            }
+            if( pcIdxParam != NULL && xParameterStringLength > 0 )
+            {
+                index = (uint16_t)atoi( pcIdxParam );
+            }
+            dvr_api_pb_start( mode, index );
+            sprintf( pcWriteBuffer, "DVR: Playback start command sent (mode=%s, index=%d)\r\n",
+                     mode ? "photo" : "video", index );
+        }
+        else if( strncmp( pcParameter, "pbpause", strlen( "pbpause" ) ) == 0 )
+        {
+            dvr_api_pb_pause();
+            sprintf( pcWriteBuffer, "DVR: Playback pause command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "pbstop", strlen( "pbstop" ) ) == 0 )
+        {
+            dvr_api_pb_stop();
+            sprintf( pcWriteBuffer, "DVR: Playback stop command sent\r\n" );
+        }
+        else if( strncmp( pcParameter, "getsts", strlen( "getsts" ) ) == 0 )
+        {
+            dvr_api_get_status();
+            sprintf( pcWriteBuffer, "DVR: Get status command sent\r\n" );
+        }
+        else
+        {
+            sprintf( pcWriteBuffer, "DVR: Unknown command. Use: getid|recstart|recstop|snap|sos|getlist|pbstart|pbpause|pbstop|getsts\r\n" );
+        }
+    }
+    else
+    {
+        sprintf( pcWriteBuffer, "DVR: Usage: dvr [getid|recstart|recstop|snap|sos|getlist|pbstart|pbpause|pbstop|getsts]\r\n" );
     }
 
-    /* There is no more data to return after this single string, so return
-    pdFALSE. */
     return pdFALSE;
 }
+
+/*
+ * Implements the "dvrstatus" command line command.
+ */
+static BaseType_t prvDVRStatusCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    if( !dvr_api_check_exists() )
+    {
+        sprintf( pcWriteBuffer, "DVR: elene file not found (USB DVR not connected)\r\n" );
+    }
+    else if( !dvr_api_is_running() )
+    {
+        sprintf( pcWriteBuffer, "DVR: Task not running\r\n" );
+    }
+    else
+    {
+        uint8_t sd = dvr_get_sd_status();
+        uint8_t rec = dvr_get_rec_status();
+        uint8_t lock = dvr_get_lock_status();
+        uint8_t mic = dvr_get_mic_status();
+        uint8_t err = dvr_get_sd_error_status();
+        uint8_t full = dvr_get_sd_full_status();
+        uint16_t video_cnt = dvr_get_video_list_count();
+        uint16_t photo_cnt = dvr_get_photo_list_count();
+        uint8_t view = dvr_get_view_mode();
+
+        sprintf( pcWriteBuffer,
+                 "DVR Status:\r\n"
+                 "  SD Card: %s\r\n"
+                 "  Recording: %s\r\n"
+                 "  File Locked: %s\r\n"
+                 "  MIC: %s\r\n"
+                 "  SD Error: %s\r\n"
+                 "  SD Full: %s\r\n"
+                 "  Video Files: %d\r\n"
+                 "  Photo Files: %d\r\n"
+                 "  View Mode: %d\r\n",
+                 sd ? "Present" : "Not Present",
+                 rec ? "Yes" : "No",
+                 lock ? "Yes" : "No",
+                 mic ? "On" : "Off",
+                 err ? "Yes" : "No",
+                 full ? "Yes" : "No",
+                 video_cnt,
+                 photo_cnt,
+                 view );
+    }
+
+    return pdFALSE;
+}
+
+/*
+ * Implements the "dvrview" command line command.
+ */
+static BaseType_t prvDVRViewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t xParameterStringLength;
+
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* Obtain the first parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter(
+        pcCommandString,
+        1,
+        &xParameterStringLength );
+
+    if( pcParameter != NULL )
+    {
+        uint8_t mode = (uint8_t)atoi( pcParameter );
+        if( mode > 4 )
+        {
+            mode = 0;
+        }
+        dvr_api_view_switch( mode );
+        sprintf( pcWriteBuffer, "DVR: View switch command sent (mode=%d: %s)\r\n",
+                 mode,
+                 mode == 0 ? "front" : (mode == 1 ? "rear" : (mode == 2 ? "f+r" : (mode == 3 ? "r+f" : "hzh"))) );
+    }
+    else
+    {
+        sprintf( pcWriteBuffer, "DVR: Usage: dvrview [0|1|2|3|4] (0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh)\r\n" );
+    }
+
+    return pdFALSE;
+}
+
+/*
+ * Implements the "dvrdsp" command line command.
+ * Usage: dvrdsp [x] [y] [w] [h] - Set display window position and size
+ *        dvrdsp -1 - Get current display window settings
+ */
+static BaseType_t prvDVRDisplayCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t xParameterStringLength;
+    int32_t x, y, w, h;
+
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* Obtain the first parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter(
+        pcCommandString,
+        1,
+        &xParameterStringLength );
+
+    if( pcParameter != NULL )
+    {
+        /* Check if it's a get status request (-1) */
+        if( strncmp( pcParameter, "-1", strlen( "-1" ) ) == 0 )
+        {
+            dvr_api_get_display_window( &x, &y, &w, &h );
+            sprintf( pcWriteBuffer, "DVR Display Window: x=%d y=%d w=%d h=%d\r\n", x, y, w, h );
+        }
+        else
+        {
+            /* Get x parameter */
+            x = atoi( pcParameter );
+
+            /* Get y parameter */
+            pcParameter = FreeRTOS_CLIGetParameter( pcCommandString, 2, &xParameterStringLength );
+            if( pcParameter == NULL )
+            {
+                sprintf( pcWriteBuffer, "DVR: Usage: dvrdsp [x] [y] [w] [h] or dvrdsp -1 to get current settings\r\n" );
+                return pdFALSE;
+            }
+            y = atoi( pcParameter );
+
+            /* Get w parameter */
+            pcParameter = FreeRTOS_CLIGetParameter( pcCommandString, 3, &xParameterStringLength );
+            if( pcParameter == NULL )
+            {
+                sprintf( pcWriteBuffer, "DVR: Usage: dvrdsp [x] [y] [w] [h] or dvrdsp -1 to get current settings\r\n" );
+                return pdFALSE;
+            }
+            w = atoi( pcParameter );
+
+            /* Get h parameter */
+            pcParameter = FreeRTOS_CLIGetParameter( pcCommandString, 4, &xParameterStringLength );
+            if( pcParameter == NULL )
+            {
+                sprintf( pcWriteBuffer, "DVR: Usage: dvrdsp [x] [y] [w] [h] or dvrdsp -1 to get current settings\r\n" );
+                return pdFALSE;
+            }
+            h = atoi( pcParameter );
+
+            /* Set display window */
+            dvr_api_set_display_window( x, y, w, h );
+            sprintf( pcWriteBuffer, "DVR: Display window set to x=%d y=%d w=%d h=%d\r\n", x, y, w, h );
+        }
+    }
+    else
+    {
+        sprintf( pcWriteBuffer, "DVR: Usage: dvrdsp [x] [y] [w] [h] or dvrdsp -1 to get current settings\r\n" );
+    }
+
+    return pdFALSE;
+}
+
+/*
+ * Implements the "dvrpreview" command line command.
+ * Usage: dvrpreview [0|1] - 0=disable preview (skip jpeg decode), 1=enable preview
+ *        dvrpreview -1 - Get current preview status
+ */
+static BaseType_t prvDVRPreviewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t xParameterStringLength;
+
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* Obtain the first parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter(
+        pcCommandString,
+        1,
+        &xParameterStringLength );
+
+    if( pcParameter != NULL )
+    {
+        /* Check if it's a get status request (-1) */
+        if( strncmp( pcParameter, "-1", strlen( "-1" ) ) == 0 )
+        {
+            uint8_t enable = dvr_api_get_preview_enable();
+            sprintf( pcWriteBuffer, "DVR Preview: %s (dvr_preview_enable=%d)\r\n",
+                     enable ? "Enabled" : "Disabled", enable );
+        }
+        else
+        {
+            uint8_t enable = (uint8_t)atoi( pcParameter );
+            dvr_api_set_preview_enable( enable ? 1 : 0 );
+            sprintf( pcWriteBuffer, "DVR Preview: %s\r\n", enable ? "Enabled" : "Disabled" );
+        }
+    }
+    else
+    {
+        sprintf( pcWriteBuffer, "DVR: Usage: dvrpreview [0|1] or dvrpreview -1 to get status\r\n" );
+    }
+
+    return pdFALSE;
+}
+#endif /* ENABLE_BD_USB_DVR_FUNC */

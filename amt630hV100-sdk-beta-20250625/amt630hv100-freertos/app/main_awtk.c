@@ -8,8 +8,9 @@
  *********************/
 #include <stdlib.h>
 #include <unistd.h>
+#if ENABLE_BD_USB_DVR_FUNC
 #include <string.h>
-
+#endif
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -23,10 +24,14 @@
 #include "sysinfo.h"
 #include "mmcsd_core.h"
 #include "ff_stdio.h"
+
+#if ENABLE_BD_USB_DVR_FUNC
 #include "lcd.h"
 #include "mfcapi.h"
 #include "pxp.h"
 #include "jpegdecapi.h"
+#endif
+
 #ifdef WIFI_SUPPORT
 #include "carlink_ey.h"
 #include "carlink_ec.h"
@@ -71,6 +76,7 @@ extern int ulog_console_backend_init(void);
 #define USB_DEV_UNPLUGED	1
 //#define TASK_STATUS_MONITOR
 
+#if ENABLE_BD_USB_DVR_FUNC
 // USB DVR related defines
 #define BD_CTRL_GET_ID          0x00
 #define BD_CTRL_REC_START        0x01
@@ -79,19 +85,42 @@ extern int ulog_console_backend_init(void);
 #define BD_CTRL_SOS             0x04
 #define BD_CTRL_GET_LIST        0x05
 #define BD_CTRL_PB_START        0x06
+#define BD_CTRL_PB_PAUSE        0x07    /*播放暂停*/
+#define BD_CTRL_PB_STOP         0x08    /*播放停止*/
 #define BD_CTRL_GET_STS         0x09
-#define BD_CTRL_MIC_ON           0x0D
+#define BD_CTRL_REC_TICK        0x0A    /*记录仪当前的录像秒数*/
+#define BD_CTRL_SET_RES         0x0B    /*记录仪的录像分辨率 - 0:1080P,1:720P - 预留一般是默认不可选*/
+#define BD_CTRL_SET_REC_TIME    0x0C    /*循环录像时长 1:1min,2:2min,3:3min,发送 0:(代表获取当前固件的对应设置)*/
+#define BD_CTRL_MIC_ON          0x0D    /*MIC开关,0:off,1:on*/
+#define BD_CTRL_STAMP_ON        0x0E    /*时间水印开关,0:off,1:on - 预留,默认开*/
+#define BD_CTRL_KEY_ON          0x0F    /*预留*/
+#define BD_CTRL_OFF_TIME        0x10    /*预留*/
+#define BD_CTRL_FORMAT          0x11    /*格式化卡,需要先停止录像*/
+#define BD_CTRL_DEFAULT         0x12    /*恢复出厂设置,需先停止录像*/
+#define BD_CTRL_SET_TIME        0x13    /*设置时间*/
+#define BD_CTRL_DEL_FILE        0x14    /*删除指定index的文件,一般文件列表界面操作*/
+#define BD_CTRL_LOCK_FILE       0x15    /*加锁指定index的文件，一般文件列表界面操作*/
+#define BD_CTRL_UNLOCK_FILE     0x16    /*解锁指定index的文件，一般文件列表界面操作*/
+#define BD_CTRL_TOTAL_TIME      0x17    /*返回指定index录像文件的总时长,一般回放文件时使用*/
+#define BD_CTRL_PB_FF           0x1e    /*回放视频快进*/
+#define BD_CTRL_PB_FB           0x1f    /*回放视频快退*/
 #define BD_CTRL_SENSOR_SEL      0x22   /*多路切换预览显示 0:前路,1:后路*/
-#define BD_ANDROID_VIEW_SWITCH  0x9c
+#define BD_ANDROID_VIEW_SWITCH  0x9c    /*多路切换预览显示 0:前路,1:后路*/
 
 #define BD_MAX_DATA_LEN         (60*1024)
+#define BD_FILE_JPG_BIT         0x8000
+#define BD_FILE_BACK_BIT        0x4000
 #define BD_HEADER_LEN           10
 #define BD_JPG_OFFSET           17
 #define JPG_FILE_NAME           "/usb/elene"
 #define FIXED_BUF_SIZE          600
 
 // DVR debug print control: 1=enable print, 0=disable print
-#define DVR_DEBUG_PRINT         1
+#define DVR_DEBUG_PRINT         0
+// JPEG decode debug print control: 1=enable, 0=disable (default off)
+#define JPEG_DEBUG_PRINT        0
+// DVR framerate statistics control: 1=enable, 0=disable
+#define DVR_FRAMERATE_PRINT     1
 
 typedef struct tag_st_bd_ctrl_if {
     uint16_t header_id;
@@ -100,7 +129,6 @@ typedef struct tag_st_bd_ctrl_if {
     uint16_t data_len;
     uint16_t checksum;
     uint8_t trans_buf[BD_MAX_DATA_LEN];
-    uint16_t need_send_data;
 } st_bd_ctrl_if_t;
 
 typedef struct tag_dvr_capture {
@@ -116,17 +144,20 @@ typedef struct tag_dvr_capture {
     // Decode and display related
     void *mfc_handle;
     uint8_t *yuv_buf;
-    uint8_t *dst_buf;
+    uint8_t *dst_buf[2];  // Double buffer for display
+    uint8_t dst_buf_index;  // Current display buffer index
     uint32_t yuv_buf_size;
     uint32_t dst_buf_size;
     uint8_t display_on;
     uint32_t current_jpg_size;  // Store current jpg size for decode
 } st_dvr_capture_t;
 
+// DVR control variables
 static st_bd_ctrl_if_t dvr_ctrl_data;
 static st_dvr_capture_t dvr_capture;
 static TaskHandle_t dvr_task_handle = NULL;
 static FF_FILE *dvr_fp = NULL;  // Global file pointer for elene
+static uint8_t dvr_need_send_data = 0;  // Flag to indicate data needs to be sent
 
 // DVR status variables
 static uint8_t dvr_sd_status = 0;      // 0: no SD, 1: SD present
@@ -143,6 +174,25 @@ static uint8_t dvr_view_mode = 0;  // 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh
 static uint16_t dvr_video_list_count = 0;
 static uint16_t dvr_photo_list_count = 0;
 
+// Display window configuration (for external control)
+static int32_t dvr_display_x = 0;       // X coordinate of display window
+static int32_t dvr_display_y = 0;       // Y coordinate of display window
+static int32_t dvr_display_width = LCD_WIDTH;   // Width of display window
+static int32_t dvr_display_height = LCD_HEIGHT; // Height of display window
+
+// Preview mode control flag (for skip jpeg decode when UI not in preview)
+static uint8_t dvr_preview_enable = 0;  // 0: skip jpeg decode, 1: enable jpeg decode
+
+// Framerate statistics
+static uint32_t dvr_frame_count = 0;
+static uint32_t dvr_frame_count_last = 0;
+static uint32_t dvr_last_stat_time = 0;
+static uint32_t dvr_fps = 0;
+
+// Skip JPEG process flag (for file list operations)
+static uint8_t dvr_skip_jpeg_process = 0;
+
+#endif
 int carlink_aa_init();
 int carlink_cp_init();
 
@@ -166,10 +216,16 @@ extern int delta_update(int filetype, size_t patchFileSize);
 /**********************
  *  STATIC PROTOTYPES
  **********************/
+#if ENABLE_BD_USB_DVR_FUNC
 static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par);
-void dvr_get_file_list(uint8_t mode);
-void dvr_get_status(void);
-
+static void dvr_get_file_list(uint8_t mode);
+static void dvr_get_status(void);
+static void dvr_pb_start(uint8_t mode, uint16_t index);
+static void dvr_pb_pause(void);
+static void dvr_pb_stop(void);
+static void dvr_pb_ff(void);
+static void dvr_pb_fb(void);
+#endif
 /**********************
  *  STATIC VARIABLES
  **********************/
@@ -181,48 +237,35 @@ void dvr_get_status(void);
 /**********************
  *  STATIC FUNCTIONS
  **********************/
+#if ENABLE_BD_USB_DVR_FUNC
+// Send data to DVR via elene file (write 512 bytes aligned)
+// Caller should call dvr_seek_for_align() before this function
+static void dvr_send_data(void)
+{
+    if (dvr_fp == NULL) {
+        printf("DVR: elene file not opened for write\n");
+        return;
+    }
 
-// Send command to DVR via elene file
-void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par)
+    ff_fwrite(&dvr_ctrl_data, 1, 512, dvr_fp);
+
+    printf("DVR: Data sent successfully\n");
+}
+
+// Send normal command to DVR
+// Sets flag and prepares data, actual sending happens in main loop
+static void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par)
 {
     st_bd_ctrl_if_t *pctrl = &dvr_ctrl_data;
+
     pctrl->header_id = 0xaa55;
     pctrl->cmd_id = cmd_id;
     pctrl->cmd_par = cmd_par;
     pctrl->data_len = 0;
-    pctrl->need_send_data = 1;
+    pctrl->checksum = 0;
+    dvr_need_send_data = 1;
 
-    // Write command to global elene file if opened
-    if (dvr_fp != NULL) {
-        // Seek to specific position before sending command (same as bd_seek_for_align)
-        uint32_t offset, limit;
-        st_dvr_capture_t *cap = &dvr_capture;
-        uint32_t saved_read_times = cap->read_times;  // Save read_times to avoid double increment
-
-        if (cap->round_flag == 0) {
-            limit = cap->file_size;
-        } else {
-            limit = cap->file_size / 3;
-        }
-        offset = cap->read_times * 300 * 1024;
-
-        if (offset + 300 * 1024 >= limit) {
-            cap->round_flag = 1;
-            cap->read_times = 0;
-            offset = 100 * 300 * 1024;
-            ff_fseek(dvr_fp, offset, FF_SEEK_SET);
-        } else {
-            ff_fseek(dvr_fp, offset, FF_SEEK_SET);
-            cap->read_times++;
-        }
-
-        ff_fwrite(pctrl, 1, 512, dvr_fp);
-
-        cap->read_times = saved_read_times;  // Restore read_times so main loop reading stays in sync
-    } else {
-        printf("DVR: dvr_fp is NULL, cmd 0x%02x not sent\n", cmd_id);
-        return;
-    }
+    printf("DVR: Send cmd: 0x%02X, par: 0x%04X\n", cmd_id, cmd_par);
 }
 
 // Check if elene file exists on USB using ff_stat
@@ -253,11 +296,10 @@ static int dvr_capture_init(st_dvr_capture_t *cap)
         printf("DVR: elene opened, dvr_fp=0x%x\n", (uint32_t)dvr_fp);
     }
 
-    blksize = 512;  // default block size
+    blksize = 100 * 1024;  // Block size should be 100KB to match elene file format
     cap->blksize = blksize;
 
-    /* Allocate with 4KB extra guard space to detect USB overwrite */
-    cap->cap_blk_buf = pvPortMalloc(blksize * FIXED_BUF_SIZE + 4096);
+    cap->cap_blk_buf = pvPortMalloc(blksize + 512 + 300 * 1024);  // 100KB block + extra space for jpg_size
     if (!cap->cap_blk_buf) {
         printf("DVR: alloc blk_buf failed\n");
         if (dvr_fp && cap->h_cap != dvr_fp) ff_fclose(dvr_fp);
@@ -265,7 +307,7 @@ static int dvr_capture_init(st_dvr_capture_t *cap)
         return -1;
     }
 
-    cap->cap_jpg_buf = pvPortMalloc(300 * 1024);
+    cap->cap_jpg_buf = pvPortMalloc(350 * 1024);  // 350KB to handle max jpg_size + header
     if (!cap->cap_jpg_buf) {
         printf("DVR: alloc jpg_buf failed\n");
         vPortFree(cap->cap_blk_buf);
@@ -304,11 +346,14 @@ static int dvr_capture_init(st_dvr_capture_t *cap)
         return -1;
     }
 
-    // Allocate display buffer (RGB565, 1280x720x2)
+    // Allocate display buffers (RGB565, double buffer 1280x720x2)
     cap->dst_buf_size = 1280 * 720 * 2;
-    cap->dst_buf = pvPortMalloc(cap->dst_buf_size);
-    if (!cap->dst_buf) {
+    cap->dst_buf[0] = pvPortMalloc(cap->dst_buf_size);
+    cap->dst_buf[1] = pvPortMalloc(cap->dst_buf_size);
+    if (!cap->dst_buf[0] || !cap->dst_buf[1]) {
         printf("DVR: dst_buf alloc failed\n");
+        if (cap->dst_buf[0]) vPortFree(cap->dst_buf[0]);
+        if (cap->dst_buf[1]) vPortFree(cap->dst_buf[1]);
         vPortFree(cap->yuv_buf);
         mfc_uninit(cap->mfc_handle);
         vPortFree(cap->cap_blk_buf);
@@ -317,6 +362,7 @@ static int dvr_capture_init(st_dvr_capture_t *cap)
         dvr_fp = NULL;
         return -1;
     }
+    cap->dst_buf_index = 0;
 
     cap->display_on = 0;
     cap->running = 1;
@@ -341,9 +387,13 @@ static void dvr_capture_deinit(st_dvr_capture_t *cap)
         vPortFree(cap->yuv_buf);
         cap->yuv_buf = NULL;
     }
-    if (cap->dst_buf) {
-        vPortFree(cap->dst_buf);
-        cap->dst_buf = NULL;
+    if (cap->dst_buf[0]) {
+        vPortFree(cap->dst_buf[0]);
+        cap->dst_buf[0] = NULL;
+    }
+    if (cap->dst_buf[1]) {
+        vPortFree(cap->dst_buf[1]);
+        cap->dst_buf[1] = NULL;
     }
     if (cap->mfc_handle) {
         mfc_uninit(cap->mfc_handle);
@@ -383,9 +433,55 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
         case BD_CTRL_SENSOR_SEL:
             printf("DVR RECV SENSOR_SEL: cmd_par=0x%02x\n", pctrl->cmd_par);
             break;
+        case BD_ANDROID_VIEW_SWITCH:
+            printf("DVR RECV VIEW_SWITCH: cmd_par=0x%02x\n", pctrl->cmd_par);
+            dvr_view_mode = pctrl->cmd_par & 0x0F;
+            break;
         case BD_CTRL_GET_LIST:
             printf("DVR: GET_LIST received, data_len=%d\n", pctrl->data_len);
             dvr_filelist_parser(pctrl->trans_buf, pctrl->data_len, pctrl->cmd_par);
+            // Resume JPEG processing after file list response
+            dvr_skip_jpeg_process = 0;
+            break;
+        case BD_CTRL_SET_RES:
+            printf("DVR: SET_RES received, res=%d\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_SET_REC_TIME:
+            printf("DVR: SET_REC_TIME received, time=%d min\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_MIC_ON:
+            printf("DVR: MIC_ON received, onoff=%d\n", pctrl->cmd_par);
+            dvr_mic_status = pctrl->cmd_par;
+            break;
+        case BD_CTRL_STAMP_ON:
+            printf("DVR: STAMP_ON received, onoff=%d\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_FORMAT:
+            printf("DVR: FORMAT received, status=%d\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_DEFAULT:
+            printf("DVR: DEFAULT received, status=%d\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_SET_TIME:
+            printf("DVR: SET_TIME received, status=%d\n", pctrl->cmd_par);
+            break;
+        case BD_CTRL_DEL_FILE:
+            printf("DVR: DEL_FILE received, index=%d, status=%d\n", pctrl->cmd_par, pctrl->data_len);
+            break;
+        case BD_CTRL_LOCK_FILE:
+            printf("DVR: LOCK_FILE received, index=%d, status=%d\n", pctrl->cmd_par, pctrl->data_len);
+            break;
+        case BD_CTRL_UNLOCK_FILE:
+            printf("DVR: UNLOCK_FILE received, index=%d, status=%d\n", pctrl->cmd_par, pctrl->data_len);
+            break;
+        case BD_CTRL_TOTAL_TIME:
+            printf("DVR: TOTAL_TIME received, index=%d, time=%d sec\n", pctrl->cmd_par, pctrl->data_len);
+            break;
+        case BD_CTRL_PB_FF:
+            printf("DVR: PB_FF received\n");
+            break;
+        case BD_CTRL_PB_FB:
+            printf("DVR: PB_FB received\n");
             break;
         default:
             printf("DVR: unknown cmd 0x%02x\n", pctrl->cmd_id);
@@ -401,46 +497,53 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
     int format;
     int ret = -1;
 
-    if (!cap->mfc_handle || !cap->yuv_buf || !cap->dst_buf) {
-        return -1;
-    }
-
-    if (jpg_size < 1024 || jpg_size > 280 * 1024) {
-        printf("DVR: decode skipped, bad size 0x%x\n", jpg_size);
+    if (!cap->mfc_handle || !cap->yuv_buf || !cap->dst_buf[0] || !cap->dst_buf[1]) {
         return -1;
     }
 
     jpginfo.handle = cap->mfc_handle;
     jpginfo.jpg_addr = (uint32_t)cap->cap_jpg_buf;
-    jpginfo.jpg_size = jpg_size;
+    jpginfo.jpg_size = cap->current_jpg_size;  // Use actual total size, not header jpg_size
     jpginfo.dec_addry = (uint32_t)cap->yuv_buf;
     jpginfo.dec_size = cap->yuv_buf_size;
 
 #if DVR_DEBUG_PRINT
-    // printf("DVR: decode jpg_addr=0x%x, jpg_size=%d, dec_addry=0x%x, dec_size=%d\n",
-        //    jpginfo.jpg_addr, jpg_size, jpginfo.dec_addry, cap->yuv_buf_size);
-    printf("DVR: JPEG header: %02x %02x %02x %02x\n",
-           ((uint8_t *)jpginfo.jpg_addr)[0], ((uint8_t *)jpginfo.jpg_addr)[1],
-           ((uint8_t *)jpginfo.jpg_addr)[2], ((uint8_t *)jpginfo.jpg_addr)[3]);
+    printf("DVR: decode jpg_addr=0x%x, jpg_size=%d, dec_addry=0x%x, dec_size=%d\n",
+           jpginfo.jpg_addr, cap->current_jpg_size, jpginfo.dec_addry, cap->yuv_buf_size);
 #endif
+    // Debug: print JPEG header and bytes around expected footer
+    // Footer (FF D9) should be at position (cap->current_jpg_size - 2) in cap_jpg_buf
+    #if JPEG_DEBUG_PRINT
+    printf("DVR: JPEG: hdr=%02x%02x%02x%02x, total=%d, last4=[%02x%02x%02x%02x]\n",
+           ((uint8_t *)jpginfo.jpg_addr)[0], ((uint8_t *)jpginfo.jpg_addr)[1],
+           ((uint8_t *)jpginfo.jpg_addr)[2], ((uint8_t *)jpginfo.jpg_addr)[3],
+           cap->current_jpg_size,
+           ((uint8_t *)jpginfo.jpg_addr)[cap->current_jpg_size - 4],
+           ((uint8_t *)jpginfo.jpg_addr)[cap->current_jpg_size - 3],
+           ((uint8_t *)jpginfo.jpg_addr)[cap->current_jpg_size - 2],
+           ((uint8_t *)jpginfo.jpg_addr)[cap->current_jpg_size - 1]);
+    #endif
 
-    ret = mfc_jpegdec(&jpginfo);
-    if (ret < 0) {
-        static uint32_t dec_fail_count = 0;
-        dec_fail_count++;
-        printf("DVR: jpgdec failed, ret=%d (fail #%u)\n", ret, dec_fail_count);
-        if (dec_fail_count > 5) {
-            /* Reinit MFC decoder to clear any corrupted state */
-            printf("DVR: reinit MFC decoder\n");
-            mfc_uninit(cap->mfc_handle);
-            cap->mfc_handle = mfc_init(RAW_STRM_TYPE_JPEG);
-            dec_fail_count = 0;
+    // Retry decode up to 3 times (like usb_detect.c)
+    ret = -1;
+    for (int retry = 0; retry < 3; retry++) {
+        ret = mfc_jpegdec(&jpginfo);
+        if (ret == 0) {
+            break;  // Success
         }
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: jpgdec retry %d, ret=%d\n", retry + 1, ret);
+        #endif
+        vTaskDelay(pdMS_TO_TICKS(2));  // Small delay before retry
+    }
+
+    if (ret < 0) {
+#if DVR_DEBUG_PRINT
+        printf("DVR: jpgdec failed, ret=%d, skip frame\n", ret);
+#endif
+        // Don't re-init MFC - it can cause crashes
+        // Just skip this frame and continue
         return -1;
-    } else {
-        /* Reset on successful decode */
-        static uint32_t dec_fail_count_reset = 0;
-        dec_fail_count_reset = 0;
     }
 
     yaddr = jpginfo.dec_addry;
@@ -457,31 +560,52 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
     } else if (jpginfo.dec_format == JPEGDEC_YCbCr422_SEMIPLANAR) {
         format = PXP_SRC_FMT_YUV2P422;
     } else {
+        #if JPEG_DEBUG_PRINT
         printf("DVR: Invalid yuv format 0x%x\n", jpginfo.dec_format);
+        #endif
         return -1;
     }
 
+    // Use double buffer - write to current buffer
+    uint8_t cur_idx = cap->dst_buf_index;
+    uint8_t next_idx = cur_idx ^ 1;  // Toggle between 0 and 1
+
     // Use PXP to convert YUV to RGB565 for display
+    #if JPEG_DEBUG_PRINT
+    printf("DVR: PXP: src=%dx%d, dst=0x%x, lcd=%dx%d\n",
+           jpginfo.dec_width, jpginfo.dec_height, (uint32_t)cap->dst_buf[next_idx], LCD_WIDTH, LCD_HEIGHT);
+    #endif
     ret = pxp_scaler_rotate(yaddr, uvaddr, vaddr, format, jpginfo.dec_width, jpginfo.dec_height,
-                            (uint32_t)cap->dst_buf, 0, PXP_OUT_FMT_RGB565, LCD_WIDTH, LCD_HEIGHT, 0);
+                            (uint32_t)cap->dst_buf[next_idx], 0, PXP_OUT_FMT_RGB565, dvr_display_width, dvr_display_height, 0);
     if (ret) {
+        #if JPEG_DEBUG_PRINT
         printf("DVR: pxp_scaler_rotate failed\n");
+        #endif
         return -1;
     }
 
     LcdOsdInfo info = {0};
-    info.x = 0;
-    info.y = 0;
-    info.width = LCD_WIDTH;
-    info.height = LCD_HEIGHT;
+    info.x = dvr_display_x;
+    info.y = dvr_display_y;
+    info.width = dvr_display_width;
+    info.height = dvr_display_height;
     info.format = LCD_OSD_FORAMT_RGB565;
-    info.yaddr = (uint32_t)cap->dst_buf;
+    info.yaddr = (uint32_t)cap->dst_buf[next_idx];
 
-    // Enable video layer BELOW UI layer (both visible, UI overlays DVR preview)
+    #if JPEG_DEBUG_PRINT
+    printf("DVR: Display: addr=0x%x, fmt=0x%x, lcd=%dx%d\n",
+           info.yaddr, info.format, info.width, info.height);
+    #endif
+
+    // Update buffer index for next frame
+    cap->dst_buf_index = next_idx;
+
+    // Enable video layer and disable UI layer
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
     ark_lcd_set_osd_info_atomic(LCD_VIDEO_LAYER, &info);
     ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-    /* Keep UI layer ON so AWTK controls remain visible */
+    ark_lcd_osd_enable(LCD_UI_LAYER, 0);
+    ark_lcd_set_osd_sync(LCD_UI_LAYER);
 
     cap->display_on = 1;
     return 0;
@@ -525,109 +649,154 @@ static int dvr_capture_get_pic_process(st_dvr_capture_t *cap)
         return -1;
     }
 
-#if 0 //O_DIRECT
-    // Seek to beginning to read data
-    ff_fseek(fp, 0, FF_SEEK_SET);
-#else
-    // Use aligned seek for continuous reading
+    /* Use aligned seek for continuous reading */
     dvr_seek_for_align(cap);
-#endif
 
+    /* Read block data (100KB) */
     nb = ff_fread(cap->cap_blk_buf, 1, cap->blksize, fp);
     if (nb != cap->blksize) {
-        printf("DVR: blk read short %d/%d\n", (int)nb, (int)cap->blksize);
+        printf("DVR: read first block incomplete, expected %d, got %d\n", cap->blksize, nb);
         return -1;
     }
 
     pctrl = (st_bd_ctrl_if_t *)cap->cap_blk_buf;
 
-    // Check if it's a command (header 0xAA55) or image data
+    /* Check if it's a command (header 0xAA55) or image data */
     if (cap->cap_blk_buf[0] == 0x55 && cap->cap_blk_buf[1] == 0xAA) {
-        // It's a command frame
+        /* It's a command frame */
         printf("DVR: cmd 0x%02x received\n", pctrl->cmd_id);
         dvr_recv_cmd_process(pctrl);
         return -1;
-    } else {
-        // It's image data
-        jpg_size = *((uint32_t *)cap->cap_blk_buf);
-        read_check_sum = *((uint32_t *)(cap->cap_blk_buf + 8));
+    }
+
+    /* Skip JPEG processing when waiting for file list response */
+    if (dvr_skip_jpeg_process) {
+        ff_fseek(fp, 0, FF_SEEK_SET);
+        return -1;
+    }
+
+    /* Skip JPEG decode when UI is not in preview mode (dvr_preview_enable == 0) */
+    if (!dvr_preview_enable) {
+        return -1;
+    }
+
+    /* It's image data - extract jpg_size from first 4 bytes */
+    jpg_size = *((uint32_t *)cap->cap_blk_buf);
+    read_check_sum = *((uint32_t *)(cap->cap_blk_buf + 8));
 
 #if DVR_DEBUG_PRINT
-        printf("DVR: jpg size=0x%x\n", jpg_size);
+    printf("DVR: jpg size=0x%x\n", jpg_size);
 #endif
 
-        if (jpg_size < 1024 || jpg_size > 280 * 1024) {
-            if (jpg_size != 0) printf("DVR: jpeg size error: 0x%x\n", jpg_size);
-            /* Read dummy data to keep USB stream in sync */
-            ff_fread(cap->cap_blk_buf + 512, 1, 100 * 1024, fp);
-            return -1;
-        }
+    /* Validate jpg_size - must be at least 1024 and at most 300KB */
+    if (jpg_size < 1024 || jpg_size > 300 * 1024) {
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: jpeg size invalid: 0x%x (min=1024, max=300KB)\n", jpg_size);
+        #endif
+        /* Read dummy data to maintain file position consistency */
+        ff_fseek(fp, 100 * 1024, FF_SEEK_CUR);
+        return -1;
+    }
 
-        // Copy first block data from BD_JPG_OFFSET (17) onwards
-        nb = cap->blksize - BD_JPG_OFFSET;
-        memcpy(cap->cap_jpg_buf, cap->cap_blk_buf + BD_JPG_OFFSET, nb);
+    /* Copy header part to jpeg buffer (skip BD_JPG_OFFSET = 17) */
+    nb = cap->blksize - BD_JPG_OFFSET;
+    if (nb > 300 * 1024) {
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: block size too large: %d\n", nb);
+        #endif
+        return -1;
+    }
+    memcpy(cap->cap_jpg_buf, cap->cap_blk_buf + BD_JPG_OFFSET, nb);
 
-        // Validate JPEG header (FF D8)
-        if (cap->cap_jpg_buf[0] != 0xFF || cap->cap_jpg_buf[1] != 0xD8) {
-            printf("DVR: invalid JPEG header\n");
-            return -1;
-        }
+    /* Check JPEG header (FF D8) */
+    if (cap->cap_jpg_buf[0] != 0xFF || cap->cap_jpg_buf[1] != 0xD8) {
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: invalid JPEG header\n");
+        #endif
+        /* Read dummy data to maintain file position consistency */
+        ff_fseek(fp, 100 * 1024, FF_SEEK_CUR);
+        return -1;
+    }
 
-        if (jpg_size < (300 * 1024)) {
-            // Read additional data from offset 512
-            size_t rd = ff_fread(cap->cap_blk_buf + 512, 1, jpg_size, fp);
-            if (rd != jpg_size) {
-                printf("DVR: fread short %d/%d, USB error?\n", (int)rd, (int)jpg_size);
-                return -1;
-            }
+    /* Read remaining JPEG data - read into cap_blk_buf + 512 */
+    size_t read_bytes = ff_fread(cap->cap_blk_buf + 512, 1, jpg_size, fp);
+    if (read_bytes != jpg_size) {
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: read remaining JPEG failed, expected %d, got %d\n", jpg_size, read_bytes);
+        #endif
+        return -1;
+    }
 
-            // Verify first block wasn't corrupted by DMA overrun
-            // (check our original JPEG header is still intact)
-            if (cap->cap_blk_buf[BD_JPG_OFFSET] != 0xFF ||
-                cap->cap_blk_buf[BD_JPG_OFFSET + 1] != 0xD8) {
-                printf("DVR: USB DMA corrupted blk_buf!\n");
-                return -1;
-            }
+    /* Copy remaining data after first block (from offset 512 in cap_blk_buf) */
+    memcpy(cap->cap_jpg_buf + nb, cap->cap_blk_buf + 512, jpg_size);
 
-            // Copy remaining data after first block
-            memcpy(cap->cap_jpg_buf + nb, cap->cap_blk_buf + 512, jpg_size);
+    /* Calculate checksum from cap_blk_buf + 512 + i*512 (like usb_detect.c) */
+    cnt = (jpg_size - 511) >> 9;
+    check_sum = 0;
+    for (i = 1; i < cnt; i++) {
+        uint32_t val = *((uint32_t *)(cap->cap_blk_buf + 512 + i * 512));
+        check_sum += val;
+    }
 
-            // Calculate checksum (sum of 4-byte values at 512-byte intervals)
-            cnt = (jpg_size - 511) >> 9;
-            check_sum = 0;
-            for (i = 1; i < cnt; i++) {
-                check_sum += *((uint32_t *)(cap->cap_blk_buf + i * 512));
-            }
+    /* Print checksum for debugging */
+    #if JPEG_DEBUG_PRINT
+    if ((check_sum & 0xFF) != (read_check_sum & 0xFF)) {
+        printf("DVR: checksum warn, size:%d, calc:0x%08x, expected:0x%08x\n",
+               jpg_size, check_sum, read_check_sum);
+        /* Continue processing - checksum mismatch doesn't mean decode will fail */
+    }
+    #endif
 
-            // Validate checksum (optional)
-            if ((check_sum & 0xFF) != (read_check_sum & 0xFF)) {
-#if DVR_DEBUG_PRINT
-                printf("DVR: checksum err, size:%d, 0x%08x, 0x%08x\n", jpg_size, check_sum, read_check_sum);
-#endif
-                return -1;
-            }
+    /* Find actual JPEG end by searching backwards for FF D9 */
+    uint32_t actual_size = nb + jpg_size;
+    int32_t search_start = (int32_t)actual_size - 200;  // Search last 200 bytes
+    if (search_start < (int32_t)nb) search_start = nb;
+    uint32_t found_pos = 0;
 
-            // Validate JPEG footer (FF D9) to ensure complete image
-            if ((cap->cap_jpg_buf[jpg_size - BD_JPG_OFFSET - 2] != 0xFF) ||
-                (cap->cap_jpg_buf[jpg_size - BD_JPG_OFFSET - 1] != 0xD9)) {
-                printf("DVR: tail error\n");
-                return -1;
-            }
-
-#if DVR_DEBUG_PRINT
-            printf("DVR: jpg ok, size=0x%x\n", jpg_size);
-#endif
-
-            // Store jpg size for decode
-            cap->current_jpg_size = jpg_size;
-
-            // JPEG data is ready in cap_jpg_buf with length jpg_size + nb
-            return 0;
-        } else {
-            printf("DVR: jpg size over 300KB limit\n");
-            return -1;
+    // Search backwards from (actual_size - 2) to search_start
+    for (int32_t i = (int32_t)actual_size - 2; i >= search_start; i--) {
+        if (cap->cap_jpg_buf[i] == 0xFF && cap->cap_jpg_buf[i+1] == 0xD9) {
+            found_pos = (uint32_t)i;
+            break;
         }
     }
+
+    #if JPEG_DEBUG_PRINT
+    // Debug: show search range
+    printf("DVR: footer search: range[%d to %d], found=%d\n",
+           search_start, actual_size - 2, found_pos);
+    #endif
+
+    if (found_pos == 0) {
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: JPEG footer not found, trying last 200 bytes scan...\n");
+        #endif
+        // Final fallback: search entire buffer for FF D9
+        for (uint32_t i = actual_size - 2; i >= nb + 100; i--) {
+            if (cap->cap_jpg_buf[i] == 0xFF && cap->cap_jpg_buf[i+1] == 0xD9) {
+                found_pos = i;
+                #if JPEG_DEBUG_PRINT
+                printf("DVR: FF D9 found at pos=%d (deep search)\n", found_pos);
+                #endif
+                break;
+            }
+        }
+        if (found_pos == 0) {
+            #if JPEG_DEBUG_PRINT
+            printf("DVR: JPEG footer FF D9 not found in buffer, using size=%d\n", actual_size);
+            #endif
+        }
+    } else {
+        actual_size = found_pos + 2;  // Include FF D9
+        #if JPEG_DEBUG_PRINT
+        printf("DVR: JPEG footer found at pos=%d, actual_size=%d\n", found_pos, actual_size);
+        #endif
+    }
+
+    cap->current_jpg_size = actual_size;
+
+    /* JPEG data is ready in cap_jpg_buf */
+    return 0;
 }
 
 // DVR task - continuously reads from elene file
@@ -644,8 +813,6 @@ static void dvr_usb_task(void *arg)
         return;
     }
 
-    // Send command to get DVR version
-    dvr_send_normal_cmd(BD_CTRL_GET_ID, 0);
 
     // Send MIC on command once on startup
     // dvr_send_normal_cmd(BD_CTRL_MIC_ON, 0);
@@ -654,34 +821,39 @@ static void dvr_usb_task(void *arg)
 
     uint32_t last_switch_time = 0;
     uint32_t current_time;
-    dvr_sensor_switch_enable = 0;  /* Disable auto switch to reduce USB command interference */
-    printf("DVR: sensor switch disabled for stability\n");
-    uint32_t consecutive_errors = 0;
-
+#if DVR_FRAMERATE_PRINT
+    dvr_last_stat_time = xTaskGetTickCount();
+    dvr_frame_count = 0;
+    dvr_frame_count_last = 0;
+    dvr_fps = 0;
+#endif
+    printf("DVR: sensor switch test started, enable=%d\n", dvr_sensor_switch_enable);
     while (cap->running) {
-        if (dvr_capture_get_pic_process(cap) == 0) {
-            if (dvr_decode_and_display(cap, cap->current_jpg_size) < 0) {
-                consecutive_errors++;
-            } else {
-                consecutive_errors = 0;
-            }
-        } else {
-            consecutive_errors++;
+        // Check if need to send command data
+        if (dvr_need_send_data) {
+            dvr_seek_for_align(cap);
+            dvr_send_data();
+            dvr_need_send_data = 0;
         }
 
-        /* USB unstable: back off progressively to avoid crash */
-        if (consecutive_errors > 20) {
-            printf("DVR: too many errors (%u), pausing 2s\n", consecutive_errors);
-            vTaskDelay(pdMS_TO_TICKS(2000));
-            consecutive_errors = 0;
-            /* Re-check if file is still accessible */
-            if (cap->h_cap == NULL || dvr_fp == NULL) {
-                printf("DVR: file handle lost, exiting task\n");
-                break;
-            }
-        } else if (consecutive_errors > 5) {
-            vTaskDelay(pdMS_TO_TICKS(100));
+        if (dvr_capture_get_pic_process(cap) == 0) {
+            // Decode and display the JPEG
+            dvr_decode_and_display(cap, cap->current_jpg_size);
+#if DVR_FRAMERATE_PRINT
+            dvr_frame_count++;
+#endif
         }
+
+#if DVR_FRAMERATE_PRINT
+        // Calculate framerate every 1 second
+        current_time = xTaskGetTickCount();
+        if (current_time - dvr_last_stat_time >= 1000) {
+            dvr_fps = dvr_frame_count - dvr_frame_count_last;
+            dvr_frame_count_last = dvr_frame_count;
+            dvr_last_stat_time = current_time;
+            printf("DVR: [FPS:%lu] frame_count=%lu\n", (unsigned long)dvr_fps, (unsigned long)dvr_frame_count);
+        }
+#endif
 
         // Switch view mode every 5 seconds (5 modes: 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh)
         if (dvr_sensor_switch_enable) {
@@ -690,11 +862,12 @@ static void dvr_usb_task(void *arg)
                 dvr_view_mode = (dvr_view_mode + 1) % 5;
                 last_switch_time = current_time;
                 printf("DVR: [TICK:%u] switch view mode=%d\n", last_switch_time, dvr_view_mode);
+                // Use send_normal_cmd to set flag, actual send happens in next loop iteration
                 dvr_send_normal_cmd(BD_ANDROID_VIEW_SWITCH, dvr_view_mode);
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(30));  /* 30ms ~33fps max, reduce USB pressure */
+        vTaskDelay(pdMS_TO_TICKS(2));
     }
 
     dvr_capture_deinit(cap);
@@ -703,62 +876,25 @@ static void dvr_usb_task(void *arg)
     vTaskDelete(NULL);
 }
 
-// USB insert: only check if DVR is online, open elene file but don't start task
-static uint8_t dvr_is_online = 0;
-
-static void dvr_check_online_on_usb_insert(void)
+// Start DVR USB task when elene file is detected
+static void dvr_start_if_elene_exists(void)
 {
-    if (!dvr_check_elene_exist()) {
-        printf("DVR: elene not found\n");
-        dvr_is_online = 0;
-        return;
-    }
-
-    /* Open elene file for later use */
-    if (dvr_fp == NULL) {
-        dvr_fp = ff_fopen(JPG_FILE_NAME, "rb+");
-        if (!dvr_fp) {
-            printf("DVR: open elene failed\n");
-            dvr_is_online = 0;
-            return;
-        }
-    }
-
-    dvr_is_online = 1;
-    printf("DVR: online, elene ready (task not started yet)\n");
-}
-
-// Called by UI (dvr_view.c) when user enters DVR page
-void dvr_start_preview(void)
-{
-    printf("DVR: >>> dvr_start_preview called <<<\n");
-
     if (dvr_task_handle != NULL) {
         printf("DVR: task already running\n");
         return;
     }
 
-    /* If not already detected online, try to detect now */
-    if (!dvr_is_online) {
-        printf("DVR: not online yet, checking elene...\n");
-        if (!dvr_check_elene_exist()) {
-            printf("DVR: elene not found, cannot start\n");
-            return;
-        }
-        if (dvr_fp == NULL) {
-            dvr_fp = ff_fopen(JPG_FILE_NAME, "rb+");
-            if (!dvr_fp) {
-                printf("DVR: open elene failed\n");
-                return;
-            }
-        }
-        dvr_is_online = 1;
-        printf("DVR: late detection ok, elene opened\n");
+    if (!dvr_check_elene_exist()) {
+        printf("DVR: elene not found\n");
+        return;
     }
 
-    printf("DVR: starting preview task\n");
+    printf("DVR: elene found, starting task\n");
 
-    memset(&dvr_capture, 0, sizeof(dvr_capture));
+    dvr_capture.running = 0;
+    dvr_capture.h_cap = NULL;
+    dvr_capture.cap_blk_buf = NULL;
+    dvr_capture.cap_jpg_buf = NULL;
 
     if (xTaskCreate(dvr_usb_task, "dvr_usb", configMINIMAL_STACK_SIZE * 16,
                     &dvr_capture, 10, &dvr_task_handle) != pdPASS) {
@@ -767,39 +903,8 @@ void dvr_start_preview(void)
     }
 }
 
-// Called by UI (dvr_view.c) when user exits DVR page
-void dvr_stop_preview(void)
-{
-    if (dvr_task_handle == NULL) {
-        return;
-    }
-
-    printf("DVR: stopping preview\n");
-    dvr_capture.running = 0;
-
-    /* Wait for task to exit */
-    vTaskDelay(pdMS_TO_TICKS(50));
-
-    dvr_capture_deinit(&dvr_capture);
-    dvr_task_handle = NULL;
-
-    /* Restore UI layer, disable video layer */
-    ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
-    ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-    ark_lcd_osd_enable(LCD_UI_LAYER, 1);
-    ark_lcd_set_osd_sync(LCD_UI_LAYER);
-
-    printf("DVR: preview stopped, UI restored\n");
-}
-
-// Check if DVR device is connected
-uint8_t dvr_is_device_online(void)
-{
-    return dvr_is_online;
-}
-
 // Request DVR status from device
-void dvr_get_status(void)
+static void dvr_get_status(void)
 {
     if (dvr_fp != NULL) {
         dvr_send_normal_cmd(BD_CTRL_GET_STS, 0);
@@ -871,9 +976,8 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
     printf("DVR: file list count - Video: %d, Photo: %d\n", dvr_video_list_count, dvr_photo_list_count);
 }
 
-//这个函数应该在需要时手动调用，不应该在任务初始化时自动调用会干扰主循环的 JPEG 读取流程
 // Get file list from DVR device
-void dvr_get_file_list(uint8_t mode)
+static void dvr_get_file_list(uint8_t mode)
 {
     uint16_t par = 0;
 
@@ -883,14 +987,377 @@ void dvr_get_file_list(uint8_t mode)
         par |= 0x8000;  // Photo file list (JPG bit)
     }
 
+    // Set flag to skip JPEG processing during file list response
+    dvr_skip_jpeg_process = 1;
+
     dvr_send_normal_cmd(BD_CTRL_GET_LIST, par);
     printf("DVR: get file list, mode=%s\n", mode == 0 ? "video" : "photo");
+}
+
+// Start playback of a specific file by index
+static void dvr_pb_start(uint8_t mode, uint16_t index)
+{
+    uint16_t par = index;
+
+    if (mode == 0) {
+        par |= 0;  // Play video file
+    } else {
+        par |= 0x8000;  // Play photo file (JPG bit)
+    }
+
+    dvr_send_normal_cmd(BD_CTRL_PB_START, par);
+    printf("DVR: pb start, mode=%s, index=%d\n", mode == 0 ? "video" : "photo", index);
+}
+
+// Pause playback
+static void dvr_pb_pause(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_PB_PAUSE, 0);
+    printf("DVR: pb pause\n");
+}
+
+// Stop playback
+static void dvr_pb_stop(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_PB_STOP, 0);
+    printf("DVR: pb stop\n");
+}
+
+// Fast forward playback
+static void dvr_pb_ff(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_PB_FF, 0);
+    printf("DVR: pb fast forward\n");
+}
+
+// Fast backward playback
+static void dvr_pb_fb(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_PB_FB, 0);
+    printf("DVR: pb fast backward\n");
+}
+
+// Set recording resolution: 0=1080P, 1=720P
+static void dvr_set_resolution(uint8_t res)
+{
+    dvr_send_normal_cmd(BD_CTRL_SET_RES, res);
+    printf("DVR: set resolution: %s\n", res == 0 ? "1080P" : "720P");
+}
+
+// Set loop recording time: 1=1min, 2=2min, 3=3min, 0=get current setting
+static void dvr_set_loop_time(uint8_t time)
+{
+    dvr_send_normal_cmd(BD_CTRL_SET_REC_TIME, time);
+    printf("DVR: set loop time: %d min\n", time);
+}
+
+// Set MIC on/off: 0=off, 1=on
+static void dvr_set_mic(uint8_t onoff)
+{
+    dvr_send_normal_cmd(BD_CTRL_MIC_ON, onoff);
+    printf("DVR: set MIC: %s\n", onoff ? "on" : "off");
+}
+
+// Set timestamp watermark on/off: 0=off, 1=on
+static void dvr_set_stamp(uint8_t onoff)
+{
+    dvr_send_normal_cmd(BD_CTRL_STAMP_ON, onoff);
+    printf("DVR: set stamp: %s\n", onoff ? "on" : "off");
+}
+
+// Format SD card (must stop recording first)
+static void dvr_format_card(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_FORMAT, 0);
+    printf("DVR: format card\n");
+}
+
+// Restore factory defaults (must stop recording first)
+static void dvr_restore_default(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_DEFAULT, 0);
+    printf("DVR: restore factory default\n");
+}
+
+// Set system time
+static void dvr_set_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
+{
+    st_bd_ctrl_if_t *pctrl = &dvr_ctrl_data;
+    uint16_t *ptr16 = (uint16_t *)pctrl->trans_buf;
+
+    ptr16[0] = (month << 8) | year;
+    ptr16[1] = (hour << 8) | day;
+    ptr16[2] = (second << 8) | minute;
+
+    pctrl->header_id = 0xAA55;
+    pctrl->cmd_id = BD_CTRL_SET_TIME;
+    pctrl->cmd_par = 0;
+    pctrl->data_len = 6;
+    pctrl->checksum = 0;
+    dvr_need_send_data = 1;
+
+    printf("DVR: set time: %04d-%02d-%02d %02d:%02d:%02d\n", year, month, day, hour, minute, second);
+}
+
+// Delete file by index
+static void dvr_delete_file(uint16_t index)
+{
+    dvr_send_normal_cmd(BD_CTRL_DEL_FILE, index);
+    printf("DVR: delete file index: %d\n", index);
+}
+
+// Lock file by index
+static void dvr_lock_file(uint16_t index)
+{
+    dvr_send_normal_cmd(BD_CTRL_LOCK_FILE, index);
+    printf("DVR: lock file index: %d\n", index);
+}
+
+// Unlock file by index
+static void dvr_unlock_file(uint16_t index)
+{
+    dvr_send_normal_cmd(BD_CTRL_UNLOCK_FILE, index);
+    printf("DVR: unlock file index: %d\n", index);
+}
+
+// Get total time of file by index
+static void dvr_get_total_time(uint16_t index)
+{
+    dvr_send_normal_cmd(BD_CTRL_TOTAL_TIME, index);
+    printf("DVR: get total time for index: %d\n", index);
 }
 
 // Get file list counts
 uint16_t dvr_get_video_list_count(void) { return dvr_video_list_count; }
 uint16_t dvr_get_photo_list_count(void) { return dvr_photo_list_count; }
 
+// Get view mode
+uint8_t dvr_get_view_mode(void) { return dvr_view_mode; }
+
+/**********************
+ *  EXTERNAL DVR API FUNCTIONS
+ *  These functions provide external access to DVR control commands
+ **********************/
+
+// DVR control API - Get DVR version ID
+void dvr_api_get_id(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_GET_ID, 0);
+}
+
+// DVR control API - Start recording
+void dvr_api_rec_start(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
+}
+
+// DVR control API - Stop recording
+void dvr_api_rec_stop(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
+}
+
+// DVR control API - Take snapshot/photo
+void dvr_api_snap(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_SNAP, 0);
+}
+
+// DVR control API - Emergency/SOS recording (lock current file)
+void dvr_api_sos(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_SOS, 0);
+}
+
+// DVR control API - Get file list (mode: 0=video, 1=photo)
+void dvr_api_get_list(uint8_t mode)
+{
+    dvr_get_file_list(mode);
+}
+
+// DVR control API - Start playback (mode: 0=video, 1=photo, index: file index)
+void dvr_api_pb_start(uint8_t mode, uint16_t index)
+{
+    dvr_pb_start(mode, index);
+}
+
+// DVR control API - Pause playback
+void dvr_api_pb_pause(void)
+{
+    dvr_pb_pause();
+}
+
+// DVR control API - Stop playback
+void dvr_api_pb_stop(void)
+{
+    dvr_pb_stop();
+}
+
+// DVR control API - Get DVR status
+void dvr_api_get_status(void)
+{
+    dvr_get_status();
+}
+
+// DVR control API - View switch (mode: 0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh)
+void dvr_api_view_switch(uint8_t mode)
+{
+    dvr_send_normal_cmd(BD_ANDROID_VIEW_SWITCH, mode);
+    dvr_view_mode = mode;
+}
+
+// DVR control API - Set resolution (0=1080P, 1=720P)
+void dvr_api_set_res(uint8_t res)
+{
+    dvr_set_resolution(res);
+}
+
+// DVR control API - Set loop recording time (1=1min, 2=2min, 3=3min, 0=get current)
+void dvr_api_set_loop_time(uint8_t time)
+{
+    dvr_set_loop_time(time);
+}
+
+// DVR control API - Set MIC on/off (0=off, 1=on)
+void dvr_api_set_mic(uint8_t onoff)
+{
+    dvr_set_mic(onoff);
+}
+
+// DVR control API - Set timestamp watermark on/off (0=off, 1=on)
+void dvr_api_set_stamp(uint8_t onoff)
+{
+    dvr_set_stamp(onoff);
+}
+
+// DVR control API - Format card
+void dvr_api_format(void)
+{
+    dvr_format_card();
+}
+
+// DVR control API - Restore factory defaults
+void dvr_api_restore_default(void)
+{
+    dvr_restore_default();
+}
+
+// DVR control API - Set system time
+void dvr_api_set_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
+{
+    dvr_set_time(year, month, day, hour, minute, second);
+}
+
+// DVR control API - Delete file by index
+void dvr_api_del_file(uint16_t index)
+{
+    dvr_delete_file(index);
+}
+
+// DVR control API - Lock file by index
+void dvr_api_lock_file(uint16_t index)
+{
+    dvr_lock_file(index);
+}
+
+// DVR control API - Unlock file by index
+void dvr_api_unlock_file(uint16_t index)
+{
+    dvr_unlock_file(index);
+}
+
+// DVR control API - Get total time of file by index
+void dvr_api_get_total_time(uint16_t index)
+{
+    dvr_get_total_time(index);
+}
+
+// DVR control API - Fast forward playback
+void dvr_api_pb_ff(void)
+{
+    dvr_pb_ff();
+}
+
+// DVR control API - Fast backward playback
+void dvr_api_pb_fb(void)
+{
+    dvr_pb_fb();
+}
+
+// DVR control API - Sensor switch enable/disable
+void dvr_api_set_sensor_switch(uint8_t enable)
+{
+    dvr_set_sensor_switch_enable(enable);
+}
+
+// DVR control API - Check if elene file exists
+int dvr_api_check_exists(void)
+{
+    return dvr_check_elene_exist();
+}
+
+// DVR control API - Check if DVR task is running
+int dvr_api_is_running(void)
+{
+    return (dvr_task_handle != NULL) ? 1 : 0;
+}
+
+// DVR control API - Set display window position and size
+// x/y: window top-left coordinates
+// width/height: window size
+// Note: This affects the OSD layer display area, PXP scales content to fit
+void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int32_t height)
+{
+    dvr_display_x = x;
+    dvr_display_y = y;
+    dvr_display_width = width;
+    dvr_display_height = height;
+    printf("DVR: set display window - x:%d y:%d w:%d h:%d\n", x, y, width, height);
+}
+
+// DVR control API - Get display window position and size
+void dvr_api_get_display_window(int32_t *x, int32_t *y, int32_t *width, int32_t *height)
+{
+    if (x) *x = dvr_display_x;
+    if (y) *y = dvr_display_y;
+    if (width) *width = dvr_display_width;
+    if (height) *height = dvr_display_height;
+    printf("DVR: get display window - x:%d y:%d w:%d h:%d\n", dvr_display_x, dvr_display_y, dvr_display_width, dvr_display_height);
+}
+
+// DVR control API - Reset display window to full screen
+void dvr_api_reset_display_window(void)
+{
+    dvr_display_x = 0;
+    dvr_display_y = 0;
+    dvr_display_width = LCD_WIDTH;
+    dvr_display_height = LCD_HEIGHT;
+    printf("DVR: reset display window to full screen\n");
+}
+
+// DVR control API - Enable/disable preview mode (jpeg decode)
+// enable: 0=disable preview (skip jpeg decode), 1=enable preview (run jpeg decode)
+void dvr_api_set_preview_enable(uint8_t enable)
+{
+    dvr_preview_enable = enable;
+    printf("DVR: preview enable set to %d\n", enable);
+
+    /* Restore UI layer when preview is disabled */
+    if (enable == 0) {
+        ark_lcd_osd_enable(LCD_UI_LAYER, 1);
+        ark_lcd_set_osd_sync(LCD_UI_LAYER);
+        ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
+        ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
+        printf("DVR: UI layer restored\n");
+    }
+}
+
+// DVR control API - Get preview mode status
+uint8_t dvr_api_get_preview_enable(void)
+{
+    return dvr_preview_enable;
+}
+#endif
 
 /**********************
  *   GLOBAL FUNCTIONS
@@ -906,14 +1373,14 @@ __no_init static uint8_t vgHeap[VG_HEAP_SIZE];
 #endif
 
 #ifdef CARLINK_ENABLE
-static char qr_text_buf[100] = {0};	//手机互联二维码数据缓存
+static char qr_text_buf[256] = {0};	//手机互联二维码数据缓存
 
 int get_qr_text_buf(char *buf, int len)
 {
 	int ret = -1;
 	int qr_len = strlen(qr_text_buf);
 
-	if ((qr_len > 0) && (len > qr_len)) {
+	if ((qr_len > 0) && (len >= qr_len)) {
 		strcpy(buf, qr_text_buf);
 		ret = 0;
 	}
@@ -1495,8 +1962,13 @@ static void usb_read_thread(void *para)
 			printf("usb dev inserted.\n");
 			hcn_usb_status_change(USB_STATUS_INSERTED);
 
-			/* Check if DVR elene file exists and start DVR task */
-			dvr_check_online_on_usb_insert();
+			#if ENABLE_BD_USB_DVR_FUNC
+			// Check if elene file exists and start DVR task if found
+			// #ifdef USB_SUPPORT
+			dvr_api_set_display_window(100, 50, 800, 480);
+			dvr_start_if_elene_exists();
+			// #endif
+			#endif
 
 #ifdef OTA_UPDATE_SUPPORT
 #ifdef DELTA_UPDATE_SUPPORT
@@ -1624,15 +2096,24 @@ static void usb_read_thread(void *para)
 
 #endif
 		} else if (status == USB_DEV_UNPLUGED) {
-			printf("usb removed.\n");
 			hcn_usb_status_change(USB_STATUS_REMOVED);
 			extern void set_update_state_reset(void);
 			set_update_state_reset();
-			/* Stop DVR if running */
-			dvr_stop_preview();
-			dvr_close_elene();
-			dvr_is_online = 0;
-			printf("DVR: USB removed, offline\n");
+			printf("usb removed.\n");
+			#if ENABLE_BD_USB_DVR_FUNC
+			if (dvr_task_handle != NULL) {
+				dvr_capture.running = 0;
+				dvr_capture_deinit(&dvr_capture);
+				dvr_close_elene();
+				dvr_task_handle = NULL;
+				// Restore UI layer and disable video layer
+				ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
+				ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
+				ark_lcd_osd_enable(LCD_UI_LAYER, 1);
+				ark_lcd_set_osd_sync(LCD_UI_LAYER);
+				printf("DVR: task deleted, resources freed, UI layer restored\n");
+			}
+			#endif
 		}
 	}
 }

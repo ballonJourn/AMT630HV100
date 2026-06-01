@@ -3,6 +3,7 @@
 
 #include "config/hcn_config.h"
 
+#define  ENABLE_BD_USB_DVR_FUNC  1
 /********** display configuration **********/
 #define LCD_INTERFACE_TTL		0
 #define LCD_INTERFACE_LVDS		1
@@ -297,8 +298,8 @@
 //如果要将亿联,carplay和android auto都使能，有可能苹果手机和支持android auto的安卓手机都安装了亿联的应用,
 //v100端应用程序必须加上设置界面来配置优先选择连亿联还是手机自带的互联(android auto/carplay)
 #define CARLINK_EC			1
-#define CARLINK_CP          0
-#define CARLINK_AA          0
+#define CARLINK_CP          1
+#define CARLINK_AA          1
 #endif
 
 #else

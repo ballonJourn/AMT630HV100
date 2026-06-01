@@ -334,7 +334,7 @@ end:
 }
 
 
-
+extern void lvds_avdd_init(void);
 void main(void)
 {
 	wdt_init();
@@ -363,13 +363,11 @@ void main(void)
 	//pSysInfo->update_status = UPDATE_STATUS_START;
 	//pSysInfo->update_media_type = UPDATE_MEDIA_USB;
 	if (pSysInfo->update_status == UPDATE_STATUS_START) {
-		gpio_direction_output(HCN_LCD_DISPLAY_EN_GPIO, 1);	///< 屏幕供电
+			///< 屏幕供电
+		gpio_direction_output(HCN_LCD_DISPLAY_EN_GPIO, 1);
+        lvds_avdd_init();
 		lcd_init();
 		wdt_stop();
-
-		pwm_config(HCN_LCD_PWM_CH, 700000, 1000000);
-		pwm_enable(HCN_LCD_PWM_CH); 
-		gpio_direction_output(HCN_LCD_BL_EN_GPIO, 1);	///< 背光使能
 
 		switch (pSysInfo->update_media_type) {
 		case UPDATE_MEDIA_SD:

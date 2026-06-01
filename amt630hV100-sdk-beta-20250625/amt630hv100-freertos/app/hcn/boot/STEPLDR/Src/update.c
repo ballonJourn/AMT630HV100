@@ -5,6 +5,8 @@
 #include "cp15.h"
 #include "pxp.h"
 #include "uart.h"
+#include "gpio.h"
+#include "pwm.h"
 
 #if LCD_INTERFACE_TYPE == LCD_INTERFACE_MIPI   
 #define  UPDATING_WIDTH      200
@@ -223,6 +225,11 @@ void update_logo_init(void)
 	ark_lcd_set_osd_possition(LCD_OSD1, x, y);
 	ark_lcd_osd_enable(LCD_OSD1, 1);
 	ark_lcd_set_osd_sync(LCD_OSD1);
+
+	/* Enable backlight after OSD is ready */
+	pwm_config(HCN_LCD_PWM_CH, 700000, 1000000);
+	pwm_enable(HCN_LCD_PWM_CH);
+	gpio_direction_output(HCN_LCD_BL_EN_GPIO, 1);
 
     SendUartString("enter logo init!\r\n");    
     PrintVariableValueHex("logo width", LCD_WIDTH);   

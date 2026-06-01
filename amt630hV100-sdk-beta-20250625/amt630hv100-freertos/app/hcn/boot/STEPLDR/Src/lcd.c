@@ -673,7 +673,7 @@ int lcd_init(void)
 	vSysctlConfigure(SYS_PAD_CTRL04, 0, 0xffffffff, 0x55555555);
 	vSysctlConfigure(SYS_PAD_CTRL05, 0, 0xffffff, 0x555555);
 #elif LCD_INTERFACE_TYPE == LCD_INTERFACE_LVDS
-        lvds_avdd_init();
+        //lvds_avdd_init();
 	vSysctlConfigure(SYS_PAD_CTRL04, 0, 0xfffff, 0xaaaaa);
 #endif
 

@@ -21,6 +21,8 @@ static void dvr_show(bool_t show);
 #include "uart_communicate/hcn_uart_send_cmd.h"
 #endif
 
+#include "vehicle_param/vehicle_param.h"
+
 #define OTA_PAGE_INTERVAL 35
 
 static dock_view_e current_dock = ICON_INFO ;     
@@ -125,6 +127,15 @@ static void hcn_key_handle(uint8_t id)
                 deal_key_set_short_press()  ;
                 break;
 
+        case  SET_KEY_LONG_PR :
+                if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 2) {
+                    vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
+                    extern void carlink_send_key_event(uint8_t key, bool pressed);
+                    carlink_send_key_event(20, true);
+                    break;
+                }
+                break;
+
         case  UP_KEY_SHORT_PR   :
                 deal_key_up_short_press()   ;
                 break;
@@ -134,6 +145,9 @@ static void hcn_key_handle(uint8_t id)
                 break;
 
         case  SET_KEY_SUPER_LONG_PR :
+                if (vehicle_get_data(VEH_CARLINK_CP_STATUS) == 2) {
+                    break;
+                }
                 deal_key_super_long_press() ;
                 break;
         default:
@@ -241,8 +255,8 @@ ret_t set_dock_view(dock_view_e dock_view)
     if (window_page[DOCK_SELECT_VIEW])
     {
         if (dock_view != ICON_DVR)
-        {
-            slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
+    {
+        slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
         }
     }
 
@@ -257,7 +271,7 @@ ret_t set_dock_view(dock_view_e dock_view)
     else
     {
         dvr_show(FALSE);
-        set_window_page( dock_view == ICON_SETTING );
+    set_window_page( dock_view == ICON_SETTING );
     }
 
     return RET_OK;

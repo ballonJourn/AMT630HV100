@@ -6,7 +6,7 @@
 #include "AndroidAuto.h"
 #include "board.h"
 #include "task.h"
-
+#include "vehicle_param/vehicle_param.h"
 #if CARLINK_AA
 
 struct AAHandle
@@ -117,6 +117,7 @@ static void onEventAA(void* ctx, const struct carlink_event *ev)
 		break;
     case CARLINK_EVENT_BT_CONNECT: {
 		pctx->mBTConnected = true;
+		printf("\r\n[ouchunhua]aa connect\r\n");
 		start_aa(pctx);
         break;
     }
@@ -126,6 +127,8 @@ static void onEventAA(void* ctx, const struct carlink_event *ev)
         break;
     }
     case CARLINK_EVENT_BT_DISCONNECT: {
+		printf("\r\n[ouchunhua]aa disconnect\r\n");
+		vehicle_set_data(VEH_CARLINK_AA_STATUS, 0);
 		pctx->mBTConnected = false;
 		pctx->mRfcommReady = false;
         break;
@@ -138,6 +141,7 @@ static void onEventAA(void* ctx, const struct carlink_event *ev)
     }
 	case CARLINK_EVENT_MSG_SESSION_STOP: {
 		printf("%s:%d\r\n", __func__, __LINE__);
+		printf("\r\n============session stop============\r\n");
 		start_aa(pctx);
         break;
     }
@@ -225,6 +229,7 @@ get_retry:
 		//android_auto_get_video_focus(0);
 	}
 #else
+	vehicle_set_data(VEH_CARLINK_AA_STATUS, 1);
 	h264_video_player_proc(pctx->mVideoHandle, buf, len);
 #endif
 }
@@ -279,6 +284,7 @@ static void status_notify_impl(void* cb_ctx, int status_type)
 	struct AAHandle* pctx = (struct AAHandle*)cb_ctx;
 	struct carlink_event ev = {0};
 
+	printf("\r\n[ouchunhua]status notify:%d\r\n", status_type);
 	if (status_type == LINK_REMOVED) {
 		printf("%s:%d\r\n", __func__, __LINE__);
 		android_auto_notify_event(&ev, CARLINK_EVENT_MSG_SESSION_STOP, 0);

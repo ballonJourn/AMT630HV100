@@ -439,7 +439,6 @@ void* h264_video_player_init()
 	}
 
 	g_hide_carlink_flag = 1;
-	vehicle_set_data(VEH_CARLINK_CONNECTED, 1);
 
 	return (void*)handle;
 }
@@ -452,7 +451,6 @@ void h264_video_player_uninit(void* h264_Handle)
 		mfc_uninit(handle);
 	}
 	g_hide_carlink_flag = 0;
-	vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
 
 	ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
 	ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
@@ -556,7 +554,8 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 		ark_lcd_set_osd_info_atomic(LCD_VIDEO_LAYER, &info);
 		ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 		ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-		if (vehicle_get_data(VEH_CARLINK_CP_STATUS) == 1) {
+		if ((vehicle_get_data(VEH_CARLINK_CP_STATUS) == 1)  
+		|| (vehicle_get_data(VEH_CARLINK_AA_STATUS) == 1)) {
 			ark_lcd_osd_enable(LCD_UI_LAYER, 0);
 			ark_lcd_set_osd_sync(LCD_UI_LAYER);
 		} else {

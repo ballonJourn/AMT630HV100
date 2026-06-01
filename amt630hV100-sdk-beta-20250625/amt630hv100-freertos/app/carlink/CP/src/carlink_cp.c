@@ -314,16 +314,11 @@ static void carlink_cp_input_event_proc(const struct carlink_event *ev)
 	//printf("key %d %d\n", key, (int)pressed);
 
 	if  (0) {
-	} else if (key == 19) {
-		/*if (!pressed)
-			sendKnobInfo(0, 0, 0, 0, 0, 0);//up在主界面向上移动光标
+	} else if (key == 19) {// back
+		if (pressed)
+			sendKnobInfo(0, 0, 1, 0, 0, 0);
 		else
-			sendKnobInfo(0, 0, 0, 0, 1, 0);*/
-		if (pressed) {//退后台，手机停止发送carplay视频流
-			carplay_send_change_modes(CarplayTransferType_Take, CarplayTransferPriority_UserInitiated, 
-				CarplayConstraint_Never, CarplayConstraint_Never,
-				0, 0, 0, 0, 0, 0, 0);
-		}
+			sendKnobInfo(0, 0, 0, 0, 0, 0);
 	} else if (key == 20) {
 		/*if (!pressed)
 			sendKnobInfo(0, 0, 0, 0, 0, 0); //down在主界面向下移动光标
@@ -351,6 +346,27 @@ static void carlink_cp_input_event_proc(const struct carlink_event *ev)
 			sendKnobInfo(1, 0, 0, 0, 0, 0);
 		else
 			sendKnobInfo(0, 0, 0, 0, 0, 0);
+	} else if (key == 28) {// home
+		if (pressed)
+			sendKnobInfo(0, 1, 0, 0, 0, 0);
+		else
+			sendKnobInfo(0, 0, 0, 0, 0, 0);
+	} else if (key == 29) {// left
+		if (pressed)
+			sendKnobInfo(0, 0, 0, -1, 0, 0);
+		else
+			sendKnobInfo(0, 0, 0, 0, 0, 0);
+	} else if (key == 30) {// right
+		if (pressed)
+			sendKnobInfo(0, 0, 0, 1, 0, 0);
+		else
+			sendKnobInfo(0, 0, 0, 0, 0, 0);
+	} else if (key == 31) {// 退后台
+		if (pressed) {
+			carplay_send_change_modes(CarplayTransferType_Take, CarplayTransferPriority_UserInitiated, 
+				CarplayConstraint_Never, CarplayConstraint_Never,
+				0, 0, 0, 0, 0, 0, 0);
+		}
 	}
 }
 

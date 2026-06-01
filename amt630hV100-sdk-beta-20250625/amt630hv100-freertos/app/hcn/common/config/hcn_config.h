@@ -79,7 +79,7 @@ extern "C" {
  * define symbol __ICFEDIT_region_RAM_start__ = 0x20640000;
  * define symbol __ICFEDIT_region_RAM_end__   = 0x23ffffff;
  */
-#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (23.5) * 1024 * 1024) ) )
+#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (22) * 1024 * 1024) ) )
 #define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024) 
 #define HCN_AWTK_HEAP_SIZE ((19) * 1024 * 1024)
 
@@ -209,13 +209,6 @@ extern "C" {
 
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE
 #define PARAM_WEAR_LEVEL_ENABLE     ///< 磨损均衡使能
-#endif
-
-///< 毫米波雷达使能 (BSD/CVW/RCW)
-#define HCN_MMWAVE_RADAR_ENABLE
-#ifdef HCN_MMWAVE_RADAR_ENABLE
-#define HCN_UART_RADAR_PORT      (3)        ///< 毫米波雷达串口号 UART3
-#define HCN_UART_RADAR_BAUDRATE  (115200)   ///< 波特率115200
 #endif
 
 ///< use flash db 

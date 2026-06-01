@@ -33,7 +33,7 @@ void home_page_deal_key_set()
         case ICON_DVR:
             set_current_level(MENU_LEVEL_1);
             /* Start DVR preview when entering DVR page */
-            dvr_start_preview();
+            // dvr_start_preview();
             break;
         default:
             break;
