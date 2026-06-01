@@ -114,29 +114,3 @@ void vehicle_set_param_bluetooth(uint8_t value)
 #endif
     return ;
 }
-
-//毫米波雷达开关
-uint8_t vehicle_get_param_radar()
-{
-    uint8_t value ;
-#if !ON_PC_CACLE
-    if (get_hcn_usr_param(HCN_PARAM_RADAR_SWITCH, &value) )
-        return value ;
-#endif
-    return 1 ; ///< 默认开启
-}
-
-void vehicle_set_param_radar(uint8_t value)
-{
-#if !ON_PC_CACLE
-    set_hcn_usr_param(HCN_PARAM_RADAR_SWITCH, (void*)&value) ;
-#endif
-
-    ///< 同步控制雷达数据上传
-#ifdef HCN_MMWAVE_RADAR_ENABLE
-    extern int mmwave_radar_data_switch(uint8_t enable);
-    mmwave_radar_data_switch(value);
-#endif
-
-    return ;
-}

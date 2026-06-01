@@ -19,7 +19,6 @@ static setting_entry_t setting_entry[SETTING_MENU_NUM_MAX] = {
     [SETTING_MENU_UNIT]       = { unit_init            , on_unit_deal_short_key           } , 
     [SETTING_MENU_DISPLAY]    = { display_init         , on_display_deal_short_key        } ,
     [SETTING_MENU_BRIGHTNESS] = { brightness_init      , on_brightness_deal_short_key     } ,
-    [SETTING_MENU_RADAR]      = { radar_switch_init    , on_radar_switch_deal_short_key   } ,
 };
 
 static setting_entry_t option_entry[SETTING_MENU_NUM_MAX] = {

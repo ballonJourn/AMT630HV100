@@ -72,8 +72,4 @@ void hcn_mw_init(void) {
 #ifdef HCN_UART_DVR_ENABLE
     uart_dvr_init();
 #endif
-
-#ifdef HCN_MMWAVE_RADAR_ENABLE
-    mmwave_radar_init();
-#endif
 }

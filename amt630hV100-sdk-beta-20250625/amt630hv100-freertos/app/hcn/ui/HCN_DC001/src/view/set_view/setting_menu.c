@@ -4,7 +4,7 @@
 
 const char* setting_menu_name[SETTING_MENU_NUM_MAX] = {
     "tmps" , "ride_ele" , "connect" , "language" , 
-    "brightness", "unit" , "clock"  , "display"  , "device" , "radar"
+    "brightness", "unit" , "clock"  , "display"  , "device"
 } ;
 
 static widget_t* setting_menu_widget[SETTING_MENU_NUM_MAX] = { NULL };
