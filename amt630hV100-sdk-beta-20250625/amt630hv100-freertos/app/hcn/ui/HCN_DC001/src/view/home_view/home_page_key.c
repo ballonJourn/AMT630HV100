@@ -32,8 +32,8 @@ void home_page_deal_key_set()
             break;
         case ICON_DVR:
             set_current_level(MENU_LEVEL_1);
-            /* Start DVR preview when entering DVR page */
-            // dvr_start_preview();
+            /* Enable DVR preview when entering DVR page */
+            dvr_api_set_preview_enable(1);
             break;
         default:
             break;
