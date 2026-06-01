@@ -165,6 +165,22 @@ typedef enum {
     VEH_DVR_MODE, ///< 0:USB has been closed 1:UVC Mode 2:MSDC Mode
     VEH_DRV_TIME, ///< 1: Record time 1 minute 2: Record time is 2 minutes 3: Record time is 3 minutes
 
+    ///< mmWave Radar (BSD/CVW/RCW)
+    VEH_RADAR_STATUS,           ///< 雷达状态 0:离线 1:在线
+    VEH_RADAR_BSD_LEFT,         ///< BSD左侧预警 0:无 1:报警
+    VEH_RADAR_BSD_RIGHT,        ///< BSD右侧预警 0:无 1:报警
+    VEH_RADAR_CVW_LEFT,         ///< CVW左侧来车预警 0:无 1:报警
+    VEH_RADAR_CVW_RIGHT,        ///< CVW右侧来车预警 0:无 1:报警
+    VEH_RADAR_RCW,              ///< RCW后方碰撞预警 0:无 1:报警
+    VEH_RADAR_LEFT_DISTANCE,    ///< 左侧最近预警目标距离 (m)
+    VEH_RADAR_RIGHT_DISTANCE,   ///< 右侧最近预警目标距离 (m)
+    VEH_RADAR_REAR_DISTANCE,    ///< 后侧预警目标距离 (m)
+    VEH_RADAR_LEFT_SPEED,       ///< 左侧最近预警目标速度 (km/h)
+    VEH_RADAR_RIGHT_SPEED,      ///< 右侧最近预警目标速度 (km/h)
+    VEH_RADAR_REAR_SPEED,       ///< 后侧最近预警目标速度 (km/h)
+    VEH_RADAR_CURRENT_SPEED,    ///< 雷达上报的当前车速 (km/h)
+    VEH_RADAR_BSD_START_SPEED,  ///< BSD启动速度 (km/h)
+
     VEH_DATA_END,
 } veh_data_e;
 
