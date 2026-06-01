@@ -4604,6 +4604,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>mmwave_radar</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\mmwave_radar\hcn_mmwave_radar.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>uart_mcu_update</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\uart_mcu_update\hcn_uart_mcu_update.c</name>
@@ -4790,6 +4796,9 @@
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\device.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\radar_switch.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\display.c</name>
