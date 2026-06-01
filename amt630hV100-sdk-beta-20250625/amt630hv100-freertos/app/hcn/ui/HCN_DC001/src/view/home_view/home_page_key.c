@@ -32,7 +32,10 @@ void home_page_deal_key_set()
             break;
         case ICON_DVR:
             set_current_level(MENU_LEVEL_1);
-            /* Enable DVR preview when entering DVR page */
+            /* Pre-arm: set display window and enable preview.
+             * If USB already in: video appears immediately.
+             * If USB not in yet: video starts as soon as USB is inserted. */
+            dvr_api_set_display_window(52, 0, 972, 500);
             dvr_api_set_preview_enable(1);
             break;
         default:

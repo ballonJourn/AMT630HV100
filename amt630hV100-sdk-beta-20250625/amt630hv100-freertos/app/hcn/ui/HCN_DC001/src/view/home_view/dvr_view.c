@@ -252,9 +252,10 @@ void dvr_page_deal_key_back(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        /* Exit DVR -> disable preview, restore home page */
+        /* Exit DVR: disable preview and reset display window */
         dvr_api_set_preview_enable(0);
-        set_dock_view(ICON_INFO); /* switch back to instrument page */
+        dvr_api_reset_display_window();
+        set_dock_view(ICON_INFO);
         set_current_level(MENU_LEVEL_0);
         break;
 

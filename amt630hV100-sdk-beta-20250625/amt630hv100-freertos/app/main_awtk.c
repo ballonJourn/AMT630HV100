@@ -584,11 +584,19 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
         return -1;
     }
 
+    /* Read display window atomically to prevent partial update from UI task */
+    taskENTER_CRITICAL();
+    int32_t dw = dvr_display_width;
+    int32_t dh = dvr_display_height;
+    int32_t dx = dvr_display_x;
+    int32_t dy = dvr_display_y;
+    taskEXIT_CRITICAL();
+
     LcdOsdInfo info = {0};
-    info.x = dvr_display_x;
-    info.y = dvr_display_y;
-    info.width = dvr_display_width;
-    info.height = dvr_display_height;
+    info.x = dx;
+    info.y = dy;
+    info.width = dw;
+    info.height = dh;
     info.format = LCD_OSD_FORAMT_RGB565;
     info.yaddr = (uint32_t)cap->dst_buf[next_idx];
 
@@ -599,6 +607,11 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
 
     // Update buffer index for next frame
     cap->dst_buf_index = next_idx;
+
+    /* Re-check preview flag before touching layer state (race guard vs UI task) */
+    if (!dvr_preview_enable) {
+        return -1;
+    }
 
     // Enable video layer and disable UI layer
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
@@ -855,8 +868,8 @@ static void dvr_usb_task(void *arg)
         }
 #endif
 
-        // Switch view mode every 5 seconds (5 modes: 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh)
-        if (dvr_sensor_switch_enable) {
+        // Switch view mode only when preview is active and sensor switch is enabled
+        if (dvr_preview_enable && dvr_sensor_switch_enable) {
             current_time = xTaskGetTickCount();
             if (current_time - last_switch_time >= 5000) {  // 500 ticks = 5 seconds
                 dvr_view_mode = (dvr_view_mode + 1) % 5;
@@ -1308,10 +1321,12 @@ int dvr_api_is_running(void)
 // Note: This affects the OSD layer display area, PXP scales content to fit
 void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int32_t height)
 {
+    taskENTER_CRITICAL();
     dvr_display_x = x;
     dvr_display_y = y;
     dvr_display_width = width;
     dvr_display_height = height;
+    taskEXIT_CRITICAL();
     printf("DVR: set display window - x:%d y:%d w:%d h:%d\n", x, y, width, height);
 }
 
@@ -1328,27 +1343,38 @@ void dvr_api_get_display_window(int32_t *x, int32_t *y, int32_t *width, int32_t 
 // DVR control API - Reset display window to full screen
 void dvr_api_reset_display_window(void)
 {
+    taskENTER_CRITICAL();
     dvr_display_x = 0;
     dvr_display_y = 0;
     dvr_display_width = LCD_WIDTH;
     dvr_display_height = LCD_HEIGHT;
+    taskEXIT_CRITICAL();
     printf("DVR: reset display window to full screen\n");
 }
 
 // DVR control API - Enable/disable preview mode (jpeg decode)
-// enable: 0=disable preview (skip jpeg decode), 1=enable preview (run jpeg decode)
+// Enable can be called BEFORE USB insert / DVR task start (pre-arm pattern):
+//   dvrdsp 52 0 972 500 → dvrpreview 1 → plug USB → video appears immediately
 void dvr_api_set_preview_enable(uint8_t enable)
 {
-    dvr_preview_enable = enable;
-    printf("DVR: preview enable set to %d\n", enable);
-
-    /* Restore UI layer when preview is disabled */
-    if (enable == 0) {
+    if (enable) {
+        /* Set flag first. If DVR task is already running, it picks up on next
+         * loop iteration. If not yet running, flag will be ready when task starts. */
+        dvr_preview_enable = 1;
+        printf("DVR: preview armed (task %s)\n",
+               dvr_task_handle ? "running" : "not yet started");
+    } else {
+        /* Clear flag first, then wait for DVR task to see it (if running),
+         * then restore layer state. */
+        dvr_preview_enable = 0;
+        if (dvr_task_handle != NULL) {
+            vTaskDelay(pdMS_TO_TICKS(5));
+        }
         ark_lcd_osd_enable(LCD_UI_LAYER, 1);
         ark_lcd_set_osd_sync(LCD_UI_LAYER);
         ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
         ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-        printf("DVR: UI layer restored\n");
+        printf("DVR: preview disabled, UI layer restored\n");
     }
 }
 
@@ -1964,8 +1990,7 @@ static void usb_read_thread(void *para)
 
 			#if ENABLE_BD_USB_DVR_FUNC
 			// Check if elene file exists and start DVR task if found
-			// #ifdef USB_SUPPORT
-			dvr_api_set_display_window(100, 50, 800, 480);
+			// Display window is set by UI layer when entering DVR page
 			dvr_start_if_elene_exists();
 			// #endif
 			#endif
