@@ -51,7 +51,7 @@ static volatile bool       g_radar_online = false;
 static volatile uint32_t   g_last_rx_tick = 0;
 
 static QueueHandle_t       g_tx_queue = NULL;
-static UartPort_t         *g_radar_uap = NULL;
+// static UartPort_t      *g_radar_uap = NULL;   ///< 保留供后续发送扩展
 static TimerHandle_t       g_online_timer = NULL;
 static TimerHandle_t       g_veh_speed_timer = NULL;
 
@@ -487,7 +487,7 @@ static void radar_rx_thread(void *param) {
     }
 
     vUartInit(uap, HCN_UART_RADAR_BAUDRATE, 0);
-    g_radar_uap = uap;
+    // g_radar_uap = uap;  ///< 保留供后续发送扩展
 
     if (radar_tx_init(uap) != 0) {
         hcn_log_error("%s: tx init failed\n", RADAR_TAG);
@@ -504,7 +504,6 @@ static void radar_rx_thread(void *param) {
     ///< 读取用户存储的雷达开关状态，决定是否开启数据上传
     uint8_t radar_sw = 1;
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE
-    extern bool get_hcn_usr_param(int id, void *param);
     get_hcn_usr_param(HCN_PARAM_RADAR_SWITCH, &radar_sw);
 #endif
     mmwave_radar_data_switch(radar_sw);
