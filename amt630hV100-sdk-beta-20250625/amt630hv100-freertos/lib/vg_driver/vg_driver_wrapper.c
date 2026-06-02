@@ -203,6 +203,22 @@ unsigned int xm_vg_get_osd_fb (int *no)
 #include "fb_queue.h"
 
 static fb_queue_s *curr_fb = NULL;
+
+/*
+ * Post-render hook: called after VG canvas finishes painting a framebuffer
+ * but BEFORE the buffer is queued for display.  This lets application code
+ * (e.g. DVR preview alpha-clear) modify the buffer in perfect sync with
+ * AWTK's rendering — no race, no flicker.
+ *
+ * Set via vg_set_post_render_hook(); pass NULL to disable.
+ */
+static void (*g_vg_post_render_hook)(unsigned int fb_base) = NULL;
+
+void vg_set_post_render_hook(void (*hook)(unsigned int fb_base))
+{
+	g_vg_post_render_hook = hook;
+}
+
 unsigned int xm_vg_require_gpu_fb (void)
 {
 	fb_queue_s *fb_unit = NULL;
@@ -226,6 +242,10 @@ void xm_vg_release_gpu_fb (void)
 	if(fb_unit)
 	{
 		curr_fb = NULL;
+		/* Call post-render hook BEFORE buffer becomes visible */
+		if (g_vg_post_render_hook) {
+			g_vg_post_render_hook(fb_unit->fb_base);
+		}
 		fb_queue_set_ready (fb_unit);
 		//XM_lock();
 		//printf ("rdy %x\n", fb_unit->fb_base);

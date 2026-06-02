@@ -227,7 +227,8 @@ Enter the map without navigation</language>
 <string name="OTA_started">
   <language name="zh_CN">启动成功</language>
   <language name="en_US">Startup Successful</language>
-</string><string name="dvr_front_video">
+</string>
+<string name="dvr_front_video">
   <language name="zh_CN">前摄视频</language>
   <language name="en_US">Front Video</language>
 </string>

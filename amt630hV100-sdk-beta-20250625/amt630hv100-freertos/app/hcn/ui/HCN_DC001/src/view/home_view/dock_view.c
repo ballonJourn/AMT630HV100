@@ -40,4 +40,3 @@ ret_t home_refresh_dock_icon(int index)
     
     return RET_OK ;
 }
-

@@ -6,6 +6,7 @@ extern ret_t link_page_init(widget_t* win, void* ctx);
 extern ret_t home_page_init(widget_t* win, void* ctx);
 extern ret_t update_page_init(widget_t* win, void* ctx);
 extern ret_t device_page_init(widget_t* win, void* ctx);
+extern ret_t dvr_page_init(widget_t* win, void* ctx);
 
 static ret_t navigator_window_init(const char* name, widget_t* win, void* ctx) {
     if (tk_str_eq(name, "link_page")) {
@@ -16,6 +17,8 @@ static ret_t navigator_window_init(const char* name, widget_t* win, void* ctx) {
         return update_page_init(win, ctx);
     }else if (tk_str_eq(name, "device_page")) {
         return device_page_init(win, ctx);
+    }else if (tk_str_eq(name, "dvr_page")) {
+        return dvr_page_init(win, ctx);
     }
 
   return RET_OK;

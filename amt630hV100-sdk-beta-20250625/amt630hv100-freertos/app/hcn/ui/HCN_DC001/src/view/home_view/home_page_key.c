@@ -5,7 +5,6 @@
 #include "home_view_interface.h"
 #include "common/navigator.h"
 #include "proxy/bluetooth_data.h"
-#include "dvr_api.h"
 
 void home_page_deal_key_set()
 {
@@ -31,9 +30,8 @@ void home_page_deal_key_set()
             setting_menu_set_focused_item(get_current_menu_index());
             break;
         case ICON_DVR:
-            set_current_level(MENU_LEVEL_1);
-            /* Start DVR preview when entering DVR page */
-            dvr_start_preview();
+            /* Open DVR as independent transparent window */
+            navigator_replace(DVR_PAGE);   // 关闭 home_page，打开 dvr_page
             break;
         default:
             break;

@@ -218,8 +218,8 @@ extern int delta_update(int filetype, size_t patchFileSize);
  **********************/
 #if ENABLE_BD_USB_DVR_FUNC
 static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par);
-static void dvr_get_file_list(uint8_t mode);
-static void dvr_get_status(void);
+void dvr_get_file_list(uint8_t mode);
+void dvr_get_status(void);
 static void dvr_pb_start(uint8_t mode, uint16_t index);
 static void dvr_pb_pause(void);
 static void dvr_pb_stop(void);
@@ -240,53 +240,12 @@ static void dvr_pb_fb(void);
 #if ENABLE_BD_USB_DVR_FUNC
 
 /*
- * Clear alpha channel in UI framebuffer for DVR preview area.
- * LCD_BPP=32 (ARGB888): alpha=0 → transparent → VIDEO layer (OSD0) shows through.
- * Called each frame by dvr_decode_and_display() to maintain the "hole".
+ * Alpha clearing removed: DVR now uses an independent AWTK window
+ * (dvr_page) with bg_color="#00000000".  VG Canvas clears the entire
+ * framebuffer to transparent each frame.  Where no widget is drawn,
+ * alpha stays 0x00 and VIDEO layer (OSD0) shows through naturally.
+ * Zero CPU overhead, no cache issues, no flicker.
  */
-static void dvr_clear_ui_alpha(void)
-{
-    uint32_t yaddr = 0;
-    ark_lcd_get_osd_yaddr(LCD_UI_LAYER, &yaddr);
-    if (!yaddr) return;
-
-    uint32_t *fb = (uint32_t *)yaddr;
-    int x0 = dvr_display_x;
-    int y0 = dvr_display_y;
-    int x1 = x0 + dvr_display_width;
-    int y1 = y0 + dvr_display_height;
-    if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
-    if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
-
-    for (int y = y0; y < y1; y++) {
-        uint32_t *p = fb + y * OSD_WIDTH + x0;
-        for (int x = x0; x < x1; x++)
-            *p++ &= 0x00FFFFFF;
-    }
-    CP15_clean_dcache_for_dma(yaddr + y0 * OSD_WIDTH * 4,
-                               yaddr + y1 * OSD_WIDTH * 4);
-}
-
-/* Restore alpha=0xFF for all framebuffers (called on preview exit) */
-static void dvr_restore_ui_alpha_all(void)
-{
-    for (int i = 0; i < 3; i++) {
-        uint8_t *addr = ark_lcd_get_fb_addr(i);
-        if (!addr) continue;
-        uint32_t *fb = (uint32_t *)addr;
-        int x0 = dvr_display_x, y0 = dvr_display_y;
-        int x1 = x0 + dvr_display_width, y1 = y0 + dvr_display_height;
-        if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
-        if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
-        for (int y = y0; y < y1; y++) {
-            uint32_t *p = fb + y * OSD_WIDTH + x0;
-            for (int x = x0; x < x1; x++)
-                *p++ |= 0xFF000000;
-        }
-        CP15_clean_dcache_for_dma((uint32_t)addr + y0 * OSD_WIDTH * 4,
-                                   (uint32_t)addr + y1 * OSD_WIDTH * 4);
-    }
-}
 
 // Send data to DVR via elene file (write 512 bytes aligned)
 // Caller should call dvr_seek_for_align() before this function
@@ -304,7 +263,7 @@ static void dvr_send_data(void)
 
 // Send normal command to DVR
 // Sets flag and prepares data, actual sending happens in main loop
-static void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par)
+void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par)
 {
     st_bd_ctrl_if_t *pctrl = &dvr_ctrl_data;
 
@@ -655,13 +614,10 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
         return -1;
     }
 
-    // Enable video layer, keep UI layer ON (punch alpha hole instead)
+    // Enable video layer (DVR window's transparent background lets it show)
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
     ark_lcd_set_osd_info_atomic(LCD_VIDEO_LAYER, &info);
     ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-
-    // Clear alpha in UI framebuffer so VIDEO shows through
-    dvr_clear_ui_alpha();
 
     cap->display_on = 1;
     return 0;
@@ -960,7 +916,7 @@ static void dvr_start_if_elene_exists(void)
 }
 
 // Request DVR status from device
-static void dvr_get_status(void)
+void dvr_get_status(void)
 {
     if (dvr_fp != NULL) {
         dvr_send_normal_cmd(BD_CTRL_GET_STS, 0);
@@ -1033,7 +989,7 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
 }
 
 // Get file list from DVR device
-static void dvr_get_file_list(uint8_t mode)
+void dvr_get_file_list(uint8_t mode)
 {
     uint16_t par = 0;
 
@@ -1399,11 +1355,10 @@ void dvr_api_set_preview_enable(uint8_t enable)
     printf("DVR: preview enable set to %d\n", enable);
 
     if (enable == 0) {
-        /* Disable video layer, restore alpha so UI is fully opaque */
+        /* Disable video layer */
         ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
         ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-        dvr_restore_ui_alpha_all();
-        printf("DVR: VIDEO off, alpha restored\n");
+        printf("DVR: VIDEO off\n");
     }
 }
 
@@ -1413,7 +1368,7 @@ uint8_t dvr_api_get_preview_enable(void)
     return dvr_preview_enable;
 }
 
-// DVR preview lifecycle - called by UI on page enter
+// DVR preview lifecycle - called by dvr_page_init() when DVR window opens
 void dvr_start_preview(void)
 {
     dvr_api_set_display_window(52, 0, 972, 500);
@@ -1421,7 +1376,7 @@ void dvr_start_preview(void)
     printf("DVR: start_preview (window 52,0,972,500)\n");
 }
 
-// DVR preview lifecycle - called by UI on page exit
+// DVR preview lifecycle - called by dvr_page BACK key / window close
 void dvr_stop_preview(void)
 {
     /* 1. Set flag - DVR task will see it via race guard and stop touching layers */
@@ -1436,10 +1391,12 @@ void dvr_stop_preview(void)
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
     ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
 
-    /* 4. Restore alpha=0xFF so UI is fully opaque again */
-    dvr_restore_ui_alpha_all();
+    /* No alpha restore needed: when DVR window closes, AWTK switches
+     * back to home_page which has an opaque wallpaper bg_image.
+     * VG Canvas clears the framebuffer with the wallpaper (alpha=0xFF),
+     * naturally covering the VIDEO layer. */
 
-    printf("DVR: stop_preview, alpha restored\n");
+    printf("DVR: stop_preview\n");
 }
 
 // DVR device online check

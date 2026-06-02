@@ -1,22 +1,16 @@
+/*
+ * dvr_view.c — DVR UI view layer for independent dvr_page window
+ *
+ * Key differences from alpha-punch version:
+ *   - dvr_page_deal_key_back() calls navigator_back() to close window
+ *   - No dvr_clear_ui_alpha() / dvr_restore_ui_alpha_all() needed
+ *   - dvr_stop_preview() only disables VIDEO layer, no framebuffer writes
+ */
+
 #include "dvr_view.h"
 #include "dvr_api.h"
 #include "../view_manager.h"
-
-/*
- * DVR View Layer — bridges AWTK UI with dvr_send_normal_cmd() in main_awtk.c
- *
- * Key action -> dvr_api.h function mapping:
- *   Camera btn SET   -> dvr_send_normal_cmd(BD_CTRL_REC_START/STOP, 0)
- *   Camera btn LONG  -> dvr_send_normal_cmd(BD_CTRL_SNAP, 0)
- *   Playback btn SET -> dvr_get_file_list(0)  (video)
- *   Photo btn SET    -> dvr_get_file_list(1)  (photo)
- *   Settings btn SET -> enter setting sub-page
- *   Setting format   -> dvr_send_normal_cmd(BD_CTRL_FORMAT, 0)
- *   Setting loop 1/2/3 -> dvr_send_normal_cmd(BD_CTRL_SET_REC_TIME, n)
- *   Setting mic      -> dvr_send_normal_cmd(BD_CTRL_MIC_ON, 0/1)
- *   File list delete -> dvr_send_normal_cmd(BD_CTRL_DEL_FILE, file_index)
- *   Back from list   -> dvr_send_normal_cmd(BD_CTRL_REC_START, 0)
- */
+#include "common/navigator.h"
 
 /* ---- Widget pointers ---- */
 static widget_t* dvr_main_view   = NULL;
@@ -126,6 +120,15 @@ ret_t home_dvr_view_init(widget_t* parent)
     dvr_storage_bar  = widget_lookup(parent, "dvr_storage_bar",  TRUE);
     dvr_storage_text = widget_lookup(parent, "dvr_storage_text", TRUE);
 
+    /* Reset ALL state for clean re-entry (window is destroyed on close,
+     * but these statics survive across open/close cycles) */
+    dvr_dock_focus  = DVR_DOCK_CAMERA;
+    dvr_list_focus  = 0;
+    dvr_set_focus   = DVR_SET_CAMERA;
+    dvr_popup_focus = 0;
+    dvr_list_mode   = 0;
+    dvr_popup_source = POPUP_SRC_FILE_DELETE;
+
     dvr_show_sub(DVR_SUB_MAIN);
     dvr_refresh_dock_highlight(DVR_DOCK_CAMERA);
     return RET_OK;
@@ -137,11 +140,61 @@ void dvr_page_deal_key_set(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        /* Dock buttons map to view modes: 0=front, 1=rear, 2=f+r, 3=r+f */
+        /* Dock SET: camera=toggle rec, playback=file list, photo=snap, settings=enter */
+        switch (dvr_dock_focus)
         {
-            uint8_t mode = (uint8_t)dvr_dock_focus;
-            dvr_api_view_switch(mode);
+        case DVR_DOCK_CAMERA:
+            /* Toggle recording */
+            if (dvr_get_rec_status())
+                dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
+            else
+                dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
+            break;
+        case DVR_DOCK_PLAYBACK:
+            /* Enter file list (video mode) */
+            dvr_list_mode = 0;
+            dvr_get_file_list(0);
+            dvr_show_sub(DVR_SUB_LIST);
+            dvr_list_focus = 0;
+            dvr_refresh_list_highlight(0);
+            break;
+        case DVR_DOCK_PHOTO:
+            /* Enter file list (photo mode) */
+            dvr_list_mode = 1;
+            dvr_get_file_list(1);
+            dvr_show_sub(DVR_SUB_LIST);
+            dvr_list_focus = 0;
+            dvr_refresh_list_highlight(0);
+            break;
+        case DVR_DOCK_SETTINGS:
+            /* Enter DVR settings */
+            dvr_show_sub(DVR_SUB_SETTING);
+            dvr_set_focus = DVR_SET_CAMERA;
+            dvr_refresh_setting_highlight(DVR_SET_CAMERA);
+            break;
+        default:
+            break;
         }
+        break;
+
+    case DVR_SUB_LIST:
+        /* In file list, SET could trigger playback or view details */
+        break;
+
+    case DVR_SUB_SETTING:
+        /* Handle setting sub-options */
+        break;
+
+    case DVR_SUB_POPUP:
+        if (dvr_popup_focus == 0) {
+            /* Confirm */
+            if (dvr_popup_source == POPUP_SRC_FILE_DELETE)
+                dvr_send_normal_cmd(BD_CTRL_DEL_FILE, dvr_list_focus);
+            else
+                dvr_send_normal_cmd(BD_CTRL_FORMAT, 0);
+        }
+        /* Both confirm and cancel return to previous view */
+        dvr_show_sub(dvr_popup_source == POPUP_SRC_CARD_FORMAT ? DVR_SUB_SETTING : DVR_SUB_LIST);
         break;
 
     default:
@@ -155,10 +208,31 @@ void dvr_page_deal_key_back(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        /* Exit DVR -> stop preview, return home */
+        /*
+         * Exit DVR page entirely.
+         * dvr_stop_preview() disables VIDEO layer.
+         * navigator_back() closes dvr_page window, returns to home_page.
+         * on_dvr_page_close callback handles dock reset.
+         */
         dvr_stop_preview();
-        set_dock_view(ICON_INFO);
-        set_current_level(MENU_LEVEL_0);
+        navigator_replace(HOME_PAGE);  // 关闭 dvr_page，重新打开 home_page
+        break;
+
+    case DVR_SUB_LIST:
+        /* Return from file list to main preview */
+        dvr_show_sub(DVR_SUB_MAIN);
+        dvr_refresh_dock_highlight(dvr_dock_focus);
+        break;
+
+    case DVR_SUB_SETTING:
+        /* Return from settings to main preview */
+        dvr_show_sub(DVR_SUB_MAIN);
+        dvr_refresh_dock_highlight(dvr_dock_focus);
+        break;
+
+    case DVR_SUB_POPUP:
+        /* Return from popup to list */
+        dvr_show_sub(DVR_SUB_LIST);
         break;
 
     default:

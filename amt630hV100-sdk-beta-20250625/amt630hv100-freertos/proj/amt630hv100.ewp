@@ -4672,6 +4672,9 @@
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\update_page.c</name>
                             </file>
+                            <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\dvr_page.c</name>
+                            </file>
                         </group>
                         <group>
                             <name>proxy</name>
