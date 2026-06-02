@@ -60,4 +60,8 @@ extern void dvr_start_preview(void);
 extern void dvr_stop_preview(void);
 extern uint8_t dvr_is_device_online(void);
 
+/* View switch: 0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh */
+extern void dvr_api_view_switch(uint8_t mode);
+extern uint8_t dvr_get_view_mode(void);
+
 #endif /* DVR_API_H */

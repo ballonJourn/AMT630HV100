@@ -137,107 +137,11 @@ void dvr_page_deal_key_set(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        switch (dvr_dock_focus) {
-        case DVR_DOCK_CAMERA:
-            /* Toggle recording based on real hardware status */
-            // if (dvr_get_rec_status()) {
-            //     dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
-            // } else {
-            //     dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
-            // }
-            break;
-        case DVR_DOCK_PLAYBACK:
-            /* Stop recording first, then request video file list */
-            if (dvr_get_rec_status()) {
-                // dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
-            }
-            dvr_list_mode = 0;
-            // dvr_get_file_list(0); /* video */
-            dvr_show_sub(DVR_SUB_LIST);
-            dvr_list_focus = 0;
-            dvr_refresh_list_highlight(0);
-            set_current_level(MENU_LEVEL_2);
-            break;
-        case DVR_DOCK_PHOTO:
-            // if (dvr_get_rec_status()) {
-            //     dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
-            // }
-            // dvr_list_mode = 1;
-            // dvr_get_file_list(1); /* photo */
-            dvr_show_sub(DVR_SUB_LIST);
-            dvr_list_focus = 0;
-            dvr_refresh_list_highlight(0);
-            set_current_level(MENU_LEVEL_2);
-            break;
-        case DVR_DOCK_SETTINGS:
-            // dvr_get_status(); /* refresh status before entering settings */
-            dvr_show_sub(DVR_SUB_SETTING);
-            dvr_set_focus = DVR_SET_CAMERA;
-            dvr_refresh_setting_highlight(DVR_SET_CAMERA);
-            set_current_level(MENU_LEVEL_2);
-            break;
+        /* Dock buttons map to view modes: 0=front, 1=rear, 2=f+r, 3=r+f */
+        {
+            uint8_t mode = (uint8_t)dvr_dock_focus;
+            dvr_api_view_switch(mode);
         }
-        break;
-
-    case DVR_SUB_LIST:
-        /* SET on file item -> delete confirmation popup */
-        dvr_popup_source = POPUP_SRC_FILE_DELETE;
-        dvr_show_sub(DVR_SUB_POPUP);
-        dvr_popup_focus = 0;
-        dvr_refresh_popup_highlight(0);
-        set_current_level(MENU_LEVEL_3);
-        break;
-
-    case DVR_SUB_SETTING:
-        switch (dvr_set_focus) {
-        case DVR_SET_CAMERA:
-            /* Toggle mic on/off */
-            // dvr_send_normal_cmd(BD_CTRL_MIC_ON, dvr_get_mic_status() ? 0 : 1);
-            break;
-        case DVR_SET_LOOP:
-            /* Cycle loop time: 1->2->3->1 */
-            {
-                static uint8_t loop_val = 1;
-                loop_val = (loop_val % 3) + 1;
-                // dvr_send_normal_cmd(BD_CTRL_SET_REC_TIME, loop_val);
-            }
-            break;
-        case DVR_SET_FORMAT:
-            dvr_popup_source = POPUP_SRC_CARD_FORMAT;
-            dvr_show_sub(DVR_SUB_POPUP);
-            dvr_popup_focus = 0;
-            dvr_refresh_popup_highlight(0);
-            set_current_level(MENU_LEVEL_3);
-            break;
-        case DVR_SET_ABOUT:
-            /* No action, display only */
-            break;
-        }
-        break;
-
-    case DVR_SUB_POPUP:
-        // if (dvr_popup_focus == 0) {
-        //     /* Confirm */
-        //     if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
-        //         /* Format: must stop recording first */
-        //         if (dvr_get_rec_status()) {
-        //             // dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
-        //         }
-        //         dvr_send_normal_cmd(BD_CTRL_FORMAT, 0);
-        //     } else {
-        //         /* Delete file at current list index */
-        //         dvr_send_normal_cmd(BD_CTRL_DEL_FILE, dvr_list_focus);
-        //     }
-        // }
-        // /* Return to caller */
-        // if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
-        //     dvr_show_sub(DVR_SUB_SETTING);
-        //     dvr_refresh_setting_highlight(dvr_set_focus);
-        // } else {
-        //     dvr_show_sub(DVR_SUB_LIST);
-        //     dvr_refresh_list_highlight(dvr_list_focus);
-        // }
-        // set_current_level(MENU_LEVEL_2);
         break;
 
     default:
@@ -251,35 +155,10 @@ void dvr_page_deal_key_back(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        /* Exit DVR -> stop preview, restore home page */
-        // dvr_stop_preview();
-        // set_dock_view(ICON_INFO); /* switch back to instrument page */
-        // set_current_level(MENU_LEVEL_0);
-        break;
-
-    case DVR_SUB_LIST:
-        /* Back to preview, resume recording */
-        // dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
-        // dvr_show_sub(DVR_SUB_MAIN);
-        // dvr_refresh_dock_highlight(dvr_dock_focus);
-        // set_current_level(MENU_LEVEL_1);
-        break;
-
-    case DVR_SUB_SETTING:
-        dvr_show_sub(DVR_SUB_MAIN);
-        dvr_refresh_dock_highlight(dvr_dock_focus);
-        set_current_level(MENU_LEVEL_1);
-        break;
-
-    case DVR_SUB_POPUP:
-        if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
-            dvr_show_sub(DVR_SUB_SETTING);
-            dvr_refresh_setting_highlight(dvr_set_focus);
-        } else {
-            dvr_show_sub(DVR_SUB_LIST);
-            dvr_refresh_list_highlight(dvr_list_focus);
-        }
-        set_current_level(MENU_LEVEL_2);
+        /* Exit DVR -> stop preview, return home */
+        dvr_stop_preview();
+        set_dock_view(ICON_INFO);
+        set_current_level(MENU_LEVEL_0);
         break;
 
     default:

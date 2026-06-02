@@ -42,6 +42,10 @@ typedef enum dvr_setting_row {
 
 ret_t home_dvr_view_init(widget_t* parent);
 
+/* DVR preview lifecycle (manages UI bg transparency + VIDEO layer) */
+void dvr_view_enter_preview(void);
+void dvr_view_exit_preview(void);
+
 /* DVR key handlers */
 void dvr_page_deal_key_set(void);
 void dvr_page_deal_key_back(void);
