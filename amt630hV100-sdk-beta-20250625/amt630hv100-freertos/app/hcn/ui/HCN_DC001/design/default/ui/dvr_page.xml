@@ -1,4 +1,4 @@
-<window name="dvr_page" style:normal:bg_color="#00000000" style:normal:border_color="#00000000">
+<window name="dvr_page" style:normal:bg_color="#FF000000" style:normal:border_color="#FF000000">
   <!-- DVR main preview: fully transparent, VIDEO layer (OSD0) shows through -->
   <view name="dvr_main_view" x="0" y="0" w="1024" h="600" visible="true">
     <!-- Dock bar at bottom (opaque background) -->
@@ -79,7 +79,7 @@
       <image name="dvr_set_loop_1_bg" x="270" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
       <image name="dvr_set_loop_2_bg" x="490" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
       <image name="dvr_set_loop_3_bg" x="710" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
-      <label name="dvr_set_loop_label" x="65" y="18" w="120" h="43" style:normal:font_size="30" tr_text="dvr_loop_time"/>
+      <label name="dvr_set_loop_label" x="65" y="18" w="120" h="43" style:norm0al:font_size="30" tr_text="dvr_loop_time"/>
       <label name="dvr_set_loop_1" x="303" y="18" w="80" h="43" style:normal:font_size="30" text="1 min"/>
       <image name="dvr_set_loop_sel" x="278" y="28" w="24" h="24" draw_type="default" image="settings_s"/>
       <label name="dvr_set_loop_2" x="523" y="18" w="80" h="43" style:normal:font_size="30" text="2 min"/>

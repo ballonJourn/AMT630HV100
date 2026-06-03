@@ -30,8 +30,12 @@ void home_page_deal_key_set()
             setting_menu_set_focused_item(get_current_menu_index());
             break;
         case ICON_DVR:
-            /* Open DVR as independent transparent window */
-            navigator_replace(DVR_PAGE);   // 关闭 home_page，打开 dvr_page
+            /* Open DVR as independent transparent window ON TOP of home_page.
+             * MUST NOT use navigator_replace() — that destroys home_page,
+             * but global timers (50ms/500ms) still reference home_page widgets
+             * through static pointers, causing Data Abort on freed memory.
+             * navigator_to() keeps home_page alive underneath. */
+            navigator_to(DVR_PAGE);
             break;
         default:
             break;

@@ -211,11 +211,12 @@ void dvr_page_deal_key_back(void)
         /*
          * Exit DVR page entirely.
          * dvr_stop_preview() disables VIDEO layer.
-         * navigator_back() closes dvr_page window, returns to home_page.
+         * navigator_back() closes dvr_page, returns to home_page
+         * (which is still alive underneath — never destroyed).
          * on_dvr_page_close callback handles dock reset.
          */
         dvr_stop_preview();
-        navigator_replace(HOME_PAGE);  // 关闭 dvr_page，重新打开 home_page
+        navigator_back();
         break;
 
     case DVR_SUB_LIST:
@@ -246,8 +247,10 @@ void dvr_page_deal_key_up(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN: {
-        int idx = (dvr_dock_focus - 1 + DVR_DOCK_BTN_MAX) % DVR_DOCK_BTN_MAX;
-        dvr_refresh_dock_highlight(idx);
+        /* Switch to previous preview mode (front/rear/f+r/r+f/hzh) */
+        uint8_t mode = dvr_get_view_mode();
+        mode = (mode + 4) % 5;   /* -1 mod 5 */
+        dvr_api_view_switch(mode);
         break;
     }
     case DVR_SUB_LIST:
@@ -277,8 +280,10 @@ void dvr_page_deal_key_down(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN: {
-        int idx = (dvr_dock_focus + 1) % DVR_DOCK_BTN_MAX;
-        dvr_refresh_dock_highlight(idx);
+        /* Switch to next preview mode (front/rear/f+r/r+f/hzh) */
+        uint8_t mode = dvr_get_view_mode();
+        mode = (mode + 1) % 5;
+        dvr_api_view_switch(mode);
         break;
     }
     case DVR_SUB_LIST:

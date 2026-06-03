@@ -241,6 +241,9 @@
         </view>
       </slide_view>
     </view>
+    <view name="dvr_pg" x="0" y="0" w="100%" h="100%">
+      <image name="dvr_bg_placeholder" x="52" y="0" w="972" h="418" draw_type="default" image="dvr_bg"/>
+    </view>
   </pages>
   <?include filename="component.xml" ?>
 </window>

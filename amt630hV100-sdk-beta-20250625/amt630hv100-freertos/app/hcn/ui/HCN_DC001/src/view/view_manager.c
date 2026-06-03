@@ -218,7 +218,9 @@ ret_t set_dock_view(dock_view_e dock_view)
 
     home_refresh_dock_icon(dock_view) ;
 
-    if (dock_view != ICON_DVR) {
+    if (dock_view == ICON_DVR) {
+        set_window_page(PAGE_DVR);
+    } else {
         set_window_page( dock_view == ICON_SETTING );
     }
 

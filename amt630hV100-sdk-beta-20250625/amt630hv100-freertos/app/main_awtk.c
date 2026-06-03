@@ -240,12 +240,60 @@ static void dvr_pb_fb(void);
 #if ENABLE_BD_USB_DVR_FUNC
 
 /*
- * Alpha clearing removed: DVR now uses an independent AWTK window
- * (dvr_page) with bg_color="#00000000".  VG Canvas clears the entire
- * framebuffer to transparent each frame.  Where no widget is drawn,
- * alpha stays 0x00 and VIDEO layer (OSD0) shows through naturally.
- * Zero CPU overhead, no cache issues, no flicker.
+ * Post-render alpha clear: called by VG Canvas AFTER all windows are
+ * painted but BEFORE the framebuffer becomes visible.
+ *
+ * With navigator_to(), home_page stays alive underneath dvr_page.
+ * AWTK renders home_page first (opaque wallpaper fills alpha=0xFF),
+ * then dvr_page widgets on top.  This hook clears alpha in the DVR
+ * preview rectangle so the VIDEO layer (OSD0) shows through.
+ *
+ * Registered via vg_set_post_render_hook() when preview is enabled;
+ * unregistered when preview is disabled.
  */
+extern void vg_set_post_render_hook(void (*hook)(unsigned int fb_base));
+
+static void dvr_alpha_clear_hook(unsigned int fb_base)
+{
+    if (!dvr_preview_enable) return;
+
+    uint32_t *fb = (uint32_t *)fb_base;
+    int x0 = dvr_display_x;
+    int y0 = dvr_display_y;
+    int x1 = x0 + dvr_display_width;
+    int y1 = y0 + dvr_display_height;
+    if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
+    if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+
+    for (int y = y0; y < y1; y++) {
+        uint32_t *p = fb + y * OSD_WIDTH + x0;
+        for (int x = x0; x < x1; x++)
+            *p++ &= 0x00FFFFFF;   /* clear alpha, keep RGB */
+    }
+    CP15_clean_dcache_for_dma(fb_base + y0 * OSD_WIDTH * 4,
+                               fb_base + y1 * OSD_WIDTH * 4);
+}
+
+/* Restore alpha=0xFF on all framebuffers (called on preview exit) */
+static void dvr_restore_ui_alpha_all(void)
+{
+    for (int i = 0; i < 3; i++) {
+        uint8_t *addr = ark_lcd_get_fb_addr(i);
+        if (!addr) continue;
+        uint32_t *fb = (uint32_t *)addr;
+        int x0 = dvr_display_x, y0 = dvr_display_y;
+        int x1 = x0 + dvr_display_width, y1 = y0 + dvr_display_height;
+        if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
+        if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+        for (int y = y0; y < y1; y++) {
+            uint32_t *p = fb + y * OSD_WIDTH + x0;
+            for (int x = x0; x < x1; x++)
+                *p++ |= 0xFF000000;
+        }
+        CP15_clean_dcache_for_dma((uint32_t)addr + y0 * OSD_WIDTH * 4,
+                                   (uint32_t)addr + y1 * OSD_WIDTH * 4);
+    }
+}
 
 // Send data to DVR via elene file (write 512 bytes aligned)
 // Caller should call dvr_seek_for_align() before this function
@@ -611,6 +659,7 @@ static int dvr_decode_and_display(st_dvr_capture_t *cap, uint32_t jpg_size)
 
     /* Race guard: UI task may have called dvr_stop_preview() during decode */
     if (!dvr_preview_enable) {
+        vTaskDelay(pdMS_TO_TICKS(100));
         return -1;
     }
 
@@ -689,6 +738,7 @@ static int dvr_capture_get_pic_process(st_dvr_capture_t *cap)
 
     /* Skip JPEG decode when UI is not in preview mode (dvr_preview_enable == 0) */
     if (!dvr_preview_enable) {
+
         return -1;
     }
 
@@ -1354,11 +1404,20 @@ void dvr_api_set_preview_enable(uint8_t enable)
     dvr_preview_enable = enable;
     printf("DVR: preview enable set to %d\n", enable);
 
-    if (enable == 0) {
+    if (enable) {
+        /* Register post-render hook: clears alpha in preview region
+         * every frame so VIDEO layer shows through home_page's opaque bg */
+        vg_set_post_render_hook(dvr_alpha_clear_hook);
+        printf("DVR: alpha-clear hook registered\n");
+    } else {
+        /* Unregister hook first */
+        vg_set_post_render_hook(NULL);
         /* Disable video layer */
         ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
         ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-        printf("DVR: VIDEO off\n");
+        /* Restore alpha so home_page UI is fully opaque again */
+        dvr_restore_ui_alpha_all();
+        printf("DVR: VIDEO off, hook removed, alpha restored\n");
     }
 }
 
@@ -1382,21 +1441,25 @@ void dvr_stop_preview(void)
     /* 1. Set flag - DVR task will see it via race guard and stop touching layers */
     dvr_preview_enable = 0;
 
-    /* 2. Wait for in-flight frame to finish (15fps ≈ 67ms/frame) */
+    /* 2. Unregister alpha-clear hook immediately (prevents further alpha clearing) */
+    vg_set_post_render_hook(NULL);
+
+    /* 3. Wait for in-flight frame to finish (15fps ≈ 67ms/frame) */
     if (dvr_task_handle != NULL) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 
-    /* 3. Disable video layer */
+    /* 4. Disable video layer */
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
     ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
 
-    /* No alpha restore needed: when DVR window closes, AWTK switches
-     * back to home_page which has an opaque wallpaper bg_image.
-     * VG Canvas clears the framebuffer with the wallpaper (alpha=0xFF),
-     * naturally covering the VIDEO layer. */
+    /* 5. Restore alpha on all framebuffers so home_page UI is fully opaque.
+     * After navigator_back() closes dvr_page, AWTK renders home_page alone.
+     * The next few frames will naturally fill alpha=0xFF, but restore now
+     * to avoid a brief flash of VIDEO-layer garbage. */
+    dvr_restore_ui_alpha_all();
 
-    printf("DVR: stop_preview\n");
+    printf("DVR: stop_preview, hook removed, alpha restored\n");
 }
 
 // DVR device online check

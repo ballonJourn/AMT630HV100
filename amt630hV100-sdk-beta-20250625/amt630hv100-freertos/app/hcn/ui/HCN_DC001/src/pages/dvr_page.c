@@ -30,6 +30,9 @@ static ret_t on_dvr_page_close(void* ctx, event_t* e)
         dvr_stop_preview();
     }
 
+    /* Re-enable auto view-mode cycling for background DVR task */
+    dvr_set_sensor_switch_enable(1);
+
     /* Reset home page dock to INFO when we return */
     set_dock_view(ICON_INFO);
     set_current_level(MENU_LEVEL_0);
@@ -53,9 +56,12 @@ ret_t dvr_page_init(widget_t* win, void* ctx)
     /* Register close event to clean up video layer */
     widget_on(win, EVT_WINDOW_CLOSE, on_dvr_page_close, NULL);
 
-    /* Start video preview — VIDEO layer renders underneath this transparent window */
+    /* Start video preview — VIDEO layer renders underneath this window */
     dvr_api_set_display_window(52, 0, 972, 500);
     dvr_api_set_preview_enable(1);
+
+    /* Disable auto view-mode cycling; user switches manually with UP/DOWN */
+    dvr_set_sensor_switch_enable(0);
 
     printf("DVR: dvr_page_init, preview started (52,0,972,500)\n");
     return RET_OK;

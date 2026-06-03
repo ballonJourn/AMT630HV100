@@ -44,6 +44,7 @@ typedef enum window{
 typedef enum pages_index{
     PAGE_HOME    = 0,
     PAGE_SETTING = 1,
+    PAGE_DVR     = 2,
 }pages_index_e ;
 
 ret_t view_manager_init(widget_t* parent) ;
