@@ -379,6 +379,10 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
             memcpy(param, &usr_param.tpms[TPMS_RIGHT_REAR], sizeof(tpms_param_t));
             break;
             
+
+        case HCN_PARAM_RADAR_SWITCH:
+            *((uint8_t *)param) = usr_param.usr_set.radar_switch;
+            break;
         case HCN_PARAM_MCU_UPDATE_LEN:
             *((uint32_t *)param) = usr_param.mcu_update_len;
             break;        
@@ -622,6 +626,13 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             }
             break;
 
+
+        case HCN_PARAM_RADAR_SWITCH:
+            if (usr_param.usr_set.radar_switch != *((uint8_t *)param)) {
+                usr_param.usr_set.radar_switch = *((uint8_t *)param);
+                is_save = true;
+            }
+            break;
         case HCN_PARAM_MCU_UPDATE_LEN:
             if (usr_param.mcu_update_len != *((uint32_t *)param)) {
                 usr_param.mcu_update_len = *((uint32_t *)param);  

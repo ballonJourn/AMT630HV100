@@ -79,7 +79,8 @@ typedef struct {
     uint32_t phone_type :1;   ///< 手机类型 0:安卓  1:ios
     uint32_t sys_log :1;     ///< 系统日志控制开关 0:关闭 1:开启
     uint32_t drive_mode :1;  ///< 驾驶模式 0：eco经济模式  1:驾驶模式
-    uint32_t resume :10;
+    uint32_t radar_switch :1; ///< 毫米波雷达开关 0:关闭 1:开启
+    uint32_t resume :9;
     uint32_t usr_reserve;   ///< 用户设置参数预留 4字节
 } usr_setting_t;
 
@@ -140,6 +141,9 @@ typedef enum {
     HCN_PARAM_LEFT_REAR_TIRE_INFO,
     HCN_PARAM_RIGHT_REAR_TIRE_INFO,
 
+
+    /* 毫米波雷达开关 */
+    HCN_PARAM_RADAR_SWITCH,
     /* mcu更新文件长度 */
     HCN_PARAM_MCU_UPDATE_LEN,
 } usr_param_handle_e;

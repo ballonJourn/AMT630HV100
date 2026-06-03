@@ -13,6 +13,7 @@ typedef enum setting_menu{
     SETTING_MENU_CLOCK      ,
     SETTING_MENU_DISPLAY    ,
     SETTING_MENU_DEVICE     ,
+    SETTING_MENU_RADAR      ,
 
     SETTING_MENU_NUM_MAX    ,
 }setting_menu_e;

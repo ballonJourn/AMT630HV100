@@ -214,6 +214,13 @@ extern "C" {
 ///< use flash db 
 //#define HCN_USE_FLASH_DB_ENABLE
 
+///< 毫米波雷达使能 (BSD/CVW/RCW)
+#define HCN_MMWAVE_RADAR_ENABLE
+#ifdef HCN_MMWAVE_RADAR_ENABLE
+#define HCN_UART_RADAR_PORT      (3)        ///< 毫米波雷达串口号 UART3
+#define HCN_UART_RADAR_BAUDRATE  (115200)   ///< 波特率115200
+#endif
+
 #ifdef __cplusplus
 }
 #endif //__cplusplus
