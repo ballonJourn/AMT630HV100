@@ -2289,7 +2289,7 @@ void awtk_thread(void *data)
 #endif
 
 	/* uart rx demo */
-	uart_rx_demo();
+	// uart_rx_demo();
 
 	/* can demo */
 	//can_demo();

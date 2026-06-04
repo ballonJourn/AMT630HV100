@@ -42,6 +42,7 @@ ret_t set_view_init(widget_t * win)
     set_display_view_init       (win) ;
     set_brightness_view_init    (win) ;
     set_device_view_init        (win) ;
+    set_radar_view_init         (win) ;
     return RET_OK ;
 }
 

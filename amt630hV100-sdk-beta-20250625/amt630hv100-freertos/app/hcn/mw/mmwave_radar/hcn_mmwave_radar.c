@@ -39,7 +39,7 @@
 #define RADAR_ONLINE_TIMEOUT_MS     (3000)   ///< 3秒无数据视为离线
 #define RADAR_VEH_SPEED_INTERVAL_MS (250)    ///< 车速输入间隔
 
-//#define RADAR_DEBUG_ENABLE                 ///< 调试打印使能
+// #define RADAR_DEBUG_ENABLE                 ///< 调试打印使能(调试中)
 
 /*=============================================================================
  * 静态变量
@@ -478,6 +478,7 @@ typedef enum {
     RX_STATE_TARGET,        ///< 接收目标帧剩余字节
 } radar_rx_state_e;
 
+extern bool get_recovery_usr_param(void);
 static void radar_rx_thread(void *param) {
     UartPort_t *uap = xUartOpen(HCN_UART_RADAR_PORT);
     if (!uap) {
@@ -489,6 +490,9 @@ static void radar_rx_thread(void *param) {
     vUartInit(uap, HCN_UART_RADAR_BAUDRATE, 0);
     // g_radar_uap = uap;  ///< 保留供后续发送扩展
 
+    printf("\r\n========Radar: uart %d opened, baud=%d=========\r\n",
+                 HCN_UART_RADAR_PORT, HCN_UART_RADAR_BAUDRATE);
+
     if (radar_tx_init(uap) != 0) {
         hcn_log_error("%s: tx init failed\n", RADAR_TAG);
         vUartClose(uap);
@@ -498,14 +502,20 @@ static void radar_rx_thread(void *param) {
 
     ///< 延时后读取版本号并确认数据开启
     vTaskDelay(pdMS_TO_TICKS(500));
+    printf("\r\n--------adar: sending version query...\r\n");
     mmwave_radar_read_version();
     vTaskDelay(pdMS_TO_TICKS(100));
 
+    while (!get_recovery_usr_param()) {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
     ///< 读取用户存储的雷达开关状态，决定是否开启数据上传
     uint8_t radar_sw = 1;
 #ifdef HCN_NOR_FLASH_PARAM_ENABLE
     get_hcn_usr_param(HCN_PARAM_RADAR_SWITCH, &radar_sw);
 #endif
+    printf("\r\n====Radar: radar_sw=%d, enabling data upload...\r\n",
+                 radar_sw);
     mmwave_radar_data_switch(radar_sw);
 
     uint8_t rx_buf[RADAR_RX_BUF_SIZE];
@@ -514,16 +524,32 @@ static void radar_rx_thread(void *param) {
     int frame_need = 0;
     radar_rx_state_e state = RX_STATE_FIND_HEAD;
     int read_len;
+    uint32_t rx_timeout_cnt = 0;    ///< RX超时计数(调试用)
+    uint32_t rx_byte_cnt = 0;       ///< RX收到字节计数(调试用)
+    uint32_t rx_discard_cnt = 0;    ///< RX丢弃字节计数(调试用)
+
+    printf("\r\n*******Radar: rx loop started, waiting for data...\n");
 
     for (;;) {
         switch (state) {
         case RX_STATE_FIND_HEAD: {
             ///< 逐字节寻找帧头
             read_len = iUartRead(uap, rx_buf, 1, pdMS_TO_TICKS(500));
+            // printf("\r\n++++++++++mmrecv len = %d\r\n", read_len);
             if (read_len <= 0) {
+                rx_timeout_cnt++;
+                ///< 每10秒(20次*500ms)输出一条诊断, 不淹没日志
+                if (rx_timeout_cnt % 20 == 0) {
+                    printf("Radar: [DIAG] no RX data for %lus "
+                                 "(total_bytes=%lu discard=%lu)\n",
+                                 (unsigned long)(rx_timeout_cnt / 2),
+                                 (unsigned long)rx_byte_cnt,
+                                 (unsigned long)rx_discard_cnt);
+                }
                 continue;
             }
 
+            rx_byte_cnt++;
             uint8_t b = rx_buf[0];
 
             if (b == RADAR_WARN_P1_HEAD0) {
@@ -532,20 +558,30 @@ static void radar_rx_thread(void *param) {
                 frame_pos = 1;
                 frame_need = 12 - 1; ///< 还需11字节
                 state = RX_STATE_WARN_P1;
+                rx_timeout_cnt = 0;
             } else if (b == RADAR_CMD_RX_HEAD0) {
                 ///< 可能是通用回复帧: 0x60
                 frame_buf[0] = b;
                 frame_pos = 1;
                 frame_need = 12 - 1;
                 state = RX_STATE_CMD_RESP;
+                rx_timeout_cnt = 0;
             } else if (b == RADAR_TARGET_HEAD0) {
                 ///< 可能是目标帧: 0xAA
                 frame_buf[0] = b;
                 frame_pos = 1;
                 frame_need = 1; ///< 先读第二个字节确认
                 state = RX_STATE_TARGET;
+                rx_timeout_cnt = 0;
+            } else {
+                ///< 非帧头字节,丢弃并记录
+                rx_discard_cnt++;
+                ///< 前64字节全部打印,帮助判断是否有数据/乱码/波特率错
+                if (rx_byte_cnt <= 64) {
+                    printf("Radar: [RX] byte[%lu]=0x%02X (discard)\n",
+                                 (unsigned long)rx_byte_cnt, b);
+                }
             }
-            ///< 其他字节丢弃
         } break;
 
         case RX_STATE_WARN_P1: {
@@ -715,7 +751,6 @@ bool mmwave_radar_is_online(void) {
 /*=============================================================================
  * 模块初始化
  *===========================================================================*/
-
 int mmwave_radar_init(void) {
     ///< 创建在线检测定时器 (1秒周期)
     g_online_timer = xTimerCreate("radar_online",
