@@ -22,22 +22,18 @@ static ret_t on_dvr_page_close(void* ctx, event_t* e)
     (void)ctx;
     (void)e;
 
-    /* Safety net: ensure preview is stopped even if BACK key path
-     * didn't run (e.g. window force-closed by system).
-     * dvr_preview_enable check avoids redundant 100ms vTaskDelay
-     * when dvr_view.c already called dvr_stop_preview(). */
+    printf("DVR-EXIT: on_dvr_page_close enter, preview_enable=%d\n",
+           dvr_api_get_preview_enable());
+
     if (dvr_api_get_preview_enable()) {
         dvr_stop_preview();
     }
 
-    /* Re-enable auto view-mode cycling for background DVR task */
     dvr_set_sensor_switch_enable(1);
-
-    /* Reset home page dock to INFO when we return */
-    set_dock_view(ICON_INFO);
+    set_dock_view(ICON_DVR);
     set_current_level(MENU_LEVEL_0);
 
-    printf("DVR: dvr_page closed, returned to home\n");
+    printf("DVR-EXIT: on_dvr_page_close done\n");
     return RET_OK;
 }
 

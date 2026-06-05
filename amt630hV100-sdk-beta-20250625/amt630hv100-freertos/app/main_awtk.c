@@ -714,6 +714,15 @@ static int dvr_capture_get_pic_process(st_dvr_capture_t *cap)
         return -1;
     }
 
+    /* Early exit: skip USB read entirely when not in preview mode.
+     * Previously the check was AFTER ff_fread (100KB USB read every 2ms),
+     * wasting USB bandwidth and CPU even when DVR preview is off.
+     * Command frames (0xAA55) are still needed, so we only skip when
+     * not in preview AND no pending command send. */
+    if (!dvr_preview_enable && !dvr_need_send_data && !dvr_skip_jpeg_process) {
+        return -1;
+    }
+
     /* Use aligned seek for continuous reading */
     dvr_seek_for_align(cap);
 
@@ -945,8 +954,9 @@ static void dvr_usb_task(void *arg)
         }
 #endif
 
-        // Switch view mode every 5 seconds (5 modes: 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh)
-        if (dvr_sensor_switch_enable) {
+        // Switch view mode every 5 seconds (only when previewing —
+        // non-preview USB writes take ~450ms per command, wasting bandwidth)
+        if (dvr_sensor_switch_enable && dvr_preview_enable) {
             current_time = xTaskGetTickCount();
             if (current_time - last_switch_time >= 5000) {  // 500 ticks = 5 seconds
                 dvr_view_mode = (dvr_view_mode + 1) % 5;
@@ -957,7 +967,10 @@ static void dvr_usb_task(void *arg)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(2));
+        /* Yield CPU. When not in preview, sleep longer to avoid
+         * burning CPU/USB bandwidth on idle polling (was 2ms = 500
+         * USB reads/sec of 100KB each, now 50ms = 20/sec idle check). */
+        vTaskDelay(pdMS_TO_TICKS(dvr_preview_enable ? 2 : 50));
     }
 
     dvr_capture_deinit(cap);
@@ -1438,14 +1451,12 @@ void dvr_api_set_preview_enable(uint8_t enable)
         vg_set_post_render_hook(dvr_alpha_clear_hook);
         printf("DVR: alpha-clear hook registered\n");
     } else {
-        /* Unregister hook first */
-        vg_set_post_render_hook(NULL);
-        /* Disable video layer */
+        /* Disable VIDEO and remove hook back-to-back, no gap */
         ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
         ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
-        /* Restore alpha so home_page UI is fully opaque again */
-        dvr_restore_ui_alpha_all();
-        printf("DVR: VIDEO off, hook removed, alpha restored\n");
+        vg_set_post_render_hook(NULL);
+        /* Alpha will be restored naturally by AWTK rendering home_page */
+        printf("DVR: VIDEO off, hook removed\n");
     }
 }
 
@@ -1466,28 +1477,54 @@ void dvr_start_preview(void)
 // DVR preview lifecycle - called by dvr_page BACK key / window close
 void dvr_stop_preview(void)
 {
-    /* 1. Set flag - DVR task will see it via race guard and stop touching layers */
+    /* 1. Set flag — DVR task's race guard will stop touching LCD layers */
     dvr_preview_enable = 0;
 
-    /* 2. Unregister alpha-clear hook immediately (prevents further alpha clearing) */
-    vg_set_post_render_hook(NULL);
-
-    /* 3. Wait for in-flight frame to finish (15fps ≈ 67ms/frame) */
+    /* 2. Wait for DVR task's in-flight frame to finish */
     if (dvr_task_handle != NULL) {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(80));
     }
 
-    /* 4. Disable video layer */
+    /* 3. VIDEO off + hook remove back-to-back */
     ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
     ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
+    vg_set_post_render_hook(NULL);
 
-    /* 5. Restore alpha on all framebuffers so home_page UI is fully opaque.
-     * After navigator_back() closes dvr_page, AWTK renders home_page alone.
-     * The next few frames will naturally fill alpha=0xFF, but restore now
-     * to avoid a brief flash of VIDEO-layer garbage. */
-    dvr_restore_ui_alpha_all();
+    /* 4. Restore on-screen FB to eliminate DVR UI instantly.
+     * Preview region (y0~y0+h): restore alpha to 0xFF (was cleared by hook).
+     * Dock bar region (y0+h ~ 600): fill with opaque black to hide the
+     * four bottom buttons immediately, rather than waiting for AWTK to
+     * render the next frame. AWTK will paint home_page over both regions
+     * within 1-2 frames. */
+    {
+        uint32_t on_screen_addr = 0;
+        ark_lcd_get_osd_yaddr(LCD_UI_LAYER, &on_screen_addr);
+        if (on_screen_addr) {
+            uint32_t *fb = (uint32_t *)on_screen_addr;
+            int x0 = dvr_display_x, y0 = dvr_display_y;
+            int x1 = x0 + dvr_display_width;
+            int y_dock_end = OSD_HEIGHT;  /* cover preview + dock = full page */
+            if (x1 > OSD_WIDTH) x1 = OSD_WIDTH;
+            /* Preview region: restore alpha only */
+            int y_preview_end = y0 + dvr_display_height;
+            if (y_preview_end > OSD_HEIGHT) y_preview_end = OSD_HEIGHT;
+            for (int y = y0; y < y_preview_end; y++) {
+                uint32_t *p = fb + y * OSD_WIDTH + x0;
+                for (int x = x0; x < x1; x++)
+                    *p++ |= 0xFF000000;
+            }
+            /* Dock region: fill opaque black to hide buttons */
+            for (int y = y_preview_end; y < y_dock_end; y++) {
+                uint32_t *p = fb + y * OSD_WIDTH + x0;
+                for (int x = x0; x < x1; x++)
+                    *p++ = 0xFF000000;
+            }
+            CP15_clean_dcache_for_dma(on_screen_addr + y0 * OSD_WIDTH * 4,
+                                       on_screen_addr + y_dock_end * OSD_WIDTH * 4);
+        }
+    }
 
-    printf("DVR: stop_preview, hook removed, alpha restored\n");
+    printf("DVR: stop_preview done\n");
 }
 
 // DVR device online check

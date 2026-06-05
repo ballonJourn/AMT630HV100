@@ -208,13 +208,9 @@ void dvr_page_deal_key_back(void)
     switch (current_dvr_sub)
     {
     case DVR_SUB_MAIN:
-        /*
-         * Exit DVR page entirely.
-         * dvr_stop_preview() disables VIDEO layer.
-         * navigator_back() closes dvr_page, returns to home_page
-         * (which is still alive underneath — never destroyed).
-         * on_dvr_page_close callback handles dock reset.
-         */
+        /* Hide DVR UI first so dock bar doesn't linger on screen
+         * during the ~37ms alpha restore in dvr_stop_preview() */
+        if (dvr_main_view) widget_set_visible(dvr_main_view, FALSE);
         dvr_stop_preview();
         navigator_back();
         break;
