@@ -1,2 +1,4 @@
 /.vscode/
 
+*.orig
+0001-*.patch

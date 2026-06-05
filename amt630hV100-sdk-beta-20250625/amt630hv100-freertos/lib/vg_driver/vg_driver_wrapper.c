@@ -222,17 +222,28 @@ void vg_set_post_render_hook(void (*hook)(unsigned int fb_base))
 unsigned int xm_vg_require_gpu_fb (void)
 {
 	fb_queue_s *fb_unit = NULL;
+	uint32_t wait_loops = 0;
 	while (!fb_unit)
 	{
 		fb_unit = fb_queue_get_free_unit();
 		if(fb_unit)
 			break;
 		OS_Delay (1);
+		wait_loops++;
+		if (wait_loops == 500) {
+			printf("[DIAG-FB] WARN: fb wait 500ms, no free fb\n");
+		} else if (wait_loops == 2000) {
+			printf("[DIAG-FB] CRIT: fb wait 2000ms, AWTK stalled!\n");
+		} else if (wait_loops >= 5000 && (wait_loops % 5000) == 0) {
+			printf("[DIAG-FB] DEAD: fb wait %lums, system hung\n",
+				   (unsigned long)wait_loops);
+		}
+	}
+	if (wait_loops > 50) {
+		printf("[DIAG-FB] fb acquired after %lums wait\n",
+			   (unsigned long)wait_loops);
 	}
 	curr_fb = fb_unit;
-	//XM_lock();
-	//printf ("req %x\n", fb_unit->fb_base);
-	//XM_unlock();
 	return fb_unit->fb_base;
 }
 
@@ -244,12 +255,19 @@ void xm_vg_release_gpu_fb (void)
 		curr_fb = NULL;
 		/* Call post-render hook BEFORE buffer becomes visible */
 		if (g_vg_post_render_hook) {
+			uint32_t t0 = xTaskGetTickCount();
 			g_vg_post_render_hook(fb_unit->fb_base);
+			uint32_t cost = xTaskGetTickCount() - t0;
+			static uint32_t hook_max_ms = 0;
+			if (cost > hook_max_ms) {
+				hook_max_ms = cost;
+				if (cost > 5) {
+					printf("[DIAG-FB] hook cost new max %lums\n",
+						   (unsigned long)cost);
+				}
+			}
 		}
 		fb_queue_set_ready (fb_unit);
-		//XM_lock();
-		//printf ("rdy %x\n", fb_unit->fb_base);
-		//XM_unlock();
 	}
 }
 

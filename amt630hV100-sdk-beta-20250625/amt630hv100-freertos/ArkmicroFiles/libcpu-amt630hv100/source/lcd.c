@@ -148,6 +148,10 @@ static int g_osdConfig[LCD_OSD_NUMS] = {0};
 static queue_s lcd_fb_ready;	// 已准备好的LCD帧
 static queue_s lcd_fb_free;	// 空闲
 
+/* Diagnostic counters - accessed by fb_diag_get_counts() */
+uint32_t g_fb_diag_vsync_count = 0;
+uint32_t g_fb_diag_no_ready_count = 0;
+
 
 static fb_queue_s  fb_queue_unit[FB_COUNT];
 
@@ -249,6 +253,27 @@ fb_queue_s *fb_queue_get_unit_from_base(unsigned int base)
 			return fb_queue_unit + i;
 	}
 	return NULL;
+}
+
+/* Diagnostic: count items in a queue (only safe from task context with XM_lock) */
+static int fb_queue_count(queue_s *q)
+{
+	int n = 0;
+	if (queue_empty(q)) return 0;
+	queue_s *p = queue_head(q);
+	while (p != q) { n++; p = queue_next(p); if (n > FB_COUNT + 2) break; }
+	return n;
+}
+
+void fb_diag_get_counts(int *free_n, int *ready_n, uint32_t *vsync_n,
+                        uint32_t *no_ready_n)
+{
+	XM_lock();
+	*free_n  = fb_queue_count(&lcd_fb_free);
+	*ready_n = fb_queue_count(&lcd_fb_ready);
+	XM_unlock();
+	*vsync_n    = g_fb_diag_vsync_count;
+	*no_ready_n = g_fb_diag_no_ready_count;
 }
 #endif
 
@@ -1075,6 +1100,7 @@ static void ark_lcd_interrupt(void *param)
 
 		/* LCD场结束中断状态位 */
 		if (status & (0x01 << 0)) {
+			g_fb_diag_vsync_count++;
 			/* 进入消隐区, 切换framebuffer */
 			fb_queue_s *next_ready_unit = fb_queue_get_ready_unit_isr();
 			if (next_ready_unit) {
@@ -1086,6 +1112,9 @@ static void ark_lcd_interrupt(void *param)
 					fb_queue_set_free_isr (last_fb);
 				}
 				last_fb = next_ready_unit;
+				g_fb_diag_no_ready_count = 0;
+			} else {
+				g_fb_diag_no_ready_count++;
 			}
 		}
 #endif

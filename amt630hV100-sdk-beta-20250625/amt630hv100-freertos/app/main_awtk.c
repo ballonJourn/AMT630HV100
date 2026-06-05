@@ -253,9 +253,13 @@ static void dvr_pb_fb(void);
  */
 extern void vg_set_post_render_hook(void (*hook)(unsigned int fb_base));
 
+static uint32_t g_alpha_hook_call_count = 0;
+
 static void dvr_alpha_clear_hook(unsigned int fb_base)
 {
     if (!dvr_preview_enable) return;
+
+    g_alpha_hook_call_count++;
 
     uint32_t *fb = (uint32_t *)fb_base;
     int x0 = dvr_display_x;
@@ -914,6 +918,30 @@ static void dvr_usb_task(void *arg)
             dvr_frame_count_last = dvr_frame_count;
             dvr_last_stat_time = current_time;
             printf("DVR: [FPS:%lu] frame_count=%lu\n", (unsigned long)dvr_fps, (unsigned long)dvr_frame_count);
+
+            /* System health report every 30 seconds */
+            static uint32_t diag_interval = 0;
+            if (++diag_interval >= 30) {
+                diag_interval = 0;
+                /* fb queue status */
+                extern void fb_diag_get_counts(int*, int*, uint32_t*, uint32_t*);
+                int fb_free_n = 0, fb_ready_n = 0;
+                uint32_t vsync_n = 0, no_ready_n = 0;
+                fb_diag_get_counts(&fb_free_n, &fb_ready_n, &vsync_n, &no_ready_n);
+                /* FreeRTOS heap */
+                size_t heap_free = xPortGetFreeHeapSize();
+                size_t heap_min  = xPortGetMinimumEverFreeHeapSize();
+                printf("[DIAG-SYS] tick=%lu fb:free=%d,ready=%d "
+                       "vsync=%lu no_rdy=%lu "
+                       "heap:cur=%u,min=%u "
+                       "dvr_prev=%d hook=%lu\n",
+                       (unsigned long)current_time,
+                       fb_free_n, fb_ready_n,
+                       (unsigned long)vsync_n, (unsigned long)no_ready_n,
+                       (unsigned)heap_free, (unsigned)heap_min,
+                       (int)dvr_preview_enable,
+                       (unsigned long)g_alpha_hook_call_count);
+            }
         }
 #endif
 
