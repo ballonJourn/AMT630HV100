@@ -39,7 +39,7 @@
 #define RADAR_ONLINE_TIMEOUT_MS     (3000)   ///< 3秒无数据视为离线
 #define RADAR_VEH_SPEED_INTERVAL_MS (250)    ///< 车速输入间隔
 
-// #define RADAR_DEBUG_ENABLE                 ///< 调试打印使能(调试中)
+#define RADAR_DEBUG_ENABLE                 ///< 调试打印使能(调试中)
 
 /*=============================================================================
  * 静态变量
