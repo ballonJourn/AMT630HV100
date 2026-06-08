@@ -56,6 +56,34 @@ static TimerHandle_t       g_online_timer = NULL;
 static TimerHandle_t       g_veh_speed_timer = NULL;
 
 /*=============================================================================
+ * 调试用: 车速/BSD速度覆盖
+ * g_dbg_speed_override >= 0 时，用此值替代真实车速发送给雷达 (单位 km/h)
+ * g_dbg_bsd_speed >= 0 时，设置BSD启动速度 (单位 km/h)
+ *===========================================================================*/
+static volatile int32_t g_dbg_speed_override = -1; ///< <0表示不覆盖，>=0为覆盖车速
+static volatile int32_t g_dbg_bsd_speed      = -1; ///< <0表示不设置
+
+/**
+ * @brief  调试接口: 设置虚拟车速 (km/h), 传 -1 取消覆盖恢复真实车速
+ */
+void mmwave_radar_dbg_set_speed(int32_t speed_kmh) {
+    g_dbg_speed_override = speed_kmh;
+    printf("Radar DBG: speed override = %d km/h (%s)\n",
+           (int)speed_kmh, speed_kmh < 0 ? "OFF" : "ON");
+}
+
+/**
+ * @brief  调试接口: 设置BSD启动速度 (km/h), 传 -1 不操作
+ */
+void mmwave_radar_dbg_set_bsd_speed(int32_t speed_kmh) {
+    if (speed_kmh >= 0) {
+        g_dbg_bsd_speed = speed_kmh;
+        mmwave_radar_set_bsd_speed((uint8_t)speed_kmh);
+        printf("Radar DBG: BSD start speed set to %d km/h\n", (int)speed_kmh);
+    }
+}
+
+/*=============================================================================
  * 校验和计算
  *===========================================================================*/
 
@@ -459,7 +487,12 @@ static void radar_veh_speed_callback(TimerHandle_t xTimer) {
         return;
     }
 
-    int32_t speed = vehicle_get_data(VEH_SPEED_CURRENT);
+    int32_t speed;
+    if (g_dbg_speed_override >= 0) {
+        speed = g_dbg_speed_override;  ///< 使用调试覆盖车速
+    } else {
+        speed = vehicle_get_data(VEH_SPEED_CURRENT);
+    }
     ///< vehicle speed 精度0.1km/h, 当前speed单位为km/h
     int16_t speed_01 = (int16_t)(speed * 10);
     mmwave_radar_input_vehicle_speed(1, speed_01);

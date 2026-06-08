@@ -216,6 +216,22 @@ int mmwave_radar_set_data_type(uint8_t type);
  */
 int mmwave_radar_input_vehicle_speed(uint8_t enable, int16_t speed);
 
+/*=============================================================================
+ * 调试接口
+ *===========================================================================*/
+
+/**
+ * @brief  调试: 覆盖发送给雷达的车速 (模拟行驶状态)
+ * @param  speed_kmh  模拟车速(km/h), 传-1取消覆盖恢复真实车速
+ */
+void mmwave_radar_dbg_set_speed(int32_t speed_kmh);
+
+/**
+ * @brief  调试: 设置BSD启动速度
+ * @param  speed_kmh  启动速度(km/h), 传-1不操作
+ */
+void mmwave_radar_dbg_set_bsd_speed(int32_t speed_kmh);
+
 #endif /* HCN_MMWAVE_RADAR_ENABLE */
 
 #ifdef __cplusplus

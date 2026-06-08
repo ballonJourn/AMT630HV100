@@ -284,3 +284,15 @@ Enter the map without navigation</language>
   <language name="zh_CN">取消</language>
   <language name="en_US">Cancel</language>
 </string>
+<string name="radar">
+  <language name="zh_CN">毫米波雷达</language>
+  <language name="en_US">Radar</language>
+</string>
+<string name="radar_on">
+  <language name="zh_CN">开</language>
+  <language name="en_US">ON</language>
+</string>
+<string name="radar_off">
+  <language name="zh_CN">关</language>
+  <language name="en_US">OFF</language>
+</string>

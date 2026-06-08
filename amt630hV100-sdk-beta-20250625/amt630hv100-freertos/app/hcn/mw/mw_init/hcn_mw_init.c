@@ -75,5 +75,6 @@ void hcn_mw_init(void) {
 
 #ifdef HCN_MMWAVE_RADAR_ENABLE
     mmwave_radar_init();
+    debug_cli_init();
 #endif
 }
