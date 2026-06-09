@@ -1469,7 +1469,7 @@ uint8_t dvr_api_get_preview_enable(void)
 // DVR preview lifecycle - called by dvr_page_init() when DVR window opens
 void dvr_start_preview(void)
 {
-    dvr_api_set_display_window(52, 0, 972, 500);
+    dvr_api_set_display_window(0, 0, 1024, 500);
     dvr_api_set_preview_enable(1);
     printf("DVR: start_preview (window 52,0,972,500)\n");
 }
@@ -2140,7 +2140,7 @@ static void usb_read_thread(void *para)
 			#if ENABLE_BD_USB_DVR_FUNC
 			// Check if elene file exists and start DVR task if found
 			// #ifdef USB_SUPPORT
-			dvr_api_set_display_window(52, 0, 972, 500);
+			dvr_api_set_display_window(0, 0, 1024, 500);
 			dvr_start_if_elene_exists();
 			// #endif
 			#endif

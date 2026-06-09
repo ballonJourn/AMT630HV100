@@ -25,9 +25,12 @@ static ret_t on_dvr_page_close(void* ctx, event_t* e)
     printf("DVR-EXIT: on_dvr_page_close enter, preview_enable=%d\n",
            dvr_api_get_preview_enable());
 
-    if (dvr_api_get_preview_enable()) {
-        dvr_stop_preview();
-    }
+    /* Always call dvr_stop_preview() regardless of preview_enable state.
+     * Preview may have been paused by dvr_show_sub() when the user was
+     * viewing the file list or settings overlay (preview_enable==0).
+     * dvr_stop_preview() is idempotent — safe to call even if already
+     * stopped; it ensures VIDEO layer off + hook removed + alpha restored. */
+    dvr_stop_preview();
 
     dvr_set_sensor_switch_enable(1);
     set_dock_view(ICON_DVR);

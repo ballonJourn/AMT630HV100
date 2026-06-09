@@ -60,8 +60,29 @@ extern void dvr_start_preview(void);
 extern void dvr_stop_preview(void);
 extern uint8_t dvr_is_device_online(void);
 
+/* DVR preview enable control — manages alpha-clear hook + VIDEO layer.
+ * enable=1: register post-render hook (alpha punch), VIDEO layer active.
+ * enable=0: unregister hook, disable VIDEO layer, alpha restored by AWTK.
+ * Used by dvr_view.c to pause/resume preview when entering overlay pages
+ * (file list, settings) that would otherwise have alpha cleared by hook. */
+extern void dvr_api_set_preview_enable(uint8_t enable);
+extern uint8_t dvr_api_get_preview_enable(void);
+
+/* DVR display window control */
+extern void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int32_t height);
+
 /* View switch: 0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh */
 extern void dvr_api_view_switch(uint8_t mode);
 extern uint8_t dvr_get_view_mode(void);
+
+/* Recording control */
+extern void dvr_api_rec_start(void);
+extern void dvr_api_rec_stop(void);
+
+/* Loop recording time: 1=1min, 2=2min, 3=3min */
+extern void dvr_api_set_loop_time(uint8_t time);
+
+/* Format SD card */
+extern void dvr_api_format(void);
 
 #endif /* DVR_API_H */

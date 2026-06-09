@@ -5,10 +5,11 @@
 
 /* DVR sub-page states */
 typedef enum dvr_sub_page {
-    DVR_SUB_MAIN     = 0,  /* 6.1 - DVR main preview */
-    DVR_SUB_LIST     = 1,  /* 6.3 - File list (video/photo) */
-    DVR_SUB_SETTING  = 2,  /* 6.5 - DVR settings */
-    DVR_SUB_POPUP    = 3,  /* 6.3-2 - Delete confirm popup */
+    DVR_SUB_MAIN     = 0,  /* 6.1 - DVR main preview (function dock) */
+    DVR_SUB_CAM_SW   = 1,  /* 6.1b - DVR preview with camera switch dock (front/rear) */
+    DVR_SUB_LIST     = 2,  /* 6.3 - File list (video/photo) */
+    DVR_SUB_SETTING  = 3,  /* 6.5 - DVR settings */
+    DVR_SUB_POPUP    = 4,  /* 6.3-2 - Delete confirm popup */
     DVR_SUB_MAX      ,
 } dvr_sub_page_e;
 
