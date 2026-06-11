@@ -95,6 +95,8 @@ static BaseType_t prvDVRStatusCommand( char *pcWriteBuffer, size_t xWriteBufferL
 static BaseType_t prvDVRViewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvDVRDisplayCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 static BaseType_t prvDVRPreviewCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRFpsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
+static BaseType_t prvDVRFileListCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString );
 #endif
 
 /*
@@ -262,6 +264,24 @@ static const CLI_Command_Definition_t xDVRPreviewCommand =
 	prvDVRPreviewCommand, /* The function to run. */
 	1 /* One parameter is expected. */
 };
+
+/* Structure that defines the "dvrfps" command line command. */
+static const CLI_Command_Definition_t xDVRFpsCommand =
+{
+	"dvrfps",
+	"\r\ndvrfps [0|1]:\r\n Enable/disable per-second DVR FPS log line (default ON)\r\n",
+	prvDVRFpsCommand, /* The function to run. */
+	1 /* One parameter is expected. */
+};
+
+/* Structure that defines the "dvrfilelist" command line command. */
+static const CLI_Command_Definition_t xDVRFileListCommand =
+{
+	"dvrfilelist",
+	"\r\ndvrfilelist:\r\n Dump cached DVR file names (front/rear, video/photo)\r\n",
+	prvDVRFileListCommand, /* The function to run. */
+	0 /* No parameters are expected. */
+};
 #endif
 /*-----------------------------------------------------------*/
 
@@ -302,6 +322,8 @@ void vRegisterSampleCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xDVRViewCommand );
 	FreeRTOS_CLIRegisterCommand( &xDVRDisplayCommand );
 	FreeRTOS_CLIRegisterCommand( &xDVRPreviewCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRFpsCommand );
+	FreeRTOS_CLIRegisterCommand( &xDVRFileListCommand );
 #endif
 }
 /*-----------------------------------------------------------*/
@@ -874,6 +896,17 @@ extern void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int3
 extern void dvr_api_get_display_window(int32_t *x, int32_t *y, int32_t *width, int32_t *height);
 extern void dvr_api_set_preview_enable(uint8_t enable);
 extern uint8_t dvr_api_get_preview_enable(void);
+extern void dvr_api_set_fps_print(uint8_t enable);
+extern uint8_t dvr_api_get_fps_print(void);
+#define DVR_NAME_MAX  16
+extern uint16_t dvr_api_get_video_list_f(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_video_list_r(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_photo_list_f(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_photo_list_r(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_video_list_f_count(void);
+extern uint16_t dvr_api_get_video_list_r_count(void);
+extern uint16_t dvr_api_get_photo_list_f_count(void);
+extern uint16_t dvr_api_get_photo_list_r_count(void);
 
 /*
  * Implements the "dvr" command line command.
@@ -1187,5 +1220,177 @@ static BaseType_t prvDVRPreviewCommand( char *pcWriteBuffer, size_t xWriteBuffer
     }
 
     return pdFALSE;
+}
+
+/*
+ * Implements the "dvrfps" command line command.
+ * Usage: dvrfps [0|1]   - 0=disable the per-second `DVR: [FPS:xx]` log, 1=enable
+ *        dvrfps -1      - query current state
+ * Default state is ON.
+ */
+static BaseType_t prvDVRFpsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    const char *pcParameter;
+    BaseType_t xParameterStringLength;
+
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* Obtain the first parameter string. */
+    pcParameter = FreeRTOS_CLIGetParameter(
+        pcCommandString,
+        1,
+        &xParameterStringLength );
+
+    if( pcParameter != NULL )
+    {
+        /* Query: dvrfps -1 */
+        if( strncmp( pcParameter, "-1", strlen( "-1" ) ) == 0 )
+        {
+            uint8_t enable = dvr_api_get_fps_print();
+            sprintf( pcWriteBuffer, "DVR FPS print: %s (dvr_fps_print_enable=%d)\r\n",
+                     enable ? "ON" : "OFF", enable );
+        }
+        else
+        {
+            uint8_t enable = (uint8_t)atoi( pcParameter );
+            dvr_api_set_fps_print( enable ? 1 : 0 );
+            sprintf( pcWriteBuffer, "DVR FPS print: %s\r\n", enable ? "ON" : "OFF" );
+        }
+    }
+    else
+    {
+        sprintf( pcWriteBuffer, "DVR: Usage: dvrfps [0|1] or dvrfps -1 to get status (default ON)\r\n" );
+    }
+
+    return pdFALSE;
+}
+
+/*
+ * Implements the "dvrfilelist" command line command.
+ *
+ * Streams the cached DVR file names back to the CLI in chunks using
+ * the standard FreeRTOS+CLI continuation pattern (return pdPASS to be
+ * called again with the next chunk, pdFALSE when done).
+ *
+ * State machine over re-invocations:
+ *   state 0..1 : front-camera video     (header + entries)
+ *   state 2..3 : rear-camera  video     (header + entries)
+ *   state 4..5 : front-camera photo     (header + entries)
+ *   state 6..7 : rear-camera  photo     (header + entries)
+ */
+typedef enum
+{
+    DVRFL_S_FV_HEAD = 0,
+    DVRFL_S_FV_ENTRIES,
+    DVRFL_S_RV_HEAD,
+    DVRFL_S_RV_ENTRIES,
+    DVRFL_S_FP_HEAD,
+    DVRFL_S_FP_ENTRIES,
+    DVRFL_S_RP_HEAD,
+    DVRFL_S_RP_ENTRIES,
+    DVRFL_S_DONE
+} dvrfl_state_t;
+
+static BaseType_t prvDVRFileListCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+    static dvrfl_state_t state = DVRFL_S_DONE;
+    static uint16_t idx = 0;
+    static char names_buf[30 * DVR_NAME_MAX];   /* longest bucket: photos (30) */
+    static uint16_t count = 0;
+
+    ( void ) pcCommandString;
+    ( void ) xWriteBufferLen;
+    configASSERT( pcWriteBuffer );
+
+    /* First call after the user typed `dvrfilelist`: start streaming. */
+    if( state == DVRFL_S_DONE )
+    {
+        state = DVRFL_S_FV_HEAD;
+        idx   = 0;
+    }
+
+    switch( state )
+    {
+        case DVRFL_S_FV_HEAD:
+            count = dvr_api_get_video_list_f( names_buf, 30 );
+            sprintf( pcWriteBuffer, "--- Front Video (%u) ---\r\n", (unsigned)count );
+            state = DVRFL_S_FV_ENTRIES;
+            idx = 0;
+            return pdPASS;
+
+        case DVRFL_S_FV_ENTRIES:
+            if( idx < count )
+            {
+                sprintf( pcWriteBuffer, "  %s\r\n", (char *)( names_buf + (size_t)idx * DVR_NAME_MAX ) );
+                idx++;
+                return pdPASS;
+            }
+            state = DVRFL_S_RV_HEAD;
+            return pdPASS;
+
+        case DVRFL_S_RV_HEAD:
+            count = dvr_api_get_video_list_r( names_buf, 30 );
+            sprintf( pcWriteBuffer, "--- Rear  Video (%u) ---\r\n", (unsigned)count );
+            state = DVRFL_S_RV_ENTRIES;
+            idx = 0;
+            return pdPASS;
+
+        case DVRFL_S_RV_ENTRIES:
+            if( idx < count )
+            {
+                sprintf( pcWriteBuffer, "  %s\r\n", (char *)( names_buf + (size_t)idx * DVR_NAME_MAX ) );
+                idx++;
+                return pdPASS;
+            }
+            state = DVRFL_S_FP_HEAD;
+            return pdPASS;
+
+        case DVRFL_S_FP_HEAD:
+            count = dvr_api_get_photo_list_f( names_buf, 30 );
+            sprintf( pcWriteBuffer, "--- Front Photo (%u) ---\r\n", (unsigned)count );
+            state = DVRFL_S_FP_ENTRIES;
+            idx = 0;
+            return pdPASS;
+
+        case DVRFL_S_FP_ENTRIES:
+            if( idx < count )
+            {
+                sprintf( pcWriteBuffer, "  %s\r\n", (char *)( names_buf + (size_t)idx * DVR_NAME_MAX ) );
+                idx++;
+                return pdPASS;
+            }
+            state = DVRFL_S_RP_HEAD;
+            return pdPASS;
+
+        case DVRFL_S_RP_HEAD:
+            count = dvr_api_get_photo_list_r( names_buf, 30 );
+            sprintf( pcWriteBuffer, "--- Rear  Photo (%u) ---\r\n", (unsigned)count );
+            state = DVRFL_S_RP_ENTRIES;
+            idx = 0;
+            return pdPASS;
+
+        case DVRFL_S_RP_ENTRIES:
+            if( idx < count )
+            {
+                sprintf( pcWriteBuffer, "  %s\r\n", (char *)( names_buf + (size_t)idx * DVR_NAME_MAX ) );
+                idx++;
+                return pdPASS;
+            }
+            /* Finished — emit a one-line summary and stop. */
+            sprintf( pcWriteBuffer, "Done.\r\n" );
+            state = DVRFL_S_DONE;
+            idx   = 0;
+            count = 0;
+            return pdFALSE;
+
+        case DVRFL_S_DONE:
+        default:
+            /* Should not be reached: prv entry-point resets to FV_HEAD. */
+            pcWriteBuffer[ 0 ] = 0x00;
+            state = DVRFL_S_DONE;
+            return pdFALSE;
+    }
 }
 #endif /* ENABLE_BD_USB_DVR_FUNC */

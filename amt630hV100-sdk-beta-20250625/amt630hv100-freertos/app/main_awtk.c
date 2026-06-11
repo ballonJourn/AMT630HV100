@@ -174,6 +174,30 @@ static uint8_t dvr_view_mode = 0;  // 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh
 static uint16_t dvr_video_list_count = 0;
 static uint16_t dvr_photo_list_count = 0;
 
+/*
+ * Filename cache: the last fetched file list for each of the four
+ * (camera, kind) buckets, populated by dvr_filelist_parser().
+ *
+ *   is_jpg = cmd_par & 0x8000   (0=video .avi, 1=photo .jpg)
+ *   is_rear = cmd_par & 0x4000  (0=front, 1=rear)
+ *
+ * Names are kept as NUL-terminated strings, e.g. "MOVI0001.avi",
+ * "LOCK0007.avi", "PICT0003.jpg".  The arrays are global so other
+ * modules can read them via the dvr_api_*_list_* accessors.
+ */
+#define DVR_NAME_MAX         16   /* incl. trailing NUL */
+#define DVR_VIDEO_LIST_MAX   20
+#define DVR_PHOTO_LIST_MAX   30
+
+static char dvr_video_list_f[DVR_VIDEO_LIST_MAX][DVR_NAME_MAX];
+static uint16_t dvr_video_list_f_count = 0;
+static char dvr_video_list_r[DVR_VIDEO_LIST_MAX][DVR_NAME_MAX];
+static uint16_t dvr_video_list_r_count = 0;
+static char dvr_photo_list_f[DVR_PHOTO_LIST_MAX][DVR_NAME_MAX];
+static uint16_t dvr_photo_list_f_count = 0;
+static char dvr_photo_list_r[DVR_PHOTO_LIST_MAX][DVR_NAME_MAX];
+static uint16_t dvr_photo_list_r_count = 0;
+
 // Display window configuration (for external control)
 static int32_t dvr_display_x = 0;       // X coordinate of display window
 static int32_t dvr_display_y = 0;       // Y coordinate of display window
@@ -188,6 +212,10 @@ static uint32_t dvr_frame_count = 0;
 static uint32_t dvr_frame_count_last = 0;
 static uint32_t dvr_last_stat_time = 0;
 static uint32_t dvr_fps = 0;
+
+// FPS print toggle (runtime, default ON). Controls whether the per-second
+// `DVR: [FPS:xx] frame_count=xx` log line is emitted. Toggled via CLI.
+static uint8_t dvr_fps_print_enable = 1;
 
 // Skip JPEG process flag (for file list operations)
 static uint8_t dvr_skip_jpeg_process = 0;
@@ -926,7 +954,14 @@ static void dvr_usb_task(void *arg)
             dvr_fps = dvr_frame_count - dvr_frame_count_last;
             dvr_frame_count_last = dvr_frame_count;
             dvr_last_stat_time = current_time;
-            printf("DVR: [FPS:%lu] frame_count=%lu\n", (unsigned long)dvr_fps, (unsigned long)dvr_frame_count);
+            /* FPS print is gated by the runtime flag dvr_fps_print_enable
+             * (CLI-controllable). Stats are always computed; only the
+             * printf is suppressed when disabled. */
+            if (dvr_fps_print_enable) {
+                printf("DVR: [FPS:%lu] frame_count=%lu\n",
+                       (unsigned long)dvr_fps,
+                       (unsigned long)dvr_frame_count);
+            }
 
             /* System health report every 30 seconds */
             static uint32_t diag_interval = 0;
@@ -1025,6 +1060,48 @@ uint8_t dvr_get_sd_full_status(void) { return dvr_sd_full; }
 // DVR sensor switch control functions
 void dvr_set_sensor_switch_enable(uint8_t enable) { dvr_sensor_switch_enable = enable; }
 
+// Store one filename in the appropriate (is_jpg, is_rear) bucket.
+// Returns 1 if stored, 0 if the bucket is full (caller still counts it).
+static uint8_t dvr_filelist_store(uint8_t is_jpg, uint8_t is_rear, const char *name)
+{
+    if (name == NULL) return 0;
+
+    if (is_jpg) {
+        if (is_rear) {
+            if (dvr_photo_list_r_count < DVR_PHOTO_LIST_MAX) {
+                strncpy(dvr_photo_list_r[dvr_photo_list_r_count], name, DVR_NAME_MAX - 1);
+                dvr_photo_list_r[dvr_photo_list_r_count][DVR_NAME_MAX - 1] = '\0';
+                dvr_photo_list_r_count++;
+                return 1;
+            }
+        } else {
+            if (dvr_photo_list_f_count < DVR_PHOTO_LIST_MAX) {
+                strncpy(dvr_photo_list_f[dvr_photo_list_f_count], name, DVR_NAME_MAX - 1);
+                dvr_photo_list_f[dvr_photo_list_f_count][DVR_NAME_MAX - 1] = '\0';
+                dvr_photo_list_f_count++;
+                return 1;
+            }
+        }
+    } else {
+        if (is_rear) {
+            if (dvr_video_list_r_count < DVR_VIDEO_LIST_MAX) {
+                strncpy(dvr_video_list_r[dvr_video_list_r_count], name, DVR_NAME_MAX - 1);
+                dvr_video_list_r[dvr_video_list_r_count][DVR_NAME_MAX - 1] = '\0';
+                dvr_video_list_r_count++;
+                return 1;
+            }
+        } else {
+            if (dvr_video_list_f_count < DVR_VIDEO_LIST_MAX) {
+                strncpy(dvr_video_list_f[dvr_video_list_f_count], name, DVR_NAME_MAX - 1);
+                dvr_video_list_f[dvr_video_list_f_count][DVR_NAME_MAX - 1] = '\0';
+                dvr_video_list_f_count++;
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
 // Parse file list from DVR device response
 static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
 {
@@ -1032,12 +1109,25 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
     uint8_t *ptr8 = buf;
     uint32_t hash, year, mon, day, hour, min, sec, attrib;
     uint16_t name_idx;
+    char fname[DVR_NAME_MAX];
     uint8_t is_jpg = (cmd_par & 0x8000) ? 1 : 0;
+    uint8_t is_rear = (cmd_par & 0x4000) ? 1 : 0;
 
     dvr_video_list_count = 0;
     dvr_photo_list_count = 0;
 
-    printf("DVR: filelist parser, len=%d, is_jpg=%d\n", len, is_jpg);
+    /* Only the bucket we are filling this pass is cleared; the other
+     * three retain their last-known list until refreshed. */
+    if (is_jpg) {
+        if (is_rear) dvr_photo_list_r_count = 0;
+        else         dvr_photo_list_f_count = 0;
+    } else {
+        if (is_rear) dvr_video_list_r_count = 0;
+        else         dvr_video_list_f_count = 0;
+    }
+
+    printf("DVR: filelist parser, len=%d, is_jpg=%d, is_rear=%d\n",
+           len, is_jpg, is_rear);
 
     for (cnt = 0; cnt < (len / BYTE_PER_FILE); cnt++) {
         // File index (little endian)
@@ -1064,30 +1154,47 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
         ptr8 += BYTE_PER_FILE;
 
         if (is_jpg) {
+            snprintf(fname, sizeof(fname), "PICT%04d.jpg", name_idx);
             printf("DVR: [PICT%04d.jpg] %04d_%02d_%02d %02d:%02d:%02d%s\n",
                    name_idx, year, mon, day, hour, min, sec,
                    attrib ? " [LOCKED]" : "");
             dvr_photo_list_count++;
         } else {
+            snprintf(fname, sizeof(fname), "%s%04d.avi",
+                     attrib ? "LOCK" : "MOVI", name_idx);
             printf("DVR: [%s%04d.avi] %04d_%02d_%02d %02d:%02d:%02d%s\n",
                    attrib ? "LOCK" : "MOVI", name_idx, year, mon, day, hour, min, sec,
                    attrib ? " [LOCKED]" : "");
             dvr_video_list_count++;
         }
+
+        dvr_filelist_store(is_jpg, is_rear, fname);
     }
 
-    printf("DVR: file list count - Video: %d, Photo: %d\n", dvr_video_list_count, dvr_photo_list_count);
+    printf("DVR: file list count - Video: %d, Photo: %d\n",
+           dvr_video_list_count, dvr_photo_list_count);
 }
 
 // Get file list from DVR device
+//   mode 0: front-camera video file list
+//   mode 1: rear-camera  video file list
+//   mode 2: front-camera photo file list
+//   mode 3: rear-camera  photo file list
 void dvr_get_file_list(uint8_t mode)
 {
     uint16_t par = 0;
 
     if (mode == 0) {
-        par |= 0;  // Video file list
+        par = 0;        // Video file list F
+    } else if (mode == 1) {
+        par = 0x4000;   // Video file list R
+    } else if (mode == 2) {
+        par = 0x8000;   // Photo file list F
+    } else if (mode == 3) {
+        par = 0xC000;   // Photo file list R
     } else {
-        par |= 0x8000;  // Photo file list (JPG bit)
+        printf("error: invalid mode\n");
+        return;
     }
 
     // Set flag to skip JPEG processing during file list response
@@ -1098,14 +1205,25 @@ void dvr_get_file_list(uint8_t mode)
 }
 
 // Start playback of a specific file by index
+//   mode 0: play front-camera video
+//   mode 1: play rear-camera  video
+//   mode 2: play front-camera photo
+//   mode 3: play rear-camera  photo
 static void dvr_pb_start(uint8_t mode, uint16_t index)
 {
     uint16_t par = index;
 
     if (mode == 0) {
-        par |= 0;  // Play video file
+        par |= 0;        // Video file list F
+    } else if (mode == 1) {
+        par |= 0x4000;   // Video file list R
+    } else if (mode == 2) {
+        par |= 0x8000;   // Photo file list F
+    } else if (mode == 3) {
+        par |= 0xC000;   // Photo file list R
     } else {
-        par |= 0x8000;  // Play photo file (JPG bit)
+        printf("error: invalid file\n");
+        return;
     }
 
     dvr_send_normal_cmd(BD_CTRL_PB_START, par);
@@ -1233,6 +1351,54 @@ static void dvr_get_total_time(uint16_t index)
 // Get file list counts
 uint16_t dvr_get_video_list_count(void) { return dvr_video_list_count; }
 uint16_t dvr_get_photo_list_count(void) { return dvr_photo_list_count; }
+
+/*
+ * Per-bucket file list accessors.
+ *
+ * Each "get_list_*" function returns the number of filenames in the
+ * corresponding bucket and, if `out` is non-NULL, copies up to
+ * `max_entries` names into `out` (each entry is DVR_NAME_MAX bytes
+ * wide). The arrays are read-only to the caller.
+ *
+ * Bucket layout:
+ *   F = front camera, R = rear camera
+ *   video = .avi (mov/lock), photo = .jpg
+ */
+static inline void dvr_copy_names(char *out, const char (*src)[DVR_NAME_MAX],
+                                  uint16_t count, uint16_t max_entries)
+{
+    uint16_t i;
+    uint16_t n = (count < max_entries) ? count : max_entries;
+    for (i = 0; i < n; i++) {
+        memcpy(out + (size_t)i * DVR_NAME_MAX, src[i], DVR_NAME_MAX);
+    }
+}
+
+uint16_t dvr_api_get_video_list_f(char *out, uint16_t max_entries)
+{
+    if (out && max_entries) dvr_copy_names(out, dvr_video_list_f, dvr_video_list_f_count, max_entries);
+    return dvr_video_list_f_count;
+}
+uint16_t dvr_api_get_video_list_r(char *out, uint16_t max_entries)
+{
+    if (out && max_entries) dvr_copy_names(out, dvr_video_list_r, dvr_video_list_r_count, max_entries);
+    return dvr_video_list_r_count;
+}
+uint16_t dvr_api_get_photo_list_f(char *out, uint16_t max_entries)
+{
+    if (out && max_entries) dvr_copy_names(out, dvr_photo_list_f, dvr_photo_list_f_count, max_entries);
+    return dvr_photo_list_f_count;
+}
+uint16_t dvr_api_get_photo_list_r(char *out, uint16_t max_entries)
+{
+    if (out && max_entries) dvr_copy_names(out, dvr_photo_list_r, dvr_photo_list_r_count, max_entries);
+    return dvr_photo_list_r_count;
+}
+
+uint16_t dvr_api_get_video_list_f_count(void) { return dvr_video_list_f_count; }
+uint16_t dvr_api_get_video_list_r_count(void) { return dvr_video_list_r_count; }
+uint16_t dvr_api_get_photo_list_f_count(void) { return dvr_photo_list_f_count; }
+uint16_t dvr_api_get_photo_list_r_count(void) { return dvr_photo_list_r_count; }
 
 // Get view mode
 uint8_t dvr_get_view_mode(void) { return dvr_view_mode; }
@@ -1466,10 +1632,24 @@ uint8_t dvr_api_get_preview_enable(void)
     return dvr_preview_enable;
 }
 
+// DVR control API - Enable/disable the per-second FPS log line.
+// enable: 0=suppress `DVR: [FPS:xx]` prints, 1=emit them. Default ON.
+void dvr_api_set_fps_print(uint8_t enable)
+{
+    dvr_fps_print_enable = enable ? 1 : 0;
+    printf("DVR: FPS print %s\n", dvr_fps_print_enable ? "ON" : "OFF");
+}
+
+// DVR control API - Query whether the FPS log line is enabled.
+uint8_t dvr_api_get_fps_print(void)
+{
+    return dvr_fps_print_enable;
+}
+
 // DVR preview lifecycle - called by dvr_page_init() when DVR window opens
 void dvr_start_preview(void)
 {
-    dvr_api_set_display_window(0, 0, 1024, 500);
+    dvr_api_set_display_window(52, 0, 972, 500);
     dvr_api_set_preview_enable(1);
     printf("DVR: start_preview (window 52,0,972,500)\n");
 }
@@ -2140,7 +2320,7 @@ static void usb_read_thread(void *para)
 			#if ENABLE_BD_USB_DVR_FUNC
 			// Check if elene file exists and start DVR task if found
 			// #ifdef USB_SUPPORT
-			dvr_api_set_display_window(0, 0, 1024, 500);
+			dvr_api_set_display_window(52, 0, 972, 500);
 			dvr_start_if_elene_exists();
 			// #endif
 			#endif

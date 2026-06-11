@@ -1,0 +1,350 @@
+From d84209e2f87319620eaa24933e91d6f9ebfa127b Mon Sep 17 00:00:00 2001
+From: dylanyunlon <dogechat@163.com>
+Date: Mon, 1 Jun 2026 01:20:10 +0000
+Subject: [PATCH 2/2] =?UTF-8?q?refactor:=20dvr=5Fview=E5=AF=B9=E6=8E=A5?=
+ =?UTF-8?q?=E6=96=B0dvr=5Fapi=5F*=E6=8E=A5=E5=8F=A3?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+dvr_api.h重写，匹配main_awtk.c的ENABLE_BD_USB_DVR_FUNC新接口:
+- dvr_send_normal_cmd() → dvr_api_rec_start/stop/format/del_file等
+- dvr_start/stop_preview() → dvr_api_set_preview_enable(0/1)
+- dvr_view.c全部注释代码恢复并替换为新API
+- home_page_key.c进入DVR页启用preview
+---
+ .../ui/HCN_DC001/src/view/home_view/dvr_api.h | 125 +++++++++---------
+ .../HCN_DC001/src/view/home_view/dvr_view.c   | 111 ++++++++--------
+ .../src/view/home_view/home_page_key.c        |   4 +-
+ 3 files changed, 120 insertions(+), 120 deletions(-)
+
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_api.h b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_api.h
+index 43b599e2..1697993d 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_api.h
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_api.h
+@@ -1,63 +1,62 @@
+-/*
+- * dvr_api.h - DVR backend API declarations
+- *
+- * These functions are implemented in main_awtk.c (commit e62395f5).
+- * dvr_view.c calls them to bridge AWTK UI actions to the USB DVR hardware.
+- *
+- * IMPORTANT: The DVR code in main_awtk.c was reverted by commit d923f206.
+- * You must re-apply the DVR additions from e62395f5 into main_awtk.c,
+- * AND change the following functions from "static" to non-static:
+- *   - dvr_send_normal_cmd()
+- *   - dvr_get_file_list()
+- *   - dvr_get_status()
+- */
+-
+-#ifndef DVR_API_H
+-#define DVR_API_H
+-
+-#include <stdint.h>
+-
+-/* Command IDs - must match main_awtk.c defines */
+-#define BD_CTRL_REC_START       0x01
+-#define BD_CTRL_REC_STOP        0x02
+-#define BD_CTRL_SNAP            0x03
+-#define BD_CTRL_GET_LIST        0x05
+-#define BD_CTRL_PB_START        0x06
+-#define BD_CTRL_GET_STS         0x09
+-#define BD_CTRL_SET_REC_TIME    0x0C
+-#define BD_CTRL_MIC_ON          0x0D
+-#define BD_CTRL_FORMAT          0x11
+-#define BD_CTRL_DEL_FILE        0x14
+-#define BD_CTRL_SENSOR_SEL      0x22
+-
+-/* Send a command to DVR via USB elene protocol.
+- * Implemented in main_awtk.c - must be non-static. */
+-extern void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par);
+-
+-/* Request file list: mode=0 for video, mode=1 for photo.
+- * Implemented in main_awtk.c - must be non-static. */
+-extern void dvr_get_file_list(uint8_t mode);
+-
+-/* Request DVR status update.
+- * Implemented in main_awtk.c - must be non-static. */
+-extern void dvr_get_status(void);
+-
+-/* Status getters - already non-static in main_awtk.c */
+-extern uint8_t dvr_get_sd_status(void);
+-extern uint8_t dvr_get_rec_status(void);
+-extern uint8_t dvr_get_lock_status(void);
+-extern uint8_t dvr_get_mic_status(void);
+-extern uint8_t dvr_get_sd_error_status(void);
+-extern uint8_t dvr_get_sd_full_status(void);
+-
+-extern uint16_t dvr_get_video_list_count(void);
+-extern uint16_t dvr_get_photo_list_count(void);
+-
+-extern void dvr_set_sensor_switch_enable(uint8_t enable);
+-
+-/* DVR preview lifecycle - called by dvr_view.c on page enter/exit */
+-extern void dvr_start_preview(void);
+-extern void dvr_stop_preview(void);
+-extern uint8_t dvr_is_device_online(void);
+-
+-#endif /* DVR_API_H */
+\ No newline at end of file
++/*
++ * dvr_api.h - DVR backend API declarations (v2 - CLI-based interface)
++ *
++ * These functions are implemented in main_awtk.c under ENABLE_BD_USB_DVR_FUNC.
++ * DVR task auto-starts on USB insertion when elene file is detected.
++ * dvr_view.c calls dvr_api_*() to control DVR from AWTK UI.
++ */
++
++#ifndef DVR_API_H
++#define DVR_API_H
++
++#include <stdint.h>
++
++/* ---- DVR Control API ---- */
++void dvr_api_get_id(void);
++void dvr_api_rec_start(void);
++void dvr_api_rec_stop(void);
++void dvr_api_snap(void);
++void dvr_api_sos(void);
++void dvr_api_get_list(uint8_t mode);         /* mode: 0=video, 1=photo */
++void dvr_api_pb_start(uint8_t mode, uint16_t index);
++void dvr_api_pb_pause(void);
++void dvr_api_pb_stop(void);
++void dvr_api_get_status(void);
++void dvr_api_view_switch(uint8_t mode);      /* 0:front 1:rear 2:f+r 3:r+f 4:hzh */
++void dvr_api_set_res(uint8_t res);           /* 0:1080P 1:720P */
++void dvr_api_set_loop_time(uint8_t time);    /* 1/2/3 min, 0=get current */
++void dvr_api_set_mic(uint8_t onoff);
++void dvr_api_set_stamp(uint8_t onoff);
++void dvr_api_format(void);
++void dvr_api_restore_default(void);
++void dvr_api_del_file(uint16_t index);
++void dvr_api_lock_file(uint16_t index);
++void dvr_api_unlock_file(uint16_t index);
++void dvr_api_get_total_time(uint16_t index);
++void dvr_api_pb_ff(void);
++void dvr_api_pb_fb(void);
++
++/* ---- Preview / Display ---- */
++void dvr_api_set_preview_enable(uint8_t enable);  /* 0:skip jpeg 1:decode */
++uint8_t dvr_api_get_preview_enable(void);
++void dvr_api_set_display_window(int32_t x, int32_t y, int32_t width, int32_t height);
++void dvr_api_get_display_window(int32_t *x, int32_t *y, int32_t *width, int32_t *height);
++void dvr_api_reset_display_window(void);
++
++/* ---- Status Query ---- */
++int  dvr_api_check_exists(void);   /* elene file exists? */
++int  dvr_api_is_running(void);     /* DVR task running? */
++uint8_t dvr_get_sd_status(void);
++uint8_t dvr_get_rec_status(void);
++uint8_t dvr_get_lock_status(void);
++uint8_t dvr_get_mic_status(void);
++uint8_t dvr_get_sd_error_status(void);
++uint8_t dvr_get_sd_full_status(void);
++uint16_t dvr_get_video_list_count(void);
++uint16_t dvr_get_photo_list_count(void);
++uint8_t dvr_get_view_mode(void);
++
++/* ---- Sensor Switch ---- */
++void dvr_set_sensor_switch_enable(uint8_t enable);
++
++#endif /* DVR_API_H */
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_view.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_view.c
+index 33da0738..d229591c 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_view.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/dvr_view.c
+@@ -3,19 +3,20 @@
+ #include "../view_manager.h"
+ 
+ /*
+- * DVR View Layer — bridges AWTK UI with dvr_send_normal_cmd() in main_awtk.c
++ * DVR View Layer — bridges AWTK UI with dvr_api_*() in main_awtk.c
+  *
+  * Key action -> dvr_api.h function mapping:
+- *   Camera btn SET   -> dvr_send_normal_cmd(BD_CTRL_REC_START/STOP, 0)
+- *   Camera btn LONG  -> dvr_send_normal_cmd(BD_CTRL_SNAP, 0)
+- *   Playback btn SET -> dvr_get_file_list(0)  (video)
+- *   Photo btn SET    -> dvr_get_file_list(1)  (photo)
++ *   Camera btn SET   -> dvr_api_rec_start() / dvr_api_rec_stop()
++ *   Camera btn LONG  -> dvr_api_snap()
++ *   Playback btn SET -> dvr_api_get_list(0)  (video)
++ *   Photo btn SET    -> dvr_api_get_list(1)  (photo)
+  *   Settings btn SET -> enter setting sub-page
+- *   Setting format   -> dvr_send_normal_cmd(BD_CTRL_FORMAT, 0)
+- *   Setting loop 1/2/3 -> dvr_send_normal_cmd(BD_CTRL_SET_REC_TIME, n)
+- *   Setting mic      -> dvr_send_normal_cmd(BD_CTRL_MIC_ON, 0/1)
+- *   File list delete -> dvr_send_normal_cmd(BD_CTRL_DEL_FILE, file_index)
+- *   Back from list   -> dvr_send_normal_cmd(BD_CTRL_REC_START, 0)
++ *   Setting format   -> dvr_api_format()
++ *   Setting loop 1/2/3 -> dvr_api_set_loop_time(n)
++ *   Setting mic      -> dvr_api_set_mic(0/1)
++ *   File list delete -> dvr_api_del_file(file_index)
++ *   Back from list   -> dvr_api_rec_start()
++ *   Exit DVR page    -> dvr_api_set_preview_enable(0)
+  */
+ 
+ /* ---- Widget pointers ---- */
+@@ -140,37 +141,37 @@ void dvr_page_deal_key_set(void)
+         switch (dvr_dock_focus) {
+         case DVR_DOCK_CAMERA:
+             /* Toggle recording based on real hardware status */
+-            // if (dvr_get_rec_status()) {
+-            //     dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
+-            // } else {
+-            //     dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
+-            // }
++            if (dvr_get_rec_status()) {
++                dvr_api_rec_stop();
++            } else {
++                dvr_api_rec_start();
++            }
+             break;
+         case DVR_DOCK_PLAYBACK:
+             /* Stop recording first, then request video file list */
+             if (dvr_get_rec_status()) {
+-                // dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
++                dvr_api_rec_stop();
+             }
+             dvr_list_mode = 0;
+-            // dvr_get_file_list(0); /* video */
++            dvr_api_get_list(0); /* video */
+             dvr_show_sub(DVR_SUB_LIST);
+             dvr_list_focus = 0;
+             dvr_refresh_list_highlight(0);
+             set_current_level(MENU_LEVEL_2);
+             break;
+         case DVR_DOCK_PHOTO:
+-            // if (dvr_get_rec_status()) {
+-            //     dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
+-            // }
+-            // dvr_list_mode = 1;
+-            // dvr_get_file_list(1); /* photo */
++            if (dvr_get_rec_status()) {
++                dvr_api_rec_stop();
++            }
++            dvr_list_mode = 1;
++            dvr_api_get_list(1); /* photo */
+             dvr_show_sub(DVR_SUB_LIST);
+             dvr_list_focus = 0;
+             dvr_refresh_list_highlight(0);
+             set_current_level(MENU_LEVEL_2);
+             break;
+         case DVR_DOCK_SETTINGS:
+-            // dvr_get_status(); /* refresh status before entering settings */
++            dvr_api_get_status(); /* refresh status before entering settings */
+             dvr_show_sub(DVR_SUB_SETTING);
+             dvr_set_focus = DVR_SET_CAMERA;
+             dvr_refresh_setting_highlight(DVR_SET_CAMERA);
+@@ -192,14 +193,14 @@ void dvr_page_deal_key_set(void)
+         switch (dvr_set_focus) {
+         case DVR_SET_CAMERA:
+             /* Toggle mic on/off */
+-            // dvr_send_normal_cmd(BD_CTRL_MIC_ON, dvr_get_mic_status() ? 0 : 1);
++            dvr_api_set_mic(dvr_get_mic_status() ? 0 : 1);
+             break;
+         case DVR_SET_LOOP:
+             /* Cycle loop time: 1->2->3->1 */
+             {
+                 static uint8_t loop_val = 1;
+                 loop_val = (loop_val % 3) + 1;
+-                // dvr_send_normal_cmd(BD_CTRL_SET_REC_TIME, loop_val);
++                dvr_api_set_loop_time(loop_val);
+             }
+             break;
+         case DVR_SET_FORMAT:
+@@ -216,28 +217,28 @@ void dvr_page_deal_key_set(void)
+         break;
+ 
+     case DVR_SUB_POPUP:
+-        // if (dvr_popup_focus == 0) {
+-        //     /* Confirm */
+-        //     if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
+-        //         /* Format: must stop recording first */
+-        //         if (dvr_get_rec_status()) {
+-        //             // dvr_send_normal_cmd(BD_CTRL_REC_STOP, 0);
+-        //         }
+-        //         dvr_send_normal_cmd(BD_CTRL_FORMAT, 0);
+-        //     } else {
+-        //         /* Delete file at current list index */
+-        //         dvr_send_normal_cmd(BD_CTRL_DEL_FILE, dvr_list_focus);
+-        //     }
+-        // }
+-        // /* Return to caller */
+-        // if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
+-        //     dvr_show_sub(DVR_SUB_SETTING);
+-        //     dvr_refresh_setting_highlight(dvr_set_focus);
+-        // } else {
+-        //     dvr_show_sub(DVR_SUB_LIST);
+-        //     dvr_refresh_list_highlight(dvr_list_focus);
+-        // }
+-        // set_current_level(MENU_LEVEL_2);
++        if (dvr_popup_focus == 0) {
++            /* Confirm */
++            if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
++                /* Format: must stop recording first */
++                if (dvr_get_rec_status()) {
++                    dvr_api_rec_stop();
++                }
++                dvr_api_format();
++            } else {
++                /* Delete file at current list index */
++                dvr_api_del_file(dvr_list_focus);
++            }
++        }
++        /* Return to caller */
++        if (dvr_popup_source == POPUP_SRC_CARD_FORMAT) {
++            dvr_show_sub(DVR_SUB_SETTING);
++            dvr_refresh_setting_highlight(dvr_set_focus);
++        } else {
++            dvr_show_sub(DVR_SUB_LIST);
++            dvr_refresh_list_highlight(dvr_list_focus);
++        }
++        set_current_level(MENU_LEVEL_2);
+         break;
+ 
+     default:
+@@ -251,18 +252,18 @@ void dvr_page_deal_key_back(void)
+     switch (current_dvr_sub)
+     {
+     case DVR_SUB_MAIN:
+-        /* Exit DVR -> stop preview, restore home page */
+-        // dvr_stop_preview();
+-        // set_dock_view(ICON_INFO); /* switch back to instrument page */
+-        // set_current_level(MENU_LEVEL_0);
++        /* Exit DVR -> disable preview, restore home page */
++        dvr_api_set_preview_enable(0);
++        set_dock_view(ICON_INFO); /* switch back to instrument page */
++        set_current_level(MENU_LEVEL_0);
+         break;
+ 
+     case DVR_SUB_LIST:
+         /* Back to preview, resume recording */
+-        // dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
+-        // dvr_show_sub(DVR_SUB_MAIN);
+-        // dvr_refresh_dock_highlight(dvr_dock_focus);
+-        // set_current_level(MENU_LEVEL_1);
++        dvr_api_rec_start();
++        dvr_show_sub(DVR_SUB_MAIN);
++        dvr_refresh_dock_highlight(dvr_dock_focus);
++        set_current_level(MENU_LEVEL_1);
+         break;
+ 
+     case DVR_SUB_SETTING:
+diff --git a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/home_page_key.c b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/home_page_key.c
+index edc363e9..89821fe1 100644
+--- a/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/home_page_key.c
++++ b/amt630hV100-sdk-beta-20250625/amt630hv100-freertos/app/hcn/ui/HCN_DC001/src/view/home_view/home_page_key.c
+@@ -32,8 +32,8 @@ void home_page_deal_key_set()
+             break;
+         case ICON_DVR:
+             set_current_level(MENU_LEVEL_1);
+-            /* Start DVR preview when entering DVR page */
+-            // dvr_start_preview();
++            /* Enable DVR preview when entering DVR page */
++            dvr_api_set_preview_enable(1);
+             break;
+         default:
+             break;
+-- 
+2.43.0
+
