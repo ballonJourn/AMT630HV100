@@ -1,7 +1,7 @@
 /*
  * dvr_api.h - DVR backend API declarations
  *
- * These functions are implemented in main_awtk.c (commit e62395f5).
+ * These functions are implemented in main_awtk.c (commit 6e9b20e9).
  * dvr_view.c calls them to bridge AWTK UI actions to the USB DVR hardware.
  *
  * IMPORTANT: The DVR code in main_awtk.c was reverted by commit d923f206.
@@ -23,6 +23,8 @@
 #define BD_CTRL_SNAP            0x03
 #define BD_CTRL_GET_LIST        0x05
 #define BD_CTRL_PB_START        0x06
+#define BD_CTRL_PB_PAUSE        0x07
+#define BD_CTRL_PB_STOP         0x08
 #define BD_CTRL_GET_STS         0x09
 #define BD_CTRL_SET_REC_TIME    0x0C
 #define BD_CTRL_MIC_ON          0x0D
@@ -34,7 +36,11 @@
  * Implemented in main_awtk.c - must be non-static. */
 extern void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par);
 
-/* Request file list: mode=0 for video, mode=1 for photo.
+/* Request file list:
+ *   mode 0: front-camera video
+ *   mode 1: rear-camera  video
+ *   mode 2: front-camera photo
+ *   mode 3: rear-camera  photo
  * Implemented in main_awtk.c - must be non-static. */
 extern void dvr_get_file_list(uint8_t mode);
 
@@ -84,5 +90,69 @@ extern void dvr_api_set_loop_time(uint8_t time);
 
 /* Format SD card */
 extern void dvr_api_format(void);
+
+/* ---------- DVR playback / file APIs (commit 6e9b20e9) ---------- */
+
+/* Get DVR firmware version ID */
+extern void dvr_api_get_id(void);
+
+/* Take a snapshot (photo) */
+extern void dvr_api_snap(void);
+
+/* Emergency/SOS recording (lock current file) */
+extern void dvr_api_sos(void);
+
+/* Get file list (mode: 0-3, see dvr_get_file_list) */
+extern void dvr_api_get_list(uint8_t mode);
+
+/* Start playback
+ *   mode 0: play front-camera video
+ *   mode 1: play rear-camera  video
+ *   mode 2: play front-camera photo
+ *   mode 3: play rear-camera  photo
+ *   index: file index within the bucket */
+extern void dvr_api_pb_start(uint8_t mode, uint16_t index);
+
+/* Pause / resume playback (toggle) */
+extern void dvr_api_pb_pause(void);
+
+/* Stop playback */
+extern void dvr_api_pb_stop(void);
+
+/* Playback fast-forward */
+extern void dvr_api_pb_ff(void);
+
+/* Playback fast-backward / rewind */
+extern void dvr_api_pb_fb(void);
+
+/* Delete file by index */
+extern void dvr_api_del_file(uint16_t index);
+
+/* Lock / unlock file by index */
+extern void dvr_api_lock_file(uint16_t index);
+extern void dvr_api_unlock_file(uint16_t index);
+
+/* Get total time of a video file */
+extern void dvr_api_get_total_time(uint16_t index);
+
+/* DVR status query */
+extern void dvr_api_get_status(void);
+
+/* ---------- Per-bucket filename cache (commit 6e9b20e9) ---------- */
+
+#define DVR_NAME_MAX  16
+
+extern uint16_t dvr_api_get_video_list_f(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_video_list_r(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_photo_list_f(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_photo_list_r(char *out, uint16_t max_entries);
+extern uint16_t dvr_api_get_video_list_f_count(void);
+extern uint16_t dvr_api_get_video_list_r_count(void);
+extern uint16_t dvr_api_get_photo_list_f_count(void);
+extern uint16_t dvr_api_get_photo_list_r_count(void);
+
+/* FPS print toggle (CLI-controllable, default ON) */
+extern void dvr_api_set_fps_print(uint8_t enable);
+extern uint8_t dvr_api_get_fps_print(void);
 
 #endif /* DVR_API_H */

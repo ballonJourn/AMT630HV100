@@ -1,22 +1,20 @@
 /*
- * dvr_view.c — DVR UI view layer for independent dvr_page window
+ * dvr_view.c — DVR UI: 4-button dock + cam sub-dock + file list + settings
  *
- * Sub-page state machine:
- *   DVR_SUB_MAIN   — Preview with function dock (Camera/Playback/Photo/Settings)
- *                     UP/DOWN navigates dock buttons, SET activates focused button
- *   DVR_SUB_CAM_SW — Preview with front/rear camera dock
- *                     UP/DOWN toggles front/rear, SET confirms switch, BACK returns
- *   DVR_SUB_LIST   — File list overlay (video/photo)
- *                     UP/DOWN scrolls files, SET plays/views, BACK returns to MAIN
- *   DVR_SUB_SETTING— Settings overlay (camera on/off, loop time, format, about)
- *                     UP/DOWN navigates rows, SET activates row action, BACK returns
- *   DVR_SUB_POPUP  — Delete/format confirmation popup
- *                     UP/DOWN toggles confirm/cancel, SET confirms, BACK cancels
+ * Main dock (4 buttons):
+ *   [DVR Preview] [Video Playback] [Photo Playback] [Settings]
  *
- * Preview management:
- *   alpha-clear hook runs every frame and punches transparent holes in FB.
- *   When entering overlay pages (LIST/SETTING/POPUP), preview is paused to
- *   prevent the hook from clearing overlay alpha. Resumed on return.
+ * DVR Preview → cam sub-dock (Front / Rear / Snapshot)
+ *   Front SET → switch to front cam, back to MAIN
+ *   Rear  SET → switch to rear  cam, back to MAIN
+ *   Snap  SET → take photo, stay (can snap again)
+ *
+ * Video Playback → file list, 2 tabs (Front Video / Rear Video)
+ * Photo Playback → file list, 2 tabs (Front Photo / Rear Photo)
+ *   UP/DOWN scrolls. SET on file → PLAYBACK. BACK → MAIN.
+ *   UP at top / DOWN at bottom → switches front↔rear tab.
+ *
+ * Settings → row list. SET enters edit. UP/DOWN changes. SET commits.
  */
 
 #include "dvr_view.h"
@@ -24,499 +22,361 @@
 #include "../view_manager.h"
 #include "common/navigator.h"
 
-/* ---- Widget pointers ---- */
-static widget_t* dvr_main_view   = NULL;
-static widget_t* dvr_list_view   = NULL;
-static widget_t* dvr_setting_view= NULL;
-static widget_t* dvr_popup_view  = NULL;
+/* ---- Widgets ---- */
+static widget_t* dvr_main_view    = NULL;
+static widget_t* dvr_list_view    = NULL;
+static widget_t* dvr_setting_view = NULL;
+static widget_t* dvr_popup_view   = NULL;
+static widget_t* dvr_dock_bar     = NULL;
+static widget_t* dvr_cam_dock     = NULL;
+static widget_t* dvr_cam_tab_sel  = NULL;
 
-/* Function dock (4 buttons) */
-static widget_t* dvr_dock_bar    = NULL;
-
-/* Camera switch dock (front/rear) */
-static widget_t* dvr_cam_dock    = NULL;
-static widget_t* dvr_cam_tab_sel = NULL;
-
-static const char* dvr_dock_btn_names[DVR_DOCK_BTN_MAX] = {
-    "dvr_btn_camera", "dvr_btn_playback", "dvr_btn_photo", "dvr_btn_settings"
+static const char* dock_btn_names[DVR_DOCK_BTN_MAX] = {
+    "dvr_btn_preview", "dvr_btn_video_pb", "dvr_btn_photo_pb", "dvr_btn_settings"
 };
-static widget_t* dvr_dock_btn[DVR_DOCK_BTN_MAX] = { NULL };
+static widget_t* dock_btn[DVR_DOCK_BTN_MAX] = {0};
 
-static widget_t* dvr_file_name[DVR_FILE_ITEM_MAX] = { NULL };
-static widget_t* dvr_file_view_btn[DVR_FILE_ITEM_MAX] = { NULL };
-static widget_t* dvr_file_del_btn[DVR_FILE_ITEM_MAX] = { NULL };
+static widget_t* file_name_w[DVR_FILE_ITEM_MAX] = {0};
+static widget_t* file_icon_w[DVR_FILE_ITEM_MAX] = {0};
+static widget_t* file_view_w[DVR_FILE_ITEM_MAX] = {0};
+static widget_t* file_del_w[DVR_FILE_ITEM_MAX]  = {0};
 
-/* File list bottom tab */
-static widget_t* dvr_list_tab_sel = NULL;
+static widget_t* list_tab_sel     = NULL;
+static widget_t* tab_label_left   = NULL;
+static widget_t* tab_label_right  = NULL;
+static widget_t* set_cam_on_sel   = NULL;
+static widget_t* set_loop_sel     = NULL;
+static widget_t* storage_bar      = NULL;
+static widget_t* storage_text     = NULL;
 
-/* Setting selection indicators */
-static widget_t* dvr_set_cam_on_sel  = NULL;
-static widget_t* dvr_set_loop_sel    = NULL;
+/* ---- State ---- */
+static dvr_sub_page_e cur_sub = DVR_SUB_MAIN;
+static int dock_focus   = DVR_DOCK_PREVIEW;
+static int cam_focus    = DVR_CAM_FRONT;
+static int list_focus   = 0;
+static int list_tab     = DVR_TAB_FRONT;   /* 0=front, 1=rear */
+static int list_mode    = 0;               /* 0=video, 1=photo (set by dock button) */
+static int set_focus    = DVR_SET_CAMERA;
+static int popup_focus  = 0;
+static int set_cam_onoff = 1;
+static int set_loop_val  = 0;
+static int set_edit_val  = 0;
+static int list_count    = 0;
+static int list_offset   = 0;
 
-static widget_t* dvr_storage_bar  = NULL;
-static widget_t* dvr_storage_text = NULL;
+typedef enum { POP_FILE_DEL=0, POP_FORMAT=1 } pop_src_e;
+static pop_src_e popup_src = POP_FILE_DEL;
 
-/* State */
-static dvr_sub_page_e current_dvr_sub = DVR_SUB_MAIN;
-static int dvr_dock_focus  = DVR_DOCK_CAMERA;
-static int dvr_list_focus  = 0;
-static int dvr_list_tab    = 0; /* 0=front video, 1=rear video */
-static int dvr_set_focus   = DVR_SET_CAMERA;
-static int dvr_popup_focus = 0;
-static int dvr_list_mode   = 0; /* 0=video, 1=photo */
-static int dvr_cam_focus   = 0; /* 0=front, 1=rear */
+static int pb_paused = 0, pb_idx = 0, pb_mode = 0;
 
-/* Setting sub-option state */
-static int dvr_set_cam_onoff = 1;   /* 0=off, 1=on (default on) */
-static int dvr_set_loop_val  = 0;   /* 0=1min, 1=2min, 2=3min */
-
-typedef enum {
-    POPUP_SRC_FILE_DELETE = 0,
-    POPUP_SRC_CARD_FORMAT = 1,
-} popup_source_e;
-static popup_source_e dvr_popup_source = POPUP_SRC_FILE_DELETE;
-
-/* ---- Helpers ---- */
-
-/*
- * dvr_show_sub — Manages visibility of all overlay views + preview state.
+/* ---- dvr_get_file_list mode encoding ----
+ * mode 0: front video, 1: rear video, 2: front photo, 3: rear photo
+ * = list_mode * 2 + list_tab
  */
-static void dvr_show_sub(dvr_sub_page_e sub)
+static inline uint8_t list_api_mode(void) { return (uint8_t)(list_mode * 2 + list_tab); }
+
+/* ---- Visibility ---- */
+static void show_sub(dvr_sub_page_e sub)
 {
-    dvr_sub_page_e prev_sub = current_dvr_sub;
-    current_dvr_sub = sub;
+    dvr_sub_page_e prev = cur_sub;
+    cur_sub = sub;
+    int pv_prev = (prev == DVR_SUB_MAIN || prev == DVR_SUB_CAM_SW);
+    int pv_next = (sub  == DVR_SUB_MAIN || sub  == DVR_SUB_CAM_SW);
+    if (pv_prev && !pv_next) { dvr_api_set_preview_enable(0); printf("DVR: preview off (sub=%d)\n", sub); }
 
-    int prev_needs_preview = (prev_sub == DVR_SUB_MAIN || prev_sub == DVR_SUB_CAM_SW);
-    int next_needs_preview = (sub == DVR_SUB_MAIN || sub == DVR_SUB_CAM_SW);
-
-    /* Pause preview when entering overlay to prevent alpha-clear hook
-     * from punching holes in opaque overlay content */
-    if (prev_needs_preview && !next_needs_preview) {
-        dvr_api_set_preview_enable(0);
-        printf("DVR: preview paused (entering sub=%d)\n", sub);
-    }
-
-    /* dvr_main_view visible for both MAIN and CAM_SW */
-    int main_visible = (sub == DVR_SUB_MAIN || sub == DVR_SUB_CAM_SW);
-    if (dvr_main_view)    widget_set_visible(dvr_main_view,    main_visible);
+    int mv = (sub == DVR_SUB_MAIN || sub == DVR_SUB_CAM_SW || sub == DVR_SUB_PLAYBACK);
+    if (dvr_main_view)    widget_set_visible(dvr_main_view,    mv);
     if (dvr_list_view)    widget_set_visible(dvr_list_view,    sub == DVR_SUB_LIST);
-    if (dvr_setting_view) widget_set_visible(dvr_setting_view, sub == DVR_SUB_SETTING);
+    if (dvr_setting_view) widget_set_visible(dvr_setting_view, sub == DVR_SUB_SETTING || sub == DVR_SUB_SET_EDIT);
     if (dvr_popup_view)   widget_set_visible(dvr_popup_view,   sub == DVR_SUB_POPUP);
-
-    /* Toggle between the two dock bars within dvr_main_view */
     if (dvr_dock_bar)     widget_set_visible(dvr_dock_bar,     sub == DVR_SUB_MAIN);
     if (dvr_cam_dock)     widget_set_visible(dvr_cam_dock,     sub == DVR_SUB_CAM_SW);
 
-    /* Resume preview when returning to preview pages */
-    if (!prev_needs_preview && next_needs_preview) {
-        dvr_api_set_preview_enable(1);
-        printf("DVR: preview resumed (entering sub=%d)\n", sub);
-    }
+    if (!pv_prev && pv_next) { dvr_api_set_preview_enable(1); printf("DVR: preview on (sub=%d)\n", sub); }
 }
 
-static void dvr_refresh_dock_highlight(int index)
-{
-    for (int i = 0; i < DVR_DOCK_BTN_MAX; i++) {
-        if (dvr_dock_btn[i])
-            widget_set_state(dvr_dock_btn[i], (i == index) ? STATE_SELECTE : STATE_NORMAL);
-    }
-    dvr_dock_focus = index;
+/* ---- Refresh helpers ---- */
+static void hl_dock(int i) {
+    for (int n=0;n<DVR_DOCK_BTN_MAX;n++) if(dock_btn[n]) widget_set_state(dock_btn[n],(n==i)?STATE_SELECTE:STATE_NORMAL);
+    dock_focus = i;
 }
-
-/*
- * dvr_refresh_cam_tab — Moves the dock_selected highlight image.
- * Left (front): x=0, Right (rear): x=602
- */
-static void dvr_refresh_cam_tab(int focus)
-{
-    dvr_cam_focus = focus;
-    if (dvr_cam_tab_sel) {
-        int32_t x_pos = (focus == 0) ? 0 : 602;
-        widget_move(dvr_cam_tab_sel, x_pos, 0);
-    }
+static void hl_cam(int i) {
+    cam_focus = i;
+    if (dvr_cam_tab_sel) widget_move(dvr_cam_tab_sel, i*324, 0);
 }
-
-static void dvr_refresh_list_highlight(int index)
-{
-    for (int i = 0; i < DVR_FILE_ITEM_MAX; i++) {
-        if (dvr_file_name[i])
-            widget_set_state(dvr_file_name[i], (i == index) ? STATE_SELECTE : STATE_NORMAL);
+static void hl_list(int i) {
+    for(int n=0;n<DVR_FILE_ITEM_MAX;n++) if(file_name_w[n]) widget_set_state(file_name_w[n],(n==i)?STATE_SELECTE:STATE_NORMAL);
+}
+static void hl_tab(int t) {
+    list_tab = t;
+    if (list_tab_sel) widget_move(list_tab_sel, t?486:0, 0);
+    if (tab_label_left && tab_label_right) {
+        if (list_mode == 0) { widget_set_text_utf8(tab_label_left,"Front Video"); widget_set_text_utf8(tab_label_right,"Rear Video"); }
+        else                { widget_set_text_utf8(tab_label_left,"Front Photo"); widget_set_text_utf8(tab_label_right,"Rear Photo"); }
     }
 }
-
-/*
- * dvr_refresh_list_tab — Moves the file list bottom tab highlight.
- * Left (front): x=0, Right (rear): x=602
- */
-static void dvr_refresh_list_tab(int tab)
-{
-    dvr_list_tab = tab;
-    if (dvr_list_tab_sel) {
-        int32_t x_pos = (tab == 0) ? 0 : 602;
-        widget_move(dvr_list_tab_sel, x_pos, 0);
-    }
+static const char* set_bg_names[DVR_SET_ROW_MAX]={"dvr_set_cam_label_bg","dvr_set_loop_label_bg","dvr_set_fmt_label_bg","dvr_set_about_label_bg"};
+static void hl_set(int r) {
+    if(!dvr_setting_view)return;
+    for(int i=0;i<DVR_SET_ROW_MAX;i++){widget_t*w=widget_lookup(dvr_setting_view,set_bg_names[i],TRUE);if(w)widget_set_state(w,(i==r)?STATE_SELECTE:STATE_NORMAL);}
+}
+static void hl_cam_onoff(int v) { if(set_cam_on_sel) widget_move(set_cam_on_sel,(v==1)?278:498,28); }
+static void hl_loop(int v)      { if(set_loop_sel) widget_move(set_loop_sel,278+v*220,28); }
+static void hl_popup(int f) {
+    if(!dvr_popup_view)return;
+    widget_t*c=widget_lookup(dvr_popup_view,"dvr_popup_confirm_bg",TRUE);
+    widget_t*x=widget_lookup(dvr_popup_view,"dvr_popup_cancel_bg",TRUE);
+    if(c) widget_set_state(c,(f==0)?STATE_SELECTE:STATE_NORMAL);
+    if(x) widget_set_state(x,(f==1)?STATE_SELECTE:STATE_NORMAL);
 }
 
-static const char* set_row_bg_names[DVR_SET_ROW_MAX] = {
-    "dvr_set_cam_label_bg", "dvr_set_loop_label_bg",
-    "dvr_set_fmt_label_bg", "dvr_set_about_label_bg"
-};
-
-static void dvr_refresh_setting_highlight(int row)
-{
-    if (!dvr_setting_view) return;
-    for (int i = 0; i < DVR_SET_ROW_MAX; i++) {
-        widget_t* w = widget_lookup(dvr_setting_view, set_row_bg_names[i], TRUE);
-        if (w) widget_set_state(w, (i == row) ? STATE_SELECTE : STATE_NORMAL);
+/* ---- File list data ---- */
+static uint16_t get_count(void) {
+    switch(list_api_mode()) {
+    case 0: return dvr_api_get_video_list_f_count();
+    case 1: return dvr_api_get_video_list_r_count();
+    case 2: return dvr_api_get_photo_list_f_count();
+    case 3: return dvr_api_get_photo_list_r_count();
+    default:return 0;
     }
 }
-
-/*
- * dvr_refresh_cam_onoff_indicator — Move the camera on/off selection dot.
- * ON position: x=278, OFF position: x=498
- */
-static void dvr_refresh_cam_onoff_indicator(int onoff)
-{
-    dvr_set_cam_onoff = onoff;
-    if (dvr_set_cam_on_sel) {
-        int32_t x_pos = (onoff == 1) ? 278 : 498;
-        widget_move(dvr_set_cam_on_sel, x_pos, 28);
+static uint8_t get_fname(int idx,char*out,int sz) {
+    char buf[DVR_FILE_ITEM_MAX*DVR_NAME_MAX]; uint16_t c=0;
+    switch(list_api_mode()){
+    case 0:c=dvr_api_get_video_list_f(buf,DVR_FILE_ITEM_MAX);break;
+    case 1:c=dvr_api_get_video_list_r(buf,DVR_FILE_ITEM_MAX);break;
+    case 2:c=dvr_api_get_photo_list_f(buf,DVR_FILE_ITEM_MAX);break;
+    case 3:c=dvr_api_get_photo_list_r(buf,DVR_FILE_ITEM_MAX);break;
+    default:return 0;
     }
+    if(idx<0||idx>=(int)c)return 0;
+    const char*s=buf+(size_t)idx*DVR_NAME_MAX; int l=(int)strlen(s); if(l>=sz)l=sz-1;
+    memcpy(out,s,l); out[l]='\0'; return 1;
 }
-
-/*
- * dvr_refresh_loop_indicator — Move the loop time selection dot.
- * 1min(index=0): x=278, 2min(index=1): x=498, 3min(index=2): x=718
- */
-static void dvr_refresh_loop_indicator(int index)
-{
-    dvr_set_loop_val = index;
-    if (dvr_set_loop_sel) {
-        int32_t x_pos = 278 + index * 220;
-        widget_move(dvr_set_loop_sel, x_pos, 28);
+void dvr_file_list_populate(void) {
+    char fn[DVR_NAME_MAX]; uint16_t tot=get_count();
+    if(list_offset>(int)tot-DVR_FILE_ITEM_MAX) list_offset=(int)tot-DVR_FILE_ITEM_MAX;
+    if(list_offset<0) list_offset=0;
+    list_count=(int)tot;
+    for(int i=0;i<DVR_FILE_ITEM_MAX;i++){
+        int fi=list_offset+i;
+        if(fi<(int)tot && get_fname(fi,fn,sizeof(fn))) dvr_file_list_set_name(i,fn);
+        else dvr_file_list_set_name(i,"");
+        /* Update row icon: video or photo */
+        if(file_icon_w[i]) {
+            if(list_mode==0) { widget_use_style(file_icon_w[i],"default"); /* keep video icon */ }
+            /* Note: icon swap via style would need per-mode styles in XML.
+             * For now the XML has video icons; photo mode will also show them.
+             * TODO: swap icon image name via widget_set_prop_str if needed. */
+        }
     }
-}
-
-static void dvr_refresh_popup_highlight(int focus)
-{
-    if (!dvr_popup_view) return;
-    widget_t* c = widget_lookup(dvr_popup_view, "dvr_popup_confirm_bg", TRUE);
-    widget_t* x = widget_lookup(dvr_popup_view, "dvr_popup_cancel_bg",  TRUE);
-    if (c) widget_set_state(c, (focus == 0) ? STATE_SELECTE : STATE_NORMAL);
-    if (x) widget_set_state(x, (focus == 1) ? STATE_SELECTE : STATE_NORMAL);
+    printf("DVR: populate mode=%d tab=%d cnt=%d off=%d\n",list_mode,list_tab,tot,list_offset);
 }
 
 /* ---- Init ---- */
-ret_t home_dvr_view_init(widget_t* parent)
-{
-    char buf[32];
-    if (!parent) return RET_FAIL;
-
-    dvr_main_view    = widget_lookup(parent, "dvr_main_view",    TRUE);
-    dvr_list_view    = widget_lookup(parent, "dvr_list_view",    TRUE);
-    dvr_setting_view = widget_lookup(parent, "dvr_setting_view", TRUE);
-    dvr_popup_view   = widget_lookup(parent, "dvr_popup_view",   TRUE);
-
-    /* Function dock bar (4 buttons) */
-    dvr_dock_bar     = widget_lookup(parent, "dvr_dock_bar",     TRUE);
-
-    /* Camera switch dock (front/rear tabs) */
-    dvr_cam_dock     = widget_lookup(parent, "dvr_cam_dock",     TRUE);
-    dvr_cam_tab_sel  = widget_lookup(parent, "dvr_cam_tab_sel",  TRUE);
-
-    for (int i = 0; i < DVR_DOCK_BTN_MAX; i++)
-        dvr_dock_btn[i] = widget_lookup(parent, dvr_dock_btn_names[i], TRUE);
-
-    for (int i = 0; i < DVR_FILE_ITEM_MAX; i++) {
-        snprintf(buf, sizeof(buf), "dvr_file_name_%d", i);
-        dvr_file_name[i] = widget_lookup(parent, buf, TRUE);
-        snprintf(buf, sizeof(buf), "dvr_file_view_%d", i);
-        dvr_file_view_btn[i] = widget_lookup(parent, buf, TRUE);
-        snprintf(buf, sizeof(buf), "dvr_file_del_%d", i);
-        dvr_file_del_btn[i] = widget_lookup(parent, buf, TRUE);
+ret_t home_dvr_view_init(widget_t* parent) {
+    char buf[32]; if(!parent)return RET_FAIL;
+    dvr_main_view    = widget_lookup(parent,"dvr_main_view",TRUE);
+    dvr_list_view    = widget_lookup(parent,"dvr_list_view",TRUE);
+    dvr_setting_view = widget_lookup(parent,"dvr_setting_view",TRUE);
+    dvr_popup_view   = widget_lookup(parent,"dvr_popup_view",TRUE);
+    dvr_dock_bar     = widget_lookup(parent,"dvr_dock_bar",TRUE);
+    dvr_cam_dock     = widget_lookup(parent,"dvr_cam_dock",TRUE);
+    dvr_cam_tab_sel  = widget_lookup(parent,"dvr_cam_tab_sel",TRUE);
+    for(int i=0;i<DVR_DOCK_BTN_MAX;i++) dock_btn[i]=widget_lookup(parent,dock_btn_names[i],TRUE);
+    for(int i=0;i<DVR_FILE_ITEM_MAX;i++){
+        snprintf(buf,sizeof(buf),"dvr_file_name_%d",i);  file_name_w[i]=widget_lookup(parent,buf,TRUE);
+        snprintf(buf,sizeof(buf),"dvr_file_icon_%d",i);  file_icon_w[i]=widget_lookup(parent,buf,TRUE);
+        snprintf(buf,sizeof(buf),"dvr_file_view_%d",i);  file_view_w[i]=widget_lookup(parent,buf,TRUE);
+        snprintf(buf,sizeof(buf),"dvr_file_del_%d",i);   file_del_w[i]=widget_lookup(parent,buf,TRUE);
     }
+    list_tab_sel   = widget_lookup(parent,"dvr_list_tab_sel",TRUE);
+    tab_label_left = widget_lookup(parent,"dvr_tab_label_left",TRUE);
+    tab_label_right= widget_lookup(parent,"dvr_tab_label_right",TRUE);
+    set_cam_on_sel = widget_lookup(parent,"dvr_set_cam_on_sel",TRUE);
+    set_loop_sel   = widget_lookup(parent,"dvr_set_loop_sel",TRUE);
+    storage_bar    = widget_lookup(parent,"dvr_storage_bar",TRUE);
+    storage_text   = widget_lookup(parent,"dvr_storage_text",TRUE);
 
-    /* File list bottom tab highlight */
-    dvr_list_tab_sel = widget_lookup(parent, "dvr_list_tab_sel", TRUE);
+    dock_focus=DVR_DOCK_PREVIEW; cam_focus=DVR_CAM_FRONT;
+    list_focus=0; list_tab=0; list_mode=0; list_count=0; list_offset=0;
+    set_focus=DVR_SET_CAMERA; popup_focus=0;
+    set_cam_onoff=1; set_loop_val=0; set_edit_val=0;
+    popup_src=POP_FILE_DEL; pb_paused=0; pb_idx=0; pb_mode=0;
 
-    /* Setting selection indicators */
-    dvr_set_cam_on_sel = widget_lookup(parent, "dvr_set_cam_on_sel", TRUE);
-    dvr_set_loop_sel   = widget_lookup(parent, "dvr_set_loop_sel",   TRUE);
-
-    dvr_storage_bar  = widget_lookup(parent, "dvr_storage_bar",  TRUE);
-    dvr_storage_text = widget_lookup(parent, "dvr_storage_text", TRUE);
-
-    /* Reset ALL state for clean re-entry */
-    dvr_dock_focus  = DVR_DOCK_CAMERA;
-    dvr_list_focus  = 0;
-    dvr_list_tab    = 0;
-    dvr_set_focus   = DVR_SET_CAMERA;
-    dvr_popup_focus = 0;
-    dvr_cam_focus   = 0;
-    dvr_list_mode   = 0;
-    dvr_set_cam_onoff = 1;
-    dvr_set_loop_val  = 0;
-    dvr_popup_source = POPUP_SRC_FILE_DELETE;
-
-    dvr_show_sub(DVR_SUB_MAIN);
-    dvr_refresh_dock_highlight(DVR_DOCK_CAMERA);
+    show_sub(DVR_SUB_MAIN); hl_dock(DVR_DOCK_PREVIEW);
     return RET_OK;
 }
 
-/* ---- SET key ---- */
-void dvr_page_deal_key_set(void)
-{
-    switch (current_dvr_sub)
-    {
+/* ==== SET ==== */
+void dvr_page_deal_key_set(void) {
+    switch(cur_sub) {
     case DVR_SUB_MAIN:
-        /* Function dock SET: activate focused button */
-        switch (dvr_dock_focus)
-        {
-        case DVR_DOCK_CAMERA:
-            /* Enter camera switch mode: show front/rear dock */
-            dvr_cam_focus = (dvr_get_view_mode() == 1) ? 1 : 0;
-            dvr_show_sub(DVR_SUB_CAM_SW);
-            dvr_refresh_cam_tab(dvr_cam_focus);
-            printf("DVR: enter cam-switch, focus=%d\n", dvr_cam_focus);
-            break;
-        case DVR_DOCK_PLAYBACK:
-            /* Enter file list (video mode) */
-            dvr_list_mode = 0;
-            dvr_list_tab = 0;
-            dvr_get_file_list(0);
-            dvr_show_sub(DVR_SUB_LIST);
-            dvr_list_focus = 0;
-            dvr_refresh_list_highlight(0);
-            dvr_refresh_list_tab(0);
-            break;
-        case DVR_DOCK_PHOTO:
-            /* Take a snapshot */
-            dvr_send_normal_cmd(BD_CTRL_SNAP, 0);
-            printf("DVR: snapshot taken\n");
-            break;
+        switch(dock_focus) {
+        case DVR_DOCK_PREVIEW:
+            cam_focus=(dvr_get_view_mode()==1)?DVR_CAM_REAR:DVR_CAM_FRONT;
+            show_sub(DVR_SUB_CAM_SW); hl_cam(cam_focus);
+            printf("DVR: enter cam dock\n"); break;
+        case DVR_DOCK_VIDEO_PB:
+            list_mode=0; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
+            dvr_api_get_list(list_api_mode());
+            show_sub(DVR_SUB_LIST); dvr_file_list_populate();
+            hl_list(0); hl_tab(list_tab);
+            printf("DVR: enter video list\n"); break;
+        case DVR_DOCK_PHOTO_PB:
+            list_mode=1; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
+            dvr_api_get_list(list_api_mode());
+            show_sub(DVR_SUB_LIST); dvr_file_list_populate();
+            hl_list(0); hl_tab(list_tab);
+            printf("DVR: enter photo list\n"); break;
         case DVR_DOCK_SETTINGS:
-            /* Enter DVR settings */
-            dvr_show_sub(DVR_SUB_SETTING);
-            dvr_set_focus = DVR_SET_CAMERA;
-            dvr_refresh_setting_highlight(DVR_SET_CAMERA);
-            /* Sync indicators with current state */
-            dvr_refresh_cam_onoff_indicator(dvr_set_cam_onoff);
-            dvr_refresh_loop_indicator(dvr_set_loop_val);
-            break;
-        default:
-            break;
+            show_sub(DVR_SUB_SETTING); set_focus=DVR_SET_CAMERA;
+            hl_set(DVR_SET_CAMERA); hl_cam_onoff(set_cam_onoff); hl_loop(set_loop_val);
+            printf("DVR: enter settings\n"); break;
+        default: break;
         }
         break;
 
     case DVR_SUB_CAM_SW:
-        /* Confirm front/rear camera selection and send command */
-        dvr_api_view_switch(dvr_cam_focus);  /* 0=front, 1=rear */
-        printf("DVR: cam-switch confirmed, mode=%d\n", dvr_cam_focus);
+        switch(cam_focus) {
+        case DVR_CAM_FRONT:  dvr_api_view_switch(0); printf("DVR: cam→front\n"); show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
+        case DVR_CAM_REAR:   dvr_api_view_switch(1); printf("DVR: cam→rear\n");  show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
+        case DVR_CAM_SNAPSHOT: dvr_api_snap(); printf("DVR: snap!\n"); break; /* stay */
+        default: break;
+        }
         break;
 
-    case DVR_SUB_LIST:
-        /* SET in file list — switch between front/rear video tab */
-        dvr_list_tab = dvr_list_tab ? 0 : 1;
-        dvr_refresh_list_tab(dvr_list_tab);
-        /* Request file list for the new tab's camera */
-        dvr_get_file_list(dvr_list_mode);
-        dvr_list_focus = 0;
-        dvr_refresh_list_highlight(0);
-        printf("DVR: list tab switched to %s\n", dvr_list_tab ? "rear" : "front");
-        break;
+    case DVR_SUB_LIST: {
+        int fi=list_offset+list_focus;
+        if(fi<list_count){
+            if(dvr_get_rec_status()){dvr_api_rec_stop();printf("DVR: rec stopped\n");}
+            pb_mode=list_api_mode(); pb_idx=fi; pb_paused=0;
+            dvr_api_pb_start((uint8_t)pb_mode,(uint16_t)fi);
+            show_sub(DVR_SUB_PLAYBACK);
+            printf("DVR: pb start mode=%d idx=%d\n",pb_mode,fi);
+        } else { printf("DVR: no file row=%d cnt=%d\n",fi,list_count); }
+        } break;
 
     case DVR_SUB_SETTING:
-        /* Handle setting sub-options */
-        switch (dvr_set_focus)
-        {
-        case DVR_SET_CAMERA:
-            /* Toggle camera recording on/off */
-            dvr_set_cam_onoff = dvr_set_cam_onoff ? 0 : 1;
-            if (dvr_set_cam_onoff)
-                dvr_api_rec_start();
-            else
-                dvr_api_rec_stop();
-            dvr_refresh_cam_onoff_indicator(dvr_set_cam_onoff);
-            printf("DVR: camera rec %s\n", dvr_set_cam_onoff ? "ON" : "OFF");
-            break;
-        case DVR_SET_LOOP:
-            /* Cycle loop recording time: 0->1->2->0 (1min->2min->3min->1min) */
-            dvr_set_loop_val = (dvr_set_loop_val + 1) % 3;
-            dvr_api_set_loop_time(dvr_set_loop_val + 1);  /* API expects 1/2/3 */
-            dvr_refresh_loop_indicator(dvr_set_loop_val);
-            printf("DVR: loop time = %d min\n", dvr_set_loop_val + 1);
-            break;
-        case DVR_SET_FORMAT:
-            /* Format SD card — show confirmation popup */
-            dvr_popup_source = POPUP_SRC_CARD_FORMAT;
-            dvr_popup_focus = 1;  /* default to Cancel for safety */
-            dvr_show_sub(DVR_SUB_POPUP);
-            dvr_refresh_popup_highlight(dvr_popup_focus);
-            break;
-        case DVR_SET_ABOUT:
-            /* About / storage info — no action */
-            break;
-        default:
-            break;
+        switch(set_focus){
+        case DVR_SET_CAMERA: set_edit_val=set_cam_onoff; hl_cam_onoff(set_edit_val); show_sub(DVR_SUB_SET_EDIT); break;
+        case DVR_SET_LOOP:   set_edit_val=set_loop_val;  hl_loop(set_edit_val);      show_sub(DVR_SUB_SET_EDIT); break;
+        case DVR_SET_FORMAT: popup_src=POP_FORMAT; popup_focus=1; show_sub(DVR_SUB_POPUP); hl_popup(1); break;
+        default: break;
         }
+        break;
+
+    case DVR_SUB_SET_EDIT:
+        if(set_focus==DVR_SET_CAMERA){set_cam_onoff=set_edit_val; if(set_cam_onoff)dvr_api_rec_start();else dvr_api_rec_stop(); hl_cam_onoff(set_cam_onoff); printf("DVR: cam %s\n",set_cam_onoff?"ON":"OFF");}
+        else if(set_focus==DVR_SET_LOOP){set_loop_val=set_edit_val; dvr_api_set_loop_time(set_loop_val+1); hl_loop(set_loop_val); printf("DVR: loop=%dmin\n",set_loop_val+1);}
+        show_sub(DVR_SUB_SETTING); hl_set(set_focus);
         break;
 
     case DVR_SUB_POPUP:
-        if (dvr_popup_focus == 0) {
-            /* Confirm */
-            if (dvr_popup_source == POPUP_SRC_FILE_DELETE)
-                dvr_send_normal_cmd(BD_CTRL_DEL_FILE, dvr_list_focus);
-            else
-                dvr_api_format();
+        if(popup_focus==0){
+            if(popup_src==POP_FILE_DEL){
+                int fi=list_offset+list_focus; uint16_t par=(uint16_t)fi;
+                if(list_mode==1) par|=0x8000; /* photo bit */
+                if(list_tab==1)  par|=0x4000; /* rear bit */
+                dvr_send_normal_cmd(BD_CTRL_DEL_FILE,par);
+                printf("DVR: del par=0x%04X\n",par);
+            } else { dvr_api_format(); }
         }
-        /* Both confirm and cancel return to previous view */
-        dvr_show_sub(dvr_popup_source == POPUP_SRC_CARD_FORMAT ? DVR_SUB_SETTING : DVR_SUB_LIST);
+        if(popup_src==POP_FORMAT){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
+        else{show_sub(DVR_SUB_LIST);dvr_api_get_list(list_api_mode());dvr_file_list_populate();if(list_focus>=list_count&&list_focus>0)list_focus--;hl_list(list_focus);}
         break;
 
-    default:
-        break;
+    case DVR_SUB_PLAYBACK:
+        pb_paused=pb_paused?0:1; dvr_api_pb_pause();
+        printf("DVR: pb %s\n",pb_paused?"paused":"resumed"); break;
+
+    default: break;
     }
 }
 
-/* ---- BACK key ---- */
-void dvr_page_deal_key_back(void)
-{
-    switch (current_dvr_sub)
-    {
+/* ==== BACK ==== */
+void dvr_page_deal_key_back(void) {
+    switch(cur_sub) {
     case DVR_SUB_MAIN:
-        /* Hide DVR UI first to avoid visual glitch during alpha restore */
-        if (dvr_main_view) widget_set_visible(dvr_main_view, FALSE);
-        dvr_stop_preview();
-        navigator_back();
-        break;
-
-    case DVR_SUB_CAM_SW:
-        /* Return from camera switch dock to function dock */
-        dvr_show_sub(DVR_SUB_MAIN);
-        dvr_refresh_dock_highlight(dvr_dock_focus);
-        break;
-
-    case DVR_SUB_LIST:
-        /* Return from file list to main preview */
-        dvr_show_sub(DVR_SUB_MAIN);
-        dvr_refresh_dock_highlight(dvr_dock_focus);
-        break;
-
-    case DVR_SUB_SETTING:
-        /* Return from settings to main preview */
-        dvr_show_sub(DVR_SUB_MAIN);
-        dvr_refresh_dock_highlight(dvr_dock_focus);
-        break;
-
+        if(dvr_main_view) widget_set_visible(dvr_main_view,FALSE);
+        dvr_stop_preview(); navigator_back(); break;
+    case DVR_SUB_CAM_SW:   show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
+    case DVR_SUB_LIST:     show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
+    case DVR_SUB_SETTING:  show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
+    case DVR_SUB_SET_EDIT:
+        if(set_focus==DVR_SET_CAMERA) hl_cam_onoff(set_cam_onoff);
+        else if(set_focus==DVR_SET_LOOP) hl_loop(set_loop_val);
+        show_sub(DVR_SUB_SETTING); hl_set(set_focus); break;
     case DVR_SUB_POPUP:
-        /* Return from popup to list or setting */
-        dvr_show_sub(dvr_popup_source == POPUP_SRC_CARD_FORMAT ? DVR_SUB_SETTING : DVR_SUB_LIST);
-        break;
-
-    default:
-        break;
+        if(popup_src==POP_FORMAT){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
+        else{show_sub(DVR_SUB_LIST);hl_list(list_focus);} break;
+    case DVR_SUB_PLAYBACK:
+        dvr_api_pb_stop(); pb_paused=0; printf("DVR: pb stopped\n");
+        show_sub(DVR_SUB_LIST); dvr_file_list_populate(); hl_list(list_focus); hl_tab(list_tab); break;
+    default: break;
     }
 }
 
-/* ---- UP key ---- */
-void dvr_page_deal_key_up(void)
-{
-    switch (current_dvr_sub)
-    {
-    case DVR_SUB_MAIN:
-        /* Navigate dock buttons upward */
-        if (dvr_dock_focus > 0) {
-            dvr_dock_focus--;
-            dvr_refresh_dock_highlight(dvr_dock_focus);
-        }
-        break;
-    case DVR_SUB_CAM_SW:
-        /* Switch to front camera */
-        dvr_cam_focus = 0;
-        dvr_refresh_cam_tab(0);
-        break;
+/* ==== UP ==== */
+void dvr_page_deal_key_up(void) {
+    switch(cur_sub) {
+    case DVR_SUB_MAIN:     if(dock_focus>0) hl_dock(dock_focus-1); break;
+    case DVR_SUB_CAM_SW:   if(cam_focus>0) hl_cam(cam_focus-1); break;
     case DVR_SUB_LIST:
-        if (dvr_list_focus > 0) {
-            dvr_list_focus--;
-            dvr_refresh_list_highlight(dvr_list_focus);
+        if(list_focus>0){list_focus--;hl_list(list_focus);}
+        else if(list_offset>0){list_offset--;dvr_file_list_populate();hl_list(0);}
+        else if(list_tab>0){
+            list_tab--; list_offset=0;
+            dvr_api_get_list(list_api_mode()); dvr_file_list_populate();
+            list_focus=0; hl_list(0); hl_tab(list_tab);
         }
         break;
-    case DVR_SUB_SETTING:
-        if (dvr_set_focus > 0) {
-            dvr_set_focus--;
-            dvr_refresh_setting_highlight(dvr_set_focus);
-        }
+    case DVR_SUB_SETTING:  if(set_focus>0){set_focus--;hl_set(set_focus);} break;
+    case DVR_SUB_SET_EDIT:
+        if(set_focus==DVR_SET_CAMERA){set_edit_val=set_edit_val?0:1;hl_cam_onoff(set_edit_val);}
+        else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val>0)?set_edit_val-1:2;hl_loop(set_edit_val);}
         break;
-    case DVR_SUB_POPUP:
-        dvr_popup_focus = 0;
-        dvr_refresh_popup_highlight(0);
-        break;
-    default:
-        break;
+    case DVR_SUB_POPUP: popup_focus=0;hl_popup(0); break;
+    default: break;
     }
 }
 
-/* ---- DOWN key ---- */
-void dvr_page_deal_key_down(void)
-{
-    switch (current_dvr_sub)
-    {
-    case DVR_SUB_MAIN:
-        /* Navigate dock buttons downward */
-        if (dvr_dock_focus < DVR_DOCK_BTN_MAX - 1) {
-            dvr_dock_focus++;
-            dvr_refresh_dock_highlight(dvr_dock_focus);
-        }
-        break;
-    case DVR_SUB_CAM_SW:
-        /* Switch to rear camera */
-        dvr_cam_focus = 1;
-        dvr_refresh_cam_tab(1);
-        break;
+/* ==== DOWN ==== */
+void dvr_page_deal_key_down(void) {
+    switch(cur_sub) {
+    case DVR_SUB_MAIN:     if(dock_focus<DVR_DOCK_BTN_MAX-1) hl_dock(dock_focus+1); break;
+    case DVR_SUB_CAM_SW:   if(cam_focus<DVR_CAM_ITEM_MAX-1) hl_cam(cam_focus+1); break;
     case DVR_SUB_LIST:
-        if (dvr_list_focus < DVR_FILE_ITEM_MAX - 1) {
-            dvr_list_focus++;
-            dvr_refresh_list_highlight(dvr_list_focus);
+        if(list_focus<DVR_FILE_ITEM_MAX-1 && (list_offset+list_focus+1)<list_count){list_focus++;hl_list(list_focus);}
+        else if((list_offset+DVR_FILE_ITEM_MAX)<list_count){list_offset++;dvr_file_list_populate();hl_list(DVR_FILE_ITEM_MAX-1);}
+        else if(list_tab<DVR_TAB_MAX-1){
+            list_tab++; list_offset=0;
+            dvr_api_get_list(list_api_mode()); dvr_file_list_populate();
+            list_focus=0; hl_list(0); hl_tab(list_tab);
         }
         break;
-    case DVR_SUB_SETTING:
-        if (dvr_set_focus < DVR_SET_ROW_MAX - 1) {
-            dvr_set_focus++;
-            dvr_refresh_setting_highlight(dvr_set_focus);
-        }
+    case DVR_SUB_SETTING:  if(set_focus<DVR_SET_ROW_MAX-1){set_focus++;hl_set(set_focus);} break;
+    case DVR_SUB_SET_EDIT:
+        if(set_focus==DVR_SET_CAMERA){set_edit_val=set_edit_val?0:1;hl_cam_onoff(set_edit_val);}
+        else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val+1)%3;hl_loop(set_edit_val);}
         break;
-    case DVR_SUB_POPUP:
-        dvr_popup_focus = 1;
-        dvr_refresh_popup_highlight(1);
-        break;
-    default:
-        break;
+    case DVR_SUB_POPUP: popup_focus=1;hl_popup(1); break;
+    default: break;
     }
 }
 
-/* ---- State accessors ---- */
-dvr_sub_page_e dvr_get_current_sub(void) { return current_dvr_sub; }
-void dvr_set_current_sub(dvr_sub_page_e sub) { dvr_show_sub(sub); }
+/* ---- Accessors ---- */
+dvr_sub_page_e dvr_get_current_sub(void) { return cur_sub; }
+void dvr_set_current_sub(dvr_sub_page_e sub) { show_sub(sub); }
 
-void dvr_file_list_set_name(int index, const char* name)
-{
-    if (index >= 0 && index < DVR_FILE_ITEM_MAX && dvr_file_name[index] && name)
-        widget_set_text_utf8(dvr_file_name[index], name);
+void dvr_file_list_set_name(int i,const char*n) {
+    if(i>=0&&i<DVR_FILE_ITEM_MAX&&file_name_w[i]&&n) widget_set_text_utf8(file_name_w[i],n);
 }
-
-void dvr_file_list_clear(void)
-{
-    for (int i = 0; i < DVR_FILE_ITEM_MAX; i++)
-        if (dvr_file_name[i]) widget_set_text_utf8(dvr_file_name[i], "");
+void dvr_file_list_clear(void) {
+    for(int i=0;i<DVR_FILE_ITEM_MAX;i++) if(file_name_w[i]) widget_set_text_utf8(file_name_w[i],"");
 }
-
-void dvr_setting_update_storage(int used_gb, int total_gb)
-{
+void dvr_setting_update_storage(int used,int total) {
     char buf[32];
-    if (dvr_storage_bar && total_gb > 0)
-        progress_bar_set_value(dvr_storage_bar, (used_gb * 100) / total_gb);
-    if (dvr_storage_text) {
-        snprintf(buf, sizeof(buf), "%dG/%dG", used_gb, total_gb);
-        widget_set_text_utf8(dvr_storage_text, buf);
-    }
+    if(storage_bar&&total>0) progress_bar_set_value(storage_bar,(used*100)/total);
+    if(storage_text){snprintf(buf,sizeof(buf),"%dG/%dG",used,total);widget_set_text_utf8(storage_text,buf);}
 }

@@ -3,34 +3,41 @@
 
 #include "common.h"
 
-/* DVR sub-page states */
 typedef enum dvr_sub_page {
-    DVR_SUB_MAIN     = 0,  /* 6.1 - DVR main preview (function dock) */
-    DVR_SUB_CAM_SW   = 1,  /* 6.1b - DVR preview with camera switch dock (front/rear) */
-    DVR_SUB_LIST     = 2,  /* 6.3 - File list (video/photo) */
-    DVR_SUB_SETTING  = 3,  /* 6.5 - DVR settings */
-    DVR_SUB_POPUP    = 4,  /* 6.3-2 - Delete confirm popup */
+    DVR_SUB_MAIN     = 0,  /* Preview + 4-button dock */
+    DVR_SUB_CAM_SW   = 1,  /* Preview + cam sub-dock (Front/Rear/Snap) */
+    DVR_SUB_LIST     = 2,  /* File list overlay (2 tabs: front/rear) */
+    DVR_SUB_SETTING  = 3,  /* Settings overlay */
+    DVR_SUB_POPUP    = 4,  /* Confirm popup */
+    DVR_SUB_PLAYBACK = 5,  /* Video/photo playback */
+    DVR_SUB_SET_EDIT = 6,  /* Setting sub-option editing */
     DVR_SUB_MAX      ,
 } dvr_sub_page_e;
 
-/* DVR main dock buttons */
+/* Main dock: 4 buttons */
 typedef enum dvr_dock_btn {
-    DVR_DOCK_CAMERA   = 0,
-    DVR_DOCK_PLAYBACK = 1,
-    DVR_DOCK_PHOTO    = 2,
-    DVR_DOCK_SETTINGS = 3,
+    DVR_DOCK_PREVIEW  = 0,   /* → cam sub-dock (front/rear/snap) */
+    DVR_DOCK_VIDEO_PB = 1,   /* → video file list */
+    DVR_DOCK_PHOTO_PB = 2,   /* → photo file list */
+    DVR_DOCK_SETTINGS = 3,   /* → settings */
     DVR_DOCK_BTN_MAX  ,
 } dvr_dock_btn_e;
 
-/* DVR list tab */
+/* Camera sub-dock: 3 items */
+typedef enum dvr_cam_item {
+    DVR_CAM_FRONT    = 0,
+    DVR_CAM_REAR     = 1,
+    DVR_CAM_SNAPSHOT = 2,
+    DVR_CAM_ITEM_MAX ,
+} dvr_cam_item_e;
+
+/* File list tab: only 2 within each mode (front/rear) */
 typedef enum dvr_list_tab {
-    DVR_TAB_FRONT_VIDEO = 0,
-    DVR_TAB_REAR_VIDEO  = 1,
-    DVR_TAB_FRONT_PHOTO = 2,
-    DVR_TAB_REAR_PHOTO  = 3,
+    DVR_TAB_FRONT = 0,
+    DVR_TAB_REAR  = 1,
+    DVR_TAB_MAX   ,
 } dvr_list_tab_e;
 
-/* DVR setting rows */
 typedef enum dvr_setting_row {
     DVR_SET_CAMERA  = 0,
     DVR_SET_LOOP    = 1,
@@ -42,26 +49,15 @@ typedef enum dvr_setting_row {
 #define DVR_FILE_ITEM_MAX  6
 
 ret_t home_dvr_view_init(widget_t* parent);
-
-/* DVR preview lifecycle (manages UI bg transparency + VIDEO layer) */
-void dvr_view_enter_preview(void);
-void dvr_view_exit_preview(void);
-
-/* DVR key handlers */
 void dvr_page_deal_key_set(void);
 void dvr_page_deal_key_back(void);
 void dvr_page_deal_key_up(void);
 void dvr_page_deal_key_down(void);
-
-/* DVR sub-page control */
 dvr_sub_page_e dvr_get_current_sub(void);
 void dvr_set_current_sub(dvr_sub_page_e sub);
-
-/* File list operations */
 void dvr_file_list_set_name(int index, const char* name);
 void dvr_file_list_clear(void);
-
-/* Setting updates */
+void dvr_file_list_populate(void);
 void dvr_setting_update_storage(int used_gb, int total_gb);
 
 #endif
