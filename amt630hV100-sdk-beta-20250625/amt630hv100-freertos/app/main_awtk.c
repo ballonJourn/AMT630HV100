@@ -217,8 +217,19 @@ static uint32_t dvr_fps = 0;
 // `DVR: [FPS:xx] frame_count=xx` log line is emitted. Toggled via CLI.
 static uint8_t dvr_fps_print_enable = 1;
 
+// File list ready flag: set by dvr_filelist_parser() after USB response,
+// cleared by UI thread after reading. This bridges the async gap between
+// dvr_api_get_list() (fire) and dvr_file_list_populate() (consume).
+static volatile uint8_t dvr_filelist_ready_flag = 0;
+
 // Skip JPEG process flag (for file list operations)
 static uint8_t dvr_skip_jpeg_process = 0;
+
+// Auto-record: set to 1 by dvr_usb_task after init. When the first
+// GET_STS response arrives with SD=1, rec_start is sent and flag cleared.
+// This ensures recording starts only after the DVR chip has initialized
+// its SD card, not before the USB elene file is even open.
+static uint8_t dvr_auto_rec_pending = 0;
 
 #endif
 int carlink_aa_init();
@@ -518,6 +529,23 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
             printf("DVR STATUS: SD=%d Rec=%d Lock=%d Error=%d Full=%d MIC=%d\n",
                    dvr_sd_status, dvr_rec_status, dvr_lock_status,
                    dvr_sd_error, dvr_sd_full, dvr_mic_status);
+            /* Auto-record: once SD card is ready and not already recording,
+             * start loop recording automatically. Only fires once per
+             * USB insertion (dvr_auto_rec_pending is set by task init). */
+            if (dvr_auto_rec_pending && dvr_sd_status && !dvr_rec_status) {
+                dvr_auto_rec_pending = 0;
+                dvr_send_normal_cmd(BD_CTRL_REC_START, 0);
+                printf("DVR: auto-rec started (SD ready)\n");
+            } else if (dvr_auto_rec_pending && !dvr_sd_status) {
+                /* SD not ready yet — re-query after a short delay.
+                 * The next FPS tick (~1s) or manual getsts will retry.
+                 * Schedule a re-query via the pending-command mechanism. */
+                printf("DVR: SD not ready, will retry auto-rec\n");
+            } else if (dvr_auto_rec_pending && dvr_rec_status) {
+                /* Already recording (e.g. DVR chip auto-started) */
+                dvr_auto_rec_pending = 0;
+                printf("DVR: already recording, auto-rec skipped\n");
+            }
             break;
         case BD_CTRL_SENSOR_SEL:
             printf("DVR RECV SENSOR_SEL: cmd_par=0x%02x\n", pctrl->cmd_par);
@@ -922,6 +950,13 @@ static void dvr_usb_task(void *arg)
 
     // Note: dvr_get_status() and dvr_get_file_list() are called on demand, not in the main loop
 
+    /* Auto-record: query status after task init; when SD=1 is first
+     * seen in dvr_recv_cmd_process(), rec_start is sent automatically.
+     * Flag is reset on task exit so the next USB insertion retriggers. */
+    dvr_auto_rec_pending = 1;
+    dvr_send_normal_cmd(BD_CTRL_GET_STS, 0);
+    printf("DVR: init done, querying status for auto-rec\n");
+
     uint32_t last_switch_time = 0;
     uint32_t current_time;
 #if DVR_FRAMERATE_PRINT
@@ -961,6 +996,19 @@ static void dvr_usb_task(void *arg)
                 printf("DVR: [FPS:%lu] frame_count=%lu\n",
                        (unsigned long)dvr_fps,
                        (unsigned long)dvr_frame_count);
+            }
+
+            /* Auto-rec retry: if SD was not ready at task init, re-query
+             * status every FPS tick (~1s) until SD comes up or 30s passes. */
+            if (dvr_auto_rec_pending) {
+                static uint8_t auto_rec_retry_count = 0;
+                if (++auto_rec_retry_count <= 30) {
+                    dvr_send_normal_cmd(BD_CTRL_GET_STS, 0);
+                } else {
+                    dvr_auto_rec_pending = 0;
+                    auto_rec_retry_count = 0;
+                    printf("DVR: auto-rec gave up after 30s (SD never ready)\n");
+                }
             }
 
             /* System health report every 30 seconds */
@@ -1009,6 +1057,7 @@ static void dvr_usb_task(void *arg)
     }
 
     dvr_capture_deinit(cap);
+    dvr_auto_rec_pending = 0;
     dvr_task_handle = NULL;
     printf("DVR: task exited\n");
     vTaskDelete(NULL);
@@ -1173,6 +1222,9 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
 
     printf("DVR: file list count - Video: %d, Photo: %d\n",
            dvr_video_list_count, dvr_photo_list_count);
+
+    /* Signal UI thread that fresh data is available */
+    dvr_filelist_ready_flag = 1;
 }
 
 // Get file list from DVR device
@@ -1399,6 +1451,11 @@ uint16_t dvr_api_get_video_list_f_count(void) { return dvr_video_list_f_count; }
 uint16_t dvr_api_get_video_list_r_count(void) { return dvr_video_list_r_count; }
 uint16_t dvr_api_get_photo_list_f_count(void) { return dvr_photo_list_f_count; }
 uint16_t dvr_api_get_photo_list_r_count(void) { return dvr_photo_list_r_count; }
+
+/* File-list ready flag: set by dvr_filelist_parser() in USB-task context,
+ * polled & cleared by UI thread after dvr_api_get_list(). */
+uint8_t dvr_api_is_filelist_ready(void)  { return dvr_filelist_ready_flag; }
+void    dvr_api_clear_filelist_ready(void){ dvr_filelist_ready_flag = 0; }
 
 // Get view mode
 uint8_t dvr_get_view_mode(void) { return dvr_view_mode; }
@@ -1649,7 +1706,7 @@ uint8_t dvr_api_get_fps_print(void)
 // DVR preview lifecycle - called by dvr_page_init() when DVR window opens
 void dvr_start_preview(void)
 {
-    dvr_api_set_display_window(52, 0, 972, 500);
+    dvr_api_set_display_window(0, 0, 1024, 500);
     dvr_api_set_preview_enable(1);
     printf("DVR: start_preview (window 52,0,972,500)\n");
 }
@@ -2320,7 +2377,7 @@ static void usb_read_thread(void *para)
 			#if ENABLE_BD_USB_DVR_FUNC
 			// Check if elene file exists and start DVR task if found
 			// #ifdef USB_SUPPORT
-			dvr_api_set_display_window(52, 0, 972, 500);
+			dvr_api_set_display_window(0, 0, 1024, 500);
 			dvr_start_if_elene_exists();
 			// #endif
 			#endif

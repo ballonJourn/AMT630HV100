@@ -155,4 +155,11 @@ extern uint16_t dvr_api_get_photo_list_r_count(void);
 extern void dvr_api_set_fps_print(uint8_t enable);
 extern uint8_t dvr_api_get_fps_print(void);
 
+/* File-list ready flag (async bridge).
+ * After calling dvr_api_get_list(), poll dvr_api_is_filelist_ready()
+ * until it returns 1, then call dvr_api_clear_filelist_ready() and
+ * read the bucket data. Set by USB-task, cleared by UI-task. */
+extern uint8_t dvr_api_is_filelist_ready(void);
+extern void    dvr_api_clear_filelist_ready(void);
+
 #endif /* DVR_API_H */

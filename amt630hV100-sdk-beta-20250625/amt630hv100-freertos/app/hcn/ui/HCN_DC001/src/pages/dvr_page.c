@@ -65,6 +65,14 @@ ret_t dvr_page_init(widget_t* win, void* ctx)
     /* Lock preview to front+rear dual-camera mode */
     dvr_api_view_switch(DVR_PREVIEW_MODE_FRONT_REAR);
 
+    /* Query current DVR status (SD card, recording, etc.) so UI
+     * has accurate state for snap/recording controls.
+     * Note: auto-rec is handled by dvr_usb_task itself — it queries
+     * status after init and starts recording when SD=1 is confirmed.
+     * This UI-side getsts is supplementary (may arrive before task
+     * is ready, which is fine — the task handles its own retry). */
+    dvr_api_get_status();
+
     /* Disable auto view-mode cycling; preview is fixed to dual-cam */
     dvr_set_sensor_switch_enable(0);
 

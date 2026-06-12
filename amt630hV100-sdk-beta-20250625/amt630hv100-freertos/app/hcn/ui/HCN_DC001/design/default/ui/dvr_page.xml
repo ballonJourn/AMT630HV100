@@ -63,6 +63,8 @@
         <image name="dvr_file_del_5" x="500" y="0" w="100" h="60" draw_type="default" style:normal:icon="icon_delete_n" style:selected:icon="icon_delete_p"/>
       </view>
     </scroll_view>
+    <!-- "No SD Card" / empty-list label (hidden by default, shown by C code) -->
+    <label name="dvr_list_no_sd" x="336" y="200" w="300" h="60" visible="false" style:normal:font_size="32" style:normal:text_color="#FFFFFFFF" text="No SD Card"/>
     <!-- Bottom tab: Front / Rear (2-tab, text set dynamically by C code) -->
     <view name="dvr_list_dock" x="0" y="500" w="972" h="100" style:normal:bg_image="dock_bg">
       <image name="dvr_list_tab_sel" x="0" y="0" w="486" h="100" draw_type="default" image="dock_selected"/>

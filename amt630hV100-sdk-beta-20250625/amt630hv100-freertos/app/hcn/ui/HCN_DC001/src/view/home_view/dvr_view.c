@@ -48,6 +48,8 @@ static widget_t* set_cam_on_sel   = NULL;
 static widget_t* set_loop_sel     = NULL;
 static widget_t* storage_bar      = NULL;
 static widget_t* storage_text     = NULL;
+static widget_t* file_scroll_w    = NULL;  /* scroll_view containing file rows */
+static widget_t* list_no_sd_label = NULL;  /* "No SD Card" label in list view */
 
 /* ---- State ---- */
 static dvr_sub_page_e cur_sub = DVR_SUB_MAIN;
@@ -64,10 +66,19 @@ static int set_edit_val  = 0;
 static int list_count    = 0;
 static int list_offset   = 0;
 
-typedef enum { POP_FILE_DEL=0, POP_FORMAT=1 } pop_src_e;
+typedef enum { POP_FILE_DEL=0, POP_FORMAT=1, POP_NO_SD=2 } pop_src_e;
 static pop_src_e popup_src = POP_FILE_DEL;
 
 static int pb_paused = 0, pb_idx = 0, pb_mode = 0;
+
+/* Async file-list fetch: after dvr_api_get_list() we poll
+ * dvr_api_is_filelist_ready() via an AWTK timer until the USB
+ * task fills the cache, then populate the UI list. */
+static int list_fetch_pending = 0;
+static uint32_t list_poll_timer_id = TK_INVALID_ID;
+#define LIST_POLL_INTERVAL_MS  100
+#define LIST_POLL_MAX_RETRIES  30   /* 3 seconds timeout */
+static int list_poll_retries = 0;
 
 /* ---- dvr_get_file_list mode encoding ----
  * mode 0: front video, 1: rear video, 2: front photo, 3: rear photo
@@ -80,8 +91,16 @@ static void show_sub(dvr_sub_page_e sub)
 {
     dvr_sub_page_e prev = cur_sub;
     cur_sub = sub;
-    int pv_prev = (prev == DVR_SUB_MAIN || prev == DVR_SUB_CAM_SW);
-    int pv_next = (sub  == DVR_SUB_MAIN || sub  == DVR_SUB_CAM_SW);
+
+    /* Cancel any pending file-list poll timer when leaving LIST sub-page */
+    if (prev == DVR_SUB_LIST && sub != DVR_SUB_LIST && list_poll_timer_id != TK_INVALID_ID) {
+        timer_remove(list_poll_timer_id);
+        list_poll_timer_id = TK_INVALID_ID;
+        list_fetch_pending = 0;
+    }
+
+    int pv_prev = (prev == DVR_SUB_MAIN || prev == DVR_SUB_CAM_SW || prev == DVR_SUB_PLAYBACK);
+    int pv_next = (sub  == DVR_SUB_MAIN || sub  == DVR_SUB_CAM_SW || sub  == DVR_SUB_PLAYBACK);
     if (pv_prev && !pv_next) { dvr_api_set_preview_enable(0); printf("DVR: preview off (sub=%d)\n", sub); }
 
     int mv = (sub == DVR_SUB_MAIN || sub == DVR_SUB_CAM_SW || sub == DVR_SUB_PLAYBACK);
@@ -126,11 +145,81 @@ static void hl_popup(int f) {
     if(!dvr_popup_view)return;
     widget_t*c=widget_lookup(dvr_popup_view,"dvr_popup_confirm_bg",TRUE);
     widget_t*x=widget_lookup(dvr_popup_view,"dvr_popup_cancel_bg",TRUE);
-    if(c) widget_set_state(c,(f==0)?STATE_SELECTE:STATE_NORMAL);
-    if(x) widget_set_state(x,(f==1)?STATE_SELECTE:STATE_NORMAL);
+    widget_t*cl=widget_lookup(dvr_popup_view,"dvr_popup_confirm",TRUE);
+    widget_t*xl=widget_lookup(dvr_popup_view,"dvr_popup_cancel",TRUE);
+    if (popup_src == POP_NO_SD) {
+        /* Alert mode: single centered OK button */
+        if(c) { widget_set_visible(c, TRUE); widget_set_state(c, STATE_SELECTE); }
+        if(cl) { widget_set_visible(cl, TRUE); widget_set_text_utf8(cl, "OK"); }
+        if(x) widget_set_visible(x, FALSE);
+        if(xl) widget_set_visible(xl, FALSE);
+    } else {
+        /* Normal confirm/cancel mode */
+        if(c) { widget_set_visible(c, TRUE); widget_set_state(c,(f==0)?STATE_SELECTE:STATE_NORMAL); }
+        if(x) { widget_set_visible(x, TRUE); widget_set_state(x,(f==1)?STATE_SELECTE:STATE_NORMAL); }
+        if(cl) { widget_set_visible(cl, TRUE); widget_set_text_utf8(cl, "OK"); }
+        if(xl) { widget_set_visible(xl, TRUE); widget_set_text_utf8(xl, "Cancel"); }
+    }
+}
+
+/* Show "No SD Card" alert popup. Returns to `return_sub` on SET/BACK. */
+static dvr_sub_page_e no_sd_return_sub = DVR_SUB_MAIN;
+
+static void show_no_sd_popup(dvr_sub_page_e return_to) {
+    widget_t* title = dvr_popup_view ? widget_lookup(dvr_popup_view,"dvr_popup_title",TRUE) : NULL;
+    if(title) widget_set_text_utf8(title, "No SD Card");
+    popup_src = POP_NO_SD;
+    no_sd_return_sub = return_to;
+    popup_focus = 0;
+    show_sub(DVR_SUB_POPUP);
+    hl_popup(0);
+    printf("DVR: no SD card alert\n");
 }
 
 /* ---- File list data ---- */
+
+/* Timer callback: polls dvr_api_is_filelist_ready() until the USB task
+ * signals that the file-list response has been parsed, then populates
+ * the UI list.  Self-cancels on success or timeout. */
+static ret_t on_filelist_poll_timer(const timer_info_t* info)
+{
+    (void)info;
+    if (dvr_api_is_filelist_ready()) {
+        dvr_api_clear_filelist_ready();
+        list_fetch_pending = 0;
+        list_poll_timer_id = TK_INVALID_ID;
+        dvr_file_list_populate();
+        hl_list(list_focus);
+        printf("DVR: filelist ready, populated\n");
+        return RET_REMOVE;
+    }
+    if (++list_poll_retries >= LIST_POLL_MAX_RETRIES) {
+        list_fetch_pending = 0;
+        list_poll_timer_id = TK_INVALID_ID;
+        dvr_file_list_populate(); /* show whatever is cached */
+        hl_list(list_focus);
+        printf("DVR: filelist poll timeout (%d retries)\n", LIST_POLL_MAX_RETRIES);
+        return RET_REMOVE;
+    }
+    return RET_REPEAT;
+}
+
+/* Fire dvr_api_get_list() and start a timer to poll for the result.
+ * Safe to call multiple times; cancels any previous pending poll. */
+static void dvr_request_file_list(void)
+{
+    if (list_poll_timer_id != TK_INVALID_ID) {
+        timer_remove(list_poll_timer_id);
+        list_poll_timer_id = TK_INVALID_ID;
+    }
+    dvr_api_clear_filelist_ready();
+    list_fetch_pending = 1;
+    list_poll_retries = 0;
+    dvr_api_get_list(list_api_mode());
+    list_poll_timer_id = timer_add(on_filelist_poll_timer, NULL, LIST_POLL_INTERVAL_MS);
+    printf("DVR: file list requested mode=%d, poll started\n", list_api_mode());
+}
+
 static uint16_t get_count(void) {
     switch(list_api_mode()) {
     case 0: return dvr_api_get_video_list_f_count();
@@ -197,6 +286,8 @@ ret_t home_dvr_view_init(widget_t* parent) {
     set_loop_sel   = widget_lookup(parent,"dvr_set_loop_sel",TRUE);
     storage_bar    = widget_lookup(parent,"dvr_storage_bar",TRUE);
     storage_text   = widget_lookup(parent,"dvr_storage_text",TRUE);
+    file_scroll_w  = widget_lookup(parent,"dvr_file_scroll",TRUE);
+    list_no_sd_label = widget_lookup(parent,"dvr_list_no_sd",TRUE);
 
     dock_focus=DVR_DOCK_PREVIEW; cam_focus=DVR_CAM_FRONT;
     list_focus=0; list_tab=0; list_mode=0; list_count=0; list_offset=0;
@@ -218,16 +309,26 @@ void dvr_page_deal_key_set(void) {
             show_sub(DVR_SUB_CAM_SW); hl_cam(cam_focus);
             printf("DVR: enter cam dock\n"); break;
         case DVR_DOCK_VIDEO_PB:
+            if (!dvr_get_sd_status()) {
+                show_no_sd_popup(DVR_SUB_MAIN);
+                printf("DVR: no SD, cannot enter video list\n"); break;
+            }
             list_mode=0; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
-            dvr_api_get_list(list_api_mode());
-            show_sub(DVR_SUB_LIST); dvr_file_list_populate();
+            show_sub(DVR_SUB_LIST);
+            dvr_file_list_clear();
             hl_list(0); hl_tab(list_tab);
+            dvr_request_file_list();
             printf("DVR: enter video list\n"); break;
         case DVR_DOCK_PHOTO_PB:
+            if (!dvr_get_sd_status()) {
+                show_no_sd_popup(DVR_SUB_MAIN);
+                printf("DVR: no SD, cannot enter photo list\n"); break;
+            }
             list_mode=1; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
-            dvr_api_get_list(list_api_mode());
-            show_sub(DVR_SUB_LIST); dvr_file_list_populate();
+            show_sub(DVR_SUB_LIST);
+            dvr_file_list_clear();
             hl_list(0); hl_tab(list_tab);
+            dvr_request_file_list();
             printf("DVR: enter photo list\n"); break;
         case DVR_DOCK_SETTINGS:
             show_sub(DVR_SUB_SETTING); set_focus=DVR_SET_CAMERA;
@@ -241,12 +342,19 @@ void dvr_page_deal_key_set(void) {
         switch(cam_focus) {
         case DVR_CAM_FRONT:  dvr_api_view_switch(0); printf("DVR: cam→front\n"); show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
         case DVR_CAM_REAR:   dvr_api_view_switch(1); printf("DVR: cam→rear\n");  show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
-        case DVR_CAM_SNAPSHOT: dvr_api_snap(); printf("DVR: snap!\n"); break; /* stay */
+        case DVR_CAM_SNAPSHOT:
+            if (!dvr_get_sd_status()) {
+                show_no_sd_popup(DVR_SUB_CAM_SW);
+            } else {
+                dvr_api_snap(); printf("DVR: snap!\n");
+            }
+            break;
         default: break;
         }
         break;
 
     case DVR_SUB_LIST: {
+        if(list_fetch_pending){printf("DVR: list still loading, ignoring SET\n");break;}
         int fi=list_offset+list_focus;
         if(fi<list_count){
             if(dvr_get_rec_status()){dvr_api_rec_stop();printf("DVR: rec stopped\n");}
@@ -273,6 +381,15 @@ void dvr_page_deal_key_set(void) {
         break;
 
     case DVR_SUB_POPUP:
+        if (popup_src == POP_NO_SD) {
+            /* Alert dismissed — restore popup title for next use */
+            widget_t* title = dvr_popup_view ? widget_lookup(dvr_popup_view,"dvr_popup_title",TRUE) : NULL;
+            if(title) widget_set_text_utf8(title, "Confirm?");
+            show_sub(no_sd_return_sub);
+            if(no_sd_return_sub==DVR_SUB_MAIN) hl_dock(dock_focus);
+            else if(no_sd_return_sub==DVR_SUB_CAM_SW) hl_cam(cam_focus);
+            break;
+        }
         if(popup_focus==0){
             if(popup_src==POP_FILE_DEL){
                 int fi=list_offset+list_focus; uint16_t par=(uint16_t)fi;
@@ -283,7 +400,7 @@ void dvr_page_deal_key_set(void) {
             } else { dvr_api_format(); }
         }
         if(popup_src==POP_FORMAT){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
-        else{show_sub(DVR_SUB_LIST);dvr_api_get_list(list_api_mode());dvr_file_list_populate();if(list_focus>=list_count&&list_focus>0)list_focus--;hl_list(list_focus);}
+        else{show_sub(DVR_SUB_LIST);dvr_file_list_clear();dvr_request_file_list();if(list_focus>=list_count&&list_focus>0)list_focus--;hl_list(list_focus);}
         break;
 
     case DVR_SUB_PLAYBACK:
@@ -308,6 +425,14 @@ void dvr_page_deal_key_back(void) {
         else if(set_focus==DVR_SET_LOOP) hl_loop(set_loop_val);
         show_sub(DVR_SUB_SETTING); hl_set(set_focus); break;
     case DVR_SUB_POPUP:
+        if (popup_src == POP_NO_SD) {
+            widget_t* title = dvr_popup_view ? widget_lookup(dvr_popup_view,"dvr_popup_title",TRUE) : NULL;
+            if(title) widget_set_text_utf8(title, "Confirm?");
+            show_sub(no_sd_return_sub);
+            if(no_sd_return_sub==DVR_SUB_MAIN) hl_dock(dock_focus);
+            else if(no_sd_return_sub==DVR_SUB_CAM_SW) hl_cam(cam_focus);
+            break;
+        }
         if(popup_src==POP_FORMAT){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
         else{show_sub(DVR_SUB_LIST);hl_list(list_focus);} break;
     case DVR_SUB_PLAYBACK:
@@ -327,7 +452,8 @@ void dvr_page_deal_key_up(void) {
         else if(list_offset>0){list_offset--;dvr_file_list_populate();hl_list(0);}
         else if(list_tab>0){
             list_tab--; list_offset=0;
-            dvr_api_get_list(list_api_mode()); dvr_file_list_populate();
+            dvr_file_list_clear();
+            dvr_request_file_list();
             list_focus=0; hl_list(0); hl_tab(list_tab);
         }
         break;
@@ -351,7 +477,8 @@ void dvr_page_deal_key_down(void) {
         else if((list_offset+DVR_FILE_ITEM_MAX)<list_count){list_offset++;dvr_file_list_populate();hl_list(DVR_FILE_ITEM_MAX-1);}
         else if(list_tab<DVR_TAB_MAX-1){
             list_tab++; list_offset=0;
-            dvr_api_get_list(list_api_mode()); dvr_file_list_populate();
+            dvr_file_list_clear();
+            dvr_request_file_list();
             list_focus=0; hl_list(0); hl_tab(list_tab);
         }
         break;
