@@ -9,11 +9,10 @@ typedef enum dvr_sub_page {
     DVR_SUB_LIST      = 2,  /* File list overlay (2 tabs: front/rear) */
     DVR_SUB_SETTING   = 3,  /* Settings overlay */
     DVR_SUB_POPUP     = 4,  /* Confirm popup */
-    DVR_SUB_PLAYBACK  = 5,  /* Video/photo playback (no alpha hook) */
+    DVR_SUB_PLAYBACK  = 5,  /* Video/photo playback (preview on: alpha hook + VIDEO layer) */
     DVR_SUB_SET_EDIT  = 6,  /* Setting sub-option editing */
     DVR_SUB_LIST_IDLE = 7,  /* dvr_bg + dock, no file list (after playback) */
     DVR_SUB_LIST_SEL  = 8,  /* Front/Rear camera selection before file list */
-    DVR_SUB_PB_LOADING= 9,  /* Loading screen: preview warming up before playback */
     DVR_SUB_MAX       ,
 } dvr_sub_page_e;
 

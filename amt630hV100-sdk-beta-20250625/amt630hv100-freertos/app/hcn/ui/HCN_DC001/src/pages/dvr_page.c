@@ -32,17 +32,24 @@ ret_t dvr_page_init(widget_t* win, void* ctx)
     home_dvr_view_init(win);
     widget_on(win, EVT_WINDOW_CLOSE, on_dvr_page_close, NULL);
 
-    /* Set display window for when preview is eventually needed */
+    /* Display window: full-width (0,0,1024,500). Both the
+     * VIDEO (OSD0) layer geometry and the alpha-clear hole derive from this. */
     dvr_api_set_display_window(0, 0, 1024, 500);
 
-    /* Do NOT start preview here — MAIN state shows dvr_bg image.
-     * Preview will be enabled when user enters CAM_SW (SET on DVR Preview). */
+    /* Start preview on page entry (restore 5b67ca2 behavior). This keeps the
+     * DVR USB video stream drained and the alpha-clear hook active for the
+     * whole session. Without it the pipe backs up while at MAIN and the DVR
+     * fails to deliver sustained playback frames (single-frame photo still
+     * worked, but continuous video playback went black). */
+    dvr_api_set_preview_enable(1);
+
+    /* Lock preview to front+rear dual-camera mode */
     dvr_api_view_switch(DVR_PREVIEW_MODE_FRONT_REAR);
 
     /* Query DVR status (SD card state, etc.) */
     dvr_api_get_status();
 
     dvr_set_sensor_switch_enable(0);
-    printf("DVR: dvr_page_init, MAIN state (no preview), window=(0,0,1024,500)\n");
+    printf("DVR: dvr_page_init, preview on, window=(0,0,1024,500)\n");
     return RET_OK;
 }
