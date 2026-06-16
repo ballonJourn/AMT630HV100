@@ -215,7 +215,7 @@ static uint32_t dvr_fps = 0;
 
 // FPS print toggle (runtime, default ON). Controls whether the per-second
 // `DVR: [FPS:xx] frame_count=xx` log line is emitted. Toggled via CLI.
-static uint8_t dvr_fps_print_enable = 1;
+static uint8_t dvr_fps_print_enable = 0;
 
 // File list ready flag: set by dvr_filelist_parser() after USB response,
 // cleared by UI thread after reading. This bridges the async gap between
@@ -1002,12 +1002,12 @@ static void dvr_usb_task(void *arg)
              * status every FPS tick (~1s) until SD comes up or 30s passes. */
             if (dvr_auto_rec_pending) {
                 static uint8_t auto_rec_retry_count = 0;
-                if (++auto_rec_retry_count <= 30) {
+                if (++auto_rec_retry_count <= 3) {
                     dvr_send_normal_cmd(BD_CTRL_GET_STS, 0);
                 } else {
                     dvr_auto_rec_pending = 0;
                     auto_rec_retry_count = 0;
-                    printf("DVR: auto-rec gave up after 30s (SD never ready)\n");
+                    printf("DVR: auto-rec gave up after 3 retries (SD not ready)\n");
                 }
             }
 
@@ -1706,9 +1706,9 @@ uint8_t dvr_api_get_fps_print(void)
 // DVR preview lifecycle - called by dvr_page_init() when DVR window opens
 void dvr_start_preview(void)
 {
-    dvr_api_set_display_window(52, 0, 972, 500);
+    dvr_api_set_display_window(0, 0, 1024, 500);
     dvr_api_set_preview_enable(1);
-    printf("DVR: start_preview (window 52,0,972,500)\n");
+    printf("DVR: start_preview (window 0,0,1024,500)\n");
 }
 
 // DVR preview lifecycle - called by dvr_page BACK key / window close
@@ -2377,7 +2377,7 @@ static void usb_read_thread(void *para)
 			#if ENABLE_BD_USB_DVR_FUNC
 			// Check if elene file exists and start DVR task if found
 			// #ifdef USB_SUPPORT
-			dvr_api_set_display_window(52, 0, 972, 500);
+			dvr_api_set_display_window(0, 0, 1024, 500);
 			dvr_start_if_elene_exists();
 			// #endif
 			#endif

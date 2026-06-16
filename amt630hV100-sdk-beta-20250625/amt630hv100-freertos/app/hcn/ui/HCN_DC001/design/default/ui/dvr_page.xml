@@ -1,31 +1,44 @@
 <window name="dvr_page" style:normal:bg_color="#FF000000" style:normal:border_color="#FF000000">
-  <!-- DVR main preview: transparent, VIDEO layer (OSD0) shows through -->
+  <!-- DVR main view: preview area (0,0,1024,500) + bottom dock (0,500,1024,100) -->
   <view name="dvr_main_view" x="0" y="0" w="1024" h="600" visible="true">
-    <!-- Main dock: DVR Preview | Video Playback | Photo Playback | Settings -->
-    <view name="dvr_dock_bar" x="52" y="500" w="972" h="100" style:normal:bg_image="dock_bg">
-      <image name="dvr_btn_preview" x="45" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_camera_n" style:selected:icon="icon_camera_p"/>
-      <image name="dvr_dock_line1" x="245" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <image name="dvr_btn_video_pb" x="286" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_playback_n" style:selected:icon="icon_playback_p"/>
-      <image name="dvr_dock_line2" x="486" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <image name="dvr_btn_photo_pb" x="527" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_photo_n" style:selected:icon="icon_photo_p"/>
-      <image name="dvr_dock_line3" x="727" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <image name="dvr_btn_settings" x="768" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_settings_n" style:selected:icon="icon_settings_p"/>
+    <!-- Background image: visible in MAIN (no preview), hidden in CAM_SW/PLAYBACK (preview on) -->
+    <image name="dvr_main_bg" x="0" y="0" w="1024" h="500" draw_type="default" image="dvr_bg" visible="true"/>
+    <!-- Main dock: 4 buttons, 256px per section -->
+    <view name="dvr_dock_bar" x="0" y="500" w="1024" h="100" style:normal:bg_image="dock_bg">
+      <image name="dvr_btn_preview"  x="48"  y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_camera_n"   style:selected:icon="icon_camera_p"/>
+      <image name="dvr_dock_line1"   x="256" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <image name="dvr_btn_video_pb" x="304" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_playback_n" style:selected:icon="icon_playback_p"/>
+      <image name="dvr_dock_line2"   x="512" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <image name="dvr_btn_photo_pb" x="560" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_photo_n"    style:selected:icon="icon_photo_p"/>
+      <image name="dvr_dock_line3"   x="768" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <image name="dvr_btn_settings" x="816" y="0" w="160" h="100" draw_type="default" style:normal:icon="icon_settings_n" style:selected:icon="icon_settings_p"/>
     </view>
-    <!-- Camera sub-dock: Front / Rear / Snapshot (3 tabs, replaces dock bar) -->
-    <view name="dvr_cam_dock" x="52" y="500" w="972" h="100" visible="false" style:normal:bg_image="dock_bg">
-      <image name="dvr_cam_tab_sel" x="0" y="0" w="324" h="100" draw_type="default" image="dock_selected"/>
-      <image name="dvr_cam_line1" x="324" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <image name="dvr_cam_line2" x="648" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <label name="dvr_cam_front" x="80" y="19" w="168" h="61" style:normal:font_size="30" tr_text="dvr_front_video"/>
-      <label name="dvr_cam_rear" x="400" y="19" w="168" h="61" style:normal:font_size="30" tr_text="dvr_rear_video"/>
-      <image name="dvr_cam_snap_icon" x="720" y="10" w="80" h="80" draw_type="default" style:normal:icon="icon_photo_n" style:selected:icon="icon_photo_p"/>
+    <!-- Camera sub-dock: 3 sections, 341px each -->
+    <view name="dvr_cam_dock" x="0" y="500" w="1024" h="100" visible="false" style:normal:bg_image="dock_bg">
+      <image name="dvr_cam_tab_sel" x="0"   y="0" w="341" h="100" draw_type="default" image="dock_selected"/>
+      <image name="dvr_cam_line1"   x="341" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <image name="dvr_cam_line2"   x="682" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <label name="dvr_cam_front"   x="86"  y="19" w="168" h="61" style:normal:font_size="30" style:normal:text_align_h="center" tr_text="dvr_front_video"/>
+      <label name="dvr_cam_rear"    x="427" y="19" w="168" h="61" style:normal:font_size="30" style:normal:text_align_h="center" tr_text="dvr_rear_video"/>
+      <image name="dvr_cam_snap_icon" x="812" y="10" w="80" h="80" draw_type="default" style:normal:icon="icon_photo_n" style:selected:icon="icon_photo_p"/>
     </view>
   </view>
 
-  <!-- File list overlay (opaque) — shared by video and photo playback -->
-  <view name="dvr_list_view" x="52" y="0" w="972" h="600" visible="false">
-    <image name="dvr_list_bg_img" x="0" y="0" w="972" h="600" draw_type="default" image="dvr_list_bg"/>
-    <scroll_view name="dvr_file_scroll" x="18" y="10" w="936" h="480" yslidable="true" xslidable="false">
+  <!-- Idle view: dvr_bg image + bottom dock (shown after playback BACK, no file list) -->
+  <view name="dvr_idle_view" x="0" y="0" w="1024" h="600" visible="false">
+    <image name="dvr_idle_bg" x="0" y="0" w="1024" h="500" draw_type="default" image="dvr_bg"/>
+    <view name="dvr_idle_dock" x="0" y="500" w="1024" h="100" style:normal:bg_image="dock_bg">
+      <image name="dvr_idle_tab_sel"   x="0"   y="0" w="512" h="100" draw_type="scale" image="dock_selected"/>
+      <image name="dvr_idle_line"      x="512" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <label name="dvr_idle_tab_left"  x="156" y="19" w="200" h="61" style:normal:font_size="30" style:normal:text_align_h="center" text="Front Video"/>
+      <label name="dvr_idle_tab_right" x="668" y="19" w="200" h="61" style:normal:font_size="30" style:normal:text_align_h="center" text="Rear Video"/>
+    </view>
+  </view>
+
+  <!-- File list overlay -->
+  <view name="dvr_list_view" x="0" y="0" w="1024" h="600" visible="false">
+    <image name="dvr_list_bg_img" x="0" y="0" w="1024" h="600" draw_type="default" image="dvr_list_bg"/>
+    <scroll_view name="dvr_file_scroll" x="44" y="10" w="936" h="480" yslidable="true" xslidable="false">
       <view name="dvr_file_item_0" x="0" y="0" w="600" h="60" style:normal:bg_image="list_bg_n">
         <image name="dvr_file_icon_0" x="10" y="0" w="60" h="60" draw_type="default" style:normal:icon="list_icon_video_n" style:selected:icon="list_icon_video_p"/>
         <label name="dvr_file_name_0" x="80" y="12" w="320" h="35" style:normal:font_size="28"/>
@@ -63,21 +76,20 @@
         <image name="dvr_file_del_5" x="500" y="0" w="100" h="60" draw_type="default" style:normal:icon="icon_delete_n" style:selected:icon="icon_delete_p"/>
       </view>
     </scroll_view>
-    <!-- "No SD Card" / empty-list label (hidden by default, shown by C code) -->
-    <label name="dvr_list_no_sd" x="336" y="200" w="300" h="60" visible="false" style:normal:font_size="32" style:normal:text_color="#FFFFFFFF" text="No SD Card"/>
-    <!-- Bottom tab: Front / Rear (2-tab, text set dynamically by C code) -->
-    <view name="dvr_list_dock" x="0" y="500" w="972" h="100" style:normal:bg_image="dock_bg">
-      <image name="dvr_list_tab_sel" x="0" y="0" w="486" h="100" draw_type="default" image="dock_selected"/>
-      <image name="dvr_list_line" x="486" y="0" w="1" h="100" draw_type="default" image="line"/>
-      <label name="dvr_tab_label_left" x="130" y="19" w="200" h="61" style:normal:font_size="30" text="Front"/>
-      <label name="dvr_tab_label_right" x="620" y="19" w="200" h="61" style:normal:font_size="30" text="Rear"/>
+    <label name="dvr_list_no_sd" x="362" y="200" w="300" h="60" visible="false" style:normal:font_size="32" style:normal:text_color="#FFFFFFFF" text="No SD Card"/>
+    <!-- Bottom tab: 2-tab, 512px each, text centered -->
+    <view name="dvr_list_dock" x="0" y="500" w="1024" h="100" style:normal:bg_image="dock_bg">
+      <image name="dvr_list_tab_sel"    x="0"   y="0" w="512" h="100" draw_type="scale" image="dock_selected"/>
+      <image name="dvr_list_line"       x="512" y="0" w="1"   h="100" draw_type="default" image="line"/>
+      <label name="dvr_tab_label_left"  x="156" y="19" w="200" h="61" style:normal:font_size="30" style:normal:text_align_h="center" text="Front Video"/>
+      <label name="dvr_tab_label_right" x="668" y="19" w="200" h="61" style:normal:font_size="30" style:normal:text_align_h="center" text="Rear Video"/>
     </view>
   </view>
 
-  <!-- Settings overlay (opaque) -->
-  <view name="dvr_setting_view" x="52" y="0" w="972" h="600" visible="false">
-    <image name="dvr_set_bg" x="0" y="0" w="972" h="600" draw_type="default" image="dvr_list_bg"/>
-    <view name="dvr_set_row_camera" x="31" y="110" w="910" h="80">
+  <!-- Settings overlay -->
+  <view name="dvr_setting_view" x="0" y="0" w="1024" h="600" visible="false">
+    <image name="dvr_set_bg" x="0" y="0" w="1024" h="600" draw_type="default" image="dvr_list_bg"/>
+    <view name="dvr_set_row_camera" x="57" y="110" w="910" h="80">
       <image name="dvr_set_cam_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_cam_on_bg" x="270" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
       <image name="dvr_set_cam_off_bg" x="490" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
@@ -86,7 +98,7 @@
       <image name="dvr_set_cam_on_sel" x="278" y="28" w="24" h="24" draw_type="default" image="settings_s"/>
       <label name="dvr_set_cam_off" x="530" y="18" w="60" h="43" style:normal:font_size="30" tr_text="dvr_off"/>
     </view>
-    <view name="dvr_set_row_loop" x="31" y="210" w="910" h="80">
+    <view name="dvr_set_row_loop" x="57" y="210" w="910" h="80">
       <image name="dvr_set_loop_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_loop_1_bg" x="270" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
       <image name="dvr_set_loop_2_bg" x="490" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
@@ -97,13 +109,13 @@
       <label name="dvr_set_loop_2" x="523" y="18" w="80" h="43" style:normal:font_size="30" text="2 min"/>
       <label name="dvr_set_loop_3" x="743" y="18" w="80" h="43" style:normal:font_size="30" text="3 min"/>
     </view>
-    <view name="dvr_set_row_format" x="31" y="310" w="910" h="80">
+    <view name="dvr_set_row_format" x="57" y="310" w="910" h="80">
       <image name="dvr_set_fmt_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_fmt_btn_bg" x="270" y="0" w="640" h="80" draw_type="default" style:normal:icon="settings_btn3_n" style:selected:icon="settings_btn3_p"/>
       <label name="dvr_set_fmt_label" x="80" y="18" w="90" h="43" style:normal:font_size="30" tr_text="dvr_format"/>
       <label name="dvr_set_fmt_btn" x="465" y="18" w="150" h="43" style:normal:font_size="30" tr_text="dvr_quick_format"/>
     </view>
-    <view name="dvr_set_row_about" x="31" y="410" w="910" h="80">
+    <view name="dvr_set_row_about" x="57" y="410" w="910" h="80">
       <image name="dvr_set_about_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_about_info_bg" x="270" y="0" w="640" h="80" draw_type="default" style:normal:icon="settings_btn3_n" style:selected:icon="settings_btn3_p"/>
       <label name="dvr_set_about_label" x="80" y="18" w="90" h="43" style:normal:font_size="30" tr_text="dvr_about"/>
@@ -112,7 +124,7 @@
     </view>
   </view>
 
-  <!-- Delete/format confirm popup -->
+  <!-- Confirm popup (centered in 1024) -->
   <view name="dvr_popup_view" x="262" y="165" w="500" h="270" visible="false">
     <image name="dvr_popup_bg" x="0" y="0" w="500" h="270" draw_type="default" image="pop up_bg"/>
     <label name="dvr_popup_title" x="170" y="60" w="160" h="46" style:normal:font_size="33" tr_text="dvr_confirm_delete"/>

@@ -199,23 +199,14 @@ ret_t set_dock_view(dock_view_e dock_view)
 {
     if (window_page[DOCK_SELECT_VIEW])
     {
-        /* ICON_DVR has no corresponding page in dock_slider_view;
-         * passing its enum value to slide_view_set_active_ex would overflow.
-         * DVR opens as an independent window, so skip slide_view control. */
-        if (dock_view != ICON_DVR) {
-            slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
-        }
+        slide_view_set_active_ex(window_page[DOCK_SELECT_VIEW] , dock_view , FALSE ) ;
     }
 
     set_current_win(dock_view) ;
 
     home_refresh_dock_icon(dock_view) ;
 
-    if (dock_view == ICON_DVR) {
-        set_window_page(PAGE_DVR);
-    } else {
-        set_window_page( dock_view == ICON_SETTING );
-    }
+    set_window_page( dock_view == ICON_SETTING );
 
     return RET_OK;
 }

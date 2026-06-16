@@ -4,26 +4,25 @@
 #include "common.h"
 
 typedef enum dvr_sub_page {
-    DVR_SUB_MAIN     = 0,  /* Preview + 4-button dock */
-    DVR_SUB_CAM_SW   = 1,  /* Preview + cam sub-dock (Front/Rear/Snap) */
-    DVR_SUB_LIST     = 2,  /* File list overlay (2 tabs: front/rear) */
-    DVR_SUB_SETTING  = 3,  /* Settings overlay */
-    DVR_SUB_POPUP    = 4,  /* Confirm popup */
-    DVR_SUB_PLAYBACK = 5,  /* Video/photo playback */
-    DVR_SUB_SET_EDIT = 6,  /* Setting sub-option editing */
-    DVR_SUB_MAX      ,
+    DVR_SUB_MAIN      = 0,  /* Preview + 4-button dock */
+    DVR_SUB_CAM_SW    = 1,  /* Preview + cam sub-dock (Front/Rear/Snap) */
+    DVR_SUB_LIST      = 2,  /* File list overlay (2 tabs: front/rear) */
+    DVR_SUB_SETTING   = 3,  /* Settings overlay */
+    DVR_SUB_POPUP     = 4,  /* Confirm popup */
+    DVR_SUB_PLAYBACK  = 5,  /* Video/photo playback */
+    DVR_SUB_SET_EDIT  = 6,  /* Setting sub-option editing */
+    DVR_SUB_LIST_IDLE = 7,  /* dvr_bg + dock, no file list (after playback) */
+    DVR_SUB_MAX       ,
 } dvr_sub_page_e;
 
-/* Main dock: 4 buttons */
 typedef enum dvr_dock_btn {
-    DVR_DOCK_PREVIEW  = 0,   /* → cam sub-dock (front/rear/snap) */
-    DVR_DOCK_VIDEO_PB = 1,   /* → video file list */
-    DVR_DOCK_PHOTO_PB = 2,   /* → photo file list */
-    DVR_DOCK_SETTINGS = 3,   /* → settings */
+    DVR_DOCK_PREVIEW  = 0,
+    DVR_DOCK_VIDEO_PB = 1,
+    DVR_DOCK_PHOTO_PB = 2,
+    DVR_DOCK_SETTINGS = 3,
     DVR_DOCK_BTN_MAX  ,
 } dvr_dock_btn_e;
 
-/* Camera sub-dock: 3 items */
 typedef enum dvr_cam_item {
     DVR_CAM_FRONT    = 0,
     DVR_CAM_REAR     = 1,
@@ -31,7 +30,6 @@ typedef enum dvr_cam_item {
     DVR_CAM_ITEM_MAX ,
 } dvr_cam_item_e;
 
-/* File list tab: only 2 within each mode (front/rear) */
 typedef enum dvr_list_tab {
     DVR_TAB_FRONT = 0,
     DVR_TAB_REAR  = 1,

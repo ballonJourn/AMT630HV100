@@ -117,6 +117,10 @@
             <label name="total_time" x="447" y="241" w="58" h="29" style:normal:text_align_h="right" text="00:00"/>
             <label name="curr_time" x="120" y="241" w="58" h="29" style:normal:text_align_h="left" text="00:00"/>
           </view>
+          <view name="dvr_dock_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
+            <image name="dvr_icon_img" x="85" y="70" w="166" h="166" draw_type="center" image="DVR_icon"/>
+            <label name="dvr_icon_label" x="76" y="258" w="183" h="35" style:normal:font_size="30" style:normal:text_align_h="center" text="DVR"/>
+          </view>
         </slide_view>
       </view>
     </view>
@@ -248,9 +252,6 @@
           <label name="radar_off_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="radar_off"/>
         </view>
       </slide_view>
-    </view>
-    <view name="dvr_pg" x="0" y="0" w="100%" h="100%">
-      <image name="dvr_bg_placeholder" x="52" y="0" w="972" h="418" draw_type="default" image="dvr_bg"/>
     </view>
   </pages>
   <?include filename="component.xml" ?>
