@@ -2,19 +2,25 @@
  * dvr_view.c — DVR UI state machine
  *
  * Flow:
- *   MAIN (preview+dock) -> SET -> CAM_SW / LIST / SETTING
- *   LIST -> SET on file -> PLAYBACK
- *   PLAYBACK -> BACK -> LIST_IDLE (dvr_bg image, no preview, no file list)
- *   LIST_IDLE -> BACK -> MAIN (preview resumes + rec_start)
- *   LIST -> BACK -> MAIN (rec_start)
+ *   MAIN (dvr_bg+dock) -> SET -> CAM_SW / LIST_SEL / SETTING
+ *   LIST_SEL (front/rear select) -> SET -> LIST (file list)
+ *   LIST -> SET on file -> PB_LOADING (preview warmup 500ms) -> PLAYBACK
+ *   PLAYBACK -> BACK -> LIST_IDLE (dvr_bg, no file list)
+ *   LIST_IDLE -> BACK -> LIST_SEL
+ *   LIST_SEL -> BACK -> MAIN (rec_start)
+ *   LIST -> BACK -> LIST_SEL (rec_start)
  *
- * Preview is only active in MAIN and CAM_SW states.
+ * Preview (alpha-clear hook) is ONLY active in CAM_SW state.
+ * PLAYBACK does NOT use the hook — DVR hardware plays directly to VIDEO layer.
  */
 
 #include "dvr_view.h"
 #include "dvr_api.h"
 #include "../view_manager.h"
 #include "common/navigator.h"
+
+/* Forward declarations */
+static void show_sub(dvr_sub_page_e sub);
 
 /* ---- Widgets ---- */
 static widget_t* dvr_main_view    = NULL;
@@ -72,6 +78,20 @@ static pop_src_e popup_src = POP_FILE_DEL;
 
 static int pb_paused = 0, pb_idx = 0, pb_mode = 0;
 
+/* Playback loading: delay PB_START to let USB task warm up (2ms polling) */
+static uint32_t pb_loading_timer_id = TK_INVALID_ID;
+#define PB_LOADING_DELAY_MS  500   /* 500ms warmup for USB task */
+
+static ret_t on_pb_loading_timer(const timer_info_t* info) {
+    (void)info;
+    pb_loading_timer_id = TK_INVALID_ID;
+    /* USB task has been polling at 2ms for 500ms — now send PB_START */
+    dvr_api_pb_start((uint8_t)pb_mode, (uint16_t)pb_idx);
+    show_sub(DVR_SUB_PLAYBACK);
+    printf("DVR: pb start mode=%d idx=%d (after warmup)\n", pb_mode, pb_idx);
+    return RET_REMOVE;
+}
+
 static int list_fetch_pending = 0;
 static uint32_t list_poll_timer_id = TK_INVALID_ID;
 #define LIST_POLL_INTERVAL_MS  100
@@ -92,16 +112,20 @@ static void show_sub(dvr_sub_page_e sub)
         list_fetch_pending = 0;
     }
 
-    /* Preview (VIDEO layer) needed for: CAM_SW, PLAYBACK only (not MAIN) */
-    int pv_prev = (prev == DVR_SUB_CAM_SW || prev == DVR_SUB_PLAYBACK);
-    int pv_next = (sub  == DVR_SUB_CAM_SW || sub  == DVR_SUB_PLAYBACK);
+    /* Preview (VIDEO layer + alpha-clear hook) needed for:
+     *   CAM_SW     — live JPEG preview decoded to VIDEO layer
+     *   PLAYBACK   — DVR hardware plays video/photo to VIDEO layer
+     *   PB_LOADING — warm up USB task (2ms polling) before sending PB_START
+     * In all cases OSD alpha must be cleared so VIDEO layer shows through. */
+    int pv_prev = (prev == DVR_SUB_CAM_SW || prev == DVR_SUB_PLAYBACK || prev == DVR_SUB_PB_LOADING);
+    int pv_next = (sub  == DVR_SUB_CAM_SW || sub  == DVR_SUB_PLAYBACK || sub  == DVR_SUB_PB_LOADING);
     if (pv_prev && !pv_next) { dvr_api_set_preview_enable(0); printf("DVR: preview off (sub=%d)\n", sub); }
 
     int mv = (sub == DVR_SUB_MAIN || sub == DVR_SUB_CAM_SW || sub == DVR_SUB_PLAYBACK);
     if (dvr_main_view)    widget_set_visible(dvr_main_view,    mv);
     /* Show dvr_bg in MAIN (no preview), hide in CAM_SW/PLAYBACK (preview on) */
     if (dvr_main_bg)      widget_set_visible(dvr_main_bg,      sub == DVR_SUB_MAIN);
-    if (dvr_idle_view)    widget_set_visible(dvr_idle_view,    sub == DVR_SUB_LIST_IDLE);
+    if (dvr_idle_view)    widget_set_visible(dvr_idle_view,    sub == DVR_SUB_LIST_IDLE || sub == DVR_SUB_LIST_SEL || sub == DVR_SUB_PB_LOADING);
     if (dvr_list_view)    widget_set_visible(dvr_list_view,    sub == DVR_SUB_LIST);
     if (dvr_setting_view) widget_set_visible(dvr_setting_view, sub == DVR_SUB_SETTING || sub == DVR_SUB_SET_EDIT);
     if (dvr_popup_view)   widget_set_visible(dvr_popup_view,   sub == DVR_SUB_POPUP);
@@ -285,17 +309,15 @@ void dvr_page_deal_key_set(void) {
         case DVR_DOCK_VIDEO_PB:
             if (!dvr_get_sd_status()) { show_no_sd_popup(DVR_SUB_MAIN); break; }
             if (dvr_get_rec_status()) { dvr_api_rec_stop(); printf("DVR: rec stopped for list\n"); }
-            list_mode=0; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
-            show_sub(DVR_SUB_LIST); dvr_file_list_clear();
-            hl_list(0); hl_tab(list_tab); dvr_request_file_list();
-            printf("DVR: enter video list\n"); break;
+            list_mode=0; list_tab=DVR_TAB_FRONT;
+            show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
+            printf("DVR: enter video cam select\n"); break;
         case DVR_DOCK_PHOTO_PB:
             if (!dvr_get_sd_status()) { show_no_sd_popup(DVR_SUB_MAIN); break; }
             if (dvr_get_rec_status()) { dvr_api_rec_stop(); printf("DVR: rec stopped for list\n"); }
-            list_mode=1; list_tab=DVR_TAB_FRONT; list_offset=0; list_focus=0;
-            show_sub(DVR_SUB_LIST); dvr_file_list_clear();
-            hl_list(0); hl_tab(list_tab); dvr_request_file_list();
-            printf("DVR: enter photo list\n"); break;
+            list_mode=1; list_tab=DVR_TAB_FRONT;
+            show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
+            printf("DVR: enter photo cam select\n"); break;
         case DVR_DOCK_SETTINGS:
             show_sub(DVR_SUB_SETTING); set_focus=DVR_SET_CAMERA;
             hl_set(DVR_SET_CAMERA); hl_cam_onoff(set_cam_onoff); hl_loop(set_loop_val);
@@ -320,9 +342,15 @@ void dvr_page_deal_key_set(void) {
         if(fi<list_count){
             if(dvr_get_rec_status()){dvr_api_rec_stop();printf("DVR: rec stopped for pb\n");}
             pb_mode=list_api_mode(); pb_idx=fi; pb_paused=0;
-            dvr_api_pb_start((uint8_t)pb_mode,(uint16_t)fi);
-            show_sub(DVR_SUB_PLAYBACK);
-            printf("DVR: pb start mode=%d idx=%d\n",pb_mode,fi);
+            /* Enter loading state: enable preview first (USB task starts
+             * high-freq 2ms polling), show "Loading..." on idle_view,
+             * then after 500ms send PB_START via timer callback. */
+            show_sub(DVR_SUB_PB_LOADING);
+            /* Update idle_view text to show loading hint */
+            if (idle_tab_left) widget_set_text_utf8(idle_tab_left, "Loading...");
+            if (idle_tab_right) widget_set_text_utf8(idle_tab_right, "");
+            pb_loading_timer_id = timer_add(on_pb_loading_timer, NULL, PB_LOADING_DELAY_MS);
+            printf("DVR: pb loading, warming up preview...\n");
         }
         } break;
 
@@ -372,6 +400,14 @@ void dvr_page_deal_key_set(void) {
         /* SET does nothing in idle state */
         break;
 
+    case DVR_SUB_LIST_SEL:
+        /* User confirmed front/rear selection — enter file list */
+        list_offset=0; list_focus=0;
+        show_sub(DVR_SUB_LIST); dvr_file_list_clear();
+        hl_list(0); hl_tab(list_tab); dvr_request_file_list();
+        printf("DVR: cam select -> list (mode=%d tab=%d)\n", list_mode, list_tab);
+        break;
+
     default: break;
     }
 }
@@ -385,9 +421,9 @@ void dvr_page_deal_key_back(void) {
     case DVR_SUB_CAM_SW:
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
     case DVR_SUB_LIST:
-        /* Back from file list -> MAIN, resume recording */
-        show_sub(DVR_SUB_MAIN); hl_dock(dock_focus);
-        dvr_api_rec_start(); printf("DVR: rec resumed (list->main)\n"); break;
+        /* Back from file list -> LIST_SEL (cam selection), resume recording */
+        show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
+        dvr_api_rec_start(); printf("DVR: rec resumed (list->sel)\n"); break;
     case DVR_SUB_SETTING:
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
     case DVR_SUB_SET_EDIT:
@@ -410,11 +446,23 @@ void dvr_page_deal_key_back(void) {
         dvr_api_pb_stop(); pb_paused=0;
         show_sub(DVR_SUB_LIST_IDLE); hl_idle_tab(list_tab);
         printf("DVR: pb stopped -> idle\n"); break;
+    case DVR_SUB_PB_LOADING:
+        /* Back during loading -> cancel timer, return to LIST */
+        if (pb_loading_timer_id != TK_INVALID_ID) {
+            timer_remove(pb_loading_timer_id);
+            pb_loading_timer_id = TK_INVALID_ID;
+        }
+        show_sub(DVR_SUB_LIST); hl_list(list_focus); hl_tab(list_tab);
+        printf("DVR: pb loading cancelled\n"); break;
     case DVR_SUB_LIST_IDLE:
-        /* Back from idle -> MAIN (preview resumes) + resume recording */
+        /* Back from idle -> LIST_SEL (cam selection) */
+        show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
+        printf("DVR: idle -> cam select\n"); break;
+    case DVR_SUB_LIST_SEL:
+        /* Back from cam selection -> MAIN, resume recording */
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus);
         dvr_api_rec_start();
-        printf("DVR: rec resumed (idle->main)\n"); break;
+        printf("DVR: rec resumed (sel->main)\n"); break;
     default: break;
     }
 }
@@ -439,6 +487,8 @@ void dvr_page_deal_key_up(void) {
         else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val>0)?set_edit_val-1:2;hl_loop(set_edit_val);}
         break;
     case DVR_SUB_POPUP: popup_focus=0;hl_popup(0); break;
+    case DVR_SUB_LIST_SEL:
+        if(list_tab>0){ list_tab--; hl_idle_tab(list_tab); } break;
     default: break;
     }
 }
@@ -463,6 +513,8 @@ void dvr_page_deal_key_down(void) {
         else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val+1)%3;hl_loop(set_edit_val);}
         break;
     case DVR_SUB_POPUP: popup_focus=1;hl_popup(1); break;
+    case DVR_SUB_LIST_SEL:
+        if(list_tab<DVR_TAB_MAX-1){ list_tab++; hl_idle_tab(list_tab); } break;
     default: break;
     }
 }
