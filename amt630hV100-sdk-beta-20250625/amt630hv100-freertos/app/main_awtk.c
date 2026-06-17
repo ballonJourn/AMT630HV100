@@ -186,8 +186,8 @@ static uint16_t dvr_photo_list_count = 0;
  * modules can read them via the dvr_api_*_list_* accessors.
  */
 #define DVR_NAME_MAX         16   /* incl. trailing NUL */
-#define DVR_VIDEO_LIST_MAX   20
-#define DVR_PHOTO_LIST_MAX   30
+#define DVR_VIDEO_LIST_MAX   128  /* must stay <= DVR_FETCH_MAX in dvr_view.c; 128 covers a full 744B GET_LIST (124 files) */
+#define DVR_PHOTO_LIST_MAX   128  /* must stay <= DVR_FETCH_MAX in dvr_view.c */
 
 static char dvr_video_list_f[DVR_VIDEO_LIST_MAX][DVR_NAME_MAX];
 static uint16_t dvr_video_list_f_count = 0;

@@ -5,10 +5,15 @@
  *   MAIN (dvr_bg+dock) -> SET -> CAM_SW / LIST_SEL / SETTING
  *   LIST_SEL (front/rear select) -> SET -> LIST (file list)
  *   LIST -> SET on file -> PLAYBACK (pb_start first, then preview on)
- *   PLAYBACK -> BACK -> LIST_IDLE (dvr_bg, no file list)
- *   LIST_IDLE -> BACK -> LIST_SEL
- *   LIST_SEL -> BACK -> MAIN (rec_start)
- *   LIST -> BACK -> LIST_SEL (rec_start)
+ *   PLAYBACK -> BACK -> LIST (pick another clip)
+ *   LIST -> BACK -> LIST_SEL
+ *   LIST_SEL -> BACK -> MAIN
+ *
+ * Recording: stopped on ENTERING the file area (the dock SET handlers) and
+ * restarted on the LIST_SEL -> MAIN exit. The whole file area (front/rear
+ * select, list, playback) thus runs with recording OFF - so pb_start never
+ * has to stop recording itself (which used to race and show live preview
+ * instead of the clip), and the live preview is never left black on exit.
  *
  * Preview (alpha-clear hook + VIDEO layer) is active in CAM_SW and PLAYBACK.
  * CRITICAL ORDERING: BD_CTRL_PB_START is sent BEFORE preview is enabled, so the
@@ -217,15 +222,23 @@ static uint16_t get_count(void) {
     default:return 0;
     }
 }
+/* get_fname must return ANY row the user scrolls to -- any index up to the full
+ * stored list count, NOT just the 6 visible rows. The buckets in main_awtk.c
+ * hold up to DVR_VIDEO_LIST_MAX(20) / DVR_PHOTO_LIST_MAX(30) names, so buf must
+ * cover the larger of those. (Bug: buf was sized for only DVR_FILE_ITEM_MAX=6,
+ * but dvr_api_get_*_list returns the FULL count, so indices 6..N read past the
+ * 96-byte buf -> stack garbage shown as the on-screen file names.) */
+#define DVR_FETCH_MAX 128  /* must be >= max(DVR_VIDEO_LIST_MAX, DVR_PHOTO_LIST_MAX) in main_awtk.c */
 static uint8_t get_fname(int idx,char*out,int sz) {
-    char buf[DVR_FILE_ITEM_MAX*DVR_NAME_MAX]; uint16_t c=0;
+    static char buf[DVR_FETCH_MAX*DVR_NAME_MAX]; uint16_t c=0;   /* static: 2KB off-stack; get_fname runs only in the UI thread, sequentially (no reentrancy) */
     switch(list_api_mode()){
-    case 0:c=dvr_api_get_video_list_f(buf,DVR_FILE_ITEM_MAX);break;
-    case 1:c=dvr_api_get_video_list_r(buf,DVR_FILE_ITEM_MAX);break;
-    case 2:c=dvr_api_get_photo_list_f(buf,DVR_FILE_ITEM_MAX);break;
-    case 3:c=dvr_api_get_photo_list_r(buf,DVR_FILE_ITEM_MAX);break;
+    case 0:c=dvr_api_get_video_list_f(buf,DVR_FETCH_MAX);break;
+    case 1:c=dvr_api_get_video_list_r(buf,DVR_FETCH_MAX);break;
+    case 2:c=dvr_api_get_photo_list_f(buf,DVR_FETCH_MAX);break;
+    case 3:c=dvr_api_get_photo_list_r(buf,DVR_FETCH_MAX);break;
     default:return 0;
     }
+    if(c>DVR_FETCH_MAX) c=DVR_FETCH_MAX;   /* API returns full count; clamp to what fit in buf */
     if(idx<0||idx>=(int)c)return 0;
     const char*s=buf+(size_t)idx*DVR_NAME_MAX; int l=(int)strlen(s); if(l>=sz)l=sz-1;
     memcpy(out,s,l); out[l]='\0';
@@ -309,19 +322,20 @@ void dvr_page_deal_key_set(void) {
             printf("DVR: enter cam dock\n"); break;
         case DVR_DOCK_VIDEO_PB:
             if (!dvr_get_sd_status()) { show_no_sd_popup(DVR_SUB_MAIN); break; }
-            /* 5b67ca2: keep recording ON through list browsing so the DVR
-             * MJPEG pipeline stays warm; it is stopped only at PB_START
-             * (file select) below. Stopping it here let the pipeline go
-             * cold, after which video playback delivered no frames. */
+            /* Symmetric with the exit (LIST_SEL -> MAIN restarts recording):
+             * stop recording HERE, on entering the file area. Doing it now -
+             * not back-to-back with pb_start - gives the DVR time to close the
+             * active recording while the user browses, so a later pb_start
+             * switches to playback cleanly instead of racing (DVR still
+             * recording -> live preview shown instead of the clip). */
+            dvr_api_rec_stop(); printf("DVR: rec stopped (enter file area)\n");
             list_mode=0; list_tab=DVR_TAB_FRONT;
             show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
             printf("DVR: enter video cam select\n"); break;
         case DVR_DOCK_PHOTO_PB:
             if (!dvr_get_sd_status()) { show_no_sd_popup(DVR_SUB_MAIN); break; }
-            /* 5b67ca2: keep recording ON through list browsing so the DVR
-             * MJPEG pipeline stays warm; it is stopped only at PB_START
-             * (file select) below. Stopping it here let the pipeline go
-             * cold, after which video playback delivered no frames. */
+            /* Stop recording on entering the file area (see DVR_DOCK_VIDEO_PB). */
+            dvr_api_rec_stop(); printf("DVR: rec stopped (enter file area)\n");
             list_mode=1; list_tab=DVR_TAB_FRONT;
             show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
             printf("DVR: enter photo cam select\n"); break;
@@ -347,7 +361,10 @@ void dvr_page_deal_key_set(void) {
         if(list_fetch_pending){printf("DVR: list loading, ignoring SET\n");break;}
         int fi=list_offset+list_focus;
         if(fi<list_count){
-            if(dvr_get_rec_status()){dvr_api_rec_stop();printf("DVR: rec stopped for pb\n");}
+            /* Recording was already stopped on entering the file area (dock
+             * handlers), so do NOT stop it here. Back-to-back rec_stop +
+             * pb_start used to race: pb_start arrived before the DVR finished
+             * stopping, so it stayed recording and showed live preview. */
             pb_mode=list_api_mode(); pb_idx=fi; pb_paused=0;
             /* The DVR identifies a recording by its NUMBER (the %04d in
              * MOVIxxxx / PICTxxxx), NOT by list position. Parse that number
@@ -434,9 +451,9 @@ void dvr_page_deal_key_back(void) {
     case DVR_SUB_CAM_SW:
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
     case DVR_SUB_LIST:
-        /* Back from file list -> LIST_SEL (cam selection), resume recording */
-        show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
-        if (!dvr_get_rec_status()) { dvr_api_rec_start(); printf("DVR: rec resumed (list->sel)\n"); } break;
+        /* Back from file list -> front/rear select. Still inside the file area
+         * (recording stays stopped); rec_start happens on LIST_SEL -> MAIN. */
+        show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab); break;
     case DVR_SUB_SETTING:
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
     case DVR_SUB_SET_EDIT:
@@ -455,20 +472,23 @@ void dvr_page_deal_key_back(void) {
         if(popup_src==POP_FORMAT){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
         else{show_sub(DVR_SUB_LIST);hl_list(list_focus);} break;
     case DVR_SUB_PLAYBACK:
-        /* Back from playback -> the file LIST, so the user can pick another
-         * clip. A 2nd Back from the list then returns to front/rear select. */
+        /* Back from playback -> the file LIST (pick another clip). Recording
+         * stays stopped through the whole file area; it is restarted once, on
+         * the exit back to live preview (LIST_SEL -> MAIN, below). */
         dvr_api_pb_stop(); pb_paused=0;
         show_sub(DVR_SUB_LIST); dvr_file_list_populate(); hl_list(list_focus);
-        if (!dvr_get_rec_status()) { dvr_api_rec_start(); printf("DVR: rec resumed (pb->list)\n"); }
         printf("DVR: pb stopped -> list\n"); break;
     case DVR_SUB_LIST_IDLE:
         /* Back from idle -> LIST_SEL (cam selection) */
         show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab);
         printf("DVR: idle -> cam select\n"); break;
     case DVR_SUB_LIST_SEL:
-        /* Back from cam selection -> MAIN, resume recording */
+        /* Symmetric exit: recording was stopped on ENTERING the file area
+         * (the dock handlers), so restart it HERE, on the back to live preview.
+         * Unconditional - rec_start while already recording is a harmless no-op
+         * and avoids trusting the cached status, which lags the DVR. */
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus);
-        if (!dvr_get_rec_status()) { dvr_api_rec_start(); printf("DVR: rec resumed (sel->main)\n"); } break;
+        dvr_api_rec_start(); printf("DVR: rec restarted on exit -> main\n"); break;
     default: break;
     }
 }
