@@ -147,6 +147,13 @@ static void hl_dock(int i) {
 static void hl_cam(int i) {
     cam_focus = i;
     if (dvr_cam_tab_sel) widget_move(dvr_cam_tab_sel, i*341, 0);
+    /* DIAG: bump a monotonic tag so the alpha hook and the video-commit path
+     * each log the next few frames; lets us see what AWTK does to the preview
+     * region on a pure highlight move (NO camera switch). */
+    extern volatile uint32_t g_dvr_diag_nav_tag;
+    g_dvr_diag_nav_tag++;
+    printf("DVR-DIAG hl_cam focus=%d tag=%u (highlight moved, NO switch)\n",
+           i, (unsigned)g_dvr_diag_nav_tag);
 }
 static void hl_list(int i) {
     /* Requirement: browsing highlight uses green text color, not font size change */
