@@ -13,6 +13,7 @@ typedef enum dvr_sub_page {
     DVR_SUB_SET_EDIT  = 6,  /* Setting sub-option editing */
     DVR_SUB_LIST_IDLE = 7,  /* dvr_bg + dock, no file list (after playback) */
     DVR_SUB_LIST_SEL  = 8,  /* Front/Rear camera selection before file list */
+    DVR_SUB_LIST_ACT  = 9,  /* Play/Delete action selection on a file list item */
     DVR_SUB_MAX       ,
 } dvr_sub_page_e;
 

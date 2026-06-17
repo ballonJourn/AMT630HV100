@@ -3,8 +3,11 @@
  *
  * Flow:
  *   MAIN (dvr_bg+dock) -> SET -> CAM_SW / LIST_SEL / SETTING
+ *   CAM_SW: SET on Front/Rear switches camera and STAYS in CAM_SW (preview)
  *   LIST_SEL (front/rear select) -> SET -> LIST (file list)
- *   LIST -> SET on file -> PLAYBACK (pb_start first, then preview on)
+ *   LIST -> SET on file -> LIST_ACT (action: UP=Play, DOWN=Delete)
+ *   LIST_ACT -> SET(Play) -> PLAYBACK | SET(Delete) -> POPUP
+ *   LIST_ACT -> BACK -> LIST
  *   PLAYBACK -> BACK -> LIST (pick another clip)
  *   LIST -> BACK -> LIST_SEL
  *   LIST_SEL -> BACK -> MAIN
@@ -14,6 +17,9 @@
  * select, list, playback) thus runs with recording OFF - so pb_start never
  * has to stop recording itself (which used to race and show live preview
  * instead of the clip), and the live preview is never left black on exit.
+ *
+ * Highlight: file list browsing (UP/DOWN in LIST) uses green text color
+ * for the focused item. No font size change — color only.
  *
  * Preview (alpha-clear hook + VIDEO layer) is active in CAM_SW and PLAYBACK.
  * CRITICAL ORDERING: BD_CTRL_PB_START is sent BEFORE preview is enabled, so the
@@ -86,6 +92,11 @@ static pop_src_e popup_src = POP_FILE_DEL;
 
 static int pb_paused = 0, pb_idx = 0, pb_mode = 0;
 
+/* Action sub-selection within file list item (Play / Delete) */
+#define LIST_ACT_PLAY   0
+#define LIST_ACT_DELETE  1
+static int list_act_focus = LIST_ACT_PLAY;
+
 static int list_fetch_pending = 0;
 static uint32_t list_poll_timer_id = TK_INVALID_ID;
 #define LIST_POLL_INTERVAL_MS  100
@@ -100,7 +111,7 @@ static void show_sub(dvr_sub_page_e sub)
     dvr_sub_page_e prev = cur_sub;
     cur_sub = sub;
 
-    if (prev == DVR_SUB_LIST && sub != DVR_SUB_LIST && list_poll_timer_id != TK_INVALID_ID) {
+    if ((prev == DVR_SUB_LIST || prev == DVR_SUB_LIST_ACT) && sub != DVR_SUB_LIST && sub != DVR_SUB_LIST_ACT && list_poll_timer_id != TK_INVALID_ID) {
         timer_remove(list_poll_timer_id);
         list_poll_timer_id = TK_INVALID_ID;
         list_fetch_pending = 0;
@@ -108,7 +119,7 @@ static void show_sub(dvr_sub_page_e sub)
 
     /* MAIN included so preview stays on across the DVR session (5b67ca2
      * behavior): keeps the USB video pipe drained and the hole punched.
-     * LIST/LIST_SEL/LIST_IDLE/SETTING excluded so the file list is never
+     * LIST/LIST_ACT/LIST_SEL/LIST_IDLE/SETTING excluded so the file list is never
      * punched through. */
     int pv_prev = (prev == DVR_SUB_MAIN || prev == DVR_SUB_CAM_SW || prev == DVR_SUB_PLAYBACK);
     int pv_next = (sub  == DVR_SUB_MAIN || sub  == DVR_SUB_CAM_SW || sub  == DVR_SUB_PLAYBACK);
@@ -119,7 +130,7 @@ static void show_sub(dvr_sub_page_e sub)
     /* Show dvr_bg in MAIN (no preview), hide in CAM_SW/PLAYBACK (preview on) */
     if (dvr_main_bg)      widget_set_visible(dvr_main_bg,      sub == DVR_SUB_MAIN);
     if (dvr_idle_view)    widget_set_visible(dvr_idle_view,    sub == DVR_SUB_LIST_IDLE || sub == DVR_SUB_LIST_SEL);
-    if (dvr_list_view)    widget_set_visible(dvr_list_view,    sub == DVR_SUB_LIST);
+    if (dvr_list_view)    widget_set_visible(dvr_list_view,    sub == DVR_SUB_LIST || sub == DVR_SUB_LIST_ACT);
     if (dvr_setting_view) widget_set_visible(dvr_setting_view, sub == DVR_SUB_SETTING || sub == DVR_SUB_SET_EDIT);
     if (dvr_popup_view)   widget_set_visible(dvr_popup_view,   sub == DVR_SUB_POPUP);
     if (dvr_dock_bar)     widget_set_visible(dvr_dock_bar,     sub == DVR_SUB_MAIN);
@@ -138,7 +149,27 @@ static void hl_cam(int i) {
     if (dvr_cam_tab_sel) widget_move(dvr_cam_tab_sel, i*341, 0);
 }
 static void hl_list(int i) {
-    for(int n=0;n<DVR_FILE_ITEM_MAX;n++) if(file_name_w[n]) widget_set_state(file_name_w[n],(n==i)?STATE_SELECTE:STATE_NORMAL);
+    /* Requirement: browsing highlight uses green text color, not font size change */
+    for(int n=0;n<DVR_FILE_ITEM_MAX;n++) {
+        if(file_name_w[n]) {
+            if(n==i)
+                widget_set_style_color(file_name_w[n], "normal:text_color", 0xFF00FF00);  /* highlight green */
+            else
+                widget_set_style_color(file_name_w[n], "normal:text_color", 0xFF083557);  /* restore default */
+        }
+        /* Reset action icons to normal when changing file selection */
+        if(file_view_w[n]) widget_set_state(file_view_w[n], STATE_NORMAL);
+        if(file_del_w[n])  widget_set_state(file_del_w[n],  STATE_NORMAL);
+    }
+}
+/* Highlight play/delete action icon within the focused file row */
+static void hl_list_act(int act) {
+    list_act_focus = act;
+    int i = list_focus;
+    if(i>=0 && i<DVR_FILE_ITEM_MAX) {
+        if(file_view_w[i]) widget_set_state(file_view_w[i], (act==LIST_ACT_PLAY)  ? STATE_SELECTE : STATE_NORMAL);
+        if(file_del_w[i])  widget_set_state(file_del_w[i],  (act==LIST_ACT_DELETE) ? STATE_SELECTE : STATE_NORMAL);
+    }
 }
 static void hl_tab(int t) {
     list_tab = t;
@@ -306,6 +337,7 @@ ret_t home_dvr_view_init(widget_t* parent) {
     set_focus=DVR_SET_CAMERA; popup_focus=0;
     set_cam_onoff=1; set_loop_val=0; set_edit_val=0;
     popup_src=POP_FILE_DEL; pb_paused=0; pb_idx=0; pb_mode=0;
+    list_act_focus=LIST_ACT_PLAY;
 
     show_sub(DVR_SUB_MAIN); hl_dock(DVR_DOCK_PREVIEW);
     return RET_OK;
@@ -348,8 +380,8 @@ void dvr_page_deal_key_set(void) {
 
     case DVR_SUB_CAM_SW:
         switch(cam_focus) {
-        case DVR_CAM_FRONT:  dvr_api_view_switch(0); show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); printf("DVR: cam->front\n"); break;
-        case DVR_CAM_REAR:   dvr_api_view_switch(1); show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); printf("DVR: cam->rear\n");  break;
+        case DVR_CAM_FRONT:  dvr_api_view_switch(0); printf("DVR: cam->front (stay in preview)\n"); break;
+        case DVR_CAM_REAR:   dvr_api_view_switch(1); printf("DVR: cam->rear (stay in preview)\n");  break;
         case DVR_CAM_SNAPSHOT:
             if (!dvr_get_sd_status()) { show_no_sd_popup(DVR_SUB_CAM_SW); }
             else { dvr_api_snap(); printf("DVR: snap!\n"); }
@@ -358,22 +390,24 @@ void dvr_page_deal_key_set(void) {
         } break;
 
     case DVR_SUB_LIST: {
+        /* SET on a file item enters action sub-mode: UP/DOWN selects Play or Delete */
         if(list_fetch_pending){printf("DVR: list loading, ignoring SET\n");break;}
         int fi=list_offset+list_focus;
         if(fi<list_count){
-            /* Recording was already stopped on entering the file area (dock
-             * handlers), so do NOT stop it here. Back-to-back rec_stop +
-             * pb_start used to race: pb_start arrived before the DVR finished
-             * stopping, so it stayed recording and showed live preview. */
+            list_act_focus = LIST_ACT_PLAY;
+            cur_sub = DVR_SUB_LIST_ACT;   /* no visibility change, same view */
+            hl_list_act(LIST_ACT_PLAY);
+            printf("DVR: list -> action select (row=%d)\n", fi);
+        } else { printf("DVR: no file row=%d cnt=%d\n", fi, list_count); }
+        } break;
+
+    case DVR_SUB_LIST_ACT: {
+        /* Confirm the selected action: Play or Delete */
+        int fi=list_offset+list_focus;
+        if(list_act_focus == LIST_ACT_PLAY) {
+            /* Start playback — same logic as the old direct-play path */
             pb_mode=list_api_mode(); pb_idx=fi; pb_paused=0;
-            /* The DVR identifies a recording by its NUMBER (the %04d in
-             * MOVIxxxx / PICTxxxx), NOT by list position. Parse that number
-             * from the selected filename and send IT as the playback index.
-             * Sending the position made the DVR open file #<position> (e.g.
-             * MOVI0002) which the circular recorder overwrote long ago -> no
-             * frames -> black. Photos were unaffected (every photo is valid,
-             * so any index still yields a picture). */
-            uint16_t pb_file_no = (uint16_t)fi;   /* fallback to position */
+            uint16_t pb_file_no = (uint16_t)fi;
             { char fn[DVR_NAME_MAX];
               if (get_fname(fi, fn, sizeof(fn)) && strlen(fn) >= 8)
                   pb_file_no = (uint16_t)((fn[4]-'0')*1000 + (fn[5]-'0')*100
@@ -381,7 +415,12 @@ void dvr_page_deal_key_set(void) {
             dvr_api_pb_start((uint8_t)pb_mode, pb_file_no);
             show_sub(DVR_SUB_PLAYBACK);
             printf("DVR: pb start mode=%d pos=%d file_no=%d\n", pb_mode, fi, pb_file_no);
-        } else { printf("DVR: no file row=%d cnt=%d\n", fi, list_count); }
+        } else {
+            /* Delete — show confirm popup */
+            popup_src = POP_FILE_DEL; popup_focus = 1;
+            show_sub(DVR_SUB_POPUP); hl_popup(1);
+            printf("DVR: action delete -> popup (row=%d)\n", fi);
+        }
         } break;
 
     case DVR_SUB_SETTING:
@@ -408,10 +447,20 @@ void dvr_page_deal_key_set(void) {
         }
         if(popup_focus==0){
             if(popup_src==POP_FILE_DEL){
-                int fi=list_offset+list_focus; uint16_t par=(uint16_t)fi;
+                int fi=list_offset+list_focus;
+                /* DVR identifies files by NUMBER (the %04d in MOVIxxxx/PICTxxxx),
+                 * NOT by list position. Parse the number from the filename —
+                 * same logic as playback (pb_start). Sending raw position made
+                 * the DVR delete file #<position> which is usually wrong. */
+                uint16_t par=(uint16_t)fi;   /* fallback to position */
+                { char fn[DVR_NAME_MAX];
+                  if (get_fname(fi, fn, sizeof(fn)) && strlen(fn) >= 8)
+                      par = (uint16_t)((fn[4]-'0')*1000 + (fn[5]-'0')*100
+                                       + (fn[6]-'0')*10 + (fn[7]-'0')); }
                 if(list_mode==1) par|=0x8000;
                 if(list_tab==1)  par|=0x4000;
                 dvr_send_normal_cmd(BD_CTRL_DEL_FILE,par);
+                printf("DVR: del file_no=%d (fi=%d)\n", par & 0x3FFF, fi);
             } else {
                 /* Stop recording before formatting SD card */
                 if (dvr_get_rec_status()) { dvr_api_rec_stop(); printf("DVR: rec stopped for format\n"); }
@@ -454,6 +503,11 @@ void dvr_page_deal_key_back(void) {
         /* Back from file list -> front/rear select. Still inside the file area
          * (recording stays stopped); rec_start happens on LIST_SEL -> MAIN. */
         show_sub(DVR_SUB_LIST_SEL); hl_idle_tab(list_tab); break;
+    case DVR_SUB_LIST_ACT:
+        /* Back from action select -> return to file list browsing */
+        cur_sub = DVR_SUB_LIST;  /* no visibility change needed, same view */
+        hl_list(list_focus);     /* reset action icon highlights */
+        printf("DVR: action select -> list\n"); break;
     case DVR_SUB_SETTING:
         show_sub(DVR_SUB_MAIN); hl_dock(dock_focus); break;
     case DVR_SUB_SET_EDIT:
@@ -513,6 +567,10 @@ void dvr_page_deal_key_up(void) {
         else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val>0)?set_edit_val-1:2;hl_loop(set_edit_val);}
         break;
     case DVR_SUB_POPUP: popup_focus=0;hl_popup(0); break;
+    case DVR_SUB_LIST_ACT:
+        /* UP in action select: switch to Play */
+        if(list_act_focus != LIST_ACT_PLAY) { list_act_focus = LIST_ACT_PLAY; hl_list_act(LIST_ACT_PLAY); }
+        break;
     case DVR_SUB_LIST_SEL:
         if(list_tab>0){ list_tab--; hl_idle_tab(list_tab); } break;
     default: break;
@@ -539,6 +597,10 @@ void dvr_page_deal_key_down(void) {
         else if(set_focus==DVR_SET_LOOP){set_edit_val=(set_edit_val+1)%3;hl_loop(set_edit_val);}
         break;
     case DVR_SUB_POPUP: popup_focus=1;hl_popup(1); break;
+    case DVR_SUB_LIST_ACT:
+        /* DOWN in action select: switch to Delete */
+        if(list_act_focus != LIST_ACT_DELETE) { list_act_focus = LIST_ACT_DELETE; hl_list_act(LIST_ACT_DELETE); }
+        break;
     case DVR_SUB_LIST_SEL:
         if(list_tab<DVR_TAB_MAX-1){ list_tab++; hl_idle_tab(list_tab); } break;
     default: break;
