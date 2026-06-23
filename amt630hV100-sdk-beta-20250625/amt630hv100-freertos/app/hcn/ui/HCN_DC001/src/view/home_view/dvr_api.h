@@ -93,8 +93,14 @@ extern void dvr_api_format(void);
 
 /* ---------- DVR playback / file APIs (commit 6e9b20e9) ---------- */
 
-/* Get DVR firmware version ID */
+/* Get DVR firmware version ID (sends GET_ID; reply arrives async) */
 extern void dvr_api_get_id(void);
+
+/* Read the most recent DVR firmware version string.
+ *   buf:      caller-provided buffer; NUL-terminated on return.
+ *   buf_len:  size of buf in bytes (recommend >= 32).
+ *   Returns 1 if a valid version has been received, 0 otherwise. */
+extern uint8_t dvr_api_get_version(char *buf, uint32_t buf_len);
 
 /* Take a snapshot (photo) */
 extern void dvr_api_snap(void);
@@ -125,8 +131,8 @@ extern void dvr_api_pb_ff(void);
 /* Playback fast-backward / rewind */
 extern void dvr_api_pb_fb(void);
 
-/* Delete file by index */
-extern void dvr_api_del_file(uint16_t index);
+/* Delete file by index (mode: 0=F video, 1=R video, 2=F photo, 3=R photo) */
+extern void dvr_api_del_file(uint8_t mode, uint16_t index);
 
 /* Lock / unlock file by index */
 extern void dvr_api_lock_file(uint16_t index);
@@ -137,6 +143,14 @@ extern void dvr_api_get_total_time(uint16_t index);
 
 /* DVR status query */
 extern void dvr_api_get_status(void);
+
+/* TF card capacity query (sends BD_CTRL_GET_TF_CAPACITY; reply arrives async) */
+extern void dvr_api_get_tf_capacity_query(void);
+
+/* Read the most recent TF card capacity sample.
+ *   total_bytes / free_bytes are out-params; may be NULL.
+ *   Returns 1 if at least one valid sample has been received, 0 otherwise. */
+extern uint8_t dvr_api_get_tf_capacity(uint32_t *total_bytes, uint32_t *free_bytes);
 
 /* ---------- Per-bucket filename cache (commit 6e9b20e9) ---------- */
 

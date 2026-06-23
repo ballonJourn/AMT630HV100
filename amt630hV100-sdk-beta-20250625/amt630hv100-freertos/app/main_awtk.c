@@ -106,6 +106,7 @@ extern int ulog_console_backend_init(void);
 #define BD_CTRL_PB_FB           0x1f    /*回放视频快退*/
 #define BD_CTRL_SENSOR_SEL      0x22   /*多路切换预览显示 0:前路,1:后路*/
 #define BD_ANDROID_VIEW_SWITCH  0x9c    /*多路切换预览显示 0:前路,1:后路*/
+#define BD_CTRL_GET_TF_CAPACITY  0x38    /* Query TF card total/free capacity (reply: 8B LE: total[0..3] free[4..7]) */
 
 #define BD_MAX_DATA_LEN         (60*1024)
 #define BD_FILE_JPG_BIT         0x8000
@@ -168,6 +169,17 @@ static uint8_t dvr_sd_error = 0;      // 0: normal, 1: error
 static uint8_t dvr_sd_full = 0;        // 0: not full, 1: full
 static uint8_t dvr_sensor_switch_enable = 1;  // enable auto sensor switch
 static uint8_t dvr_view_mode = 0;  // 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh
+
+// TF card capacity cache (populated by BD_CTRL_GET_TF_CAPACITY response, 0 until first response)
+static volatile uint32_t dvr_tf_total_bytes = 0;
+static volatile uint32_t dvr_tf_free_bytes  = 0;
+static volatile uint8_t  dvr_tf_capacity_valid = 0;  /* 0=no response yet, 1=have a fresh sample */
+
+// DVR firmware version string cache (populated by BD_CTRL_GET_ID response).
+// NUL-terminated. 32 bytes covers typical firmware version strings; truncated if longer.
+#define DVR_VERSION_MAX_LEN  32
+static volatile uint8_t  dvr_version_valid = 0;             /* 0=no response yet, 1=have a sample */
+static char               dvr_version_buf[DVR_VERSION_MAX_LEN];
 
 // File list related
 #define BYTE_PER_FILE  6
@@ -264,6 +276,7 @@ static void dvr_pb_pause(void);
 static void dvr_pb_stop(void);
 static void dvr_pb_ff(void);
 static void dvr_pb_fb(void);
+static void dvr_tf_capacity_parser(uint8_t *buf, int32_t len);
 #endif
 /**********************
  *  STATIC VARIABLES
@@ -533,7 +546,22 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
 {
     switch (pctrl->cmd_id) {
         case BD_CTRL_GET_ID:
-            printf("DVR version: %s\n", pctrl->trans_buf);
+            /* Cache the NUL-terminated version string from trans_buf. The
+             * string is bounded by data_len (when set) and/or the first NUL
+             * we encounter; we always leave one byte for trailing NUL. */
+            {
+                int32_t copy_len = pctrl->data_len;
+                if (copy_len < 0) copy_len = 0;
+                if (copy_len > (int32_t)(DVR_VERSION_MAX_LEN - 1)) {
+                    copy_len = DVR_VERSION_MAX_LEN - 1;
+                }
+                /* If DVR sent a long string with no NUL in the first data_len
+                 * bytes, force termination by writing a NUL. */
+                memcpy(dvr_version_buf, pctrl->trans_buf, (size_t)copy_len);
+                dvr_version_buf[copy_len] = '\0';
+                dvr_version_valid = 1;
+                printf("DVR version: %s\n", dvr_version_buf);
+            }
             break;
         case BD_CTRL_GET_STS:
             dvr_sd_status = (pctrl->cmd_par & 0x01) ? 1 : 0;
@@ -609,6 +637,10 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
             break;
         case BD_CTRL_TOTAL_TIME:
             printf("DVR: TOTAL_TIME received, index=%d, time=%d sec\n", pctrl->cmd_par, pctrl->data_len);
+            break;
+        case BD_CTRL_GET_TF_CAPACITY:
+            printf("DVR: GET_TF_CAPACITY received, data_len=%d\n", pctrl->data_len);
+            dvr_tf_capacity_parser(pctrl->trans_buf, pctrl->data_len);
             break;
         case BD_CTRL_PB_FF:
             printf("DVR: PB_FF received\n");
@@ -1243,6 +1275,71 @@ static void dvr_filelist_parser(uint8_t *buf, int32_t len, uint16_t cmd_par)
     dvr_filelist_ready_flag = 1;
 }
 
+// Parse TF card capacity response from DVR device.
+// Wire format (little-endian, 8 bytes):
+//   trans_buf[0..3]  = total KiB  (1024-byte units, NOT bytes)
+//   trans_buf[4..7]  = free  KiB  (1024-byte units, NOT bytes)
+// Note: the DVR firmware reports sizes in KiB (1024-byte blocks), matching
+// the typical SD-card stat convention. We convert to bytes for the public API.
+static void dvr_tf_capacity_parser(uint8_t *buf, int32_t len)
+{
+    uint32_t total_kib = 0;
+    uint32_t free_kib  = 0;
+    uint32_t total_bytes = 0;
+    uint32_t free_bytes  = 0;
+
+    if (buf == NULL) {
+        printf("DVR: GET_TF_CAPACITY: null buffer\n");
+        return;
+    }
+
+    if (len >= 4) {
+        total_kib = ((uint32_t)buf[3] << 24) | ((uint32_t)buf[2] << 16) |
+                    ((uint32_t)buf[1] <<  8) |  (uint32_t)buf[0];
+    }
+    if (len >= 8) {
+        free_kib = ((uint32_t)buf[7] << 24) | ((uint32_t)buf[6] << 16) |
+                   ((uint32_t)buf[5] <<  8) |  (uint32_t)buf[4];
+    } else {
+        printf("DVR: GET_TF_CAPACITY: short reply (len=%d), free=0\n", len);
+    }
+
+    /* Convert KiB → bytes. Guard against overflow for very large (>4 TiB)
+     * cards by saturating at UINT32_MAX (effectively 2^32-1 bytes ≈ 4 GiB). */
+    if (total_kib > (0xFFFFFFFFu / 1024U)) {
+        total_bytes = 0xFFFFFFFFu;
+    } else {
+        total_bytes = total_kib * 1024U;
+    }
+    if (free_kib > (0xFFFFFFFFu / 1024U)) {
+        free_bytes = 0xFFFFFFFFu;
+    } else {
+        free_bytes = free_kib * 1024U;
+    }
+
+    dvr_tf_total_bytes    = total_bytes;
+    dvr_tf_free_bytes     = free_bytes;
+    dvr_tf_capacity_valid = 1;
+
+    /* Dump raw trans_buf bytes (clamped to 8) for protocol verification. */
+    printf("DVR: TF capacity raw[%d]:", (int)len);
+    int32_t dump_len = (len < 8) ? len : 8;
+    for (int32_t i = 0; i < dump_len; i++) {
+        printf(" %02X", buf[i]);
+    }
+    printf("\n");
+
+    printf("DVR: TF capacity raw[HEX] total=0x%08X free=0x%08X  "
+           "[KiB] total=%u free=%u  "
+           "[bytes] total=%u free=%u  "
+           "(%.2f GiB total, %.2f GiB free)\n",
+           total_kib, free_kib,
+           total_kib, free_kib,
+           total_bytes, free_bytes,
+           (double)total_bytes / (1024.0 * 1024.0 * 1024.0),
+           (double)free_bytes  / (1024.0 * 1024.0 * 1024.0));
+}
+
 // Get file list from DVR device
 //   mode 0: front-camera video file list
 //   mode 1: rear-camera  video file list
@@ -1389,10 +1486,29 @@ static void dvr_set_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour
 }
 
 // Delete file by index
-static void dvr_delete_file(uint16_t index)
+//   mode 0: delete front-camera video
+//   mode 1: delete rear-camera  video
+//   mode 2: delete front-camera photo
+//   mode 3: delete rear-camera  photo
+static void dvr_delete_file(uint8_t mode, uint16_t index)
 {
-    dvr_send_normal_cmd(BD_CTRL_DEL_FILE, index);
-    printf("DVR: delete file index: %d\n", index);
+    uint16_t par = index;
+
+    if (mode == 0) {
+        par |= 0;        // Video file list F
+    } else if (mode == 1) {
+        par |= 0x4000;   // Video file list R
+    } else if (mode == 2) {
+        par |= 0x8000;   // Photo file list F
+    } else if (mode == 3) {
+        par |= 0xC000;   // Photo file list R
+    } else {
+        printf("error: invalid file\n");
+        return;
+    }
+
+    dvr_send_normal_cmd(BD_CTRL_DEL_FILE, par);
+    printf("DVR: delete file, mode=%s, index=%d\n", mode == 0 ? "video" : "photo", index);
 }
 
 // Lock file by index
@@ -1481,10 +1597,35 @@ uint8_t dvr_get_view_mode(void) { return dvr_view_mode; }
  *  These functions provide external access to DVR control commands
  **********************/
 
-// DVR control API - Get DVR version ID
+// DVR control API - Get DVR version ID (sends GET_ID; reply arrives async)
 void dvr_api_get_id(void)
 {
     dvr_send_normal_cmd(BD_CTRL_GET_ID, 0);
+}
+
+// DVR control API - Read the most recent DVR firmware version string.
+//   buf:      caller-provided buffer; NUL-terminated on return.
+//   buf_len:  size of buf in bytes (recommend >= DVR_VERSION_MAX_LEN).
+//   Returns 1 if a valid version has been received, 0 otherwise.
+//   The string is a snapshot — call again after dvr_api_get_id() to refresh.
+uint8_t dvr_api_get_version(char *buf, uint32_t buf_len)
+{
+    if (buf == NULL || buf_len == 0) {
+        return 0;
+    }
+    if (!dvr_version_valid) {
+        buf[0] = '\0';
+        return 0;
+    }
+    /* dvr_version_buf is written once and not concurrently mutated, so a
+     * byte-by-byte copy (no locking) is safe and avoids hidden volatile
+     * access on every character. */
+    uint32_t i;
+    for (i = 0; i + 1 < buf_len && dvr_version_buf[i] != '\0'; i++) {
+        buf[i] = dvr_version_buf[i];
+    }
+    buf[i] = '\0';
+    return 1;
 }
 
 // DVR control API - Start recording
@@ -1541,6 +1682,24 @@ void dvr_api_get_status(void)
     dvr_get_status();
 }
 
+// DVR control API - Send a TF-card capacity query (no payload).
+// Reply is parsed asynchronously by dvr_recv_cmd_process(); read back via
+// dvr_api_get_tf_capacity() (or check the valid flag it returns).
+void dvr_api_get_tf_capacity_query(void)
+{
+    dvr_send_normal_cmd(BD_CTRL_GET_TF_CAPACITY, 0);
+}
+
+// DVR control API - Read the most recent TF card capacity sample.
+//   total_bytes / free_bytes are out-params; may be NULL.
+//   Returns 1 if at least one valid sample has been received, 0 otherwise.
+uint8_t dvr_api_get_tf_capacity(uint32_t *total_bytes, uint32_t *free_bytes)
+{
+    if (total_bytes) *total_bytes = dvr_tf_total_bytes;
+    if (free_bytes)  *free_bytes  = dvr_tf_free_bytes;
+    return dvr_tf_capacity_valid;
+}
+
 // DVR control API - View switch (mode: 0=front, 1=rear, 2=f+r, 3=r+f, 4=hzh)
 void dvr_api_view_switch(uint8_t mode)
 {
@@ -1590,10 +1749,10 @@ void dvr_api_set_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, u
     dvr_set_time(year, month, day, hour, minute, second);
 }
 
-// DVR control API - Delete file by index
-void dvr_api_del_file(uint16_t index)
+// DVR control API - Delete file by index (mode: 0=F video, 1=R video, 2=F photo, 3=R photo)
+void dvr_api_del_file(uint8_t mode, uint16_t index)
 {
-    dvr_delete_file(index);
+    dvr_delete_file(mode, index);
 }
 
 // DVR control API - Lock file by index
