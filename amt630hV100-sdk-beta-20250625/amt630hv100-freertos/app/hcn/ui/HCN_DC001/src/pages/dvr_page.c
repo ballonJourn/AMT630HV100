@@ -49,6 +49,13 @@ ret_t dvr_page_init(widget_t* win, void* ctx)
     /* Query DVR status (SD card state, etc.) */
     dvr_api_get_status();
 
+    /* Pre-fetch version and TF capacity into cache while user is on the
+     * main DVR screen.  By the time the user navigates to Settings, the
+     * async replies will (usually) have arrived, so the loading popup
+     * can be skipped entirely. */
+    dvr_api_get_id();
+    dvr_api_get_tf_capacity_query();
+
     dvr_set_sensor_switch_enable(0);
     printf("DVR: dvr_page_init, preview on, window=(0,0,1024,500)\n");
     return RET_OK;

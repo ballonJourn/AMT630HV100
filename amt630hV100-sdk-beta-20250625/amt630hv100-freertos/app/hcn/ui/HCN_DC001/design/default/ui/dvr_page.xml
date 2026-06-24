@@ -89,15 +89,14 @@
   <!-- Settings overlay -->
   <view name="dvr_setting_view" x="0" y="0" w="1024" h="600" visible="false">
     <image name="dvr_set_bg" x="0" y="0" w="1024" h="600" draw_type="default" image="dvr_list_bg"/>
-    <view name="dvr_set_row_camera" x="57" y="110" w="910" h="80">
-      <image name="dvr_set_cam_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
-      <image name="dvr_set_cam_on_bg" x="270" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
-      <image name="dvr_set_cam_off_bg" x="490" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
-      <label name="dvr_set_cam_label" x="80" y="18" w="90" h="43" style:normal:font_size="30" tr_text="dvr_camera"/>
-      <label name="dvr_set_cam_on" x="305" y="18" w="60" h="43" style:normal:font_size="30" tr_text="dvr_on"/>
-      <image name="dvr_set_cam_on_sel" x="278" y="28" w="24" h="24" draw_type="default" image="settings_s"/>
-      <label name="dvr_set_cam_off" x="530" y="18" w="60" h="43" style:normal:font_size="30" tr_text="dvr_off"/>
+    <!-- Row 0: Version (single info cell) -->
+    <view name="dvr_set_row_version" x="57" y="110" w="910" h="80">
+      <image name="dvr_set_ver_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
+      <image name="dvr_set_ver_info_bg" x="270" y="0" w="640" h="80" draw_type="default" style:normal:icon="settings_btn3_n" style:selected:icon="settings_btn3_p"/>
+      <label name="dvr_set_ver_label" x="65" y="18" w="120" h="43" style:normal:font_size="30" tr_text="dvr_version"/>
+      <label name="dvr_set_ver_text" x="310" y="18" w="560" h="43" style:normal:font_size="28" text="--"/>
     </view>
+    <!-- Row 1: Loop Time (unchanged) -->
     <view name="dvr_set_row_loop" x="57" y="210" w="910" h="80">
       <image name="dvr_set_loop_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_loop_1_bg" x="270" y="0" w="200" h="80" draw_type="default" style:normal:icon="settings_btn2_n" style:selected:icon="settings_btn2_p"/>
@@ -109,18 +108,23 @@
       <label name="dvr_set_loop_2" x="523" y="18" w="80" h="43" style:normal:font_size="30" text="2 min"/>
       <label name="dvr_set_loop_3" x="743" y="18" w="80" h="43" style:normal:font_size="30" text="3 min"/>
     </view>
+    <!-- Row 2: Format — two sub-options (Format SD / Factory Reset) -->
     <view name="dvr_set_row_format" x="57" y="310" w="910" h="80">
       <image name="dvr_set_fmt_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
-      <image name="dvr_set_fmt_btn_bg" x="270" y="0" w="640" h="80" draw_type="default" style:normal:icon="settings_btn3_n" style:selected:icon="settings_btn3_p"/>
+      <image name="dvr_set_fmt_sd_bg" x="270" y="0" w="310" h="80" draw_type="default" style:normal:icon="settings_btn2w_n" style:selected:icon="settings_btn2w_p"/>
+      <image name="dvr_set_fmt_rst_bg" x="600" y="0" w="310" h="80" draw_type="default" style:normal:icon="settings_btn2w_n" style:selected:icon="settings_btn2w_p"/>
       <label name="dvr_set_fmt_label" x="80" y="18" w="90" h="43" style:normal:font_size="30" tr_text="dvr_format"/>
-      <label name="dvr_set_fmt_btn" x="465" y="18" w="150" h="43" style:normal:font_size="30" tr_text="dvr_quick_format"/>
+      <label name="dvr_set_fmt_sd" x="340" y="18" w="170" h="43" style:normal:font_size="28" tr_text="dvr_quick_format"/>
+      <image name="dvr_set_fmt_sel" x="285" y="28" w="24" h="24" draw_type="default" image="settings_s"/>
+      <label name="dvr_set_fmt_rst" x="670" y="18" w="170" h="43" style:normal:font_size="28" tr_text="dvr_factory_reset"/>
     </view>
+    <!-- Row 3: SD Card (capacity bar + text) -->
     <view name="dvr_set_row_about" x="57" y="410" w="910" h="80">
       <image name="dvr_set_about_label_bg" x="0" y="0" w="250" h="80" draw_type="default" style:normal:icon="settings_btn1_n" style:selected:icon="settings_btn1_p"/>
       <image name="dvr_set_about_info_bg" x="270" y="0" w="640" h="80" draw_type="default" style:normal:icon="settings_btn3_n" style:selected:icon="settings_btn3_p"/>
-      <label name="dvr_set_about_label" x="80" y="18" w="90" h="43" style:normal:font_size="30" tr_text="dvr_about"/>
-      <progress_bar name="dvr_storage_bar" x="300" y="30" w="360" h="20" style:normal:bg_image="storage_n" style:normal:fg_image="storage_p" value="50"/>
-      <label name="dvr_storage_text" x="683" y="19" w="123" h="43" style:normal:font_size="28" text="10G/20G"/>
+      <label name="dvr_set_about_label" x="55" y="18" w="140" h="43" style:normal:font_size="30" tr_text="dvr_sd_card"/>
+      <progress_bar name="dvr_storage_bar" x="300" y="30" w="360" h="20" style:normal:bg_image="storage_n" style:normal:fg_image="storage_p" value="0"/>
+      <label name="dvr_storage_text" x="683" y="19" w="200" h="43" style:normal:font_size="28" text="--/--"/>
     </view>
   </view>
 
@@ -128,6 +132,8 @@
   <view name="dvr_popup_view" x="262" y="165" w="500" h="270" visible="false">
     <image name="dvr_popup_bg" x="0" y="0" w="500" h="270" draw_type="default" image="pop up_bg"/>
     <label name="dvr_popup_title" x="170" y="60" w="160" h="46" style:normal:font_size="33" tr_text="dvr_confirm_delete"/>
+    <!-- Loading spinner: centered in popup, hidden by default, shown during DVR_SUB_LOADING -->
+    <image name="dvr_popup_loading" x="210" y="90" w="80" h="80" draw_type="default" image="dvr_loading_0" visible="false"/>
     <image name="dvr_popup_confirm_bg" x="50" y="170" w="180" h="60" draw_type="default" style:normal:icon="pop up_btn_n" style:selected:icon="pop up_btn_p"/>
     <label name="dvr_popup_confirm" x="112" y="179" w="56" h="41" style:normal:font_size="30" tr_text="dvr_confirm"/>
     <image name="dvr_popup_cancel_bg" x="270" y="170" w="180" h="60" draw_type="default" style:normal:icon="pop up_btn_n" style:selected:icon="pop up_btn_p"/>
