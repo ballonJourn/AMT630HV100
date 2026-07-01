@@ -94,6 +94,10 @@ extern void dvr_api_format(void);
 /* Restore DVR factory defaults (must stop recording first) */
 extern void dvr_api_restore_default(void);
 
+/* DEL_FILE acknowledgement polling */
+extern uint8_t dvr_api_is_del_ack(void);
+extern void dvr_api_clear_del_ack(void);
+
 /* ---------- DVR playback / file APIs (commit 6e9b20e9) ---------- */
 
 /* Get DVR firmware version ID (sends GET_ID; reply arrives async) */

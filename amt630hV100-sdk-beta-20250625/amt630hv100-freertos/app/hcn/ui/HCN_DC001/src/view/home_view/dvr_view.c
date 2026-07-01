@@ -35,6 +35,8 @@
 
 /* Forward declarations */
 static void show_sub(dvr_sub_page_e sub);
+static void del_poll_stop(void);
+static void dvr_request_file_list(void);
 
 /* ---- Widgets ---- */
 static widget_t* dvr_main_view    = NULL;
@@ -116,6 +118,12 @@ static uint32_t loading_timer_id = TK_INVALID_ID;
 static int loading_poll_retries = 0;
 static int loading_anim_frame   = 0;
 
+/* Delete-then-refresh poll timer: waits for DEL_FILE ACK before refreshing list */
+static uint32_t del_poll_timer_id = TK_INVALID_ID;
+#define DEL_POLL_INTERVAL_MS  200
+#define DEL_POLL_MAX_RETRIES  25    /* 200ms × 25 = 5s timeout */
+static int del_poll_retries = 0;
+
 static inline uint8_t list_api_mode(void) { return (uint8_t)(list_mode * 2 + list_tab); }
 
 /* ---- Visibility ---- */
@@ -124,10 +132,13 @@ static void show_sub(dvr_sub_page_e sub)
     dvr_sub_page_e prev = cur_sub;
     cur_sub = sub;
 
-    if ((prev == DVR_SUB_LIST || prev == DVR_SUB_LIST_ACT) && sub != DVR_SUB_LIST && sub != DVR_SUB_LIST_ACT && list_poll_timer_id != TK_INVALID_ID) {
-        timer_remove(list_poll_timer_id);
-        list_poll_timer_id = TK_INVALID_ID;
-        list_fetch_pending = 0;
+    if ((prev == DVR_SUB_LIST || prev == DVR_SUB_LIST_ACT) && sub != DVR_SUB_LIST && sub != DVR_SUB_LIST_ACT) {
+        if (list_poll_timer_id != TK_INVALID_ID) {
+            timer_remove(list_poll_timer_id);
+            list_poll_timer_id = TK_INVALID_ID;
+            list_fetch_pending = 0;
+        }
+        del_poll_stop();
     }
 
     int pv_prev = (prev == DVR_SUB_MAIN || prev == DVR_SUB_CAM_SW || prev == DVR_SUB_PLAYBACK);
@@ -325,6 +336,47 @@ static void enter_settings(void) {
     show_sub(DVR_SUB_LOADING);
     loading_timer_id = timer_add(on_loading_poll_timer, NULL, LOADING_POLL_INTERVAL_MS);
     printf("DVR: enter settings (cache miss, loading started)\n");
+}
+
+/* ---- Delete-then-refresh timer ---- */
+static void del_poll_stop(void) {
+    if (del_poll_timer_id != TK_INVALID_ID) { timer_remove(del_poll_timer_id); del_poll_timer_id = TK_INVALID_ID; }
+}
+static ret_t on_del_poll_timer(const timer_info_t* info) {
+    (void)info;
+    /* Guard: if user navigated away from list, abort silently */
+    if (cur_sub != DVR_SUB_LIST && cur_sub != DVR_SUB_LIST_ACT) {
+        del_poll_stop();
+        printf("DVR: del refresh aborted (left list, sub=%d)\n", cur_sub);
+        return RET_REMOVE;
+    }
+    del_poll_retries++;
+    /* Phase 1 (tick 1~3): let the DEL command get physically sent over USB.
+     * dvr_send_normal_cmd only sets a flag; the actual ff_fwrite happens in
+     * the DVR capture task's next loop iteration (2~50ms).  We give it 3
+     * ticks (600ms) so the DVR has time to process the delete too. */
+    if (del_poll_retries <= 3) {
+        return RET_REPEAT;
+    }
+    /* Phase 2 (tick 4): send GET_LIST to refresh */
+    if (del_poll_retries == 4) {
+        printf("DVR: del wait done, requesting fresh list\n");
+        dvr_file_list_clear();
+        dvr_request_file_list();
+        /* list_focus adjustment happens after list arrives (in filelist poll) */
+        return RET_REPEAT;
+    }
+    /* Phase 3 (tick 5+): wait for list response (already handled by list_poll_timer) */
+    del_poll_stop();
+    if(list_focus >= list_count && list_focus > 0) list_focus--;
+    hl_list(list_focus);
+    return RET_REMOVE;
+}
+static void del_then_refresh(void) {
+    del_poll_stop();
+    del_poll_retries = 0;
+    del_poll_timer_id = timer_add(on_del_poll_timer, NULL, DEL_POLL_INTERVAL_MS);
+    printf("DVR: del sent, waiting before list refresh\n");
 }
 
 /* ---- File list data ---- */
@@ -556,6 +608,7 @@ void dvr_page_deal_key_set(void) {
                                        + (fn[6]-'0')*10 + (fn[7]-'0')); }
                 if(list_mode==1) par|=0x8000;
                 if(list_tab==1)  par|=0x4000;
+                dvr_api_clear_del_ack();
                 dvr_send_normal_cmd(BD_CTRL_DEL_FILE,par);
                 printf("DVR: del file_no=%d (fi=%d)\n", par & 0x3FFF, fi);
             /* CHANGED: split format vs factory reset */
@@ -570,7 +623,7 @@ void dvr_page_deal_key_set(void) {
         }
         /* CHANGED: both FORMAT and FACTORY_RST return to settings */
         if(popup_src==POP_FORMAT || popup_src==POP_FACTORY_RST){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
-        else{show_sub(DVR_SUB_LIST);dvr_file_list_clear();dvr_request_file_list();if(list_focus>=list_count&&list_focus>0)list_focus--;hl_list(list_focus);}
+        else{show_sub(DVR_SUB_LIST);hl_list(list_focus);del_then_refresh();}
         break;
 
     case DVR_SUB_PLAYBACK:

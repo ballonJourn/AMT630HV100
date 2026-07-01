@@ -170,10 +170,14 @@ static uint8_t dvr_sd_full = 0;        // 0: not full, 1: full
 static uint8_t dvr_sensor_switch_enable = 1;  // enable auto sensor switch
 static uint8_t dvr_view_mode = 0;  // 0:front, 1:rear, 2:f+r, 3:r+f, 4:hzh
 
-// TF card capacity cache (populated by BD_CTRL_GET_TF_CAPACITY response, 0 until first response)
-static volatile uint32_t dvr_tf_total_bytes = 0;
-static volatile uint32_t dvr_tf_free_bytes  = 0;
-static volatile uint8_t  dvr_tf_capacity_valid = 0;  /* 0=no response yet, 1=have a fresh sample */
+// TF card capacity cache — stored in KiB to avoid uint32_t overflow on >4GiB cards.
+static volatile uint32_t dvr_tf_total_kib = 0;
+static volatile uint32_t dvr_tf_free_kib  = 0;
+static volatile uint8_t  dvr_tf_capacity_valid = 0;
+
+// DEL_FILE acknowledgement flag: set to 1 when DVR replies to a DEL_FILE command.
+// Cleared by dvr_api_clear_del_ack() before sending DEL, polled by UI after.
+static volatile uint8_t  dvr_del_ack_received = 0;
 
 // DVR firmware version string cache (populated by BD_CTRL_GET_ID response).
 // NUL-terminated. 32 bytes covers typical firmware version strings; truncated if longer.
@@ -313,7 +317,6 @@ static void dvr_alpha_clear_hook(unsigned int fb_base)
 
     g_alpha_hook_call_count++;
 
-    uint32_t *fb = (uint32_t *)fb_base;
     int x0 = dvr_display_x;
     int y0 = dvr_display_y;
     int x1 = x0 + dvr_display_width;
@@ -321,13 +324,30 @@ static void dvr_alpha_clear_hook(unsigned int fb_base)
     if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
     if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
 
-    for (int y = y0; y < y1; y++) {
-        uint32_t *p = fb + y * OSD_WIDTH + x0;
-        for (int x = x0; x < x1; x++)
-            *p++ &= 0x00FFFFFF;   /* clear alpha, keep RGB */
+    /* The old code did a per-pixel READ-MODIFY-WRITE here (*p &= 0x00FFFFFF),
+     * which measured 74-93ms over the 1024x500 region and stalled the LCD
+     * render task for ~5 frames on every UI repaint -- that stall WAS the
+     * preview flicker.  The hole rect is identical to the VIDEO layer rect
+     * (info.x/y/w/h == dvr_display_*), so the UI-layer RGB under the hole is
+     * never visible; we can do a straight 32-bit WRITE of 0x00000000
+     * (alpha=0, RGB=0) instead of reading each pixel.  That removes 512K
+     * memory reads.  0x00000000 is safe for both straight-alpha and additive
+     * blend (RGB=0 contributes nothing either way).
+     * If the row is full-width we can fill it as one contiguous run. */
+    if (x0 == 0 && x1 == OSD_WIDTH) {
+        /* contiguous block: y0..y1 full rows */
+        uint32_t *p   = (uint32_t *)fb_base + (uint32_t)y0 * OSD_WIDTH;
+        uint32_t *end = (uint32_t *)fb_base + (uint32_t)y1 * OSD_WIDTH;
+        while (p < end) *p++ = 0x00000000;
+    } else {
+        for (int y = y0; y < y1; y++) {
+            uint32_t *p = (uint32_t *)fb_base + (uint32_t)y * OSD_WIDTH + x0;
+            for (int x = x0; x < x1; x++)
+                *p++ = 0x00000000;
+        }
     }
-    CP15_clean_dcache_for_dma(fb_base + y0 * OSD_WIDTH * 4,
-                               fb_base + y1 * OSD_WIDTH * 4);
+    CP15_clean_dcache_for_dma(fb_base + (uint32_t)y0 * OSD_WIDTH * 4,
+                               fb_base + (uint32_t)y1 * OSD_WIDTH * 4);
 }
 
 /* Restore alpha=0xFF on all framebuffers (called on preview exit) */
@@ -378,7 +398,10 @@ void dvr_send_normal_cmd(unsigned short cmd_id, unsigned short cmd_par)
     pctrl->checksum = 0;
     dvr_need_send_data = 1;
 
-    printf("DVR: Send cmd: 0x%02X, par: 0x%04X\n", cmd_id, cmd_par);
+    printf("DVR-TX>> cmd=0x%02X par=0x%04X frame[AA 55 %02X %02X %02X %02X 00 00 00 00]\n",
+           cmd_id, cmd_par,
+           cmd_id & 0xFF, (cmd_id >> 8) & 0xFF,
+           cmd_par & 0xFF, (cmd_par >> 8) & 0xFF);
 }
 
 // Check if elene file exists on USB using ff_stat
@@ -574,6 +597,15 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
                 dvr_auto_rec_pending = 0;
                 printf("DVR: already recording, auto-rec skipped\n");
             }
+            /* If version is still unknown, piggyback a GET_ID request.
+             * GET_STS just arrived so the USB channel is responsive right
+             * now — best moment to slip in a GET_ID and catch the reply
+             * on the next 2ms read cycle. Only retry while preview is on
+             * (USB reads are frequent); stops once version is cached. */
+            if (!dvr_version_valid && dvr_preview_enable) {
+                dvr_send_normal_cmd(BD_CTRL_GET_ID, 0);
+                printf("DVR: version retry (piggyback on GET_STS reply)\n");
+            }
             break;
         case BD_CTRL_SENSOR_SEL:
             printf("DVR RECV SENSOR_SEL: cmd_par=0x%02x\n", pctrl->cmd_par);
@@ -611,7 +643,8 @@ static void dvr_recv_cmd_process(st_bd_ctrl_if_t *pctrl)
             printf("DVR: SET_TIME received, status=%d\n", pctrl->cmd_par);
             break;
         case BD_CTRL_DEL_FILE:
-            printf("DVR: DEL_FILE received, index=%d, status=%d\n", pctrl->cmd_par, pctrl->data_len);
+            dvr_del_ack_received = 1;
+            printf("DVR: DEL_FILE ACK received, par=0x%04X, status=%d\n", pctrl->cmd_par, pctrl->data_len);
             break;
         case BD_CTRL_LOCK_FILE:
             printf("DVR: LOCK_FILE received, index=%d, status=%d\n", pctrl->cmd_par, pctrl->data_len);
@@ -826,7 +859,13 @@ static int dvr_capture_get_pic_process(st_dvr_capture_t *cap)
     /* Check if it's a command (header 0xAA55) or image data */
     if (cap->cap_blk_buf[0] == 0x55 && cap->cap_blk_buf[1] == 0xAA) {
         /* It's a command frame */
-        printf("DVR: cmd 0x%02x received\n", pctrl->cmd_id);
+        printf("DVR-RX<< cmd=0x%02X par=0x%04X data_len=%d frame[%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X]\n",
+               pctrl->cmd_id, pctrl->cmd_par, pctrl->data_len,
+               cap->cap_blk_buf[0], cap->cap_blk_buf[1],
+               cap->cap_blk_buf[2], cap->cap_blk_buf[3],
+               cap->cap_blk_buf[4], cap->cap_blk_buf[5],
+               cap->cap_blk_buf[6], cap->cap_blk_buf[7],
+               cap->cap_blk_buf[8], cap->cap_blk_buf[9]);
         dvr_recv_cmd_process(pctrl);
         return -1;
     }
@@ -1269,13 +1308,8 @@ static void dvr_tf_capacity_parser(uint8_t *buf, int32_t len)
 {
     uint32_t total_kib = 0;
     uint32_t free_kib  = 0;
-    uint32_t total_bytes = 0;
-    uint32_t free_bytes  = 0;
 
-    if (buf == NULL) {
-        printf("DVR: GET_TF_CAPACITY: null buffer\n");
-        return;
-    }
+    if (buf == NULL) { printf("DVR: GET_TF_CAPACITY: null buffer\n"); return; }
 
     if (len >= 4) {
         total_kib = ((uint32_t)buf[3] << 24) | ((uint32_t)buf[2] << 16) |
@@ -1284,44 +1318,16 @@ static void dvr_tf_capacity_parser(uint8_t *buf, int32_t len)
     if (len >= 8) {
         free_kib = ((uint32_t)buf[7] << 24) | ((uint32_t)buf[6] << 16) |
                    ((uint32_t)buf[5] <<  8) |  (uint32_t)buf[4];
-    } else {
-        printf("DVR: GET_TF_CAPACITY: short reply (len=%d), free=0\n", len);
     }
 
-    /* Convert KiB → bytes. Guard against overflow for very large (>4 TiB)
-     * cards by saturating at UINT32_MAX (effectively 2^32-1 bytes ≈ 4 GiB). */
-    if (total_kib > (0xFFFFFFFFu / 1024U)) {
-        total_bytes = 0xFFFFFFFFu;
-    } else {
-        total_bytes = total_kib * 1024U;
-    }
-    if (free_kib > (0xFFFFFFFFu / 1024U)) {
-        free_bytes = 0xFFFFFFFFu;
-    } else {
-        free_bytes = free_kib * 1024U;
-    }
-
-    dvr_tf_total_bytes    = total_bytes;
-    dvr_tf_free_bytes     = free_bytes;
+    dvr_tf_total_kib      = total_kib;
+    dvr_tf_free_kib       = free_kib;
     dvr_tf_capacity_valid = 1;
 
-    /* Dump raw trans_buf bytes (clamped to 8) for protocol verification. */
-    printf("DVR: TF capacity raw[%d]:", (int)len);
-    int32_t dump_len = (len < 8) ? len : 8;
-    for (int32_t i = 0; i < dump_len; i++) {
-        printf(" %02X", buf[i]);
-    }
-    printf("\n");
-
-    printf("DVR: TF capacity raw[HEX] total=0x%08X free=0x%08X  "
-           "[KiB] total=%u free=%u  "
-           "[bytes] total=%u free=%u  "
-           "(%.2f GiB total, %.2f GiB free)\n",
+    printf("DVR: TF [KiB] total=%u free=%u (%.2f GiB / %.2f GiB)\n",
            total_kib, free_kib,
-           total_kib, free_kib,
-           total_bytes, free_bytes,
-           (double)total_bytes / (1024.0 * 1024.0 * 1024.0),
-           (double)free_bytes  / (1024.0 * 1024.0 * 1024.0));
+           (double)total_kib / (1024.0*1024.0),
+           (double)free_kib / (1024.0*1024.0));
 }
 
 // Get file list from DVR device
@@ -1612,6 +1618,18 @@ uint8_t dvr_api_get_version(char *buf, uint32_t buf_len)
     return 1;
 }
 
+// DVR control API - Check if DEL_FILE ACK has been received
+uint8_t dvr_api_is_del_ack(void)
+{
+    return dvr_del_ack_received;
+}
+
+// DVR control API - Clear DEL_FILE ACK flag (call before sending DEL)
+void dvr_api_clear_del_ack(void)
+{
+    dvr_del_ack_received = 0;
+}
+
 // DVR control API - Start recording
 void dvr_api_rec_start(void)
 {
@@ -1677,10 +1695,10 @@ void dvr_api_get_tf_capacity_query(void)
 // DVR control API - Read the most recent TF card capacity sample.
 //   total_bytes / free_bytes are out-params; may be NULL.
 //   Returns 1 if at least one valid sample has been received, 0 otherwise.
-uint8_t dvr_api_get_tf_capacity(uint32_t *total_bytes, uint32_t *free_bytes)
+uint8_t dvr_api_get_tf_capacity(uint32_t *total_kib, uint32_t *free_kib)
 {
-    if (total_bytes) *total_bytes = dvr_tf_total_bytes;
-    if (free_bytes)  *free_bytes  = dvr_tf_free_bytes;
+    if (total_kib) *total_kib = dvr_tf_total_kib;
+    if (free_kib)  *free_kib  = dvr_tf_free_kib;
     return dvr_tf_capacity_valid;
 }
 
