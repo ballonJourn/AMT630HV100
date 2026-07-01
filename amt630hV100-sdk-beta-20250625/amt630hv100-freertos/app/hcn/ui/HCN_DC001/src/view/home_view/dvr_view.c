@@ -342,41 +342,63 @@ static void enter_settings(void) {
 static void del_poll_stop(void) {
     if (del_poll_timer_id != TK_INVALID_ID) { timer_remove(del_poll_timer_id); del_poll_timer_id = TK_INVALID_ID; }
 }
+/* Optimistic delete: immediately remove the item from UI, then verify
+ * in the background by re-fetching the list after DEL has been sent. */
+static int del_pending_fi = -1;   /* index of file being deleted, -1 = none */
+
+static void del_optimistic_remove(int fi) {
+    /* Shift file names up in the visible list to hide the deleted item */
+    if (fi < 0 || fi >= list_count) return;
+    list_count--;
+    /* Re-populate from cache with the item conceptually removed.
+     * Since the cache hasn't updated yet, we just blank the slot and
+     * let the background refresh fix it properly. */
+    for (int i = fi - list_offset; i < DVR_FILE_ITEM_MAX - 1; i++) {
+        if (i >= 0 && i + 1 < DVR_FILE_ITEM_MAX && file_name_w[i] && file_name_w[i+1]) {
+            const wchar_t *tmp = widget_get_text(file_name_w[i+1]);
+            widget_set_text(file_name_w[i], tmp);
+        }
+    }
+    /* Clear the last visible slot */
+    int last = DVR_FILE_ITEM_MAX - 1;
+    if (last >= 0 && file_name_w[last]) widget_set_text_utf8(file_name_w[last], "");
+    /* Adjust focus */
+    if (list_focus >= list_count && list_focus > 0) list_focus--;
+    hl_list(list_focus);
+    printf("DVR: UI optimistic remove fi=%d, visible count=%d\n", fi, list_count);
+}
+
 static ret_t on_del_poll_timer(const timer_info_t* info) {
     (void)info;
-    /* Guard: if user navigated away from list, abort silently */
     if (cur_sub != DVR_SUB_LIST && cur_sub != DVR_SUB_LIST_ACT) {
-        del_poll_stop();
-        printf("DVR: del refresh aborted (left list, sub=%d)\n", cur_sub);
+        del_poll_stop(); del_pending_fi = -1;
+        printf("DVR: del verify aborted (left list)\n");
         return RET_REMOVE;
     }
     del_poll_retries++;
-    /* Phase 1 (tick 1~3): let the DEL command get physically sent over USB.
-     * dvr_send_normal_cmd only sets a flag; the actual ff_fwrite happens in
-     * the DVR capture task's next loop iteration (2~50ms).  We give it 3
-     * ticks (600ms) so the DVR has time to process the delete too. */
-    if (del_poll_retries <= 3) {
-        return RET_REPEAT;
-    }
-    /* Phase 2 (tick 4): send GET_LIST to refresh */
+    /* Tick 1~3: wait for DEL command to be physically sent and processed */
+    if (del_poll_retries <= 3) return RET_REPEAT;
+    /* Tick 4: send GET_LIST to verify deletion and sync the real list */
     if (del_poll_retries == 4) {
-        printf("DVR: del wait done, requesting fresh list\n");
+        printf("DVR: del verify: requesting fresh list\n");
         dvr_file_list_clear();
         dvr_request_file_list();
-        /* list_focus adjustment happens after list arrives (in filelist poll) */
         return RET_REPEAT;
     }
-    /* Phase 3 (tick 5+): wait for list response (already handled by list_poll_timer) */
-    del_poll_stop();
-    if(list_focus >= list_count && list_focus > 0) list_focus--;
-    hl_list(list_focus);
+    /* Tick 5+: list_poll_timer handles the rest, we're done */
+    del_poll_stop(); del_pending_fi = -1;
     return RET_REMOVE;
 }
-static void del_then_refresh(void) {
+
+static void del_then_refresh(int fi) {
     del_poll_stop();
+    del_pending_fi = fi;
     del_poll_retries = 0;
+    /* Immediate UI feedback — remove the row now */
+    del_optimistic_remove(fi);
+    /* Background: wait for USB send, then verify with GET_LIST */
     del_poll_timer_id = timer_add(on_del_poll_timer, NULL, DEL_POLL_INTERVAL_MS);
-    printf("DVR: del sent, waiting before list refresh\n");
+    printf("DVR: del fi=%d, UI updated, background verify started\n", fi);
 }
 
 /* ---- File list data ---- */
@@ -623,7 +645,11 @@ void dvr_page_deal_key_set(void) {
         }
         /* CHANGED: both FORMAT and FACTORY_RST return to settings */
         if(popup_src==POP_FORMAT || popup_src==POP_FACTORY_RST){show_sub(DVR_SUB_SETTING);hl_set(set_focus);}
-        else{show_sub(DVR_SUB_LIST);hl_list(list_focus);del_then_refresh();}
+        else{
+            int del_fi = list_offset + list_focus;
+            show_sub(DVR_SUB_LIST);
+            del_then_refresh(del_fi);
+        }
         break;
 
     case DVR_SUB_PLAYBACK:
