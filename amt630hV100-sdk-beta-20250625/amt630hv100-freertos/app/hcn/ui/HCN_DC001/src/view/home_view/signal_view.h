@@ -15,6 +15,7 @@ typedef enum home_signal_com{
     ICON_ECU            ,
     ICON_TCS            , 
     ICON_BRAKE          ,     
+    ICON_RADAR          ,     ///< 毫米波雷达在线状态图标
 
     ICON_SIGNAL_NUM_MAX ,
 }signal_e;

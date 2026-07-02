@@ -27,6 +27,7 @@ void signal_abs();
 
 void signal_brake();
 
+void signal_radar();
 
 
 

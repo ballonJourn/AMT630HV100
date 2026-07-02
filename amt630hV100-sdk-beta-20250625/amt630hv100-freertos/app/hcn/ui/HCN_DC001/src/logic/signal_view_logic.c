@@ -1,6 +1,10 @@
 #include "signal_view_logic.h"
 #include "proxy/vehicle_data.h"
 #include "view/home_view/home_view_interface.h"
+#include "config/hcn_config.h"
+#ifdef HCN_MMWAVE_RADAR_ENABLE
+#include "vehicle_param/vehicle_param.h"
+#endif
 
 void signal_view_update()
 {
@@ -16,6 +20,7 @@ void signal_view_update()
     signal_tcs();
     signal_abs();
     signal_brake();
+    signal_radar();
 
     return ; 
 }
@@ -91,4 +96,12 @@ void signal_brake()
 {
     bool_t value = (bool_t)vehicle_get_data_signal_lamp(VEH_BRAKE);
     home_refresh_signal(ICON_BRAKE , value) ;
+}
+
+void signal_radar()
+{
+#ifdef HCN_MMWAVE_RADAR_ENABLE
+    bool_t value = (bool_t)vehicle_get_data(VEH_RADAR_STATUS);
+    home_refresh_signal(ICON_RADAR , value) ;
+#endif
 }

@@ -24,6 +24,7 @@
     <image name="icon_right_bg" x="489" y="0" w="52" h="52" draw_type="default" image="top_right"/>
     <image name="icon_right" x="489" y="0" w="52" h="52" draw_type="default" image="top_right_n" animation="visible(name=animation_demo,duration=4000,yoyo_times=0,easing=elastic_out,auto_start=false,auto_destroy=false,from=0,to=1)"/>
     <image name="icon_near_beam" x="559" y="0" w="52" h="52" draw_type="default" image="top_auto_high_beams_n"/>
+    <image name="icon_radar" x="614" y="0" w="52" h="52" draw_type="default" image="top_radar_n" visible="false"/>
     <image name="icon_abs" x="668" y="0" w="52" h="52" draw_type="default" image="top_abs_n"/>
     <image name="icon_ecu" x="727" y="0" w="52" h="52" draw_type="default" image="top_ecu_n"/>
     <image name="icon_tcs" x="790" y="0" w="52" h="52" draw_type="default" image="top_tcs_n"/>

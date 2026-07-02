@@ -1,9 +1,8 @@
-
 #include "signal_view.h"
 
 const char* home_signal_widget_name[ICON_SIGNAL_NUM_MAX] = {
     "icon_GMS" , "icon_gps" , "icon_bt" , "icon_high_beam" ,"icon_left" , "icon_ready" , "icon_right" , "icon_near_beam" ,
-    "icon_abs" , "icon_ecu" , "icon_tcs", "icon_engine" 
+    "icon_abs" , "icon_ecu" , "icon_tcs", "icon_engine" , "icon_radar"
 } ;
 
 static widget_t* home_signal_widget[ICON_SIGNAL_NUM_MAX] = { NULL };
