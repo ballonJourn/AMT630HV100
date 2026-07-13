@@ -24,6 +24,7 @@
 #include "task.h"
 
 #ifdef HCN_WIFI_INIT_DELAY_ENABLE
+#if CARLINK_EC
 
 static TaskHandle_t wifi_init_task = NULL;
 
@@ -97,4 +98,9 @@ int hcn_wifi_init(void) {
     return 0;
 }
 
+#else
+int hcn_wifi_init(void) {
+    return 0;
+}
+#endif
 #endif

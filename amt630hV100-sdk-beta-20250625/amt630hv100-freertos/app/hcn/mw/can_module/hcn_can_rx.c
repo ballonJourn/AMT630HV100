@@ -639,7 +639,7 @@ int can_module_init(void) {
 	vCanSetFilter(cap, &canfilter);
 #endif
 
-    if (xTaskCreate(can_rxdemo_thread, "canrx", configMINIMAL_STACK_SIZE, cap,
+    if (xTaskCreate(can_rxdemo_thread, "canrx", configMINIMAL_STACK_SIZE * 4, cap,
                     configMAX_PRIORITIES / 3, NULL) != pdPASS) {
         hcn_log_error("create can rxdemo task fail.\n");
         return -1;

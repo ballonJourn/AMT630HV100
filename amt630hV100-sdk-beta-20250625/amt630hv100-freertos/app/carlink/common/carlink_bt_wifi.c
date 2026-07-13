@@ -921,4 +921,81 @@ int carlink_bt_wifi_init()
 	printf("bt wlan init is ok\r\n");
 	return 0;
 }
+#else
+/* Stubs for functions referenced by hcn modules when EC/CP/AA are all disabled (e.g. CARLINK_EY mode) */
+const char *carlink_get_bt_mac()
+{
+	return NULL;
+}
+
+const char *carlink_get_ble_mac()
+{
+	return NULL;
+}
+
+bool carlink_ble_mac_addr_is_ready()
+{
+	return false;
+}
+
+bool carlink_bt_mac_addr_is_ready()
+{
+	return false;
+}
+
+const char *carlink_get_wifi_p2p_name()
+{
+	return NULL;
+}
+
+const char *carlink_get_wifi_ssid()
+{
+	return NULL;
+}
+
+const char *carlink_get_wifi_mac()
+{
+	return NULL;
+}
+
+const char *carlink_get_wifi_passwd()
+{
+	return NULL;
+}
+
+void carlink_get_ap_ip_addr(char ip[4])
+{
+	(void)ip;
+}
+
+int carlink_wifi_init()
+{
+	return 0;
+}
+
+int restart_p2p()
+{
+	return 0;
+}
+
+int start_sta_ext(const char* ssid, const char* passwd, char need_passwd)
+{
+	(void)ssid;
+	(void)passwd;
+	(void)need_passwd;
+	return 0;
+}
+
+int start_sta_ota_proc(const char* ssid, const char* passwd, char need_passwd)
+{
+	(void)ssid;
+	(void)passwd;
+	(void)need_passwd;
+	return 0;
+}
+
+uint32_t get_ota_sta_gw_addr(void)
+{
+	return 0;
+}
 #endif
