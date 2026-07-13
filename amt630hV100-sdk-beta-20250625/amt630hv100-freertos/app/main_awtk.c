@@ -2817,18 +2817,16 @@ void awtk_thread(void *data)
 	set_carlink_video_info(LCD_WIDTH, LCD_HEIGHT, 30);
 	carlink_ey_init();
 #endif
-#if CARLINK_EC
-	#ifndef HCN_WIFI_INIT_DELAY_ENABLE
+/* 延时wifi初始化:任何基于wifi的互联(EC/CP/AA)都需要先建立wifi。
+ * 原先 hcn_wifi_init() 仅在 CARLINK_EC 下调用,关闭EC后会导致CP无wifi可用。*/
+#if (CARLINK_EC || CARLINK_CP || CARLINK_AA) && defined(HCN_WIFI_INIT_DELAY_ENABLE)
+	hcn_wifi_init();
+#endif
+
+#if CARLINK_EC && !defined(HCN_WIFI_INIT_DELAY_ENABLE)
 	set_carlink_display_info(0, 0, LCD_WIDTH, LCD_HEIGHT);
 	set_carlink_video_info(LCD_WIDTH, LCD_HEIGHT, 30);
 	carlink_ec_init(0, NULL);
-	#else
-	hcn_wifi_init();
-	#endif
-#endif
-
-#if CARLINK_CP
-	carlink_cp_init();
 #endif
 
 #if CARLINK_AA

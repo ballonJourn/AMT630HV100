@@ -13,7 +13,9 @@
 */
 
 #include <string.h>
+#if CARLINK_EC
 #include "ECTiny.h"
+#endif
 #include "log/hcn_log.h"
 #include "carlink_cb/hcn_carlink_provide.h"
 
@@ -75,11 +77,20 @@ const char* hcn_ec_get_qr_code_url() {
 }
 
 const char* hcn_ec_get_version() {
+#if CARLINK_EC
     return EC_getVersion();
+#else
+    return "";
+#endif
 }
 
 int32_t hcn_ec_loadNightModeStatus(uint32_t isNightModeOn) {
+#if CARLINK_EC
     return EC_uploadNightModeStatus(isNightModeOn);
+#else
+    (void)isNightModeOn;
+    return 0;
+#endif
 }
 
 const char * hcn_get_ota_ssid(void) {
@@ -91,10 +102,16 @@ const char * hcn_get_ota_ap_pwd(void) {
 }
 
 int32_t hcn_ec_startMirror() {
+#if CARLINK_EC
     return EC_startMirror();
+#else
+    return 0;
+#endif
 }
 
 void hcn_ec_stopMirror() {
+#if CARLINK_EC
     EC_stopMirror();
+#endif
 }
 

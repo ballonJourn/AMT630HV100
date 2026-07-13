@@ -14,7 +14,9 @@
 
 #include <FreeRTOS.h>
 #include "task.h"
+#if CARLINK_EC
 #include "ECTiny.h"
+#endif
 #include "carlink_cb/hcn_carlink_task.h"
 #include "vehicle_param/vehicle_param.h"
 #include "log/hcn_log.h"

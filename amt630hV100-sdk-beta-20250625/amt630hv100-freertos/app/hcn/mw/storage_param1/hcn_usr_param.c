@@ -87,7 +87,9 @@ static void printf_usr_param(usr_param_t * param) {
         printf("drive_mode:%d\r\n", param->usr_set.drive_mode);
 
         printf("ride_time_a:%d\r\n", param->ride_info.ride_time_a);     
-        printf("ride_time_b:%d\r\n", param->ride_info.ride_time_b);     
+        printf("ride_time_b:%d\r\n", param->ride_info.ride_time_b);
+        printf("radar_switch:%d\r\n", param->usr_set.radar_switch);
+        printf("carlink_type:%d\r\n", param->usr_set.carlink_type);     
         printf("mcu update_len:%d\r\n", param->mcu_update_len);
         for (int i = 0; i < MAX_WHEEL_POS_NUM; i++) {
             printf("tpms_info[%d].id:0x%x\n", i, param->tpms[i].tpms_id);
@@ -179,6 +181,10 @@ static void check_usr_param(void) {
         usr_param.maintain_info.maintain_time.is_sync_time = 0;
     }
 
+    if (usr_param.usr_set.carlink_type > 1) {
+        usr_param.usr_set.carlink_type = 0;
+    }
+
 #if USE_PARAM_PRINTF
     printf_usr_param(&usr_param);
 #endif
@@ -204,13 +210,14 @@ void check_start_source(uint8_t start_src) {
     } else {
         hcn_log_info("\r\nStart by bat\n");
         usr_param.usr_set.mile_format = 0;
-        usr_param.usr_set.mile_display = 0,
+        usr_param.usr_set.mile_display = 0;
         usr_param.usr_set.language = 0;
         usr_param.usr_set.theme = 0;
         usr_param.usr_set.bt_switch = 1;
         usr_param.usr_set.tpms_unit = 0;
         usr_param.usr_set.brightness = 3;
         usr_param.usr_set.auto_headlight = 0;
+        usr_param.usr_set.carlink_type = 0;
     }
 
     check_usr_param();
@@ -379,10 +386,14 @@ bool get_hcn_usr_param(usr_param_handle_e id, void *param) {
             memcpy(param, &usr_param.tpms[TPMS_RIGHT_REAR], sizeof(tpms_param_t));
             break;
             
-
         case HCN_PARAM_RADAR_SWITCH:
             *((uint8_t *)param) = usr_param.usr_set.radar_switch;
             break;
+
+        case HCN_PARAM_CARLINK_TYPE:
+            *((uint8_t *)param) = usr_param.usr_set.carlink_type;
+            break;
+
         case HCN_PARAM_MCU_UPDATE_LEN:
             *((uint32_t *)param) = usr_param.mcu_update_len;
             break;        
@@ -626,13 +637,20 @@ bool set_hcn_usr_param(usr_param_handle_e id, void *param) {
             }
             break;
 
-
         case HCN_PARAM_RADAR_SWITCH:
             if (usr_param.usr_set.radar_switch != *((uint8_t *)param)) {
                 usr_param.usr_set.radar_switch = *((uint8_t *)param);
                 is_save = true;
             }
             break;
+        
+        case HCN_PARAM_CARLINK_TYPE:
+            if (usr_param.usr_set.carlink_type != *((uint8_t *)param)) {
+                usr_param.usr_set.carlink_type = *((uint8_t *)param);
+                is_save = true;
+            }
+            break;
+
         case HCN_PARAM_MCU_UPDATE_LEN:
             if (usr_param.mcu_update_len != *((uint32_t *)param)) {
                 usr_param.mcu_update_len = *((uint32_t *)param);  

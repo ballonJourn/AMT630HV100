@@ -22,9 +22,10 @@
 #include "carlink_video.h"
 #include "gpio.h"
 #include "task.h"
+#include "carlink_cp.h"
+#include "storage_param1/hcn_usr_param.h"
 
 #ifdef HCN_WIFI_INIT_DELAY_ENABLE
-#if CARLINK_EC
 
 static TaskHandle_t wifi_init_task = NULL;
 
@@ -75,15 +76,24 @@ reset_wifi:
 
     //enable_btco_log();		///< 开启wifi btco
 
+    while (get_recovery_usr_param() == false) {
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
     set_carlink_display_info(0, 0, HCN_LCD_EC_WIDTH, HCN_LCD_EC_HEIGHT);
     set_carlink_video_info(HCN_LCD_EC_WIDTH, HCN_LCD_EC_HEIGHT, 30);
-    carlink_ec_init(0, NULL);
+
+    uint8_t carlink_type = 0;
+    get_hcn_usr_param(HCN_PARAM_CARLINK_TYPE, &carlink_type);
+    if (carlink_type == 0) {
+        carlink_cp_init();
+    } else if (carlink_type == 1) {
+        carlink_ec_init(0, NULL);
+    } 
 
     vTaskDelay(pdMS_TO_TICKS(200)); 
     hcn_log_info("wifi init ok!\n");
 
     vTaskDelete(NULL);
-
 }
 
 int hcn_wifi_init(void) {
@@ -98,9 +108,4 @@ int hcn_wifi_init(void) {
     return 0;
 }
 
-#else
-int hcn_wifi_init(void) {
-    return 0;
-}
-#endif
 #endif

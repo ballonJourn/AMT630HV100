@@ -24,7 +24,9 @@
 #include "cJSON.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#if CARLINK_EC
 #include "ECTiny.h"
+#endif
 #include "config/hcn_config.h"
 #include "vehicle_param/vehicle_param.h"
 #include "uart_communicate/hcn_uart_send_cmd.h"
@@ -36,11 +38,12 @@
 static IhcnCallBack *gHcnCallback = NULL;
  
 static void sync_carlink_data_time(void) {
+#if CARLINK_EC
     char time_zone[30];
     char datetime[30];
 
     vTaskDelay(pdMS_TO_TICKS(100));
-    if (EC_queryTime(0, 0, time_zone, sizeof(time_zone), 
+    if (EC_queryTime(0, 0, time_zone, sizeof(time_zone),
                     datetime, sizeof(datetime)) == 0) {
         hcn_log_info("\r\nEC_queryTime dateTime:%s\r\n", datetime);
 
@@ -54,29 +57,30 @@ static void sync_carlink_data_time(void) {
         char sec_str[3] = {datetime[17], datetime[18], '\0'};
 
         int year_t = atoi(year_str);
-        int mon_t = atoi(mon_str);  
+        int mon_t = atoi(mon_str);
         int day_t = atoi(day_str);
         int hour_t = atoi(hour_str);
         int min_t = atoi(min_str);
         int sec_t = atoi(sec_str);
 
         SystemTime_t sys_time;
-        memset(&sys_time, 0, sizeof(SystemTime_t)); 
+        memset(&sys_time, 0, sizeof(SystemTime_t));
         sys_time.tm_year = year_t;
         sys_time.tm_mon = mon_t;
         sys_time.tm_mday = day_t;
         sys_time.tm_hour = hour_t;
         sys_time.tm_min = min_t;
-        sys_time.tm_sec = sec_t;   
+        sys_time.tm_sec = sec_t;
 
         hcn_log_info("Internal time set to: %04d/%02d/%02d %02d:%02d:%02d\n",
                      sys_time.tm_year, sys_time.tm_mon, sys_time.tm_mday,
                      sys_time.tm_hour, sys_time.tm_min, sys_time.tm_sec);
-                                        
+
         set_os_date_time(sys_time);
     } else {
         hcn_log_error("EC_queryTime failed!\n");
     }
+#endif
 }
 
 static void parse_weather_json(const char *data) {
@@ -120,20 +124,24 @@ static void onHcnLinkConnect(void) {
 static void onHcnVideoStatus(bool status) {
     if (status) {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 1);
+#if CARLINK_EC
 #ifdef HCN_CARLINK_ROAD_PIC_ENABLE
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_LANE_GUIDANCE_PICTURE |
                                      EC_APP_HUD_SUPPORT_FUNCTION_ROAD_JUNCTION_PICTURE);
 #else
-        EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_DEFAULT); 
+        EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_DEFAULT);
+#endif
 #endif
     } else {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
 
         vehicle_set_data(VEH_QUETY_WEATHER_STATUS, 0);
 
-        vehicle_set_data(VEH_EASY_NAV_STATUS, 0);		
+        vehicle_set_data(VEH_EASY_NAV_STATUS, 0);
 
-        EC_disableDownloadPhoneAppHud(); 
+#if CARLINK_EC
+        EC_disableDownloadPhoneAppHud();
+#endif
     }
 }
 

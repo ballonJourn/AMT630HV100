@@ -3,11 +3,11 @@
 #include <string.h>
 #include "carlink_video.h"
 #include "carlink_common.h"
+#include "AndroidAuto.h"
 #include "board.h"
 #include "task.h"
 #include "vehicle_param/vehicle_param.h"
 #if CARLINK_AA
-#include "AndroidAuto.h"
 
 struct AAHandle
 {
@@ -399,3 +399,4 @@ void carlink_aa_enable(int enable)
 }
 
 #endif
+

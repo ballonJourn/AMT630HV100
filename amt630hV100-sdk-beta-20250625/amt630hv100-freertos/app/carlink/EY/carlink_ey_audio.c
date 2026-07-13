@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include "board.h"
-
-#if CARLINK_EY
 #include "carlink_ey_audio.h"
 
 static int ey_bt_play_state_callback(BT_PLAY_STATE_E state, unsigned short samplerate, unsigned char channel)
@@ -40,4 +37,3 @@ int carlink_ey_audio_init()
     fsc_bt_register_pcm_interface((void*)&bt_sw_cfg);
     return 0;
 }
-#endif

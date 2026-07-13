@@ -465,9 +465,6 @@ static void carplay_iap_data_read(void* ctx, const void* buf, int len)
 static void  taskInitCarlinkCpProc(void* param)
 {
 	printf("cp task start\r\n");
-	while (vehicle_get_data(VEH_CARLINK_URL_STATUS) == 0) {
-		vTaskDelay(pdMS_TO_TICKS(100));
-	}
 	struct carplay_ctx* pctx = &g_cp_handle;
 	struct carlink_event ev = {0};
 	int ret  = -1;
@@ -526,7 +523,9 @@ static void  taskInitCarlinkCpProc(void* param)
 	audio_cbs.ctx							= NULL;
 	audio_register_callbacks((void *)(&audio_cbs));
 
-	set_carlink_display_info(0, 0, CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT);
+	/* 显示窗口高度须 16 对齐:OSD 处理 YUV420 按 16 行块读取,非对齐高度会多读
+	 * 缓冲区里 PXP 未写的行(全0=绿),底部出现绿线。544=16*34,源视频仍 1024x600。 */
+	set_carlink_display_info(0, 0, CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT - 56);
 	set_carlink_video_info(CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT, 30);
 	carplay_init_parameter();
 	
