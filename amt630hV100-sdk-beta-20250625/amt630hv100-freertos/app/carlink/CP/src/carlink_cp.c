@@ -227,6 +227,12 @@ static int video_start_callback_impl(void *ctx)
 	return 0;
 }
 
+bool bt_connected_but_cp_rejected(void) {
+      return vehicle_get_data(VEH_BT_CONNECTED_STATUS) == 1
+          && vehicle_get_data(VEH_CARLINK_CP_PHONE_DEV_STATUS) == 0
+          && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 0;
+}
+
 static void video_stop_callback_impl(void *ctx)
 {
 	//key_value = 0;
@@ -402,7 +408,7 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
 		case CARLINK_EVENT_BT_IAP_READY: {
 			pctx->mIapReady = true;
 			printf("%s:%d\r\n", __func__, __LINE__);
-			vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
+			//vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
 			start_cp(pctx);
             break;
         }

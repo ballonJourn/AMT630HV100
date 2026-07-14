@@ -3135,7 +3135,6 @@
                     <state>$PROJ_DIR$\..\lib\wolfssl\wolfssl.a</state>
                     <state>$PROJ_DIR$\..\lib\bt\fsc_bt\lib\gocGsp.a</state>
                     <state>$PROJ_DIR$\..\app\carlink\CP\lib\carplay.a</state>
-                    <state>$PROJ_DIR$\..\app\carlink\AA\lib\AndroidAuto.a</state>
                     <state>$PROJ_DIR$\..\lib\bt\fsc_bt\lib\gocStackCarplay.a</state>
                 </option>
                 <option>
@@ -4017,6 +4016,9 @@
             <name>carlink</name>
             <group>
                 <name>aa</name>
+                <excluded>
+                    <configuration>AWTK</configuration>
+                </excluded>
                 <file>
                     <name>$PROJ_DIR$\..\app\carlink\AA\src\carlink_aa.c</name>
                 </file>
@@ -4469,6 +4471,12 @@
                     </file>
                 </group>
                 <group>
+                    <name>debug_cli</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\debug_cli\hcn_debug_cli.c</name>
+                    </file>
+                </group>
+                <group>
                     <name>display_mode</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\display_mode\hcn_display_mode.c</name>
@@ -4505,6 +4513,12 @@
                     <name>maintence</name>
                     <file>
                         <name>$PROJ_DIR$\..\app\hcn\mw\maintence\hcn_mileage_maintence.c</name>
+                    </file>
+                </group>
+                <group>
+                    <name>mmwave_radar</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\app\hcn\mw\mmwave_radar\hcn_mmwave_radar.c</name>
                     </file>
                 </group>
                 <group>
@@ -4664,6 +4678,9 @@
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\device_page.c</name>
                             </file>
                             <file>
+                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\dvr_page.c</name>
+                            </file>
+                            <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\home_page.c</name>
                             </file>
                             <file>
@@ -4671,9 +4688,6 @@
                             </file>
                             <file>
                                 <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\update_page.c</name>
-                            </file>
-                            <file>
-                                <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\pages\dvr_page.c</name>
                             </file>
                         </group>
                         <group>
@@ -4799,6 +4813,9 @@
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\language.c</name>
+                                </file>
+                                <file>
+                                    <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\radar_switch.c</name>
                                 </file>
                                 <file>
                                     <name>$PROJ_DIR$\..\app\hcn\ui\HCN_DC001\src\view\set_view\set_page_key.c</name>
