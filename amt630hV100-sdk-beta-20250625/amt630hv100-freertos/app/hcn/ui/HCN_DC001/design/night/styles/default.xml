@@ -229,9 +229,9 @@
     <normal/>
     <selected bg_color="#0085A464" selected_text_color="#00000000"/>
   </style>
-  <style name="ride_menu" font_size="25" round_radius="10" text_color="#FFFFFF">
-    <normal bg_color="#595959"/>
-    <selected bg_color="#0085A464" selected_text_color="#00000000"/>
+  <style name="ride_menu" font_size="25" round_radius="10">
+    <normal bg_color="#FFFFFF" text_color="#000000"/>
+    <selected bg_color="#0085A4" text_color="#FFFFFF"/>
   </style>
   <style name="setting_menu" font_size="38" icon_at="left">
     <normal font_name="default" icon="box" text_color="#FFFFFF"/>

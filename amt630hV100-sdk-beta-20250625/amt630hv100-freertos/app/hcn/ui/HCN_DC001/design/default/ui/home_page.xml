@@ -100,7 +100,7 @@
             <view name="bt_connected" x="68" y="84" w="257" h="268" visible="false">
               <image name="phone_state_img" x="46" y="71" w="128" h="125" draw_type="default" image="icon_answer"/>
               <rich_text name="phone_tips" x="0" y="0" w="229" h="71" style:normal:font_size="30" style:normal:text_align_h="center" style:normal:text_align_v="middle" line_gap="1"/>
-              <hscroll_label name="phone_num" x="0" y="219" w="229" h="49" only_focus="true" style:normal:font_size="35" style:normal:text_align_h="center" ellipses="true" text="137 9611 2548 "/>
+              <hscroll_label name="phone_num" x="0" y="192" w="229" h="49" only_focus="true" style:normal:font_size="35" style:normal:text_align_h="center" ellipses="true" text="137 9611 2548 "/>
             </view>
             <view name="bt_no_connected" x="68" y="84" w="257" h="268" visible="true">
               <image name="image3" x="40" y="71" w="128" h="125" draw_type="default" image="icon_call"/>
@@ -177,7 +177,7 @@
             <tooltip name="tooltip" w="573" h="231" line="{show:true}" symbol="{show:true,size:3}" tip="{show:true}" y="14"/>
           </chart_view>
           <label name="label5" x="23" y="36" w="179" h="35" style:normal:font_size="25" tr_text="press_up_down"/>
-          <label name="label5" x="202" y="36" w="92" h="35" style="ride_menu" tr_text="last_ride"/>
+          <label name="ride_last" x="202" y="36" w="92" h="35" style="ride_menu" tr_text="last_ride"/>
           <label name="ride_5km" x="306" y="36" w="92" h="35" style="ride_menu" tr_text="near_5km"/>
           <label name="ride_20km" x="411" y="36" w="92" h="35" style="ride_menu" tr_text="near_20km"/>
           <label name="label6" x="323" y="74" w="224" h="25" tr_text="power"/>
