@@ -5,6 +5,7 @@
 #include "home_view_interface.h"
 #include "common/navigator.h"
 #include "proxy/bluetooth_data.h"
+#include "proxy/vehicle_argument.h"
 
 void home_page_deal_key_set()
 {
@@ -14,7 +15,12 @@ void home_page_deal_key_set()
         case ICON_INFO:
             /* code */
             break;
-        case ICON_NAVI: navigator_switch_to(LINK_PAGE , false);
+        case ICON_NAVI:
+            if (vehicle_get_param_carlink_type() == 0) {
+                navigator_switch_to(CP_PAGE, false);
+            } else {
+                navigator_switch_to(LINK_PAGE, false);
+            }
             break;
         case ICON_MUSIC:
             set_current_level(MENU_LEVEL_1);

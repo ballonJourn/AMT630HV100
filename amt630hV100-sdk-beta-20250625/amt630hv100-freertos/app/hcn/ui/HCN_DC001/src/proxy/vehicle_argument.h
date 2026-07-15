@@ -47,4 +47,10 @@ void vehicle_set_param_bluetooth(uint8_t value);
 uint8_t vehicle_get_param_radar();
 
 void vehicle_set_param_radar(uint8_t value);
+
+//手机互联类型 0:CarPlay 1:亿连
+uint8_t vehicle_get_param_carlink_type();
+
+void vehicle_set_param_carlink_type(uint8_t value);
+
 #endif

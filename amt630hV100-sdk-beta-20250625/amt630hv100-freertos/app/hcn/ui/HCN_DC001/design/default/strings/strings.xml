@@ -296,3 +296,25 @@ Enter the map without navigation</language>
   <language name="zh_CN">关</language>
   <language name="en_US">OFF</language>
 </string>
+<string name="carlink_mode">
+  <language name="zh_CN">投屏方式</language>
+  <language name="en_US">Link Mode</language>
+</string>
+<string name="carlink_ey">
+  <language name="zh_CN">亿连</language>
+  <language name="en_US">EasyConn</language>
+</string>
+<string name="carlink_reboot_tip">
+  <language name="zh_CN">确认后将重启生效
+取消则保持当前连接方式</language>
+  <language name="en_US">Confirm to reboot
+Cancel to keep current</language>
+</string>
+<string name="cp_connect_tip">
+  <language name="zh_CN">请通过蓝牙连接
+%s
+以使用CarPlay</language>
+  <language name="en_US">Connect via Bluetooth
+%s
+to use CarPlay</language>
+</string>

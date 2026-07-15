@@ -12,5 +12,6 @@
 #include "view/set_view/brightness.h" 
 #include "view/set_view/device.h"
 #include "view/set_view/radar_switch.h"
+#include "view/set_view/carlink_switch.h"
 
 #endif

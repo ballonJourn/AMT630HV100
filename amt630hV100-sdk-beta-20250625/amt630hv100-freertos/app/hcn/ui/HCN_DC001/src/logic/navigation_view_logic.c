@@ -9,6 +9,7 @@
 #include "carlink_cb/hcn_easy_navi.h"
 #include "proxy/vehicle_data.h"
 #include "proxy/bluetooth_data.h"
+#include "proxy/vehicle_argument.h"
 #include "view/set_view/bt_connect.h"
 
 static hcnNavigationHudInfo g_navigation_info = { 0 };
@@ -30,7 +31,12 @@ void navigation_view_update()
 
         if (false == _mirror_state)
         {
-            home_refresh_nav_view( QR_VIEW )  ;
+            if (vehicle_get_param_carlink_type() == 0) {
+                home_refresh_cp_dock_tip(vehicle_get_bluetooth_name()) ;
+                home_refresh_nav_view( CP_TIP_VIEW ) ;
+            } else {
+                home_refresh_nav_view( QR_VIEW )  ;
+            }
             // g_mirror_navigation = false       ;
         }
         else
@@ -86,10 +92,14 @@ void update_qr()
         if (_mirror_url)
         {
             #if ON_PC_CACLE == 0
-                char buff[ 256 ] = { 0 };
-                get_qr_text_buf(buff , sizeof(buff)) ;
-                if (tk_strlen(buff))
-                    home_refresh_qr(buff);
+                if (vehicle_get_param_carlink_type() == 1) {
+                    char buff[ 256 ] = { 0 };
+                    get_qr_text_buf(buff , sizeof(buff)) ;
+                    if (tk_strlen(buff))
+                        home_refresh_qr(buff);
+                } else {
+                    home_refresh_cp_dock_tip(vehicle_get_bluetooth_name()) ;
+                }
             #endif
 
             refresh_bt_name(vehicle_get_bluetooth_name());

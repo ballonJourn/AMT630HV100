@@ -9,6 +9,7 @@
 #include "view_manager.h"
 #include "home_view/dvr_view.h"
 #include "link_view/link_page_key.h"
+#include "cp_view/cp_page_key.h"
 #include "proxy/vehicle_time.h"
 #include "proxy/bluetooth_data.h"
 #include "logic/hcn_selfcheck.h"
@@ -48,6 +49,8 @@ static widget_t* window_page[WINDOWS_NUM_MAX] = { NULL };
                 }                                                                                     \
             } else if (tk_str_eq(top_win_name, LINK_PAGE)) {                                          \
                 link_page_deal_key_##keyType();                                                       \
+            } else if (tk_str_eq(top_win_name, CP_PAGE)) {                                            \
+                cp_page_deal_key_##keyType();                                                          \
             }else if (tk_str_eq(top_win_name, DVR_PAGE)) {                                            \
                 dvr_page_deal_key_##keyType();                                                        \
             }else if  (tk_str_eq(top_win_name, DEVICE_PAGE)) {                                        \

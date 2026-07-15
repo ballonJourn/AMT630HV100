@@ -89,6 +89,9 @@
                 <label name="label_distance" x="28" y="130" w="175" h="59" style:normal:font_size="57"/>
                 <label name="label_road" x="18" y="189" w="205" h="52" style:normal:font_size="32" style:normal:text_align_h="center"/>
               </view>
+              <view name="cp_tip_view" x="0" y="0" w="242" h="258" visible="true">
+                <label name="cp_dock_tip" x="10" y="44" w="222" h="176" line_wrap="true" style:normal:font_name="default" style:normal:font_size="30" word_wrap="true"/>
+              </view>
             </slide_view>
           </view>
           <view name="music_page" x="0" y="0" w="336" h="100%" style:normal:bg_image="left_bg_n" style:normal:bg_image_draw_type="center">
@@ -137,6 +140,7 @@
         <label name="display" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="438" tr_text="display"/>
         <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="500" tr_text="device"/>
         <label name="radar" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="562" tr_text="radar"/>
+        <label name="carlink" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="624" tr_text="carlink_mode"/>
       </scroll_view>
       <list_view name="list_view" x="73" y="55" w="180" h="312" default_item_height="62" style:normal:bg_color="#00000000" item_height="62" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
         <scroll_view name="scroll_menu1" x="0" y="0" w="180" h="312" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
@@ -149,6 +153,7 @@
           <label name="clock" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="时间"/>
           <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="设备信息"/>
           <label name="radar" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="毫米波雷达"/>
+          <label name="carlink" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="投屏方式"/>
         </scroll_view>
       </list_view>
       <image name="image5" x="145" y="372" w="36" h="16" draw_type="default" image="setting_page_down_n"/>
@@ -251,6 +256,20 @@
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="radar_on_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="radar_on"/>
           <label name="radar_off_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="radar_off"/>
+        </view>
+        <view name="carlink_view" x="0" y="0" w="100%" h="100%">
+          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="carlink_mode"/>
+          <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
+          <label name="carlink_cp_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="CarPlay"/>
+          <label name="carlink_ey_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="carlink_ey"/>
+          <view name="carlink_popup_view" x="74" y="65" w="500" h="270" visible="false">
+            <image name="carlink_popup_bg" x="0" y="0" w="500" h="270" draw_type="default" image="pop up_bg"/>
+            <label name="carlink_popup_title" x="50" y="40" w="400" h="80" style:normal:font_size="28" style:normal:text_align_h="center" tr_text="carlink_reboot_tip"/>
+            <image name="carlink_popup_confirm_bg" x="50" y="170" w="180" h="60" draw_type="default" style:normal:icon="pop up_btn_n" style:selected:icon="pop up_btn_p"/>
+            <label name="carlink_popup_confirm" x="112" y="179" w="56" h="41" style:normal:font_size="30" tr_text="dvr_confirm"/>
+            <image name="carlink_popup_cancel_bg" x="270" y="170" w="180" h="60" draw_type="default" style:normal:icon="pop up_btn_n" style:selected:icon="pop up_btn_p"/>
+            <label name="carlink_popup_cancel" x="332" y="179" w="56" h="41" style:normal:font_size="30" tr_text="dvr_cancel"/>
+          </view>
         </view>
       </slide_view>
     </view>

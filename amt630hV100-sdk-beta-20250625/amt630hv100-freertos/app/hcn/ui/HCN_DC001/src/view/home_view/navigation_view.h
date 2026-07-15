@@ -17,6 +17,7 @@ typedef enum {
     QR_VIEW       ,
     TIPS_VIEW     ,
     NAVI_VIEW     ,
+    CP_TIP_VIEW   ,
 
     NVAI_VIEW_MAX ,
 }home_navigate_view_e ;
@@ -34,6 +35,6 @@ ret_t home_refresh_nav_distance(char *value);
 
 ret_t home_refresh_nav_view(home_navigate_view_e view)  ;
 
-
+ret_t home_refresh_cp_dock_tip(const char* bt_name) ;
 
 #endif

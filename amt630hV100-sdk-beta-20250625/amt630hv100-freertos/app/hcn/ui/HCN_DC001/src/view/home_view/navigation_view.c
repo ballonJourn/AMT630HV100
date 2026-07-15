@@ -10,6 +10,7 @@ const char* home_navi_widget_name[NAVI_NUM_MAX] = {
 static widget_t* home_navi_widget[NAVI_NUM_MAX] = { NULL };
 
 static widget_t* nav_slide_view =  NULL ;
+static widget_t* cp_dock_tip_w =  NULL ;
 
 //static home_navigate_view_e navigate_view = QR_VIEW ;
 
@@ -21,6 +22,7 @@ ret_t home_nav_view_init(widget_t* parent)
     }
 
     nav_slide_view = widget_lookup(parent,"nav_slide_view", TRUE);
+    cp_dock_tip_w  = widget_lookup(parent,"cp_dock_tip", TRUE);
 
     return RET_OK ;
 }
@@ -82,4 +84,15 @@ ret_t home_refresh_nav_view(home_navigate_view_e view)
     slide_view_set_active_ex(nav_slide_view , view , false);
     
     return RET_OK ; 
+}
+
+ret_t home_refresh_cp_dock_tip(const char* bt_name)
+{
+    if (cp_dock_tip_w && bt_name) {
+        char buf[128] ;
+        tk_snprintf(buf, sizeof(buf),
+            "请通过蓝牙连接\n%s\n以使用CarPlay", bt_name) ;
+        widget_set_text_utf8(cp_dock_tip_w, buf) ;
+    }
+    return RET_OK ;
 }

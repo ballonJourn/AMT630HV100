@@ -15,6 +15,7 @@
 #include "proxy/vehicle_time.h"
 #include "proxy/vehicle_mile.h"
 #include "proxy/vehicle_argument.h"
+#include "proxy/bluetooth_data.h"
 #include "proxy/vehicle_ota.h"
 #include "mileage_calc.h"
 #include "common/navigator.h"
@@ -43,6 +44,7 @@ ret_t set_view_init(widget_t * win)
     set_brightness_view_init    (win) ;
     set_device_view_init        (win) ;
     set_radar_view_init         (win) ;
+    set_carlink_view_init       (win) ;
     return RET_OK ;
 }
 
@@ -62,6 +64,10 @@ ret_t home_view_init(widget_t * win)
     
     home_dock_music_ex_view_init(win) ;
     home_nav_view_init          (win) ;
+    if (vehicle_get_param_carlink_type() == 0) {
+        home_refresh_cp_dock_tip(vehicle_get_bluetooth_name()) ;
+        home_refresh_nav_view(CP_TIP_VIEW) ;
+    }
     home_dock_music_view_init   (win) ;
     home_phone_view_init        (win) ;
     home_info_view_init         (win) ;

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 const char* set_energy_widget_name[RIDE_NUM_MAX] = {
-    "ride_last" , "ride_5km" , "ride_20km" , "last_elec" ,"curr_elec" , "avg_elec" ,
+    "ride_5km" , "ride_20km" , "last_elec" ,"curr_elec" , "avg_elec" ,
     "line_series" 
 } ;
 
@@ -13,9 +13,9 @@ static widget_t* set_energy_widget[RIDE_NUM_MAX] = { NULL };
 
 static widget_t* chart_view = NULL ;
 
-static cycling_engrgy_option_e option = RIDE_LAST_OPTION ;
+static cycling_engrgy_option_e option = RIDE_5KM_OPTION ;
 
-static cycling_engrgy_option_e clicked_option = RIDE_LAST_OPTION ;
+static cycling_engrgy_option_e clicked_option = RIDE_5KM_OPTION ;
 
 ret_t set_cycling_energy_view_init(widget_t* parent)
 {

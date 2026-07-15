@@ -140,3 +140,22 @@ void vehicle_set_param_radar(uint8_t value)
 
     return ;
 }
+
+//手机互联类型 0:CarPlay 1:亿连
+uint8_t vehicle_get_param_carlink_type()
+{
+    uint8_t value ;
+#if !ON_PC_CACLE
+    if (get_hcn_usr_param(HCN_PARAM_CARLINK_TYPE, &value) )
+        return value ;
+#endif
+    return 0 ; ///< 默认CarPlay
+}
+
+void vehicle_set_param_carlink_type(uint8_t value)
+{
+#if !ON_PC_CACLE
+    set_hcn_usr_param(HCN_PARAM_CARLINK_TYPE, (void*)&value) ;
+#endif
+    return ;
+}
