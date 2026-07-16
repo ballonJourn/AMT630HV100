@@ -79,7 +79,7 @@ extern "C" {
  * define symbol __ICFEDIT_region_RAM_start__ = 0x20640000;
  * define symbol __ICFEDIT_region_RAM_end__   = 0x23ffffff;
  */
-#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (22.5) * 1024 * 1024) ) )
+#define HCN_configTOTAL_HEAP_SIZE (( ( size_t ) ( (23.5) * 1024 * 1024) ) )
 #define HCN_VG_HEAP_SIZE  ( (12) * 1024 * 1024) 
 #define HCN_AWTK_HEAP_SIZE ((19) * 1024 * 1024)
 

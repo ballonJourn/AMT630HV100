@@ -756,6 +756,7 @@ static void on_bt_str_parse(char *at_str) {
                 memcpy(g_bt_data.btDevName, param_array[0], \
                 strlen(param_array[0]) < TEXT_PARAM_LEN ? \
                 strlen(param_array[0]) : TEXT_PARAM_LEN);
+                vehicle_set_data(VEH_BT_NAME_READY, 1);
             }
 
             if (is_firsend) {

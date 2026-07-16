@@ -119,19 +119,28 @@ static void hcn_key_handle(uint8_t id)
                 break;
             
         case  BACK_KEY_LONG_PR:
-                deal_key_back_long_press();
+                {
+                    widget_t* top_win_ = window_manager_get_top_window(window_manager());
+                    if (top_win_ != NULL && tk_str_eq(top_win_->name, CP_PAGE)) {
+                        cp_page_deal_key_back_long();
+                    } else {
+                        deal_key_back_long_press();
+                    }
+                }
                 break;
-                
+
         case  SET_KEY_SHORT_PR  :
                 deal_key_set_short_press()  ;
                 break;
-                
+
         case  SET_KEY_LONG_PR :
-                if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 2) {
-                    vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
-                    extern void carlink_send_key_event(uint8_t key, bool pressed);
-                    carlink_send_key_event(20, true);
-                    break;
+                {
+                    widget_t* top_win_ = window_manager_get_top_window(window_manager());
+                    if (top_win_ == NULL) return;
+                    const char* top_win_name = top_win_->name;
+                    if (tk_str_eq(top_win_name, CP_PAGE)) {
+                        cp_page_deal_key_set_long();
+                    }
                 }
                 break;
 
@@ -272,8 +281,9 @@ void deal_key_set_short_press()
 {
     if (vehicle_buluetooth_is_calling())
         vehicle_calling_pick_up();
-    else
-        HCN_KEY_DISPATCH(set);  
+    else {
+        HCN_KEY_DISPATCH(set);
+    }
 
     return ;
 }

@@ -181,6 +181,7 @@ typedef enum {
     VEH_RADAR_REAR_SPEED,       ///< 后侧最近预警目标速度 (km/h)
     VEH_RADAR_CURRENT_SPEED,    ///< 雷达上报的当前车速 (km/h)
     VEH_RADAR_BSD_START_SPEED,  ///< BSD启动速度 (km/h)
+    VEH_BT_NAME_READY,         ///< 蓝牙设备名称就绪 0:未就绪 1:已改名完成
     VEH_DATA_END,
 } veh_data_e;
 

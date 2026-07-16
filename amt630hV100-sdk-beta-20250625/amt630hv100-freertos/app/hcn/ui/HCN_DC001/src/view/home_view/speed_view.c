@@ -1,4 +1,3 @@
-
 #include "speed_view.h"
 #include "../../logic/hcn_selfcheck.h"
 
@@ -134,5 +133,14 @@ ret_t home_refresh_gear(gear_e gear)
    slide_menu_set_value(gearWid, gear);
    // slide_menu_scroll_to_next(gearWid);
 
+   return RET_OK ;
+}
+
+
+ret_t home_drv_mode_set_visible(bool_t visible)
+{
+   if(home_speed_widget[DRVING_MODE] ){
+      widget_set_visible(home_speed_widget[DRVING_MODE] , visible) ;
+   }
    return RET_OK ;
 }

@@ -114,3 +114,4 @@ void hcn_ec_stopMirror() {
     EC_stopMirror();
 #endif
 }
+

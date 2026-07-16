@@ -11,6 +11,7 @@
 #include "proxy/bluetooth_data.h"
 #include "proxy/vehicle_argument.h"
 #include "view/set_view/bt_connect.h"
+#include "vehicle_param/vehicle_param.h"
 
 static hcnNavigationHudInfo g_navigation_info = { 0 };
 static bool g_mirror_state      = false ;  
@@ -83,9 +84,16 @@ void navigation_view_update()
 
 }
 
+extern bool carlink_ble_mac_addr_is_ready();
+
 void update_qr()
 {
-    bool _mirror_url = vehicle_get_mirror_url() ;
+    bool _mirror_url = false ;
+    if (vehicle_get_param_carlink_type() == 0) {
+        _mirror_url = carlink_ble_mac_addr_is_ready() ;
+    } else if (vehicle_get_param_carlink_type() == 1) {
+        _mirror_url = vehicle_get_mirror_url() ;
+    }
     if (g_mirror_url != _mirror_url)
     {
         g_mirror_url = _mirror_url ;
@@ -109,7 +117,18 @@ void update_qr()
         }
         
     }
-    
+
+    /* CarPlay模式：蓝牙改名完成后一次性补刷dock小窗 */
+    if (g_mirror_url && vehicle_get_param_carlink_type() == 0) {
+        #if ON_PC_CACLE == 0
+        if (vehicle_get_data(VEH_BT_NAME_READY) == 1) {
+            vehicle_set_data(VEH_BT_NAME_READY, 0);
+            home_refresh_cp_dock_tip(vehicle_get_bluetooth_name()) ;
+            printf("cp dock tip refreshed on bt name ready\n") ;
+        }
+        #endif
+    }
+
     return ;
 }
 

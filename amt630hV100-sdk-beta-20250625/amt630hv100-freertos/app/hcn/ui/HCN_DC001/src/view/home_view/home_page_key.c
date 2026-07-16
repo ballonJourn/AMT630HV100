@@ -6,6 +6,7 @@
 #include "common/navigator.h"
 #include "proxy/bluetooth_data.h"
 #include "proxy/vehicle_argument.h"
+#include "vehicle_param/vehicle_param.h"
 
 void home_page_deal_key_set()
 {
@@ -16,10 +17,16 @@ void home_page_deal_key_set()
             /* code */
             break;
         case ICON_NAVI:
-            if (vehicle_get_param_carlink_type() == 0) {
-                navigator_switch_to(CP_PAGE, false);
-            } else {
+            if (vehicle_get_param_carlink_type() == 1) {
                 navigator_switch_to(LINK_PAGE, false);
+            } else if (vehicle_get_param_carlink_type() == 0) {
+                if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 2) {
+                    vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
+                    extern void carlink_send_key_event(uint8_t key, bool pressed);
+                    carlink_send_key_event(20, true);
+                } else if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 0) {
+                    navigator_switch_to(CP_PAGE, false);
+                }
             }
             break;
         case ICON_MUSIC:

@@ -554,6 +554,7 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 		ark_lcd_set_osd_info_atomic(LCD_VIDEO_LAYER, &info);
 		ark_lcd_osd_enable(LCD_VIDEO_LAYER, 1);
 		ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
+
 		if ((vehicle_get_data(VEH_CARLINK_CP_STATUS) == 1)  
 		|| (vehicle_get_data(VEH_CARLINK_AA_STATUS) == 1)
 		|| (g_hide_carlink_flag == 1)) {
