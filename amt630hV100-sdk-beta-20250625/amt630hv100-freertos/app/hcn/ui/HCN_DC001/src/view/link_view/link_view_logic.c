@@ -8,7 +8,6 @@
 #include "proxy/mirror_data.h"
 #include "../3rd/awtk-widget-qr/src/qr/qr.h"
 #include "logic/hcn_global.h"
-#include "view/home_view/speed_view.h"
 
 
 #define REFRESH_INTERVAL_50_MS   (50)
@@ -79,22 +78,15 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         }
         speed         = 0 ;
         poewr         = 0 ;
-        drv_mode      = DRV_MODE_MAX ;
+        drv_mode      = DRV_MODE_E ;
         gear          = GEAR_MAX ;
         electriacl    = 0 ;
 
         rest_data();
-
-        /* link_page关闭，恢复home_page上的驾驶模式图标 */
-        home_drv_mode_set_visible(TRUE) ;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
     {
         printf("on_link_page_changed EVT_WINDOW_WILL_OPEN\n") ;
-
-        /* home_page未关闭在底下，其driving_mode图标会透过link_page
-         * 的半透明背景显示出来，导致E/N/S重叠，进入时隐藏它 */
-        home_drv_mode_set_visible(FALSE) ;
 
         link_refresh_electricalret_unit(vehicle_get_param_unit());
 

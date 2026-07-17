@@ -413,8 +413,8 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
             break;
         }
         case CARLINK_EVENT_BT_DISCONNECT: {
-			printf("bt disconnect, iap disconnect %d %d\r\n", pctx->mIapReady, pctx->mPhoneCarplayFlag);
-			if (pctx->mIapReady && !pctx->mPhoneCarplayFlag) {
+			printf("bt disconnect, iap disconnect %d %d %d\r\n", pctx->mIapReady, pctx->mPhoneCarplayFlag, pctx->mCarplayConnected);
+			if (pctx->mIapReady && (!pctx->mPhoneCarplayFlag || !pctx->mCarplayConnected)) {
 				//手机端"Carplay车载"关闭，同时苹果手机蓝牙也关闭了，执行一下carplay stop
 				carplay_stop();
 			}
@@ -442,7 +442,11 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
 				vehicle_set_data(VEH_CARLINK_CP_PHONE_DEV_STATUS, 0);
 				carlink_bt_open();
 				printf("%s:%d\r\n", __func__, __LINE__);
-				start_cp(pctx);
+				if (pctx->mPhoneCarplayFlag) {
+					start_cp(pctx);
+				} else {
+					printf("pctx->mPhoneCarplayFlag = 0, dont start cp!\n");
+				}
 			}
             break;
         }

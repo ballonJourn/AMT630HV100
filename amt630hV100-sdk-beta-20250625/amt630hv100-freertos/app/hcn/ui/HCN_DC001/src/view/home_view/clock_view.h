@@ -7,6 +7,7 @@ enum home_clcok
     CLOCK_MIN     ,
     CLOCK_COLON   ,
     CLOCK_SEC     ,
+    CLOCK_AMPM    ,
     CLOCK_NUM_MAX ,
 };
 
@@ -17,5 +18,7 @@ ret_t home_refresh_clock_min(int min) ;
 ret_t home_refresh_clock_sec(int sec) ;
 
 ret_t home_refresh_clock_colon(int visiable) ;
+
+ret_t home_refresh_clock_ampm(int hour, bool_t is_12h) ;
 
 #endif

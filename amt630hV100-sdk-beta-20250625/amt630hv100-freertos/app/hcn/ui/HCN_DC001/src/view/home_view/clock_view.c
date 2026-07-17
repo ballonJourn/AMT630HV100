@@ -1,7 +1,7 @@
 #include "clock_view.h"
 
 const char* home_clock_widget_name[CLOCK_NUM_MAX] = {
-    "min" , "colon" , "sec" 
+    "min" , "colon" , "sec" , "ampm"
 } ;
 
 static widget_t* home_clock_widget[CLOCK_NUM_MAX] = { NULL };
@@ -48,4 +48,18 @@ ret_t home_refresh_clock_colon(int visiable)
     
     
     return RET_OK ;
-} 
+}
+
+ret_t home_refresh_clock_ampm(int hour, bool_t is_12h)
+{
+    if (home_clock_widget[CLOCK_AMPM]) {
+        if (is_12h) {
+            widget_set_visible(home_clock_widget[CLOCK_AMPM], TRUE);
+            widget_set_text_utf8(home_clock_widget[CLOCK_AMPM],
+                                 (hour < 12) ? "AM" : "PM");
+        } else {
+            widget_set_visible(home_clock_widget[CLOCK_AMPM], FALSE);
+        }
+    }
+    return RET_OK ;
+}

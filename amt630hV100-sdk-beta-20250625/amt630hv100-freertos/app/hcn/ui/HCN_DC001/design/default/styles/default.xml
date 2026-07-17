@@ -221,7 +221,7 @@
     <normal/>
     <disable/>
   </style>
-  <style name="call_tips" text_color="#083557">
+  <style name="call_tips" text_color="#FFFFFF" font_size="24">
     <normal bg_color="#000000B4"/>
     <disable/>
   </style>
@@ -230,11 +230,11 @@
     <selected bg_color="#0085A464" selected_text_color="#00000000"/>
   </style>
   <style name="ride_menu" font_size="25" round_radius="10" text_color="#083557">
-    <normal bg_color="#595959"/>
+    <normal bg_color="#FFFFFFCC"/>
     <selected bg_color="#0085A464" selected_text_color="#00000000"/>
   </style>
   <style name="setting_menu" font_size="38" icon_at="left">
-    <normal font_name="default" icon="box" text_color="#08355780"/>
+    <normal font_name="default" icon="" text_color="#08355780"/>
     <selected icon="setting_menu_selec" selected_text_color="#00000000" text_color="#083557"/>
   </style>
   <style name="setting_option" bg_image_draw_type="icon" font_size="33" icon="">

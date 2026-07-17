@@ -1,8 +1,9 @@
 <window name="home_page" style:normal:bg_image="wallpaper">
-  <view name="time_view" x="1" y="6" w="99" h="50">
+  <view name="time_view" x="1" y="6" w="130" h="50">
     <label name="min" x="0" y="0" w="51" h="50" style:normal:font_size="44" style:normal:text_align_v="top" text="00"/>
     <label name="colon" x="32" y="-8" w="41" h="52" style:normal:font_size="51" style:normal:text_align_v="top" text=":"/>
     <label name="sec" x="49" y="0" w="60" h="50" style:normal:font_size="44" style:normal:text_align_v="top" text="00"/>
+    <label name="ampm" x="96" y="18" w="34" h="32" style:normal:font_size="18" style:normal:text_align_v="bottom" visible="false" text=""/>
   </view>
   <view name="dock_view" x="13" y="130" w="49" h="340" children_layout="default(r=0,c=1,ym=5,s=2)">
     <image name="icon_info" draw_type="default" h="50" style:normal:icon="dock_instrument_n" style:normal:bg_image="" style:selected:icon="dock_instrument_p"/>
@@ -129,21 +130,21 @@
       </view>
     </view>
     <view name="setting_pg" x="0" y="0" w="100%" h="100%">
-      <scroll_view name="scroll_menu" x="73" y="55" w="180" h="312" visible="true" enable="true" snap_to_page="false" move_to_page="false">
-        <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="180" tr_text="tmps"/>
-        <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="62" tr_text="ride_ele"/>
-        <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="125" tr_text="connect"/>
-        <label name="language" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="188" tr_text="language"/>
-        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" h="62" y="250" tr_text="brightness"/>
-        <label name="unit" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="312" tr_text="unit"/>
-        <label name="clock" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="375" tr_text="clock"/>
-        <label name="display" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="438" tr_text="display"/>
-        <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="500" tr_text="device"/>
-        <label name="radar" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="562" tr_text="radar"/>
-        <label name="carlink" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="180" y="624" tr_text="carlink_mode"/>
+      <scroll_view name="scroll_menu" x="73" y="55" w="230" h="312" visible="true" enable="true" snap_to_page="false" move_to_page="false">
+        <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" w="230" tr_text="tmps"/>
+        <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="62" tr_text="ride_ele"/>
+        <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="125" tr_text="connect"/>
+        <label name="language" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="188" tr_text="language"/>
+        <label name="brightness" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" h="62" y="250" tr_text="brightness"/>
+        <label name="unit" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="312" tr_text="unit"/>
+        <label name="clock" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="375" tr_text="clock"/>
+        <label name="display" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="438" tr_text="display"/>
+        <label name="device" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="500" tr_text="device"/>
+        <label name="radar" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="562" tr_text="radar"/>
+        <label name="carlink" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" w="230" y="624" tr_text="carlink_mode"/>
       </scroll_view>
-      <list_view name="list_view" x="73" y="55" w="180" h="312" default_item_height="62" style:normal:bg_color="#00000000" item_height="62" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
-        <scroll_view name="scroll_menu1" x="0" y="0" w="180" h="312" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
+      <list_view name="list_view" x="73" y="55" w="230" h="312" default_item_height="62" style:normal:bg_color="#00000000" item_height="62" style:normal:y_offset="0" style:normal:border_color="#00000000" visible="false" enable="false" disg:lock="true">
+        <scroll_view name="scroll_menu1" x="0" y="0" w="230" h="312" snap_to_page="false" style:normal:y_offset="0" style:normal:border_color="#00000000" yslidable="false" visible="true">
           <label h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" name="tmps" text="胎压检测"/>
           <label name="ride_ele" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="骑行能耗"/>
           <label name="connect" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="连接手机"/>
@@ -156,8 +157,8 @@
           <label name="carlink" h="62" style="setting_menu" style:normal:margin_left="0" style:normal:bg_image="" style:normal:bg_image_draw_type="default" focusable="true" text="投屏方式"/>
         </scroll_view>
       </list_view>
-      <image name="image5" x="145" y="372" w="36" h="16" draw_type="default" image="setting_page_down_n"/>
-      <image name="image6" x="145" y="33" w="36" h="16" draw_type="default" image="setting_page_up_n"/>
+      <image name="image5" x="170" y="372" w="36" h="16" draw_type="default" image="setting_page_down_n"/>
+      <image name="image6" x="170" y="33" w="36" h="16" draw_type="default" image="setting_page_up_n"/>
       <slide_view x="324" y="9" w="700" h="400" name="setting_menu" style:normal:border_color="#00000000" vertical="true" style:normal:bg_image="setting_bg" style:normal:bg_image_draw_type="center">
         <view name="tmps_view" x="0" y="0" w="100%" h="100%">
           <image name="tmps_car" x="150" y="100" w="350" h="235" draw_type="default" image="setting_tire_pressure_bg"/>
@@ -203,13 +204,13 @@
           <label name="bt_phone_info" x="120" y="314" w="461" h="49" style:normal:font_size="32"/>
         </view>
         <view name="language" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="language"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="language"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="chinese_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="中文"/>
           <label name="english_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="English"/>
         </view>
         <view name="brightness" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="brightness"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="brightness"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <scroll_view name="brightness_scroll" x="63" y="111" w="576" h="225">
             <label name="brightness_auto_option" x="0" y="0" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="auto"/>
@@ -220,29 +221,41 @@
           </scroll_view>
         </view>
         <view name="unit_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="unit"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="unit"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="unit_km_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="kilometer"/>
           <label name="unit_mile_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="mile"/>
         </view>
         <view name="clock_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="clock"/>
-          <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
-          <label name="clock_h_1" x="205" y="170" w="47" h="106" style="clock_option" text="1"/>
-          <label name="clock_h_2" x="252" y="170" w="47" h="106" style="clock_option" text="8"/>
-          <label name="colon" x="314" y="164" w="47" h="106" style="clock_option" text=":"/>
-          <label name="clock_m_1" x="374" y="170" w="47" h="106" style="clock_option" text="1"/>
-          <label name="clock_m_2" x="421" y="170" w="47" h="106" style="clock_option" text="9"/>
+          <label name="clock_title" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="clock"/>
+          <image name="clock_line" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
+          <label name="clock_adjust_time" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="adjust_time"/>
+          <label name="clock_adjust_format" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="adjust_format"/>
+          <view name="clock_time_view" x="0" y="0" w="100%" h="100%" visible="false">
+            <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="adjust_time"/>
+            <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
+            <label name="clock_h_1" x="205" y="170" w="47" h="106" style="clock_option" text="1"/>
+            <label name="clock_h_2" x="252" y="170" w="47" h="106" style="clock_option" text="8"/>
+            <label name="colon" x="314" y="164" w="47" h="106" style="clock_option" text=":"/>
+            <label name="clock_m_1" x="374" y="170" w="47" h="106" style="clock_option" text="1"/>
+            <label name="clock_m_2" x="421" y="170" w="47" h="106" style="clock_option" text="9"/>
+          </view>
+          <view name="clock_format_view" x="0" y="0" w="100%" h="100%" visible="false">
+            <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="adjust_format"/>
+            <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
+            <label name="clock_24h_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="clock_24h"/>
+            <label name="clock_12h_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="clock_12h"/>
+          </view>
         </view>
         <view name="display_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="display"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="display"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="display_auto_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="auto"/>
           <label name="display_day_option" x="63" y="209" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="day"/>
           <label name="display_night_option" x="63" y="298" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="night"/>
         </view>
         <view name="device_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="device"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="device"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="label3" x="24" y="105" w="179" h="41" style:normal:font_size="33" style:normal:text_align_h="left" tr_text="sn"/>
           <label name="device_sn" x="24" y="142" w="538" h="41" style:normal:font_size="33" style:normal:text_align_h="left" text="WDW454A56WD4A56"/>
@@ -252,13 +265,13 @@
           <label name="device_mcu" x="26" y="329" w="538" h="41" style:normal:font_size="33" style:normal:text_align_h="left" text="1.010"/>
         </view>
         <view name="radar_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="radar"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="radar"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="radar_on_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="radar_on"/>
           <label name="radar_off_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="radar_off"/>
         </view>
         <view name="carlink_view" x="0" y="0" w="100%" h="100%">
-          <label name="label3" x="261" y="42" w="179" h="41" style:normal:font_size="33" tr_text="carlink_mode"/>
+          <label name="label3" x="200" y="42" w="300" h="41" style:normal:font_size="33" tr_text="carlink_mode"/>
           <image name="image4" x="13" y="96" w="648" h="2" draw_type="default" image="setting_line"/>
           <label name="carlink_cp_option" x="63" y="122" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" text="CarPlay"/>
           <label name="carlink_ey_option" x="63" y="219" w="576" h="75" style="setting_option" style:normal:icon="" style:normal:icon_at="auto" tr_text="carlink_ey"/>

@@ -1,4 +1,3 @@
-
 #ifndef VEHICLE_ARGUMENT__H
 #define VEHICLE_ARGUMENT__H
 
@@ -52,5 +51,10 @@ void vehicle_set_param_radar(uint8_t value);
 uint8_t vehicle_get_param_carlink_type();
 
 void vehicle_set_param_carlink_type(uint8_t value);
+
+///< 时间制式 0:24小时制 1:12小时制
+uint8_t vehicle_get_param_time_format();
+
+void vehicle_set_param_time_format(uint8_t value);
 
 #endif

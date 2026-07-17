@@ -5,6 +5,7 @@
 #include "../view_manager.h"
 
 enum set_cycling_energy_com{
+    RIDE_LAST           ,
     RIDE_5_KM           ,
     RIDE_20_KM          ,
     RIDE_LAST_ELEC      ,
@@ -17,6 +18,7 @@ enum set_cycling_energy_com{
 };
 
 typedef enum {
+    RIDE_LAST_OPTION ,
     RIDE_5KM_OPTION  ,
     RIDE_20KM_OPTION ,
 

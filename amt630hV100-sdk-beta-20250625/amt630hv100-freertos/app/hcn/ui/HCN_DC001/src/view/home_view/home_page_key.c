@@ -20,12 +20,25 @@ void home_page_deal_key_set()
             if (vehicle_get_param_carlink_type() == 1) {
                 navigator_switch_to(LINK_PAGE, false);
             } else if (vehicle_get_param_carlink_type() == 0) {
-                if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 2) {
-                    vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
-                    extern void carlink_send_key_event(uint8_t key, bool pressed);
-                    carlink_send_key_event(20, true);
-                } else if (MENU_LEVEL_0 == get_current_levle() && vehicle_get_data(VEH_CARLINK_CP_STATUS) == 0) {
-                    navigator_switch_to(CP_PAGE, false);
+                if (MENU_LEVEL_0 != get_current_levle()) {
+                    break;
+                }
+                {
+                    int32_t cp_status = vehicle_get_data(VEH_CARLINK_CP_STATUS);
+                    if (cp_status == 2) {
+                        /* 用户之前主动退出CP页面，恢复到CarPlay前台 */
+                        vehicle_set_data(VEH_CARLINK_CP_STATUS, 1);
+                        {
+                            extern void carlink_send_key_event(uint8_t key, bool pressed);
+                            carlink_send_key_event(20, true);
+                        }
+                    } else if (cp_status == 1) {
+                        /* CarPlay已连接但不知为何回到了home，直接切到CP页面 */
+                        navigator_switch_to(CP_PAGE, false);
+                    } else {
+                        /* cp_status == 0: 未连接，打开CP引导页等待连接 */
+                        navigator_switch_to(CP_PAGE, false);
+                    }
                 }
             }
             break;

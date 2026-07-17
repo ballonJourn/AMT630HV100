@@ -2,8 +2,8 @@
   <view name="view" x="754" y="20" w="250" h="250" style:normal:bg_image="interconnection_bg">
     <label name="speed_lab" x="0" y="-14" w="151" h="124" style:normal:text_color="#FFFFFF" style:normal:font_size="124" text="0"/>
     <label name="unit_lab" x="152" y="45" w="83" h="41" style:normal:text_color="#606060" style:normal:font_size="35" text="km/h"/>
-    <image name="ride_mode_img" x="20" y="91" w="32" h="50" draw_type="default" image="link_drv_mode_0"/>
   </view>
+  <image name="ride_mode_img" x="783" y="118" w="27" h="21" draw_type="default" image="drv_mode_0"/>
   <slide_menu name="gear_view" x="878" y="110" w="116" h="52" min_scale="1" align_v="top" value="1">
     <image name="gear_N" draw_type="center" style:normal:icon="linkgear_n_n" style:selected:icon="linkgear_n_p"/>
     <image name="gear_D" draw_type="center" style:selected:icon="linkgear_d_p" style:normal:icon="linkgear_d_n"/>

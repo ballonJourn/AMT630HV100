@@ -19,6 +19,7 @@
 #include "proxy/vehicle_ota.h"
 #include "mileage_calc.h"
 #include "common/navigator.h"
+#include "vehicle_param/vehicle_param.h"
 
 #define REFRESH_INTERVAL_50_MS   (50)
 #define REFRESH_INTERVAL_100_MS  (200)
@@ -104,12 +105,30 @@ ret_t timer_refresh_500_ms(const timer_info_t *info)
     static bool clock_colon = TRUE ;
     static uint8_t display_value  = 0xFF ;
     static bool update_state = false ;
+    static uint8_t last_time_fmt = 0xFF ;
 
     int min = vehicle_get_time_hour();
-    if (clock_min != min)
+    uint8_t time_fmt = vehicle_get_param_time_format();
+    int display_hour = min;
+
+    /* 12小时制转换：0→12, 1~12不变, 13~23减12 */
+    if (time_fmt == 1) {
+        if (min == 0) display_hour = 12;
+        else if (min > 12) display_hour = min - 12;
+    }
+
+    home_refresh_clock_ampm(min, (time_fmt == 1) ? TRUE : FALSE);
+
+    /* 制式切换时强制刷新，避免1~12点缓存命中不更新 */
+    if (last_time_fmt != time_fmt) {
+        last_time_fmt = time_fmt;
+        clock_min = -1;  /* 强制下面的比较不等 */
+    }
+
+    if (clock_min != display_hour)
     {
-        clock_min = min;
-        home_refresh_clock_min(min) ;
+        clock_min = display_hour;
+        home_refresh_clock_min(display_hour) ;
     }
     
     int sec = vehicle_get_time_min();
@@ -211,6 +230,37 @@ ret_t timer_refresh_50_ms(const timer_info_t *info)
     speed_view_update() ;
 
     signal_view_update();
+
+    /* ── CarPlay 自动拉起 / 断开自动回退 ─────────────────────────
+     * 仅在 VEH_CARLINK_CP_STATUS 发生 **边沿变化** 时执行一次窗口切换，
+     * 避免 50ms 周期性 switch_to 吞掉按键事件（Bug1 根因）。
+     *
+     * 状态语义：0=未连接  1=已连接  2=用户主动退出CP页面但蓝牙仍在
+     */
+    {
+        static int32_t s_last_cp_status = -1;  /* -1 表示首次 */
+        int32_t cur_cp_status = vehicle_get_data(VEH_CARLINK_CP_STATUS);
+
+        if (cur_cp_status != s_last_cp_status) {
+            s_last_cp_status = cur_cp_status;
+
+            widget_t* top_win_ = window_manager_get_top_window(window_manager());
+            const char* top_name = (top_win_ != NULL) ? top_win_->name : "";
+
+            if (cur_cp_status == 1) {
+                /* CarPlay 刚连接 → 如果当前不在 CP 页面，自动切过去 */
+                if (!tk_str_eq(top_name, CP_PAGE)) {
+                    navigator_switch_to(CP_PAGE, false);
+                }
+            } else if (cur_cp_status == 0) {
+                /* CarPlay 断开 → 如果当前在 CP 页面，自动回主页 */
+                if (tk_str_eq(top_name, CP_PAGE)) {
+                    navigator_back_to_home();
+                }
+            }
+            /* cur_cp_status == 2 不做自动切换，用户主动退出的应尊重 */
+        }
+    }
 
     return RET_REPEAT ;
 }

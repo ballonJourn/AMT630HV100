@@ -159,3 +159,22 @@ void vehicle_set_param_carlink_type(uint8_t value)
 #endif
     return ;
 }
+
+//时间制式 0:24小时制 1:12小时制
+uint8_t vehicle_get_param_time_format()
+{
+    uint8_t value ;
+#if !ON_PC_CACLE
+    if (get_hcn_usr_param(HCN_PARAM_TIME_FORMAT, &value) )
+        return value ;
+#endif
+    return 0 ; ///< 默认24小时制
+}
+
+void vehicle_set_param_time_format(uint8_t value)
+{
+#if !ON_PC_CACLE
+    set_hcn_usr_param(HCN_PARAM_TIME_FORMAT, (void*)&value) ;
+#endif
+    return ;
+}

@@ -310,6 +310,22 @@ Enter the map without navigation</language>
   <language name="en_US">Confirm to reboot
 Cancel to keep current</language>
 </string>
+<string name="adjust_time">
+  <language name="zh_CN">调整时间</language>
+  <language name="en_US">Adjust Time</language>
+</string>
+<string name="adjust_format">
+  <language name="zh_CN">调整制式</language>
+  <language name="en_US">Time Format</language>
+</string>
+<string name="clock_24h">
+  <language name="zh_CN">24小时制</language>
+  <language name="en_US">24-Hour</language>
+</string>
+<string name="clock_12h">
+  <language name="zh_CN">12小时制</language>
+  <language name="en_US">12-Hour</language>
+</string>
 <string name="cp_connect_tip">
   <language name="zh_CN">请通过蓝牙连接
 %s

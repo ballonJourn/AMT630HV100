@@ -36,8 +36,4 @@ ret_t home_refresh_gear(gear_e gear);
 //设置单位
 ret_t home_refresh_unit(unit_e unit);
 
-
-//控制home_page上驾驶模式图标的可见性（link_page叠加时需隐藏）
-ret_t home_drv_mode_set_visible(bool_t visible);
-
 #endif
