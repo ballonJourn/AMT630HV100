@@ -321,4 +321,3 @@ void carlink_cb_init(void) {
         inited = true;
     }
 }
-

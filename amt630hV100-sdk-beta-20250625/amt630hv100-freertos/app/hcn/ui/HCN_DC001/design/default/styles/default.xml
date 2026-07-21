@@ -329,7 +329,7 @@
 </progress_circle>
 <qr>
   <style name="default">
-    <normal bg_color="#083557" bg_image="" fg_color="#000000"/>
+    <normal bg_color="#FFFFFF" bg_image="" fg_color="#000000"/>
     <disable bg_color="#F0F0F0" fg_color="#BEBEBE"/>
   </style>
 </qr>

@@ -61,7 +61,7 @@ ret_t link_refresh_drv_mode(drv_mode_e mode)
 {
     char format_buff[64] = { 0 };
     mode = tk_min(mode , DRV_MODE_S) ;
-    tk_snprintf(format_buff , sizeof(format_buff) , "drv_mode_%d", (int)mode);
+    tk_snprintf(format_buff , sizeof(format_buff) , "link_drv_mode_%d", (int)mode);
 
     if(link_view_widget[LINK_VIEW_RIDE_MODE] ){
         image_set_image(link_view_widget[LINK_VIEW_RIDE_MODE] , format_buff );

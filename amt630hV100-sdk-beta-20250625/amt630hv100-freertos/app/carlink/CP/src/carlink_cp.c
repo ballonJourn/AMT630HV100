@@ -535,7 +535,7 @@ static void  taskInitCarlinkCpProc(void* param)
 
 	/* 显示窗口高度须 16 对齐:OSD 处理 YUV420 按 16 行块读取,非对齐高度会多读
 	 * 缓冲区里 PXP 未写的行(全0=绿),底部出现绿线。544=16*34,源视频仍 1024x600。 */
-	set_carlink_display_info(0, 0, CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT - 56);
+	set_carlink_display_info(0, 0, CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT);
 	set_carlink_video_info(CARLINK_VIDEO_WIDTH, CARLINK_VIDEO_HEIGHT, 30);
 	carplay_init_parameter();
 	
