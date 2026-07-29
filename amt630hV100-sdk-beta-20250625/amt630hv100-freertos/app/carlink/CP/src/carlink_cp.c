@@ -440,11 +440,11 @@ static void onEventCarplay(void* ctx, const struct carlink_event *ev)
 				pctx->mCarplayConnected = 0;
 				vehicle_set_data(VEH_CARLINK_CP_STATUS, 0);
 				vehicle_set_data(VEH_CARLINK_CP_PHONE_DEV_STATUS, 0);
-				carlink_bt_open();
 				printf("%s:%d\r\n", __func__, __LINE__);
 				if (pctx->mPhoneCarplayFlag) {
 					start_cp(pctx);
 				} else {
+					carlink_bt_open();
 					printf("pctx->mPhoneCarplayFlag = 0, dont start cp!\n");
 				}
 			}
