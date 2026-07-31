@@ -1948,9 +1948,99 @@ uint8_t dvr_is_device_online(void)
 }
 #endif
 
-/**********************
- *   GLOBAL FUNCTIONS
- **********************/
+/* ═══════════════════════════════════════════════════════════════════════
+ * Link-page (亿连) alpha-clear hook
+ *
+ * Mirrors DVR's post-render hook architecture.  link_page displays the
+ * carlink H264 video stream via LCD_VIDEO_LAYER (OSD0) in a sub-region,
+ * with AWTK UI widgets (speed, gear, power, battery, QR) on LCD_UI_LAYER
+ * (OSD1) in a non-overlapping panel.
+ *
+ * Layout (Frame 4):
+ *   top bar      : (0,  0)  1024×60   UI layer, opaque
+ *   video region : (0, 60)   800×480  VIDEO layer, alpha=0 hole in UI
+ *   right panel  : (800,60)  224×480  UI layer, opaque
+ *   bottom bar   : (0,548)  1024×52   UI layer, opaque
+ *
+ * The hook clears alpha in the video region AFTER AWTK rendering completes,
+ * so the LCD controller always sees a consistent frame — no flicker.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+#define LINK_VIDEO_X       0
+#define LINK_VIDEO_Y       60
+#define LINK_VIDEO_WIDTH   800
+#define LINK_VIDEO_HEIGHT  480
+
+static uint8_t link_preview_enable = 0;
+
+#include "vehicle_param/vehicle_param.h"
+
+extern void vg_set_post_render_hook(void (*hook)(unsigned int fb_base));
+
+static void link_alpha_clear_hook(unsigned int fb_base)
+{
+    if (!link_preview_enable) return;
+
+    /* Only punch the alpha hole when carlink video is actually streaming.
+     * Before connection: keep region opaque (bg_color=#FF000000 fills it black)
+     * so home_page underneath doesn't bleed through as a "residual". */
+    if (vehicle_get_data(VEH_CARLINK_CONNECTED) != 1) return;
+
+    int x0 = LINK_VIDEO_X;
+    int y0 = LINK_VIDEO_Y;
+    int x1 = x0 + LINK_VIDEO_WIDTH;
+    int y1 = y0 + LINK_VIDEO_HEIGHT;
+    if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
+    if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+
+    /* Full-width row: fill as one contiguous run (same optimisation as DVR).
+     * Writes 0x00000000 (alpha=0, RGB=0) so VIDEO layer shows through. */
+    if (x0 == 0 && x1 == OSD_WIDTH) {
+        uint32_t *p   = (uint32_t *)fb_base + (uint32_t)y0 * OSD_WIDTH;
+        uint32_t *end = (uint32_t *)fb_base + (uint32_t)y1 * OSD_WIDTH;
+        while (p < end) *p++ = 0x00000000;
+    } else {
+        for (int y = y0; y < y1; y++) {
+            uint32_t *p = (uint32_t *)fb_base + (uint32_t)y * OSD_WIDTH + x0;
+            for (int x = x0; x < x1; x++)
+                *p++ = 0x00000000;
+        }
+    }
+    CP15_clean_dcache_for_dma(fb_base + (uint32_t)y0 * OSD_WIDTH * 4,
+                               fb_base + (uint32_t)y1 * OSD_WIDTH * 4);
+}
+
+void link_api_set_preview_enable(uint8_t enable)
+{
+    link_preview_enable = enable;
+    printf("LINK: preview enable set to %d\n", enable);
+
+    if (enable) {
+        /* Position carlink VIDEO layer to match the alpha-clear region */
+        set_carlink_display_info(LINK_VIDEO_X, LINK_VIDEO_Y,
+                                 LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
+        vg_set_post_render_hook(link_alpha_clear_hook);
+        printf("LINK: alpha-clear hook registered, video at (%d,%d,%d,%d)\n",
+               LINK_VIDEO_X, LINK_VIDEO_Y, LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
+    } else {
+        /* Immediately blank video layer and restore UI-only display */
+        ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
+        ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
+        ark_lcd_osd_enable(LCD_UI_LAYER, 1);
+        ark_lcd_set_osd_sync(LCD_UI_LAYER);
+        vg_set_post_render_hook(NULL);
+        /* Restore carlink VIDEO layer geometry to full screen */
+        set_carlink_display_info(0, 0, LCD_WIDTH, LCD_HEIGHT);
+        printf("LINK: VIDEO off, hook removed, display restored to full\n");
+        /* h264_video_player_proc will see link_preview_enable==0 and skip
+         * all LCD output, so no frames hit VIDEO layer on home_page. */
+    }
+}
+
+uint8_t link_api_get_preview_enable(void)
+{
+    return link_preview_enable;
+}
 #ifdef VG_DRIVER
 #pragma data_alignment=1024
 #ifdef __HCN_CONFIG_H__

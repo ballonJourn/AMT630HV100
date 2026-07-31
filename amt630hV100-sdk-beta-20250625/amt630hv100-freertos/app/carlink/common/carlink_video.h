@@ -33,6 +33,11 @@ void set_carlink_display_info(int x, int y, int w, int h);//set carlink show are
 void set_carlink_display_state(int on); // on: 1.display carlink;  0. display native ui
 void set_carlink_active_video_info(int x, int y);//for android auto
 
+/* Query whether link_page preview mode is active. When link_page is not
+ * visible, video frames should not be pushed to LCD_VIDEO_LAYER even if
+ * g_hide_carlink_flag is 1 (carlink connected). Implemented in main_awtk.c. */
+extern uint8_t link_api_get_preview_enable(void);
+
 
 void* h264_video_player_init();
 void h264_video_player_uninit(void* h264_Handle);

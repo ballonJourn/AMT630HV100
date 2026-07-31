@@ -37,4 +37,17 @@ ret_t link_refresh_qr(int state) ;
 
 ret_t rest_data();
 
+/* ── Top bar ── */
+ret_t link_topbar_init(widget_t* parent) ;
+ret_t link_topbar_refresh_clock(int hour, int min, bool_t colon_visible, uint8_t time_fmt) ;
+ret_t link_topbar_refresh_signal(int index, bool_t visible) ;
+
+/* ── Bottom bar ── */
+ret_t link_bottombar_init(widget_t* parent) ;
+ret_t link_bottombar_refresh_trip(double trip) ;
+ret_t link_bottombar_refresh_odo(double odo) ;
+ret_t link_bottombar_refresh_mileage_unit(unit_e unit) ;
+ret_t link_bottombar_refresh_electrical(uint32_t mileage) ;
+ret_t link_bottombar_refresh_electrical_unit(unit_e unit) ;
+
 #endif

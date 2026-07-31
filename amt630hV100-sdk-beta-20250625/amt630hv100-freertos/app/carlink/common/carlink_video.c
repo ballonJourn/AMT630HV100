@@ -487,6 +487,13 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 	if (0 == g_hide_carlink_flag)
 		return 0;
 
+	/* Only render to LCD_VIDEO_LAYER when link_page is in foreground.
+	 * On home_page the video layer must stay dark — otherwise the 30fps
+	 * VIDEO/UI layer toggling causes visible flicker.  H264 decode above
+	 * still runs, keeping the carlink session alive for nav data. */
+	if (!link_api_get_preview_enable())
+		return 0;
+
 	/*if (xVideoDisplayBufTake(pdMS_TO_TICKS(50)) != pdPASS) {
 		printf("xVideoDisplayBufTake failed!\r\n");
 		return -1;
