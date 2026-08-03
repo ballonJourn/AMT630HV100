@@ -8,10 +8,10 @@
 
   <!-- ── Top bar (0,0) 1024×60 — mirrors home_page, black bg ── -->
   <view name="link_time_view" x="1" y="6" w="130" h="50">
-    <label name="link_time_min" x="0" y="0" w="51" h="50" style:normal:font_size="44" style:normal:text_align_v="top" text="00"/>
-    <label name="link_time_colon" x="32" y="-8" w="41" h="52" style:normal:font_size="51" style:normal:text_align_v="top" text=":"/>
-    <label name="link_time_sec" x="49" y="0" w="60" h="50" style:normal:font_size="44" style:normal:text_align_v="top" text="00"/>
-    <label name="link_time_ampm" x="96" y="18" w="34" h="32" style:normal:font_size="18" style:normal:text_align_v="bottom" visible="false" text=""/>
+    <label name="link_time_min" x="0" y="0" w="51" h="50" style:normal:font_size="44" style:normal:text_color="#FFFFFF" style:normal:text_align_v="top" text="00"/>
+    <label name="link_time_colon" x="32" y="-8" w="41" h="52" style:normal:font_size="51" style:normal:text_color="#FFFFFF" style:normal:text_align_v="top" text=":"/>
+    <label name="link_time_sec" x="49" y="0" w="60" h="50" style:normal:font_size="44" style:normal:text_color="#FFFFFF" style:normal:text_align_v="top" text="00"/>
+    <label name="link_time_ampm" x="96" y="18" w="34" h="32" style:normal:font_size="18" style:normal:text_color="#FFFFFF" style:normal:text_align_v="bottom" visible="false" text=""/>
   </view>
   <view name="link_signal_view" x="100" y="0" w="924" h="62">
     <image name="link_icon_GMS" x="0" y="0" w="52" h="52" draw_type="default" image="top_signal_3_n"/>
@@ -54,16 +54,16 @@
   <view x="800" y="300" w="224" h="1" style:normal:bg_color="#333333"/>
 
   <!-- ── Power ── -->
-  <label name="power_lab" x="875" y="319" w="61" h="34" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
-  <label name="label1" x="938" y="319" w="23" h="34" style:normal:text_color="#327889" style:normal:font_size="33" style:normal:text_align_h="left" text="w"/>
+  <label name="power_lab" x="870" y="319" w="61" h="34" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
+  <label name="label1" x="938" y="320" w="23" h="34" style:normal:text_color="#327889" style:normal:font_size="30" style:normal:text_align_h="left" text="w"/>
   <slider name="power_bar" x="866" y="383" w="100" h="22" style:normal:icon="box_power_pointer" style:pressed:icon="" style:over:icon="" style:disable:icon="" style:focused:icon="" style:normal:bg_color="#848484" style:normal:fg_color="#FFFFFF" style:normal:round_radius="0" bar_size="5" dragger_size="0" value="0"/>
 
   <!-- divider -->
   <view x="800" y="420" w="224" h="1" style:normal:bg_color="#333333"/>
 
   <!-- ── Battery / Range ── -->
-  <label name="elec_lab" x="865" y="440" w="61" h="34" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
-  <label name="elec_unit" x="926" y="440" w="41" h="34" style:normal:text_color="#327889" style:normal:font_size="33" style:normal:text_align_h="left" text="km"/>
+  <label name="elec_lab" x="860" y="440" w="61" h="34" style:normal:text_color="#FFFFFF" style:normal:font_size="33" style:normal:text_align_h="right" text="0"/>
+  <label name="elec_unit" x="926" y="441" w="41" h="34" style:normal:text_color="#327889" style:normal:font_size="30" style:normal:text_align_h="left" text="km"/>
   <progress_bar name="elec_bar" x="869" y="491" w="90" h="30" style:normal:text_color="#000000" style:normal:fg_color="#FF0000" style:normal:bg_color="#FFFFFF" show_text="true" style:normal:font_size="25" style:normal:font_name="default" style:normal:margin="0" style:normal:border_width="4" style:normal:border_color="#FFFFFF" style:normal:round_radius="6" format="%d%%" value="0"/>
   <image name="image3" x="954" y="499" w="9" h="15" draw_type="default" image="link_elecRect_head"/>
 
@@ -72,19 +72,19 @@
 
   <!-- ── Bottom bar (0,548) 1024×52 — mirrors home_page mileage + electrical, black bg ── -->
   <view name="link_mileage_view" x="1" y="548" w="1023" h="52">
-    <label name="link_trip_title" x="0" y="5" w="55" h="35" style:normal:font_size="27" style:normal:text_align_v="bottom" text="TRIP"/>
-    <label name="link_trip_label" x="55" y="9" w="70" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="0.0"/>
-    <label name="link_trip_unit" x="131" y="9" w="49" h="35" style:normal:font_size="35" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
-    <label name="link_odo_title" x="964" y="6" w="55" h="35" style:normal:font_size="27" style:normal:text_align_v="bottom" text="ODO"/>
-    <label name="link_odo_label" x="809" y="9" w="102" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="0"/>
-    <label name="link_odo_unit" x="916" y="9" w="44" h="35" style:normal:font_size="35" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
+    <label name="link_trip_title" x="0" y="5" w="55" h="35" style="mileage_unit" style:normal:font_size="27" style:normal:text_align_v="bottom" text="TRIP"/>
+    <label name="link_trip_label" x="55" y="9" w="70" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="0.0"/>
+    <label name="link_trip_unit" x="131" y="9" w="49" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
+    <label name="link_odo_title" x="964" y="6" w="55" h="35" style="mileage_unit" style:normal:font_size="27" style:normal:text_align_v="bottom" text="ODO"/>
+    <label name="link_odo_label" x="809" y="9" w="102" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="0"/>
+    <label name="link_odo_unit" x="916" y="9" w="44" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
   </view>
   <view name="link_electrical_view" x="228" y="548" w="568" h="52" style:normal:bg_image="power_level_bg">
     <progress_bar name="link_electrical_bar" x="192" y="20" w="186" h="12" style:normal:text_color="#00000000" style:normal:bg_color="#00000000" style:normal:bg_image="power_level_n" style:normal:fg_color="#00FF00" style:normal:bg_image_draw_type="icon" style:normal:border_color="#00000000" value="100"/>
-    <label name="link_elec_percentage" x="95" y="10" w="38" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
-    <label name="link_elec_percent_sign" x="132" y="10" w="31" h="35" style:normal:font_size="33" style:normal:text_align_v="bottom" text="%"/>
-    <label name="link_elec_range_value" x="379" y="10" w="61" h="35" style:normal:font_size="35" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
-    <label name="link_elec_range_unit" x="445" y="10" w="52" h="35" style:normal:font_size="35" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
+    <label name="link_elec_percentage" x="95" y="10" w="38" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
+    <label name="link_elec_percent_sign" x="132" y="10" w="31" h="35" style="mileage_unit" style:normal:font_size="33" style:normal:text_align_v="bottom" text="%"/>
+    <label name="link_elec_range_value" x="379" y="10" w="61" h="35" style:normal:font_size="35" style:normal:text_color="#FFFFFF" style:normal:text_align_h="right" style:normal:text_align_v="bottom" text="100"/>
+    <label name="link_elec_range_unit" x="445" y="10" w="52" h="35" style="mileage_unit" style:normal:font_size="35" style:normal:text_align_h="left" style:normal:text_align_v="bottom" text="km"/>
   </view>
 
   <!-- ── QR code: centered in video area, hidden after carlink connects ── -->
