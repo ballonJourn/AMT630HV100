@@ -1983,14 +1983,35 @@ volatile uint8_t g_link_render_gate = 0;
 
 extern void vg_set_post_render_hook(void (*hook)(unsigned int fb_base));
 
+/* Debounce counter: VEH_CARLINK_CONNECTED can transiently drop to 0 during
+ * WiFi retransmission or H264 stream gap (~1 frame).  Without debounce, the
+ * hook skips the alpha-clear for that frame → UI layer is opaque over VIDEO
+ * layer → 1-frame black flash.  We require N consecutive not-connected
+ * readings before actually stopping the alpha-clear. At 60fps render rate,
+ * 6 frames ≈ 100ms — long enough to ride over transients, short enough to
+ * stop quickly on real disconnect. */
+#define LINK_CONNECTED_DEBOUNCE  6
+static uint8_t link_connected_debounce_cnt = 0;
+
 static void link_alpha_clear_hook(unsigned int fb_base)
 {
     if (!link_preview_enable) return;
 
-    /* Only punch the alpha hole when carlink video is actually streaming.
-     * Before connection: keep region opaque (bg_color=#FF000000 fills it black)
-     * so home_page underneath doesn't bleed through as a "residual". */
-    if (vehicle_get_data(VEH_CARLINK_CONNECTED) != 1) return;
+    /* Debounced connection check: once connected, keep punching the alpha
+     * hole for LINK_CONNECTED_DEBOUNCE extra frames after disconnect is
+     * first observed.  This prevents 1-frame flicker from WiFi transients. */
+    if (vehicle_get_data(VEH_CARLINK_CONNECTED) == 1) {
+        link_connected_debounce_cnt = 0;  /* reset on every connected frame */
+    } else {
+        if (link_connected_debounce_cnt < LINK_CONNECTED_DEBOUNCE) {
+            link_connected_debounce_cnt++;
+            /* Still in grace period — continue punching alpha hole */
+        } else {
+            /* Truly disconnected: stop punching.  AWTK's bg_color and QR
+             * widget will paint the region (black bg + QR code visible). */
+            return;
+        }
+    }
 
     int x0 = LINK_VIDEO_X;
     int y0 = LINK_VIDEO_Y;
@@ -2046,9 +2067,47 @@ void link_api_set_preview_enable(uint8_t enable)
 
     if (enable) {
         link_preview_enable = 1;
+        /* Reset debounce counter for fresh session */
+        link_connected_debounce_cnt = LINK_CONNECTED_DEBOUNCE;
+
         /* Position carlink VIDEO layer to match the alpha-clear region */
         set_carlink_display_info(LINK_VIDEO_X, LINK_VIDEO_Y,
                                  LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
+
+        /* ── Pre-fill all 3 framebuffers with opaque black in the video
+         * region.  navigator_switch_to() keeps home_page alive underneath
+         * link_page, and AWTK's triple-buffer may still hold home_page
+         * wallpaper in one or two back-buffers that haven't been repainted
+         * yet.  If the LCD controller shows one of those stale buffers
+         * before AWTK gets around to repainting it, the user sees a
+         * home_page "ghost" — exactly the A-level bug reported by QA.
+         *
+         * By pre-filling all 3 buffers with opaque black NOW, we ensure
+         * every possible VSYNC swap shows black in this region until either
+         * (a) AWTK repaints with link_page bg_color + QR (not connected),
+         * or (b) the hook starts punching alpha holes (connected).
+         *
+         * Cost: 800×480×4 bytes × 3 buffers ≈ 4.6MB write, one-time at
+         * page open.  Negligible vs. 30fps H264 decode bandwidth. */
+        {
+            int x0 = LINK_VIDEO_X, y0 = LINK_VIDEO_Y;
+            int x1 = x0 + LINK_VIDEO_WIDTH, y1 = y0 + LINK_VIDEO_HEIGHT;
+            if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
+            if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+            for (int i = 0; i < 3; i++) {
+                uint8_t *addr = ark_lcd_get_fb_addr(i);
+                if (!addr) continue;
+                uint32_t *fb = (uint32_t *)addr;
+                for (int y = y0; y < y1; y++) {
+                    uint32_t *p = fb + y * OSD_WIDTH + x0;
+                    for (int x = x0; x < x1; x++)
+                        *p++ = 0xFF000000;  /* opaque black */
+                }
+                CP15_clean_dcache_for_dma((uint32_t)addr + y0 * OSD_WIDTH * 4,
+                                           (uint32_t)addr + y1 * OSD_WIDTH * 4);
+            }
+        }
+
         vg_set_post_render_hook(link_alpha_clear_hook);
         /* Open render gate LAST — after all resources are configured,
          * so h264_video_player_proc never sees gate=1 with stale state. */
