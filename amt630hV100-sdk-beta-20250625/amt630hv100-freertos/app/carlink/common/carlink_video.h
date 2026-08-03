@@ -38,6 +38,13 @@ void set_carlink_active_video_info(int x, int y);//for android auto
  * g_hide_carlink_flag is 1 (carlink connected). Implemented in main_awtk.c. */
 extern uint8_t link_api_get_preview_enable(void);
 
+/* Render gate: volatile flag checked by h264_video_player_proc BEFORE any
+ * LCD layer operation.  Closed (0) by link_api_set_preview_enable(0) as the
+ * very first step, so even an in-flight frame that already read
+ * g_hide_carlink_flag==1 will abort before touching LCD_VIDEO_LAYER.
+ * Defined in main_awtk.c alongside link_preview_enable. */
+extern volatile uint8_t g_link_render_gate;
+
 
 void* h264_video_player_init();
 void h264_video_player_uninit(void* h264_Handle);

@@ -494,11 +494,15 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 	if (!link_api_get_preview_enable())
 		return 0;
 
-	/*if (xVideoDisplayBufTake(pdMS_TO_TICKS(50)) != pdPASS) {
-		printf("xVideoDisplayBufTake failed!\r\n");
-		return -1;
-	}*/
-	
+	/* Render gate: re-check the volatile gate AFTER decode completes but
+	 * BEFORE any LCD layer operation.  link_api_set_preview_enable(0) closes
+	 * this gate as the very first step, so even a frame that passed the
+	 * link_api_get_preview_enable() check above will be caught here if the
+	 * disable happened between that check and now.  This closes the race
+	 * window that caused sporadic flicker on home_page. */
+	if (!g_link_render_gate)
+		return 0;
+
 	for(i = 0; i < outBuf.num; i++) {
 		int active_offset = 0;
 		align_width = outBuf.frameWidth;
@@ -506,6 +510,12 @@ int h264_video_player_proc(void* h264_Handle, const char *h264_buf, int h264_buf
 
 		if(!(align_width && align_height))
 			continue;
+
+		/* Per-frame re-check: if gate closed mid-loop (multi-frame Apple
+		 * H264 packets where outBuf.num > 1), abort immediately. */
+		if (!g_link_render_gate)
+			break;
+
 		active_offset = g_active_video_y * align_width;
 		yaddr = outBuf.buffer[i].yBusAddress + active_offset + g_active_video_x;
 		uaddr = outBuf.buffer[i].yBusAddress + align_width * align_height + active_offset / 2 + g_active_video_x;

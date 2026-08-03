@@ -1973,6 +1973,12 @@ uint8_t dvr_is_device_online(void)
 
 static uint8_t link_preview_enable = 0;
 
+/* Render gate: checked by h264_video_player_proc() BEFORE any LCD layer
+ * operation.  Must be volatile — written by UI task, read by EY network task.
+ * Closed (0) BEFORE disabling VIDEO layer, so even an in-flight frame that
+ * already passed the link_preview_enable check will be stopped. */
+volatile uint8_t g_link_render_gate = 0;
+
 #include "vehicle_param/vehicle_param.h"
 
 extern void vg_set_post_render_hook(void (*hook)(unsigned int fb_base));
@@ -2010,30 +2016,89 @@ static void link_alpha_clear_hook(unsigned int fb_base)
                                fb_base + (uint32_t)y1 * OSD_WIDTH * 4);
 }
 
+/* Restore alpha=0xFF in the link video region on ALL framebuffers.
+ * Called on preview exit so the alpha hole doesn't persist in back-buffers
+ * that AWTK might not immediately repaint (triple-buffering). Mirrors
+ * dvr_restore_ui_alpha_all() for the DVR preview path. */
+static void link_restore_ui_alpha_all(void)
+{
+    int x0 = LINK_VIDEO_X, y0 = LINK_VIDEO_Y;
+    int x1 = x0 + LINK_VIDEO_WIDTH, y1 = y0 + LINK_VIDEO_HEIGHT;
+    if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
+    if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+    for (int i = 0; i < 3; i++) {
+        uint8_t *addr = ark_lcd_get_fb_addr(i);
+        if (!addr) continue;
+        uint32_t *fb = (uint32_t *)addr;
+        for (int y = y0; y < y1; y++) {
+            uint32_t *p = fb + y * OSD_WIDTH + x0;
+            for (int x = x0; x < x1; x++)
+                *p++ |= 0xFF000000;
+        }
+        CP15_clean_dcache_for_dma((uint32_t)addr + y0 * OSD_WIDTH * 4,
+                                   (uint32_t)addr + y1 * OSD_WIDTH * 4);
+    }
+}
+
 void link_api_set_preview_enable(uint8_t enable)
 {
-    link_preview_enable = enable;
     printf("LINK: preview enable set to %d\n", enable);
 
     if (enable) {
+        link_preview_enable = 1;
         /* Position carlink VIDEO layer to match the alpha-clear region */
         set_carlink_display_info(LINK_VIDEO_X, LINK_VIDEO_Y,
                                  LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
         vg_set_post_render_hook(link_alpha_clear_hook);
+        /* Open render gate LAST — after all resources are configured,
+         * so h264_video_player_proc never sees gate=1 with stale state. */
+        g_link_render_gate = 1;
         printf("LINK: alpha-clear hook registered, video at (%d,%d,%d,%d)\n",
                LINK_VIDEO_X, LINK_VIDEO_Y, LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
     } else {
-        /* Immediately blank video layer and restore UI-only display */
+        /* === CRITICAL SHUTDOWN SEQUENCE ===
+         * The EY network task calls h264_video_player_proc() at ~30fps in a
+         * separate FreeRTOS task.  If we disable LCD_VIDEO_LAYER while an
+         * in-flight frame has already passed the preview_enable check, that
+         * frame will re-enable VIDEO_LAYER after us → 1-frame flicker.
+         *
+         * Solution: close the render gate FIRST (volatile write, immediately
+         * visible to EY task), then drain one frame period so any in-flight
+         * frame completes or aborts at the gate check.  Only then touch LCD. */
+
+        /* Step 1: Close render gate — EY task will abort at g_link_render_gate
+         * check before any LCD operation, even if it already read
+         * link_preview_enable==1. */
+        g_link_render_gate = 0;
+
+        /* Step 2: Set the preview flag — future h264_video_player_proc calls
+         * will exit at the link_api_get_preview_enable() check. */
+        link_preview_enable = 0;
+
+        /* Step 3: Drain one video frame period (~35ms at 30fps) to guarantee
+         * any in-flight h264_video_player_proc call has either completed its
+         * LCD operations or aborted at the gate check. Without this delay,
+         * an in-flight frame that entered the render loop before step 1
+         * could still be executing pxp_scaler_rotate/LCD writes. */
+        vTaskDelay(pdMS_TO_TICKS(35));
+
+        /* Step 4: Now safe to disable VIDEO layer — no concurrent writer */
         ark_lcd_osd_enable(LCD_VIDEO_LAYER, 0);
         ark_lcd_set_osd_sync(LCD_VIDEO_LAYER);
         ark_lcd_osd_enable(LCD_UI_LAYER, 1);
         ark_lcd_set_osd_sync(LCD_UI_LAYER);
+
+        /* Step 5: Remove post-render hook */
         vg_set_post_render_hook(NULL);
-        /* Restore carlink VIDEO layer geometry to full screen */
+
+        /* Step 6: Restore alpha in ALL framebuffers so the alpha hole from
+         * link_alpha_clear_hook doesn't persist in triple-buffered back-buffers
+         * that AWTK may swap to before repainting the region. */
+        link_restore_ui_alpha_all();
+
+        /* Step 7: Restore carlink VIDEO layer geometry to full screen */
         set_carlink_display_info(0, 0, LCD_WIDTH, LCD_HEIGHT);
-        printf("LINK: VIDEO off, hook removed, display restored to full\n");
-        /* h264_video_player_proc will see link_preview_enable==0 and skip
-         * all LCD output, so no frames hit VIDEO layer on home_page. */
+        printf("LINK: gate closed, VIDEO off, alpha restored, display full\n");
     }
 }
 
