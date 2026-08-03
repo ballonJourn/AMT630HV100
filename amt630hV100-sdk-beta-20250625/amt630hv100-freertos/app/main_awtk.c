@@ -2074,37 +2074,37 @@ void link_api_set_preview_enable(uint8_t enable)
         set_carlink_display_info(LINK_VIDEO_X, LINK_VIDEO_Y,
                                  LINK_VIDEO_WIDTH, LINK_VIDEO_HEIGHT);
 
-        /* ── Pre-fill all 3 framebuffers with opaque black in the video
-         * region.  navigator_switch_to() keeps home_page alive underneath
-         * link_page, and AWTK's triple-buffer may still hold home_page
-         * wallpaper in one or two back-buffers that haven't been repainted
-         * yet.  If the LCD controller shows one of those stale buffers
-         * before AWTK gets around to repainting it, the user sees a
-         * home_page "ghost" — exactly the A-level bug reported by QA.
+        /* ── Pre-fill all 3 framebuffers with opaque black over the ENTIRE
+         * screen (0,0)~(OSD_WIDTH,OSD_HEIGHT).
          *
-         * By pre-filling all 3 buffers with opaque black NOW, we ensure
-         * every possible VSYNC swap shows black in this region until either
-         * (a) AWTK repaints with link_page bg_color + QR (not connected),
-         * or (b) the hook starts punching alpha holes (connected).
+         * navigator_switch_to() keeps home_page alive underneath link_page,
+         * and AWTK's triple-buffer may still hold home_page wallpaper in
+         * one or two back-buffers that haven't been repainted yet.  If the
+         * LCD controller shows one of those stale buffers before AWTK gets
+         * around to repainting it, the user sees a home_page "ghost".
          *
-         * Cost: 800×480×4 bytes × 3 buffers ≈ 4.6MB write, one-time at
+         * The previous fix only filled the video region (0,60,800,480),
+         * leaving the top bar (0,0,1024,60), right panel (800,60,224,480),
+         * the 8px gap (0,540,1024,8), and bottom bar (0,548,1024,52) with
+         * stale home_page content.  link_page's design uses a black
+         * background (#FF000000) for the entire window, so filling the
+         * full screen is both correct and safe — AWTK will repaint its
+         * widgets (clock, icons, speed, gear, etc.) on top of this black
+         * canvas in the very next render pass.
+         *
+         * Cost: 1024×600×4 bytes × 3 buffers ≈ 7.4MB write, one-time at
          * page open.  Negligible vs. 30fps H264 decode bandwidth. */
         {
-            int x0 = LINK_VIDEO_X, y0 = LINK_VIDEO_Y;
-            int x1 = x0 + LINK_VIDEO_WIDTH, y1 = y0 + LINK_VIDEO_HEIGHT;
-            if (x1 > OSD_WIDTH)  x1 = OSD_WIDTH;
-            if (y1 > OSD_HEIGHT) y1 = OSD_HEIGHT;
+            uint32_t total_pixels = (uint32_t)OSD_WIDTH * OSD_HEIGHT;
             for (int i = 0; i < 3; i++) {
                 uint8_t *addr = ark_lcd_get_fb_addr(i);
                 if (!addr) continue;
-                uint32_t *fb = (uint32_t *)addr;
-                for (int y = y0; y < y1; y++) {
-                    uint32_t *p = fb + y * OSD_WIDTH + x0;
-                    for (int x = x0; x < x1; x++)
-                        *p++ = 0xFF000000;  /* opaque black */
-                }
-                CP15_clean_dcache_for_dma((uint32_t)addr + y0 * OSD_WIDTH * 4,
-                                           (uint32_t)addr + y1 * OSD_WIDTH * 4);
+                uint32_t *p   = (uint32_t *)addr;
+                uint32_t *end = p + total_pixels;
+                while (p < end)
+                    *p++ = 0xFF000000;  /* opaque black */
+                CP15_clean_dcache_for_dma((uint32_t)addr,
+                                           (uint32_t)addr + total_pixels * 4);
             }
         }
 

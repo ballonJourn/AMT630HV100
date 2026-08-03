@@ -1,4 +1,4 @@
-<window name="link_page" style:normal:bg_color="#FF000000" style:normal:border_color="#FF000000">
+<window name="link_page" style:normal:bg_color="#000000" style:normal:border_color="#000000">
   <!-- ══ Frame 4 layout ═══════════════════════════════════════════════
        VIDEO  : (0,60)   800×480  alpha hole punched by post-render hook
        RIGHT  : (800,60) 224×480  opaque panel — speed/gear/power/battery

@@ -43,6 +43,22 @@ extern void link_api_set_preview_enable(uint8_t enable);
 extern uint8_t link_api_get_preview_enable(void);
 #endif
 
+/* ── Triple-buffer full-repaint counter ──
+ *
+ * The VG driver uses dirty-rect-copy: each frame, "clean" areas are
+ * copied from a previous buffer to the current one.  With triple-
+ * buffering, it takes 3 consecutive full-screen-dirty frames to ensure
+ * every buffer slot has been completely repainted by AWTK with
+ * link_page's black background.  If any frame has only a partial dirty
+ * rect, dirty-rect-copy fills the rest from an older buffer that may
+ * still contain home_page wallpaper → ghost artifact.
+ *
+ * lk_fullscreen_repaint_cnt is set to 3 on page open.  The 50ms timer
+ * decrements it and calls widget_invalidate_force() each tick until 0.
+ * Cost: 3 frames × ~16ms = negligible one-time overhead at page entry. */
+static uint8_t  lk_fullscreen_repaint_cnt = 0;
+static widget_t *lk_win_ref = NULL;
+
 ret_t link_init(widget_t *win) 
 {
     if (win == NULL) return RET_FAIL ;
@@ -183,6 +199,9 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         lk_last_bot_elec = -1 ;
 
         rest_data();
+
+        lk_fullscreen_repaint_cnt = 0;
+        lk_win_ref = NULL;
     }
     else if(e->type == EVT_WINDOW_WILL_OPEN)
     {
@@ -218,9 +237,16 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         widget_t* qr = widget_lookup((widget_t *)ctx, "link_qr", TRUE);
         if (qr)
             qr_set_value(qr , buff) ;
- 
     #endif
-    
+
+        /* Arm triple-buffer full-repaint: see comment at lk_fullscreen_repaint_cnt.
+         * The 50ms timer will call widget_invalidate_force() for the next 3 ticks,
+         * ensuring all 3 framebuffer slots are fully painted with link_page content
+         * so VG dirty-rect-copy never restores stale home_page wallpaper. */
+        lk_win_ref = (widget_t *)ctx;
+        lk_fullscreen_repaint_cnt = 3;
+        widget_invalidate_force(lk_win_ref, NULL);
+
     }
 
   return RET_OK ;
@@ -229,6 +255,16 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
 static ret_t timer_refresh_50_ms(const timer_info_t *info)
 {
     (void)info ;
+
+    /* ── Triple-buffer forced repaint (runs at most 3 times after page open) ──
+     * Each tick forces the entire link_page window dirty so AWTK repaints the
+     * full 1024×600 area.  After 3 consecutive full-screen frames, all 3
+     * framebuffer slots contain link_page content and VG dirty-rect-copy
+     * can no longer restore stale home_page wallpaper from any buffer. */
+    if (lk_fullscreen_repaint_cnt > 0 && lk_win_ref != NULL) {
+        widget_invalidate_force(lk_win_ref, NULL);
+        lk_fullscreen_repaint_cnt--;
+    }
 
     int __state = vehicle_get_data(VEH_CARLINK_CONNECTED) ;
     link_refresh_qr(!__state) ;
