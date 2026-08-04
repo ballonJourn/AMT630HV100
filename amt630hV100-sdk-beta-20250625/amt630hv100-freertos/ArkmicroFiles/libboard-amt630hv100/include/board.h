@@ -299,7 +299,7 @@
 //v100端应用程序必须加上设置界面来配置优先选择连亿联还是手机自带的互联(android auto/carplay)
 #define CARLINK_EC			1
 #define CARLINK_CP          1
-#define CARLINK_AA          1
+#define CARLINK_AA          0
 #endif
 
 #else

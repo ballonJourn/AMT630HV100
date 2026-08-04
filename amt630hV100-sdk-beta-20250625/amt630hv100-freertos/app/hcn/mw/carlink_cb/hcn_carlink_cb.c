@@ -129,6 +129,7 @@ static void onHcnVideoStatus(bool status) {
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_LANE_GUIDANCE_PICTURE |
                                      EC_APP_HUD_SUPPORT_FUNCTION_ROAD_JUNCTION_PICTURE);
 #else
+        printf("===================[ouchunhua]easy navi111==========\n");
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_DEFAULT);
 #endif
 #endif
@@ -182,6 +183,7 @@ static void onHcnWeatherReceived(const char *weather_json) {
 
 static void onHcnEasyNavigation(const hcnNavigationHudInfo * naviData) {
     if (naviData) {
+        printf("===================[ouchunhua]easy navi2==========\n");
         parse_easy_navi_info(naviData);
     }
 }

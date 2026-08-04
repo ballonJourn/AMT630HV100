@@ -8,6 +8,7 @@
 #include "proxy/mirror_data.h"
 #include "../3rd/awtk-widget-qr/src/qr/qr.h"
 #include "logic/hcn_global.h"
+#include "logic/navigation_view_logic.h"
 #include "proxy/vehicle_time.h"
 #include "proxy/vehicle_mile.h"
 
@@ -199,6 +200,17 @@ static ret_t on_link_page_changed(void* ctx, event_t* e)
         lk_last_bot_elec = -1 ;
 
         rest_data();
+
+        /* 重置 home_page 简易导航缓存，令下一次 navigation_view_update()
+         * 强制重新求值并刷新 slide_view。
+         * 场景：用户在 link_page 前台期间手机开始导航，home_page 的定时器
+         * 虽然也检测到状态变化并调用了 home_refresh_nav_view(NAVI_VIEW)，
+         * 但 AWTK 对被遮盖窗口的渲染结果不保证写入当前显示的 framebuffer。
+         * 返回 home_page 后 g_mirror_navigation 已经等于 true，缓存命中
+         * → slide_view 不会被重新设置 → 导航区域显示为上一个状态（空白或
+         * TIPS_VIEW）。invalidate 后，缓存回到 false，下一次 500ms tick
+         * 检测到 false → true 变化就会重新调用 home_refresh_nav_view。*/
+        navigation_view_invalidate();
 
         lk_fullscreen_repaint_cnt = 0;
         lk_win_ref = NULL;

@@ -82,6 +82,13 @@ ret_t home_refresh_nav_view(home_navigate_view_e view)
         return RET_FAIL;
     
     slide_view_set_active_ex(nav_slide_view , view , false);
+
+    /* slide_view_set_active_no_animate_impl 在 active == new_active 时
+     * 不调用 widget_invalidate（AWTK 优化：值未变则不标脏）。
+     * 但从 link_page 返回时，三缓冲已被全刷黑，即使 slide_view 的
+     * active index 没变，framebuffer 上的内容已丢失，必须强制重绘。
+     * widget_invalidate 只标脏不立即绘制，代价极低。 */
+    widget_invalidate(nav_slide_view , NULL);
     
     return RET_OK ; 
 }

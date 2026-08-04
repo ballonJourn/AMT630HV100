@@ -110,6 +110,7 @@ void onPhoneAppHUD(const ECNavigationHudInfo *data)
 {
     if (get_hcn_callback() && get_hcn_callback()->onHcnEasyNavigation) {
         if (data) {
+            printf("===================[ouchunhua]easy navi1==========\n");
             hcnNavigationHudInfo navi_data;
             memset(&navi_data, 0, sizeof(navi_data));
 

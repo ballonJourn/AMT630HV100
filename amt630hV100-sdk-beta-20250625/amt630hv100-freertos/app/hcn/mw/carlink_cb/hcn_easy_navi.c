@@ -75,7 +75,7 @@ void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
     if (info == NULL) {
         return;
     }
-
+    printf("===================[ouchunhua]easy navi3==========\n");
     int navi_status = info->status ? 0 : 1;
     memset(&easy_navi_info, 0, sizeof(easy_navi_info));
 
@@ -88,15 +88,12 @@ void parse_easy_navi_info(const hcnNavigationHudInfo *info) {
             "%s", info->currentRoad);
     snprintf(easy_navi_info.nextRoad, sizeof(easy_navi_info.nextRoad), 
             "%s", info->nextRoad);
-#if 0
-    hcn_log_info("parse_easy_navi_info status:%d, naviIcon:%d, destRemainDist:%d, roadRemainDist:%d, signalIntensity:%d, currentRoad:%s, nextRoad:%s\n",
+#if 1
+    hcn_log_info("parse_easy_navi status:%d navi_status:%d icon:%d roadDist:%d\n",
         easy_navi_info.status,
+        navi_status,
         easy_navi_info.naviIcon,
-        easy_navi_info.destinationRemainingDistance,
-        easy_navi_info.roadRemainingDistance,
-        easy_navi_info.signalIntensity,
-        easy_navi_info.currentRoad,
-        easy_navi_info.nextRoad);        
+        easy_navi_info.roadRemainingDistance);
 #endif
     vehicle_set_data(VEH_EASY_NAV_STATUS, navi_status);		
 }
