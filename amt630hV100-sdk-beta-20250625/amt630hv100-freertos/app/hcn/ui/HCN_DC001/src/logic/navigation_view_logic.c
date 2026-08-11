@@ -31,10 +31,7 @@ void navigation_view_invalidate(void)
     g_mirror_navigation = false ;
     memset(&g_navigation_info, 0, sizeof(g_navigation_info)) ;
 
-    printf("NAV_INV: cache reset, now calling update. VEH_CONNECTED=%d VEH_NAV=%d\n",
-           (int)vehicle_get_mirror_state(), (int)vehicle_get_mirror_navigation()) ;
-
-    /* 立即求值并刷新 — 同步执行，同一帧内生效 */
+    /* 立即求值并刷新 */
     navigation_view_update() ;
 }
 
@@ -55,12 +52,10 @@ void navigation_view_update()
                 home_refresh_nav_view( QR_VIEW )  ;
             }
             // g_mirror_navigation = false       ;
-            printf("NAV_UPD: mirror_state→FALSE, show QR/CP_TIP\n") ;
         }
         else
         {
             home_refresh_nav_view( TIPS_VIEW )  ;
-            printf("NAV_UPD: mirror_state→TRUE, show TIPS\n") ;
         }
     }
     
@@ -71,10 +66,8 @@ void navigation_view_update()
         {
             if ( false == _mirror_navigation) {
                 home_refresh_nav_view(TIPS_VIEW)  ;
-                printf("NAV_UPD: mirror_nav→FALSE, show TIPS\n") ;
             } else {
                 home_refresh_nav_view(NAVI_VIEW)  ;
-                printf("NAV_UPD: mirror_nav→TRUE, show NAVI\n") ;
             }
 
             g_mirror_navigation = _mirror_navigation ;

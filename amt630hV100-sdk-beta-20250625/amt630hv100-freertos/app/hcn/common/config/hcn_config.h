@@ -122,6 +122,10 @@ extern "C" {
 #define HCN_LCD_EC_WIDTH        (1024)
 #define HCN_LCD_EC_HEIGHT       (600)
 
+///< 互联选型设置菜单项使能(仅控制设置菜单中"互联选型"项的显示与导航;
+/// 关闭时菜单不显示该项,但CarPlay/亿连的互联与按键逻辑不受影响)
+#define HCN_CARLINK_SWITCH_ENABLE
+
 ///< 天气功能使能
 //#define HCN_CARLINK_WEATHER_ENABLE
 

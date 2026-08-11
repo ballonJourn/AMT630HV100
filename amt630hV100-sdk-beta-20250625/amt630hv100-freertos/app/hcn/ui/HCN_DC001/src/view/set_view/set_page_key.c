@@ -33,8 +33,8 @@ void set_page_deal_key_down ()
     switch (level)
     {
         case MENU_LEVEL_0: break;
-        case MENU_LEVEL_1:  
-            menu_index = ( menu_index + 1 ) % SETTING_MENU_NUM_MAX ;
+        case MENU_LEVEL_1:
+            menu_index = setting_menu_get_next_item(menu_index) ;
             setting_menu_set_focused_item(menu_index) ;
             break;
         case MENU_LEVEL_2: 
@@ -58,8 +58,8 @@ void set_page_deal_key_up   ()
     switch (level)
     {
         case MENU_LEVEL_0: break;
-        case MENU_LEVEL_1:  
-            menu_index = ( menu_index - 1 + SETTING_MENU_NUM_MAX) % SETTING_MENU_NUM_MAX ;
+        case MENU_LEVEL_1:
+            menu_index = setting_menu_get_prev_item(menu_index) ;
             setting_menu_set_focused_item( menu_index ) ;
             break;
         case MENU_LEVEL_2: 

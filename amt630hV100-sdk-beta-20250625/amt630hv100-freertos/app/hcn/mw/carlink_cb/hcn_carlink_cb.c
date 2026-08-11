@@ -24,6 +24,7 @@
 #include "cJSON.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "board.h"
 #if CARLINK_EC
 #include "ECTiny.h"
 #endif
@@ -129,10 +130,9 @@ static void onHcnVideoStatus(bool status) {
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_LANE_GUIDANCE_PICTURE |
                                      EC_APP_HUD_SUPPORT_FUNCTION_ROAD_JUNCTION_PICTURE);
 #else
-        printf("===================[ouchunhua]easy navi111==========\n");
         EC_enableDownloadPhoneAppHud(EC_APP_HUD_SUPPORT_FUNCTION_DEFAULT);
 #endif
-#endif
+#endif 
     } else {
         vehicle_set_data(VEH_CARLINK_CONNECTED, 0);
 
@@ -183,7 +183,6 @@ static void onHcnWeatherReceived(const char *weather_json) {
 
 static void onHcnEasyNavigation(const hcnNavigationHudInfo * naviData) {
     if (naviData) {
-        printf("===================[ouchunhua]easy navi2==========\n");
         parse_easy_navi_info(naviData);
     }
 }
@@ -323,4 +322,3 @@ void carlink_cb_init(void) {
         inited = true;
     }
 }
-

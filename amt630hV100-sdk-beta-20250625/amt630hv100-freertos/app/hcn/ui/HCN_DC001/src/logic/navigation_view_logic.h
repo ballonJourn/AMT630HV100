@@ -7,6 +7,8 @@ void update_qr();
 
 void navigation_view_update() ;
 
+void navigation_view_invalidate(void) ;
+
 ret_t parse_navigation_data(const hcnNavigationHudInfo *_navigation_info) ;
 
 #endif

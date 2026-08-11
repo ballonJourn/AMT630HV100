@@ -81,6 +81,18 @@ void onECConnectStatus(ECConnectedStatus status, ECConnectedType type)
         //EC_uploadNightModeStatus(gDayNight);
         EC_startMirror();
 
+        /* API 文档要求：EC_enableDownloadPhoneAppHud 必须在连接层成功建立后调用。
+         * 在 onECConnectStatus(CONNECT_SUCCEED) 中调用是最可靠的时机。
+         * 之前放在 vp_start()/onHcnVideoStatus 中，可能因为时序问题
+         * 导致 SDK 忽略了 HUD 启用请求。 */
+        {
+            uint32_t hud_flags = EC_APP_HUD_SUPPORT_FUNCTION_LANE_GUIDANCE_PICTURE |
+                                 EC_APP_HUD_SUPPORT_FUNCTION_ROAD_JUNCTION_PICTURE;
+            int32_t ret = EC_enableDownloadPhoneAppHud(hud_flags);
+            printf("EC_enableHud(0x%x) at CONNECT_SUCCEED, ret=%d\n",
+                   (unsigned)hud_flags, (int)ret);
+        }
+
         //EC_startIperfTcpServer("192.168.43.103",11150);
         printf("\r\nEC start mirror\r\n");
         if (get_hcn_callback() && get_hcn_callback()->onHcnLinkConnect) {
@@ -110,7 +122,6 @@ void onPhoneAppHUD(const ECNavigationHudInfo *data)
 {
     if (get_hcn_callback() && get_hcn_callback()->onHcnEasyNavigation) {
         if (data) {
-            printf("===================[ouchunhua]easy navi1==========\n");
             hcnNavigationHudInfo navi_data;
             memset(&navi_data, 0, sizeof(navi_data));
 
@@ -872,4 +883,3 @@ void carlink_ec_enable(int enable)
 }
 
 #endif
-
